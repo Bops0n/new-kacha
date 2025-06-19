@@ -1,5 +1,4 @@
 // app/layout.tsx
-import AdminNavbar from './components/Navbar';
 import './globals.css';
 import { Sarabun } from 'next/font/google'; // นำเข้าฟอนต์ Kanit
 
@@ -21,7 +20,6 @@ export default function RootLayout({
     <html lang="th" data-theme="light" className={`${sarabun.variable}`}>
     <head></head>
       <body>
-      <AdminNavbar/>
         {children}</body>
     </html>
   );

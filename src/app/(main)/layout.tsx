@@ -1,4 +1,4 @@
-import AdminNavbar from "./components/AdminNavbar";
+import UserNavbar from "./components/UserNavbar";
 
 export default function RootLayout({
   children,
@@ -7,7 +7,7 @@ export default function RootLayout({
 }) {
     return(
         <>
-        <AdminNavbar/>
+        <UserNavbar/>
         {children}
         </>
     )

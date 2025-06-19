@@ -1,13 +1,12 @@
-import React from 'react'; // Ensure React is explicitly imported
-import { FiEye, FiEdit, FiTrash2, FiEyeOff } from 'react-icons/fi';
-import { ProductInventory } from '../../../types'; // Adjust path based on your project structure
+import React from 'react';
+import { FiEye, FiTrash2 } from 'react-icons/fi'; // Changed FiEdit to FiEye, removed FiEdit from import
+import { ProductInventory } from '../../../types'; // Correct path to types
 
 interface ProductRowProps {
   product: ProductInventory;
   formatPrice: (price: number) => string;
-  getFullCategoryName: (childId: number | null) => string; // To display category path
-  viewProductDetails: (product: ProductInventory) => void;
-  handleEditProductClick: (product: ProductInventory) => void;
+  getFullCategoryName: (childId: number | null) => string;
+  openProductModal: (product: ProductInventory, initialMode: 'view' | 'edit') => void; // Prop for modal control
   deleteProduct: (productId: number) => void;
 }
 
@@ -15,16 +14,15 @@ const ProductRow: React.FC<ProductRowProps> = ({
   product,
   formatPrice,
   getFullCategoryName,
-  viewProductDetails,
-  handleEditProductClick,
+  openProductModal,
   deleteProduct,
 }) => {
   const isLowStock = product.Quantity <= product.Reorder_Point && product.Quantity > 0;
   const isOutOfStock = product.Quantity === 0;
 
   return (
-    <tr className="hover">
-      {/* Product ID */}
+    // Make the entire row clickable to open the modal in view mode
+    <tr className="hover cursor-pointer" onClick={() => openProductModal(product, 'view')}>
       <td><div className="font-bold text-primary">{product.Product_ID}</div></td>
       {/* Image */}
       <td>
@@ -54,11 +52,11 @@ const ProductRow: React.FC<ProductRowProps> = ({
       <td className="text-sm text-base-content/80">{getFullCategoryName(product.Child_ID)}</td>
       {/* Quantity with status indicators */}
       <td>
-        <div className={`font-bold ${isOutOfStock ? 'text-error' : isLowStock ? 'text-warning' : ''}`}>
+        <div className="font-bold">
           {product.Quantity} {product.Unit}
         </div>
-        {isOutOfStock && <span className="badge badge-error badge-xs">หมด</span>}
-        {isLowStock && !isOutOfStock && <span className="badge badge-warning badge-xs">ใกล้หมด</span>}
+        {isOutOfStock && <span className="badge badge-error badge-xs ml-1">หมด</span>}
+        {isLowStock && !isOutOfStock && <span className="badge badge-warning badge-xs ml-1">ใกล้หมด</span>}
       </td>
       {/* Sale Price */}
       <td><div className="font-bold">{formatPrice(product.Sale_Price)}</div></td>
@@ -75,21 +73,20 @@ const ProductRow: React.FC<ProductRowProps> = ({
         <div className="flex gap-1">
           <button
             className="btn btn-sm btn-ghost btn-square"
-            onClick={() => viewProductDetails(product)}
+            onClick={(e) => {
+              e.stopPropagation(); // Prevent row click from also triggering
+              openProductModal(product, 'view'); // Open in view mode
+            }}
             title="ดูรายละเอียด"
           >
             <FiEye className="w-4 h-4" />
           </button>
           <button
-            className="btn btn-sm btn-ghost btn-square"
-            onClick={() => handleEditProductClick(product)}
-            title="แก้ไข"
-          >
-            <FiEdit className="w-4 h-4" />
-          </button>
-          <button
             className="btn btn-sm btn-ghost btn-square text-error"
-            onClick={() => deleteProduct(product.Product_ID)}
+            onClick={(e) => {
+              e.stopPropagation(); // Prevent row click from also triggering
+              deleteProduct(product.Product_ID);
+            }}
             title="ลบ"
           >
             <FiTrash2 className="w-4 h-4" />

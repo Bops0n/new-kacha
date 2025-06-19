@@ -14,7 +14,12 @@ import {
   FiStar, // For Review Rating
   FiTag, // For Brand
   FiLink, // For Image URL
-  FiEyeOff // For hidden visibility
+  FiEyeOff, // For hidden visibility
+  FiX,
+  FiSave,
+  FiAlertTriangle, // New: Icon for low stock
+  FiAlertCircle,   // New: Icon for out of stock
+  FiCheckCircle    // New: Icon for in stock (already there, but confirm usage)
 } from 'react-icons/fi';
 
 import {
@@ -24,10 +29,10 @@ import {
   ChildSubCategory,
   ProductEditForm,
   FullCategoryPath
-} from '../../../types'; // CONFIRMED CORRECT PATH FOR TYPES
+} from '../../../types';
 
-import ProductRow from '../components/ProductRow'; // CONFIRMED CORRECT PATHS FOR COMPONENTS
-import ProductCard from '../components/ProductCard'; // CONFIRMED CORRECT PATHS FOR COMPONENTS
+import ProductRow from './ProductRow';
+import ProductCard from './ProductCard';
 
 // --- Mock Data for Products and Categories ---
 // In a real app, this would come from an API/database
@@ -67,17 +72,17 @@ const mockProducts: ProductInventory[] = [
   },
   {
     Product_ID: 2, Child_ID: 1003, Name: 'Acer Predator Helios 300', Brand: 'Acer', Description: 'High-performance gaming laptop',
-    Unit: 'Pcs', Quantity: 15, Sale_Cost: 35000, Sale_Price: 42000, Reorder_Point: 5, Visibility: true,
+    Unit: 'Pcs', Quantity: 15, Sale_Cost: 35000, Sale_Price: 42000, Reorder_Point: 5, Visibility: true, // Quantity (15) > Reorder_Point (5) -> In Stock
     Review_Rating: 4, Image_URL: 'https://via.placeholder.com/150x150/B0E0E6/000000?text=Helios300',
   },
   {
     Product_ID: 3, Child_ID: 3001, Name: 'Modern Fabric Sofa', Brand: 'IKEA', Description: 'Comfortable 3-seater sofa for living room',
-    Unit: 'Pcs', Quantity: 5, Sale_Cost: 8000, Sale_Price: 12000, Reorder_Point: 2, Visibility: true,
+    Unit: 'Pcs', Quantity: 2, Sale_Cost: 8000, Sale_Price: 12000, Reorder_Point: 2, Visibility: true, // Quantity (2) <= Reorder_Point (2) -> Low Stock
     Review_Rating: 4, Image_URL: 'https://via.placeholder.com/150x150/D8BFD8/000000?text=Sofa',
   },
   {
     Product_ID: 4, Child_ID: 2001, Name: 'Philips Blender HR2118', Brand: 'Philips', Description: 'Powerful blender for smoothies and more',
-    Unit: 'Pcs', Quantity: 30, Sale_Cost: 1500, Sale_Price: 2200, Reorder_Point: 10, Visibility: false, // Hidden product
+    Unit: 'Pcs', Quantity: 0, Sale_Cost: 1500, Sale_Price: 2200, Reorder_Point: 10, Visibility: false, // Quantity (0) -> Out of Stock
     Review_Rating: 3, Image_URL: 'https://via.placeholder.com/150x150/FFD700/000000?text=Blender',
   },
   {
@@ -87,28 +92,28 @@ const mockProducts: ProductInventory[] = [
   },
   {
     Product_ID: 6, Child_ID: 1002, Name: 'iPhone 15 Pro Max', Brand: 'Apple', Description: 'Apple\'s top-tier smartphone',
-    Unit: 'Pcs', Quantity: 20, Sale_Cost: 38000, Sale_Price: 45000, Reorder_Point: 8, Visibility: true,
+    Unit: 'Pcs', Quantity: 8, Sale_Cost: 38000, Sale_Price: 45000, Reorder_Point: 8, Visibility: true, // Quantity (8) <= Reorder_Point (8) -> Low Stock
     Review_Rating: 5, Image_URL: 'https://via.placeholder.com/150x150/C0C0C0/000000?text=iPhone15',
   },
   {
     Product_ID: 7, Child_ID: 1004, Name: 'Dell XPS 15', Brand: 'Dell', Description: 'Premium ultrabook for professionals',
     Unit: 'Pcs', Quantity: 10, Sale_Cost: 40000, Sale_Price: 48000, Reorder_Point: 4, Visibility: true,
-    Review_Rating: 4, Image_URL: 'https://via.placeholder.com/150x150/F8F8FF/000000?text=DellXPS',
+    Review_Rating: 4, Image_URL: 'https://placehold.co/150x150/F8F8FF/000000?text=DellXPS',
   },
   {
     Product_ID: 8, Child_ID: 2002, Name: 'Panasonic Microwave NN-ST25JW', Brand: 'Panasonic', Description: 'Compact and efficient microwave oven',
-    Unit: 'Pcs', Quantity: 25, Sale_Cost: 2000, Sale_Price: 2800, Reorder_Point: 7, Visibility: true,
-    Review_Rating: 4, Image_URL: 'https://via.placeholder.com/150x150/E0FFFF/000000?text=Microwave',
+    Unit: 'Pcs', Quantity: 0, Sale_Cost: 2000, Sale_Price: 2800, Reorder_Point: 7, Visibility: true, // Quantity (0) -> Out of Stock
+    Review_Rating: 4, Image_URL: 'https://placehold.co/150x150/E0FFFF/000000?text=Microwave',
   },
   {
     Product_ID: 9, Child_ID: 3002, Name: 'Glass Coffee Table', Brand: 'Chic Home', Description: 'Sleek design with tempered glass top',
     Unit: 'Pcs', Quantity: 8, Sale_Cost: 3000, Sale_Price: 4500, Reorder_Point: 2, Visibility: true,
-    Review_Rating: 3, Image_URL: 'https://via.placeholder.com/150x150/F5DEB3/000000?text=CoffeeTable',
+    Review_Rating: 3, Image_URL: 'https://placehold.co/150x150/F5DEB3/000000?text=CoffeeTable',
   },
   {
     Product_ID: 10, Child_ID: 3003, Name: 'Queen Size Bed Frame', Brand: 'SleepWell', Description: 'Sturdy wooden bed frame',
     Unit: 'Pcs', Quantity: 6, Sale_Cost: 7000, Sale_Price: 10000, Reorder_Point: 2, Visibility: true,
-    Review_Rating: 4, Image_URL: 'https://via.placeholder.com/150x150/FFC0CB/000000?text=BedFrame',
+    Review_Rating: 4, Image_URL: 'https://placehold.co/150x150/FFC0CB/000000?text=BedFrame',
   },
 ];
 
@@ -129,6 +134,19 @@ mockCategories.forEach(cat => {
   });
 });
 
+// --- Helper to get Product Stock Status ---
+type StockStatus = 'in_stock' | 'low_stock' | 'out_of_stock';
+
+const getProductStockStatus = (product: ProductInventory): StockStatus => {
+  if (product.Quantity === 0) {
+    return 'out_of_stock';
+  }
+  if (product.Quantity <= product.Reorder_Point) {
+    return 'low_stock';
+  }
+  return 'in_stock';
+};
+
 // --- Main Product Management Component ---
 export default function ProductManagement() {
   const [products, setProducts] = useState<ProductInventory[]>(mockProducts);
@@ -139,10 +157,12 @@ export default function ProductManagement() {
   const [subCategoryFilter, setSubCategoryFilter] = useState<number | 'all'>('all');
   const [childCategoryFilter, setChildCategoryFilter] = useState<number | 'all'>('all');
   const [visibilityFilter, setVisibilityFilter] = useState<boolean | 'all'>('all');
+  const [stockStatusFilter, setStockStatusFilter] = useState<StockStatus | 'all'>('all'); // New: Stock status filter
 
   const [selectedProduct, setSelectedProduct] = useState<ProductInventory | null>(null);
   const [showProductModal, setShowProductModal] = useState<boolean>(false);
-  const [isEditing, setIsEditing] = useState<boolean>(false); // True for edit mode, false for add mode
+  const [isEditing, setIsEditing] = useState<boolean>(false); // True for edit mode, false for add new or view
+
   const [editFormData, setEditFormData] = useState<ProductEditForm>({
     Product_ID: null,
     Child_ID: mockChildSubCategories[0]?.Child_ID || 0, // Default to first child category
@@ -211,9 +231,15 @@ export default function ProductManagement() {
       filtered = filtered.filter(product => product.Visibility === visibilityFilter);
     }
 
+    // New: Filter by Stock Status
+    if (stockStatusFilter !== 'all') {
+      filtered = filtered.filter(product => getProductStockStatus(product) === stockStatusFilter);
+    }
+
+
     setFilteredProducts(filtered);
     setCurrentPage(1); // Reset to first page on filter change
-  }, [searchTerm, brandFilter, categoryFilter, subCategoryFilter, childCategoryFilter, visibilityFilter, products]);
+  }, [searchTerm, brandFilter, categoryFilter, subCategoryFilter, childCategoryFilter, visibilityFilter, stockStatusFilter, products]); // Add stockStatusFilter to dependencies
 
   // --- Pagination Logic ---
   useEffect(() => {
@@ -235,60 +261,110 @@ export default function ProductManagement() {
   };
 
   // --- Product Actions ---
-  const viewProductDetails = (product: ProductInventory) => {
-    setSelectedProduct(product);
+
+  // Function to open modal in a specific mode (view or edit)
+  const openProductModal = (product: ProductInventory | null, initialMode: 'view' | 'edit') => {
+    if (product) {
+      // Set selected product and populate form data for editing
+      setSelectedProduct(product);
+      const fullCat = allCategoriesMap.get(product.Child_ID);
+      setEditFormData({
+        Product_ID: product.Product_ID,
+        Child_ID: product.Child_ID,
+        Name: product.Name,
+        Brand: product.Brand,
+        Description: product.Description || '',
+        Unit: product.Unit,
+        Quantity: product.Quantity,
+        Sale_Cost: product.Sale_Cost,
+        Sale_Price: product.Sale_Price,
+        Reorder_Point: product.Reorder_Point,
+        Visibility: product.Visibility,
+        Review_Rating: product.Review_Rating,
+        Image_URL: product.Image_URL || '',
+        Selected_Category_ID: fullCat?.Category_ID || null,
+        Selected_Sub_Category_ID: fullCat?.Sub_Category_ID || null,
+        Selected_Child_ID: fullCat?.Child_ID || null,
+      });
+    } else {
+      // For adding new product, reset form and clear selected product
+      setEditFormData({
+        Product_ID: null,
+        Child_ID: mockChildSubCategories[0]?.Child_ID || 0,
+        Name: '',
+        Brand: '',
+        Description: '',
+        Unit: 'Pcs',
+        Quantity: 0,
+        Sale_Cost: 0,
+        Sale_Price: 0,
+        Reorder_Point: 0,
+        Visibility: true,
+        Review_Rating: null,
+        Image_URL: '',
+        Selected_Category_ID: mockCategories[0]?.Category_ID || null,
+        Selected_Sub_Category_ID: mockSubCategories.find(sub => sub.Category_ID === mockCategories[0]?.Category_ID)?.Sub_Category_ID || null,
+        Selected_Child_ID: mockChildSubCategories.find(child => child.Sub_Category_ID === mockSubCategories.find(sub => sub.Category_ID === mockCategories[0]?.Category_ID)?.Sub_Category_ID)?.Child_ID || null,
+      });
+      setSelectedProduct(null);
+    }
+    setIsEditing(initialMode === 'edit');
     setShowProductModal(true);
-    setIsEditing(false); // View mode
   };
 
+
+  // Toggles between VIEW and EDIT mode within the modal
+  const toggleEditMode = () => {
+    // If switching from view to edit, ensure editFormData is up-to-date with selectedProduct
+    if (!isEditing && selectedProduct) {
+      const fullCat = allCategoriesMap.get(selectedProduct.Child_ID);
+      setEditFormData({
+        Product_ID: selectedProduct.Product_ID,
+        Child_ID: selectedProduct.Child_ID,
+        Name: selectedProduct.Name,
+        Brand: selectedProduct.Brand,
+        Description: selectedProduct.Description || '',
+        Unit: selectedProduct.Unit,
+        Quantity: selectedProduct.Quantity,
+        Sale_Cost: selectedProduct.Sale_Cost,
+        Sale_Price: selectedProduct.Sale_Price,
+        Reorder_Point: selectedProduct.Reorder_Point,
+        Visibility: selectedProduct.Visibility,
+        Review_Rating: selectedProduct.Review_Rating,
+        Image_URL: selectedProduct.Image_URL || '',
+        Selected_Category_ID: fullCat?.Category_ID || null,
+        Selected_Sub_Category_ID: fullCat?.Sub_Category_ID || null,
+        Selected_Child_ID: fullCat?.Child_ID || null,
+      });
+    }
+    // If switching from edit to view (via cancel), reset editFormData to original selectedProduct values
+    if (isEditing && selectedProduct) {
+      const fullCat = allCategoriesMap.get(selectedProduct.Child_ID);
+      setEditFormData({
+        Product_ID: selectedProduct.Product_ID,
+        Child_ID: selectedProduct.Child_ID,
+        Name: selectedProduct.Name,
+        Brand: selectedProduct.Brand,
+        Description: selectedProduct.Description || '',
+        Unit: selectedProduct.Unit,
+        Quantity: selectedProduct.Quantity,
+        Sale_Cost: selectedProduct.Sale_Cost,
+        Sale_Price: selectedProduct.Sale_Price,
+        Reorder_Point: selectedProduct.Reorder_Point,
+        Visibility: selectedProduct.Visibility,
+        Review_Rating: selectedProduct.Review_Rating,
+        Image_URL: selectedProduct.Image_URL || '',
+        Selected_Category_ID: fullCat?.Category_ID || null,
+        Selected_Sub_Category_ID: fullCat?.Sub_Category_ID || null,
+        Selected_Child_ID: fullCat?.Child_ID || null,
+      });
+    }
+    setIsEditing(prev => !prev);
+  };
+
+  // Handles adding a new product, opens modal directly in ADD/EDIT mode
   const handleAddProductClick = () => {
-    // Reset form for adding a new product
-    setEditFormData({
-      Product_ID: null,
-      Child_ID: mockChildSubCategories[0]?.Child_ID || 0, // Default to first child category
-      Name: '',
-      Brand: '',
-      Description: '',
-      Unit: 'Pcs', // Default unit
-      Quantity: 0,
-      Sale_Cost: 0,
-      Sale_Price: 0,
-      Reorder_Point: 0,
-      Visibility: true,
-      Review_Rating: null,
-      Image_URL: '',
-      Selected_Category_ID: mockCategories[0]?.Category_ID || null,
-      Selected_Sub_Category_ID: mockSubCategories.find(sub => sub.Category_ID === mockCategories[0]?.Category_ID)?.Sub_Category_ID || null,
-      Selected_Child_ID: mockChildSubCategories.find(child => child.Sub_Category_ID === mockSubCategories.find(sub => sub.Category_ID === mockCategories[0]?.Category_ID)?.Sub_Category_ID)?.Child_ID || null,
-    });
-    setSelectedProduct(null); // No product selected when adding
-    setIsEditing(false); // Add mode
-    setShowProductModal(true);
-  };
-
-  const handleEditProductClick = (product: ProductInventory) => {
-    const fullCat = allCategoriesMap.get(product.Child_ID);
-    setEditFormData({
-      Product_ID: product.Product_ID,
-      Child_ID: product.Child_ID,
-      Name: product.Name,
-      Brand: product.Brand,
-      Description: product.Description || '',
-      Unit: product.Unit,
-      Quantity: product.Quantity,
-      Sale_Cost: product.Sale_Cost,
-      Sale_Price: product.Sale_Price,
-      Reorder_Point: product.Reorder_Point,
-      Visibility: product.Visibility,
-      Review_Rating: product.Review_Rating,
-      Image_URL: product.Image_URL || '',
-      Selected_Category_ID: fullCat?.Category_ID || null,
-      Selected_Sub_Category_ID: fullCat?.Sub_Category_ID || null,
-      Selected_Child_ID: fullCat?.Child_ID || null,
-    });
-    setSelectedProduct(product); // Set product for editing
-    setIsEditing(true); // Edit mode
-    setShowProductModal(true);
+    openProductModal(null, 'edit'); // Open for new product, directly in edit mode
   };
 
   const saveProductDetails = () => {
@@ -298,7 +374,7 @@ export default function ProductManagement() {
     }
 
     const newOrUpdatedProduct: ProductInventory = {
-      Product_ID: editFormData.Product_ID || Date.now(), // Use existing ID or generate new for mock
+      Product_ID: isEditing && editFormData.Product_ID !== null ? editFormData.Product_ID : Date.now(), // Use existing ID or generate new for mock
       Child_ID: editFormData.Selected_Child_ID,
       Name: editFormData.Name,
       Brand: editFormData.Brand,
@@ -313,16 +389,17 @@ export default function ProductManagement() {
       Image_URL: editFormData.Image_URL || null,
     };
 
-    if (isEditing && editFormData.Product_ID) {
+    if (isEditing && editFormData.Product_ID !== null) {
       // Update existing product
       setProducts(prev => prev.map(p =>
         p.Product_ID === newOrUpdatedProduct.Product_ID ? newOrUpdatedProduct : p
       ));
+      setSelectedProduct(newOrUpdatedProduct); // Update selectedProduct to reflect changes
     } else {
       // Add new product
       setProducts(prev => [...prev, newOrUpdatedProduct]);
     }
-    setShowProductModal(false);
+    setIsEditing(false); // Switch back to view mode after saving
   };
 
   const deleteProduct = (productId: number) => {
@@ -342,13 +419,11 @@ export default function ProductManagement() {
       if (type === 'checkbox') {
         newState[name as keyof ProductEditForm] = checked as any; // Cast for boolean
       } else if (['Quantity', 'Sale_Cost', 'Sale_Price', 'Reorder_Point', 'Review_Rating', 'Selected_Category_ID', 'Selected_Sub_Category_ID', 'Selected_Child_ID'].includes(name)) {
-        // Handle number conversions carefully, especially for empty strings if input type is 'number'
-        newState[name as keyof ProductEditForm] = value === '' ? null : Number(value) as any; // Allow null for empty number fields if needed
+        newState[name as keyof ProductEditForm] = value === '' ? null : Number(value) as any;
       } else {
         newState[name as keyof ProductEditForm] = value as any;
       }
 
-      // Special handling for category dropdowns to update child_id and subsequent dropdowns
       if (name === 'Selected_Category_ID') {
         const categoryId = Number(value);
         const firstSubCatInNewCategory = mockSubCategories.find(sub => sub.Category_ID === categoryId);
@@ -356,22 +431,21 @@ export default function ProductManagement() {
         newState.Selected_Category_ID = categoryId;
         newState.Selected_Sub_Category_ID = firstSubCatInNewCategory?.Sub_Category_ID || null;
         newState.Selected_Child_ID = firstChildCatInNewSubCat?.Child_ID || null;
-        newState.Child_ID = firstChildCatInNewSubCat?.Child_ID || 0; // Update Child_ID directly for saving
+        newState.Child_ID = firstChildCatInNewSubCat?.Child_ID || 0;
       } else if (name === 'Selected_Sub_Category_ID') {
         const subCategoryId = Number(value);
         const firstChildCatInNewSubCat = mockChildSubCategories.find(child => child.Sub_Category_ID === subCategoryId);
         newState.Selected_Sub_Category_ID = subCategoryId;
         newState.Selected_Child_ID = firstChildCatInNewSubCat?.Child_ID || null;
-        newState.Child_ID = firstChildCatInNewSubCat?.Child_ID || 0; // Update Child_ID directly for saving
+        newState.Child_ID = firstChildCatInNewSubCat?.Child_ID || 0;
       } else if (name === 'Selected_Child_ID') {
         const childId = Number(value);
         newState.Selected_Child_ID = childId;
-        newState.Child_ID = childId; // Update Child_ID directly for saving
+        newState.Child_ID = childId;
       }
       return newState;
     });
   };
-
 
   // --- Helper Functions ---
   const formatPrice = (price: number): string => {
@@ -393,6 +467,7 @@ export default function ProductManagement() {
     total: number;
     inStock: number;
     lowStock: number;
+    outOfStock: number; // New stat
     visible: number;
     hidden: number;
   }
@@ -400,8 +475,9 @@ export default function ProductManagement() {
   const getProductStats = (): ProductStats => {
     const stats: ProductStats = {
       total: products.length,
-      inStock: products.filter(p => p.Quantity > p.Reorder_Point).length,
-      lowStock: products.filter(p => p.Quantity <= p.Reorder_Point && p.Quantity > 0).length,
+      inStock: products.filter(p => getProductStockStatus(p) === 'in_stock').length,
+      lowStock: products.filter(p => getProductStockStatus(p) === 'low_stock').length,
+      outOfStock: products.filter(p => getProductStockStatus(p) === 'out_of_stock').length, // New stat
       visible: products.filter(p => p.Visibility).length,
       hidden: products.filter(p => !p.Visibility).length,
     };
@@ -475,7 +551,7 @@ export default function ProductManagement() {
           <div className="bg-base-100 rounded-lg p-4 shadow-sm">
             <div className="flex items-center gap-3">
               <div className="p-2 bg-warning/10 rounded-lg">
-                <FiZap className="w-5 h-5 text-warning" />
+                <FiAlertTriangle className="w-5 h-5 text-warning" /> {/* Changed icon to FiAlertTriangle */}
               </div>
               <div>
                 <p className="text-sm text-base-content/70">สินค้าใกล้หมด</p>
@@ -483,6 +559,19 @@ export default function ProductManagement() {
               </div>
             </div>
           </div>
+
+          <div className="bg-base-100 rounded-lg p-4 shadow-sm">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-error/10 rounded-lg">
+                <FiAlertCircle className="w-5 h-5 text-error" /> {/* Changed icon to FiAlertCircle */}
+              </div>
+              <div>
+                <p className="text-sm text-base-content/70">สินค้าหมดแล้ว</p>
+                <p className="text-2xl font-bold">{stats.outOfStock}</p>
+              </div>
+            </div>
+          </div>
+
 
           <div className="bg-base-100 rounded-lg p-4 shadow-sm">
             <div className="flex items-center gap-3">
@@ -495,26 +584,13 @@ export default function ProductManagement() {
               </div>
             </div>
           </div>
-
-          <div className="bg-base-100 rounded-lg p-4 shadow-sm">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-error/10 rounded-lg">
-                <FiEyeOff className="w-5 h-5 text-error" />
-              </div>
-              <div>
-                <p className="text-sm text-base-content/70">สินค้าที่ซ่อน</p>
-                <p className="text-2xl font-bold">{stats.hidden}</p>
-              </div>
-            </div>
-          </div>
         </div>
 
         {/* Filters Section */}
         <div className="bg-base-100 rounded-lg shadow-sm p-6 mb-6">
           <div className="flex flex-col md:flex-row flex-wrap gap-4">
-            <div className="flex-1 min-w-[200px]">
-              <div className="relative">
-                <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-base-content/50 w-4 h-4" />
+            <div className="flex-1/3 min-w-[200px]">
+              <div className="flex flex-row">
                 <input
                   type="text"
                   placeholder="ค้นหาด้วยชื่อ, แบรนด์, รหัสสินค้า..."
@@ -522,6 +598,7 @@ export default function ProductManagement() {
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
+                <FiSearch className="absolute z left-3 top-1/2 transform -translate-y-1/2 text-black w-4 h-4" />
               </div>
             </div>
             <div className="w-full sm:w-auto flex-grow">
@@ -544,7 +621,7 @@ export default function ProductManagement() {
               >
                 <option value="all">ทุกหมวดหมู่หลัก</option>
                 {mockCategories.map(cat => (
-                  <option key={`cat-${cat.Category_ID}`} value={cat.Category_ID}>{cat.Name}</option> {/* Fixed Key */}
+                  <option key={`cat-${cat.Category_ID}`} value={cat.Category_ID}>{cat.Name}</option>
                 ))}
               </select>
             </div>
@@ -557,7 +634,7 @@ export default function ProductManagement() {
               >
                 <option value="all">ทุกหมวดหมู่ย่อย</option>
                 {mockSubCategories.filter(sub => categoryFilter === 'all' || sub.Category_ID === categoryFilter).map(sub => (
-                  <option key={`sub-${sub.Sub_Category_ID}`} value={sub.Sub_Category_ID}>{sub.Name}</option> {/* Fixed Key */}
+                  <option key={`sub-${sub.Sub_Category_ID}`} value={sub.Sub_Category_ID}>{sub.Name}</option>
                 ))}
               </select>
             </div>
@@ -570,7 +647,7 @@ export default function ProductManagement() {
               >
                 <option value="all">ทุกหมวดหมู่ย่อยย่อย</option>
                 {mockChildSubCategories.filter(child => subCategoryFilter === 'all' || child.Sub_Category_ID === subCategoryFilter).map(child => (
-                  <option key={`child-${child.Child_ID}`} value={child.Child_ID}>{child.Name}</option> {/* Fixed Key */}
+                  <option key={`child-${child.Child_ID}`} value={child.Child_ID}>{child.Name}</option>
                 ))}
               </select>
             </div>
@@ -583,6 +660,19 @@ export default function ProductManagement() {
                 <option value="all">สถานะการแสดงผลทั้งหมด</option>
                 <option value="true">แสดงผล</option>
                 <option value="false">ซ่อน</option>
+              </select>
+            </div>
+            {/* New: Stock Status Filter */}
+            <div className="w-full sm:w-auto flex-grow">
+              <select
+                className="select select-bordered w-full"
+                value={stockStatusFilter}
+                onChange={(e) => setStockStatusFilter(e.target.value as StockStatus | 'all')}
+              >
+                <option value="all">สถานะสต็อกทั้งหมด</option>
+                <option value="in_stock">ในสต็อก</option>
+                <option value="low_stock">สินค้าใกล้หมด</option>
+                <option value="out_of_stock">สินค้าหมดแล้ว</option>
               </select>
             </div>
             <div className="w-full sm:w-auto flex-grow md:w-40">
@@ -614,7 +704,8 @@ export default function ProductManagement() {
                   <th>หมวดหมู่</th>
                   <th>จำนวน</th>
                   <th>ราคาขาย</th>
-                  <th>สถานะ</th>
+                  <th>สถานะการแสดงผล</th>
+                  
                   <th>จัดการ</th>
                 </tr>
               </thead>
@@ -625,9 +716,9 @@ export default function ProductManagement() {
                     product={product}
                     formatPrice={formatPrice}
                     getFullCategoryName={getFullCategoryName}
-                    viewProductDetails={viewProductDetails}
-                    handleEditProductClick={handleEditProductClick}
+                    openProductModal={openProductModal}
                     deleteProduct={deleteProduct}
+                    getProductStockStatus={getProductStockStatus} // Pass helper function
                   />
                 ))}
               </tbody>
@@ -645,7 +736,8 @@ export default function ProductManagement() {
                   product={product}
                   formatPrice={formatPrice}
                   getFullCategoryName={getFullCategoryName}
-                  viewProductDetails={viewProductDetails}
+                  openProductModal={openProductModal}
+                  getProductStockStatus={getProductStockStatus} // Pass helper function
                 />
               ))}
             </div>
@@ -664,6 +756,7 @@ export default function ProductManagement() {
             <p className="text-base-content/70">ไม่พบสินค้าที่ตรงกับเงื่อนไขการค้นหา</p>
           </div>
         )}
+
 
         {/* Pagination Section */}
         {filteredProducts.length > 0 && (
@@ -745,32 +838,16 @@ export default function ProductManagement() {
         {/* Add/Edit Product Modal */}
         {showProductModal && (
           <div className="modal modal-open">
-            <div className="modal-box w-11/12 max-w-4xl"> {/* Increased max-width for more fields */}
+            <div className="modal-box w-11/12 max-w-4xl">
               <h3 className="font-bold text-lg mb-4">
-                {isEditing ? `แก้ไขสินค้า ID: ${selectedProduct?.Product_ID}` : 'เพิ่มสินค้าใหม่'}
+                {isEditing ? `แก้ไขสินค้า ID: ${editFormData.Product_ID || ''}` : `รายละเอียดสินค้า ID: ${selectedProduct?.Product_ID || ''}`}
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Product Details (Display/Edit) */}
                 <div>
                   <h4 className="font-semibold mb-2">ข้อมูลสินค้า</h4>
                   <div className="bg-base-200 rounded-lg p-4">
-                    {/* Image URL Input */}
-                    {isEditing || !isEditing ? ( // Always show for add/edit
-                      <div className="form-control mb-2">
-                        <label className="label"><span className="label-text">URL รูปภาพ</span></label>
-                        <input
-                          type="text"
-                          name="Image_URL"
-                          placeholder="http://example.com/image.jpg"
-                          className="input input-bordered w-full"
-                          value={editFormData.Image_URL}
-                          onChange={handleFormChange}
-                          readOnly={!isEditing}
-                        />
-                      </div>
-                    ) : null}
-
-                    {/* Image Preview */}
+                    {/* Image Preview / Input */}
                     <div className="mb-4 text-center">
                       <label className="label">
                         <span className="label-text">รูปภาพสินค้า</span>
@@ -784,28 +861,50 @@ export default function ProductManagement() {
                           e.currentTarget.src = 'https://placehold.co/150x150/CCCCCC/666666?text=Image+Error';
                         }}
                       />
+                      {isEditing && (
+                        <div className="form-control mt-2">
+                          <label className="label"><span className="label-text">URL รูปภาพ</span></label>
+                          <input
+                            type="text"
+                            name="Image_URL"
+                            placeholder="http://example.com/image.jpg"
+                            className="input input-bordered w-full"
+                            value={editFormData.Image_URL}
+                            onChange={handleFormChange}
+                          />
+                        </div>
+                      )}
                     </div>
 
-                    {/* Name */}
-                    <div className="form-control mb-2">
-                      <label className="label"><span className="label-text">ชื่อสินค้า</span></label>
-                      <input type="text" name="Name" className="input input-bordered w-full" value={editFormData.Name} onChange={handleFormChange} readOnly={!isEditing} />
-                    </div>
-                    {/* Brand */}
-                    <div className="form-control mb-2">
-                      <label className="label"><span className="label-text">แบรนด์</span></label>
-                      <input type="text" name="Brand" className="input input-bordered w-full" value={editFormData.Brand} onChange={handleFormChange} readOnly={!isEditing} />
-                    </div>
-                    {/* Description */}
-                    <div className="form-control mb-2">
-                      <label className="label"><span className="label-text">รายละเอียด</span></label>
-                      <textarea name="Description" className="textarea textarea-bordered w-full h-24" value={editFormData.Description} onChange={handleFormChange} readOnly={!isEditing}></textarea>
-                    </div>
-                    {/* Unit */}
-                    <div className="form-control mb-2">
-                      <label className="label"><span className="label-text">หน่วย</span></label>
-                      <input type="text" name="Unit" className="input input-bordered w-full" value={editFormData.Unit} onChange={handleFormChange} readOnly={!isEditing} />
-                    </div>
+                    {isEditing ? (
+                      <>
+                        <div className="form-control mb-2">
+                          <label className="label"><span className="label-text">ชื่อสินค้า</span></label>
+                          <input type="text" name="Name" className="input input-bordered w-full" value={editFormData.Name} onChange={handleFormChange} />
+                        </div>
+                        <div className="form-control mb-2">
+                          <label className="label"><span className="label-text">แบรนด์</span></label>
+                          <input type="text" name="Brand" className="input input-bordered w-full" value={editFormData.Brand} onChange={handleFormChange} />
+                        </div>
+                        <div className="form-control mb-2">
+                          <label className="label"><span className="label-text">รายละเอียด</span></label>
+                          <textarea name="Description" className="textarea textarea-bordered w-full h-24" value={editFormData.Description} onChange={handleFormChange}></textarea>
+                        </div>
+                        <div className="form-control mb-2">
+                          <label className="label"><span className="label-text">หน่วย</span></label>
+                          <input type="text" name="Unit" className="input input-bordered w-full" value={editFormData.Unit} onChange={handleFormChange} />
+                        </div>
+                      </>
+                    ) : (
+                      selectedProduct && (
+                        <>
+                          <p><strong>ชื่อสินค้า:</strong> {selectedProduct.Name}</p>
+                          <p><strong>แบรนด์:</strong> {selectedProduct.Brand}</p>
+                          <p><strong>รายละเอียด:</strong> {selectedProduct.Description || '-'}</p>
+                          <p><strong>หน่วย:</strong> {selectedProduct.Unit}</p>
+                        </>
+                      )
+                    )}
                   </div>
                 </div>
 
@@ -813,42 +912,34 @@ export default function ProductManagement() {
                 <div>
                   <h4 className="font-semibold mb-2">ข้อมูลคลังและหมวดหมู่</h4>
                   <div className="bg-base-200 rounded-lg p-4">
-                    {/* Quantity */}
-                    <div className="form-control mb-2">
-                      <label className="label"><span className="label-text">จำนวน</span></label>
-                      <input type="number" name="Quantity" className="input input-bordered w-full" value={editFormData.Quantity} onChange={handleFormChange} readOnly={!isEditing} />
-                    </div>
-                    {/* Sale Cost */}
-                    <div className="form-control mb-2">
-                      <label className="label"><span className="label-text">ต้นทุนขาย</span></label>
-                      <input type="number" name="Sale_Cost" className="input input-bordered w-full" value={editFormData.Sale_Cost} onChange={handleFormChange} readOnly={!isEditing} />
-                    </div>
-                    {/* Sale Price */}
-                    <div className="form-control mb-2">
-                      <label className="label"><span className="label-text">ราคาขาย</span></label>
-                      <input type="number" name="Sale_Price" className="input input-bordered w-full" value={editFormData.Sale_Price} onChange={handleFormChange} readOnly={!isEditing} />
-                    </div>
-                    {/* Reorder Point */}
-                    <div className="form-control mb-2">
-                      <label className="label"><span className="label-text">จุดสั่งซื้อซ้ำ</span></label>
-                      <input type="number" name="Reorder_Point" className="input input-bordered w-full" value={editFormData.Reorder_Point} onChange={handleFormChange} readOnly={!isEditing} />
-                    </div>
-                    {/* Review Rating */}
-                    <div className="form-control mb-2">
-                      <label className="label"><span className="label-text">คะแนนรีวิว (1-5)</span></label>
-                      <input type="number" name="Review_Rating" className="input input-bordered w-full" min="1" max="5" value={editFormData.Review_Rating || ''} onChange={handleFormChange} readOnly={!isEditing} />
-                    </div>
-                    {/* Visibility */}
-                    <div className="form-control mb-2">
-                      <label className="label cursor-pointer">
-                        <span className="label-text">แสดงผลบนเว็บไซต์</span>
-                        <input type="checkbox" name="Visibility" className="checkbox" checked={editFormData.Visibility} onChange={handleFormChange} disabled={!isEditing} />
-                      </label>
-                    </div>
-
-                    {/* Category Selection - Visible only during editing/adding */}
-                    {(isEditing || !isEditing) && (
+                    {isEditing ? (
                       <>
+                        <div className="form-control mb-2">
+                          <label className="label"><span className="label-text">จำนวน</span></label>
+                          <input type="number" name="Quantity" className="input input-bordered w-full" value={editFormData.Quantity} onChange={handleFormChange} />
+                        </div>
+                        <div className="form-control mb-2">
+                          <label className="label"><span className="label-text">ต้นทุนขาย</span></label>
+                          <input type="number" name="Sale_Cost" className="input input-bordered w-full" value={editFormData.Sale_Cost} onChange={handleFormChange} />
+                        </div>
+                        <div className="form-control mb-2">
+                          <label className="label"><span className="label-text">ราคาขาย</span></label>
+                          <input type="number" name="Sale_Price" className="input input-bordered w-full" value={editFormData.Sale_Price} onChange={handleFormChange} />
+                        </div>
+                        <div className="form-control mb-2">
+                          <label className="label"><span className="label-text">จุดสั่งซื้อซ้ำ</span></label>
+                          <input type="number" name="Reorder_Point" className="input input-bordered w-full" value={editFormData.Reorder_Point} onChange={handleFormChange} />
+                        </div>
+                        <div className="form-control mb-2">
+                          <label className="label"><span className="label-text">คะแนนรีวิว (1-5)</span></label>
+                          <input type="number" name="Review_Rating" className="input input-bordered w-full" min="1" max="5" value={editFormData.Review_Rating || ''} onChange={handleFormChange} />
+                        </div>
+                        <div className="form-control mb-2">
+                          <label className="label cursor-pointer">
+                            <span className="label-text">แสดงผลบนเว็บไซต์</span>
+                            <input type="checkbox" name="Visibility" className="checkbox" checked={editFormData.Visibility} onChange={handleFormChange} />
+                          </label>
+                        </div>
                         <div className="form-control mb-2">
                           <label className="label"><span className="label-text">หมวดหมู่หลัก</span></label>
                           <select
@@ -856,11 +947,10 @@ export default function ProductManagement() {
                             className="select select-bordered w-full"
                             value={editFormData.Selected_Category_ID || ''}
                             onChange={handleFormChange}
-                            disabled={!isEditing}
                           >
                             <option value="">เลือกหมวดหมู่หลัก</option>
                             {mockCategories.map(cat => (
-                              <option key={`cat-select-${cat.Category_ID}`} value={cat.Category_ID}>{cat.Name}</option> {/* Fixed Key */}
+                              <option key={`cat-select-${cat.Category_ID}`} value={cat.Category_ID}>{cat.Name}</option>
                             ))}
                           </select>
                         </div>
@@ -871,11 +961,11 @@ export default function ProductManagement() {
                             className="select select-bordered w-full"
                             value={editFormData.Selected_Sub_Category_ID || ''}
                             onChange={handleFormChange}
-                            disabled={!isEditing || !editFormData.Selected_Category_ID}
+                            disabled={!editFormData.Selected_Category_ID}
                           >
                             <option value="">เลือกหมวดหมู่ย่อย</option>
                             {filteredSubCategories.map(sub => (
-                              <option key={`sub-select-${sub.Sub_Category_ID}`} value={sub.Sub_Category_ID}>{sub.Name}</option> {/* Fixed Key */}
+                              <option key={`sub-select-${sub.Sub_Category_ID}`} value={sub.Sub_Category_ID}>{sub.Name}</option>
                             ))}
                           </select>
                         </div>
@@ -886,41 +976,62 @@ export default function ProductManagement() {
                             className="select select-bordered w-full"
                             value={editFormData.Selected_Child_ID || ''}
                             onChange={handleFormChange}
-                            disabled={!isEditing || !editFormData.Selected_Sub_Category_ID}
+                            disabled={!editFormData.Selected_Sub_Category_ID}
                           >
                             <option value="">เลือกหมวดหมู่ย่อยย่อย</option>
                             {filteredChildSubCategories.map(child => (
-                              <option key={`child-select-${child.Child_ID}`} value={child.Child_ID}>{child.Name}</option> {/* Fixed Key */}
+                              <option key={`child-select-${child.Child_ID}`} value={child.Child_ID}>{child.Name}</option>
                             ))}
                           </select>
                         </div>
                       </>
-                    )}
-                    {/* Display Full Category Path when not editing */}
-                    {!isEditing && selectedProduct && (
-                      <div className="mt-4">
-                        <p><strong>หมวดหมู่:</strong></p>
-                        <p className="text-sm text-base-content/80">
-                          {getFullCategoryName(selectedProduct.Child_ID)}
-                        </p>
-                      </div>
+                    ) : (
+                      selectedProduct && (
+                        <>
+                          <p><strong>จำนวน:</strong> {selectedProduct.Quantity} {selectedProduct.Unit}</p>
+                          <p><strong>ต้นทุนขาย:</strong> {formatPrice(selectedProduct.Sale_Cost)}</p>
+                          <p><strong>ราคาขาย:</strong> {formatPrice(selectedProduct.Sale_Price)}</p>
+                          <p><strong>จุดสั่งซื้อซ้ำ:</strong> {selectedProduct.Reorder_Point}</p>
+                          <p><strong>คะแนนรีวิว:</strong> {selectedProduct.Review_Rating || '-'}</p>
+                          <p><strong>สถานะการแสดงผล:</strong> {selectedProduct.Visibility ? 'แสดงผล' : 'ซ่อน'}</p>
+                          <p><strong>หมวดหมู่:</strong> {getFullCategoryName(selectedProduct.Child_ID)}</p>
+                          <div className="mt-4">
+                            <p className="font-semibold">สถานะสต็อก:</p>
+                            <span className={`badge ${getProductStockStatus(selectedProduct) === 'in_stock' ? 'badge-success' : getProductStockStatus(selectedProduct) === 'low_stock' ? 'badge-warning' : 'badge-error'} badge-lg`}>
+                              {getProductStockStatus(selectedProduct) === 'in_stock' && <FiCheckCircle className="w-4 h-4 mr-1" />}
+                              {getProductStockStatus(selectedProduct) === 'low_stock' && <FiAlertTriangle className="w-4 h-4 mr-1" />}
+                              {getProductStockStatus(selectedProduct) === 'out_of_stock' && <FiAlertCircle className="w-4 h-4 mr-1" />}
+                              {getProductStockStatus(selectedProduct) === 'in_stock' ? 'ในสต็อก' : getProductStockStatus(selectedProduct) === 'low_stock' ? 'ใกล้หมด' : 'หมดแล้ว'}
+                            </span>
+                          </div>
+                        </>
+                      )
                     )}
                   </div>
                 </div>
               </div>
 
               <div className="modal-action flex-col sm:flex-row mt-6">
-                <button className="btn btn-ghost w-full sm:w-auto" onClick={() => setShowProductModal(false)}>
-                  <FiX className="w-4 h-4" /> ปิด
-                </button>
                 {isEditing ? (
-                  <button className="btn btn-primary w-full sm:w-auto" onClick={saveProductDetails}>
-                    <FiSave className="w-4 h-4" /> บันทึกการแก้ไข
-                  </button>
+                  <>
+                    <button className="btn btn-ghost w-full sm:w-auto" onClick={toggleEditMode}>
+                      <FiX className="w-4 h-4" /> ยกเลิก
+                    </button>
+                    <button className="btn btn-primary w-full sm:w-auto" onClick={saveProductDetails}>
+                      <FiSave className="w-4 h-4" /> บันทึก
+                    </button>
+                  </>
                 ) : (
-                  <button className="btn btn-primary w-full sm:w-auto" onClick={saveProductDetails}>
-                    <FiPlus className="w-4 h-4" /> เพิ่มสินค้า
-                  </button>
+                  <>
+                    <button className="btn w-full sm:w-auto" onClick={() => setShowProductModal(false)}>
+                      <FiX className="w-4 h-4" /> ปิด
+                    </button>
+                    {selectedProduct && ( // Show edit button only if a product is selected (not for "add new" initial state)
+                      <button className="btn btn-primary w-full sm:w-auto" onClick={toggleEditMode}>
+                        <FiEdit className="w-4 h-4" /> แก้ไข
+                      </button>
+                    )}
+                  </>
                 )}
               </div>
             </div>

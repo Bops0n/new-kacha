@@ -1,25 +1,26 @@
-import React from 'react'; // Ensure React is explicitly imported
-import { FiEye, FiTag, FiBox, FiDollarSign } from 'react-icons/fi';
-import { ProductInventory } from '../../../types'; // Adjust path based on your project structure
+import React from 'react';
+import { FiTag, FiBox, FiDollarSign, FiEye } from 'react-icons/fi'; // Changed FiEdit to FiEye
+import { ProductInventory } from '../../../types'; // Correct path to types
 
 interface ProductCardProps {
   product: ProductInventory;
   formatPrice: (price: number) => string;
   getFullCategoryName: (childId: number | null) => string;
-  viewProductDetails: (product: ProductInventory) => void;
+  openProductModal: (product: ProductInventory, initialMode: 'view' | 'edit') => void; // Prop for modal control
 }
 
 const ProductCard: React.FC<ProductCardProps> = ({
   product,
   formatPrice,
   getFullCategoryName,
-  viewProductDetails,
+  openProductModal,
 }) => {
   const isLowStock = product.Quantity <= product.Reorder_Point && product.Quantity > 0;
   const isOutOfStock = product.Quantity === 0;
 
   return (
-    <div className="card bg-base-200 shadow-sm">
+    // Make the entire card clickable to open the modal in view mode
+    <div className="card bg-base-200 shadow-sm cursor-pointer" onClick={() => openProductModal(product, 'view')}>
       <div className="card-body p-4">
         <div className="flex items-start gap-4 mb-3">
           {/* Product Image */}
@@ -74,7 +75,10 @@ const ProductCard: React.FC<ProductCardProps> = ({
         <div className="card-actions justify-end mt-4">
           <button
             className="btn btn-sm btn-outline"
-            onClick={() => viewProductDetails(product)}
+            onClick={(e) => {
+              e.stopPropagation(); // Prevent card click from also triggering
+              openProductModal(product, 'view'); // Open in view mode
+            }}
           >
             <FiEye className="w-4 h-4" /> ดูรายละเอียด
           </button>
