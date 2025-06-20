@@ -4,10 +4,15 @@ import { GoTriangleDown } from "react-icons/go";
 import { HiMenu, HiX } from "react-icons/hi";
 import { useState } from "react";
 import Link from "next/link";
+import { signOut, useSession } from "next-auth/react";
+import { redirect } from "next/navigation";
 
 export default function AdminNavbar() {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
-
+    
+    
+    const session = useSession()
+    if (session?.data?.user?.accessLevel == '1')
     return (
         <div className="w-full" data-theme="dark">
             {/* Top Bar */}
@@ -70,18 +75,19 @@ export default function AdminNavbar() {
                         {/* Login Section & Mobile Menu */}
                         <div className="flex items-center gap-4">
                             {/* Login Dropdown */}
-                            <div className="dropdown dropdown-end">
-                                <label tabIndex={0} className="btn btn-ghost  gap-2 hover:bg-gray-400">
-                                    <span className="hidden sm:block">ลงชื่อ / สมัครสมาชิก</span>
-                                    <span className="sm:hidden">เข้าสู่ระบบ</span>
-                                    <GoTriangleDown />
-                                </label>
-                                <ul tabIndex={0} className="dropdown-content menu p-2 shadow-lg bg-gray-300 rounded-box w-52 border border-gray-400">
-                                    <li> <Link href={"#"} className=" hover:bg-gray-400">เข้าสู่ระบบ</Link></li>
-                                    <li> <Link href={"#"} className=" hover:bg-gray-400">สมัครสมาชิก</Link></li>
-                                    <li> <Link href={"#"} className=" hover:bg-gray-400">ลืมรหัสผ่าน</Link></li>
-                                </ul>
-                            </div>
+                                <div className="dropdown dropdown-end">
+                                    <label tabIndex={0} className="btn btn-ghost gap-2 hover:bg-gray-200 text-gray-800 rounded-lg">
+                                        <span className="hidden sm:block">{session?.data?.user?.name}</span>
+                                        <span className="sm:hidden text-sm">{ session?.data?.user?.name?.split(' ')[0] }</span>
+                                        <GoTriangleDown className="w-4 h-4" />
+                                    </label>
+                                    <ul tabIndex={0} className="dropdown-content menu p-2 shadow-lg bg-white rounded-box w-52 border border-gray-300 mt-0 text-gray-800">
+                                        <li> <Link href={"/profile"} className="hover:bg-gray-200 rounded">โปรไฟล์ของฉัน</Link></li>
+                                        <li> <Link href={"/orders"} className="hover:bg-gray-200 rounded">ประวัติคำสั่งซื้อ</Link></li>
+                                        <li> <Link href={"/favorites"} className="hover:bg-gray-200 rounded">รายการโปรด</Link></li>
+                                        <li> <a onClick={()=> signOut()} className="hover:bg-gray-200 rounded">ออกจากระบบ</a></li>
+                                    </ul>
+                                </div>
 
                             {/* Mobile Menu Button */}
                             <div className="lg:hidden">

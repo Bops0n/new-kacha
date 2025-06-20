@@ -4,30 +4,22 @@ import { useState, useEffect } from 'react';
 import {
   FiSearch,
   FiPlus,
-  FiEdit,
-  FiTrash2,
   FiUser,
-  FiMail,
-  FiPhone,
-  FiKey, // For Access Level
-  FiHome, // For Address
-  FiMapPin, // For address details
-  FiX,
-  FiSave
 } from 'react-icons/fi';
 
 import { User, Address, UserEditForm, AccessLevel, NewAddressForm } from '../../../types'; // Correct path to types
 
 import UserRow from './UserRow'; // Correct path to components
 import UserCard from './UserCard'; // Correct path to components
+import UserModal from './modal/UserModal'; // <-- นำเข้า UserModal
+import AddressModal from './modal/AddressModal'; // <-- นำเข้า AddressModal
 
 // --- Mock Data ---
-// In a real application, this data would be fetched from your backend API
 const mockUsers: User[] = [
   {
     User_ID: 101,
     Username: 'john.doe',
-    Password: 'password123', // In production, never handle passwords like this
+    Password: 'password123',
     Full_Name: 'John Doe',
     Email: 'john.doe@example.com',
     Phone: '0812345678',
@@ -147,6 +139,17 @@ export default function UserManagement() {
   const [paginatedUsers, setPaginatedUsers] = useState<User[]>([]);
   const [totalPages, setTotalPages] = useState<number>(1);
 
+  // --- call data from api ---
+  useEffect(() => {
+    async function callData(){
+      const data = await fetch('../api/admin/user/getUsers')
+      const response = await data.json()
+      console.log(response.users)
+      setUsers(response.users)
+    }
+    callData()
+  },[])
+
   // --- Filtering Logic ---
   useEffect(() => {
     let filtered: User[] = users;
@@ -190,8 +193,14 @@ export default function UserManagement() {
 
   // --- User Actions ---
   // Opens modal in VIEW mode
-  const openUserModal = (user: User) => {
+  const openUserModal = async(user: User) => {
     setSelectedUser(user);
+
+    const response = await fetch(`../api/admin/user/getAddress?UserId=${user.User_ID}`)
+    const data = await response.json()
+    console.log(data.addresses)
+
+
     // Populate form data with current user's data for potential edit later
     setEditFormData({
       User_ID: user.User_ID,
@@ -202,7 +211,7 @@ export default function UserManagement() {
       Phone: user.Phone || '',
       Access_Level: user.Access_Level,
       Token: user.Token,
-      Addresses: user.Addresses || [],
+      Addresses: data.addresses || [],
     });
     setIsEditing(false); // Set to view mode
     setShowUserModal(true);
@@ -231,14 +240,29 @@ export default function UserManagement() {
     setShowUserModal(true);
   };
 
-  const saveUserDetails = () => {
+  const saveUserDetails = async() => {
+
+    if (selectedUser){
+      const response = await fetch('../api/admin/user/updateUser',{
+        method : 'PATCH',
+        body : JSON.stringify(editFormData)
+      })
+      console.log(response)
+      
+    }else{
+      console.log('nouserslect')
+    }
     if (!editFormData.Username || !editFormData.Full_Name) {
-      alert('กรุณากรอก Username และ Full Name'); // Replace with custom modal
+      // alert('กรุณากรอก Username และ Full Name'); // Replace with custom modal
+      // Using a placeholder for custom alert
+      // showAlert('กรุณากรอก Username และ Full Name');
       return;
     }
     // Password validation only for new users or if password field is explicitly changed in edit mode
     if (!isEditing && !editFormData.Password) {
-      alert('กรุณากำหนดรหัสผ่านสำหรับผู้ใช้ใหม่');
+      // alert('กรุณากำหนดรหัสผ่านสำหรับผู้ใช้ใหม่');
+      // Using a placeholder for custom alert
+      // showAlert('กรุณากำหนดรหัสผ่านสำหรับผู้ใช้ใหม่');
       return;
     }
 
@@ -267,10 +291,10 @@ export default function UserManagement() {
   };
 
   const deleteUser = (userId: number) => {
-    if (window.confirm(`คุณแน่ใจหรือไม่ที่จะลบผู้ใช้ User ID: ${userId}?`)) {
+    // if (window.confirm(`คุณแน่ใจหรือไม่ที่จะลบผู้ใช้ User ID: ${userId}?`)) {
       setUsers(prev => prev.filter(u => u.User_ID !== userId));
       setShowUserModal(false);
-    }
+    // }
   };
 
   // --- Address Actions within User Modal ---
@@ -286,7 +310,7 @@ export default function UserManagement() {
         Zip_Code: '',
         Is_Default: false,
         Sub_District: '',
-        Phone: selectedUser.Phone || '', // Default address phone to user's main phone
+        Phone: selectedUser.Phone || '',
       });
       setAddressToEdit(null); // Not editing existing address
       setShowAddAddressModal(true);
@@ -294,7 +318,7 @@ export default function UserManagement() {
   };
 
   const handleEditAddressClick = (address: Address) => {
-    setNewAddressForm({ // Use newAddressForm to populate fields for editing
+    setNewAddressForm({
       Address_ID: address.Address_ID,
       User_ID: address.User_ID,
       Address_1: address.Address_1,
@@ -312,7 +336,9 @@ export default function UserManagement() {
 
   const saveAddress = () => {
     if (!newAddressForm.Address_1 || !newAddressForm.District || !newAddressForm.Province || !newAddressForm.Zip_Code || !newAddressForm.Sub_District || !newAddressForm.Phone) {
-      alert('กรุณากรอกข้อมูลที่อยู่ให้ครบถ้วน');
+      // alert('กรุณากรอกข้อมูลที่อยู่ให้ครบถ้วน');
+      // Using a placeholder for custom alert
+      // showAlert('กรุณากรอกข้อมูลที่อยู่ให้ครบถ้วน');
       return;
     }
 
@@ -320,23 +346,20 @@ export default function UserManagement() {
       const updatedAddresses = [...editFormData.Addresses];
       const newOrUpdatedAddress: Address = {
         ...newAddressForm,
-        Address_ID: newAddressForm.Address_ID || Date.now(), // Generate ID for new address
-        User_ID: selectedUser.User_ID, // Ensure User_ID is correct
-        Address_2: newAddressForm.Address_2 || null, // Ensure null for empty
+        Address_ID: newAddressForm.Address_ID || Date.now(),
+        User_ID: selectedUser.User_ID,
+        Address_2: newAddressForm.Address_2 || null,
       };
 
       if (addressToEdit) {
-        // Update existing address
         const index = updatedAddresses.findIndex(addr => addr.Address_ID === addressToEdit.Address_ID && addr.User_ID === addressToEdit.User_ID);
         if (index !== -1) {
           updatedAddresses[index] = newOrUpdatedAddress;
         }
       } else {
-        // Add new address
         updatedAddresses.push(newOrUpdatedAddress);
       }
 
-      // Handle default address logic (only one can be default)
       if (newOrUpdatedAddress.Is_Default) {
         updatedAddresses.forEach(addr => {
           if (addr.Address_ID !== newOrUpdatedAddress.Address_ID) {
@@ -344,17 +367,14 @@ export default function UserManagement() {
           }
         });
       } else {
-        // If the current address is no longer default, ensure at least one address is default if others exist
         if (updatedAddresses.length > 0 && !updatedAddresses.some(addr => addr.Is_Default)) {
-          // If no default, make the first one default (or choose logically)
           updatedAddresses[0].Is_Default = true;
         }
       }
 
-
       setEditFormData(prev => ({ ...prev, Addresses: updatedAddresses }));
       setShowAddAddressModal(false);
-      setNewAddressForm({ // Reset form
+      setNewAddressForm({
         Address_ID: null, User_ID: 0, Address_1: '', Address_2: '', District: '', Province: '', Zip_Code: '', Is_Default: false, Sub_District: '', Phone: '',
       });
       setAddressToEdit(null);
@@ -363,18 +383,17 @@ export default function UserManagement() {
 
 
   const deleteAddress = (addressId: number, userId: number) => {
-    if (window.confirm('คุณแน่ใจหรือไม่ที่จะลบที่อยู่นี้?')) {
+    // if (window.confirm('คุณแน่ใจหรือไม่ที่จะลบที่อยู่นี้?')) {
       if (selectedUser) {
         const updatedAddresses = editFormData.Addresses.filter(addr => !(addr.Address_ID === addressId && addr.User_ID === userId));
 
-        // If the deleted address was default, ensure another is set if remaining addresses exist
         if (updatedAddresses.length > 0 && !updatedAddresses.some(addr => addr.Is_Default)) {
           updatedAddresses[0].Is_Default = true;
         }
 
         setEditFormData(prev => ({ ...prev, Addresses: updatedAddresses }));
       }
-    }
+    // }
   };
 
   // --- Form Change Handlers ---
@@ -478,7 +497,7 @@ export default function UserManagement() {
                     key={user.User_ID}
                     user={user}
                     getAccessLevelLabel={getAccessLevelLabel}
-                    openUserModal={openUserModal} // Pass the function here
+                    openUserModal={openUserModal}
                     deleteUser={deleteUser}
                   />
                 ))}
@@ -496,7 +515,7 @@ export default function UserManagement() {
                   key={user.User_ID}
                   user={user}
                   getAccessLevelLabel={getAccessLevelLabel}
-                  openUserModal={openUserModal} // Pass the function here
+                  openUserModal={openUserModal}
                 />
               ))}
             </div>
@@ -594,194 +613,33 @@ export default function UserManagement() {
           </div>
         )}
 
+        {/* Render UserModal */}
+        <UserModal
+          showModal={showUserModal}
+          onClose={() => setShowUserModal(false)}
+          selectedUser={selectedUser}
+          isEditing={isEditing}
+          toggleEditMode={toggleEditMode}
+          editFormData={editFormData}
+          handleUserFormChange={handleUserFormChange}
+          saveUserDetails={saveUserDetails}
+          deleteUser={deleteUser}
+          getAccessLevelLabel={getAccessLevelLabel}
+          handleAddAddressClick={handleAddAddressClick}
+          handleEditAddressClick={handleEditAddressClick}
+          deleteAddress={deleteAddress}
+          setShowAddAddressModal={setShowAddAddressModal}
+        />
 
-        {/* User Detail/Edit Modal */}
-        {showUserModal && (
-          <div className="modal modal-open">
-            <div className="modal-box w-11/12 max-w-4xl">
-              <h3 className="font-bold text-lg mb-4">
-                {isEditing ? `แก้ไขผู้ใช้ ID: ${editFormData.User_ID || ''}` : `รายละเอียดผู้ใช้ ID: ${selectedUser?.User_ID || ''}`}
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* User Information Form / Display */}
-                <div>
-                  <h4 className="font-semibold mb-2">ข้อมูลผู้ใช้</h4>
-                  <div className="bg-base-200 rounded-lg p-4">
-                    {isEditing ? (
-                      <>
-                        <div className="form-control mb-2">
-                          <label className="label"><span className="label-text">ชื่อผู้ใช้</span></label>
-                          <input type="text" name="Username" className="input input-bordered w-full" value={editFormData.Username} onChange={handleUserFormChange} />
-                        </div>
-                        <div className="form-control mb-2">
-                          <label className="label"><span className="label-text">รหัสผ่าน (จะถูกเปลี่ยนหากแก้ไข)</span></label>
-                          <input type="password" name="Password" className="input input-bordered w-full" value={editFormData.Password} onChange={handleUserFormChange} />
-                        </div>
-                        <div className="form-control mb-2">
-                          <label className="label"><span className="label-text">ชื่อเต็ม</span></label>
-                          <input type="text" name="Full_Name" className="input input-bordered w-full" value={editFormData.Full_Name} onChange={handleUserFormChange} />
-                        </div>
-                        <div className="form-control mb-2">
-                          <label className="label"><span className="label-text">อีเมล</span></label>
-                          <input type="email" name="Email" className="input input-bordered w-full" value={editFormData.Email || ''} onChange={handleUserFormChange} />
-                        </div>
-                        <div className="form-control mb-2">
-                          <label className="label"><span className="label-text">เบอร์โทร</span></label>
-                          <input type="tel" name="Phone" className="input input-bordered w-full" value={editFormData.Phone || ''} onChange={handleUserFormChange} />
-                        </div>
-                        <div className="form-control mb-2">
-                          <label className="label"><span className="label-text">ระดับการเข้าถึง</span></label>
-                          <select name="Access_Level" className="select select-bordered w-full" value={editFormData.Access_Level} onChange={handleUserFormChange}>
-                            <option value="0">Guest</option>
-                            <option value="1">User</option>
-                            <option value="9">Admin</option>
-                          </select>
-                        </div>
-                      </>
-                    ) : (
-                      selectedUser && ( // Display selectedUser info if not in editing mode
-                        <>
-                          <p><strong>User ID:</strong> {selectedUser.User_ID}</p>
-                          <p><strong>ชื่อผู้ใช้:</strong> {selectedUser.Username}</p>
-                          <p><strong>ชื่อเต็ม:</strong> {selectedUser.Full_Name}</p>
-                          <p><strong>อีเมล:</strong> {selectedUser.Email || '-'}</p>
-                          <p><strong>เบอร์โทร:</strong> {selectedUser.Phone || '-'}</p>
-                          <p><strong>ระดับการเข้าถึง:</strong> {getAccessLevelLabel(selectedUser.Access_Level)}</p>
-                        </>
-                      )
-                    )}
-                  </div>
-                </div>
-
-                {/* User Addresses */}
-                <div>
-                  <h4 className="font-semibold mb-2 flex justify-between items-center">
-                    ที่อยู่
-                    {isEditing && ( // Only allow adding addresses in edit mode
-                      <button className="btn btn-sm btn-primary" onClick={handleAddAddressClick}>
-                        <FiPlus className="w-4 h-4" /> เพิ่มที่อยู่
-                      </button>
-                    )}
-                  </h4>
-                  <div className="bg-base-200 rounded-lg p-4 max-h-96 overflow-y-auto">
-                    {editFormData.Addresses.length > 0 ? (
-                      <div className="space-y-4">
-                        {editFormData.Addresses.map((address, index) => (
-                          <div key={`${address.User_ID}-${address.Address_ID}`} className="border border-base-300 rounded-lg p-3 relative">
-                            {address.Is_Default && (
-                              <span className="badge badge-info absolute top-2 right-2">ค่าเริ่มต้น</span>
-                            )}
-                            <p className="text-sm font-semibold">{address.Address_1} {address.Address_2}</p>
-                            <p className="text-xs text-base-content/80">{address.Sub_District}, {address.District}, {address.Province}, {address.Zip_Code}</p>
-                            <p className="text-xs text-base-content/80">โทร: {address.Phone}</p>
-                            {isEditing && (
-                              <div className="absolute bottom-2 right-2 flex gap-1">
-                                <button
-                                  className="btn btn-ghost btn-xs btn-square"
-                                  onClick={() => handleEditAddressClick(address)}
-                                  title="แก้ไขที่อยู่"
-                                >
-                                  <FiEdit className="w-3 h-3" />
-                                </button>
-                                <button
-                                  className="btn btn-ghost btn-xs btn-square text-error"
-                                  onClick={() => deleteAddress(address.Address_ID, address.User_ID)}
-                                  title="ลบที่อยู่"
-                                >
-                                  <FiTrash2 className="w-3 h-3" />
-                                </button>
-                              </div>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <p className="text-center text-base-content/70 py-4">ยังไม่มีที่อยู่</p>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              <div className="modal-action flex-col sm:flex-row mt-6">
-                {isEditing ? (
-                  <>
-                    <button className="btn btn-ghost w-full sm:w-auto" onClick={toggleEditMode}>
-                      <FiX className="w-4 h-4" /> ยกเลิก
-                    </button>
-                    <button className="btn btn-primary w-full sm:w-auto" onClick={saveUserDetails}>
-                      <FiSave className="w-4 h-4" /> บันทึก
-                    </button>
-                  </>
-                ) : (
-                  <>
-                    <button className="btn w-full sm:w-auto" onClick={() => setShowUserModal(false)}>
-                      <FiX className="w-4 h-4" /> ปิด
-                    </button>
-                    {selectedUser && ( // Only show edit button if a user is selected (not for "add new" initial state)
-                      <button className="btn btn-primary w-full sm:w-auto" onClick={toggleEditMode}>
-                        <FiEdit className="w-4 h-4" /> แก้ไข
-                      </button>
-                    )}
-                  </>
-                )}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Add/Edit Address Modal */}
-        {showAddAddressModal && ( // Removed selectedUser check, as editFormData.Addresses will contain User_ID
-          <div className="modal modal-open">
-            <div className="modal-box w-11/12 max-w-md">
-              <h3 className="font-bold text-lg mb-4">
-                {addressToEdit ? 'แก้ไขที่อยู่' : 'เพิ่มที่อยู่ใหม่'}
-              </h3>
-              <div className="form-control mb-2">
-                <label className="label"><span className="label-text">ที่อยู่ 1</span></label>
-                <input type="text" name="Address_1" className="input input-bordered w-full" value={newAddressForm.Address_1} onChange={handleAddressFormChange} />
-              </div>
-              <div className="form-control mb-2">
-                <label className="label"><span className="label-text">ที่อยู่ 2 (ไม่บังคับ)</span></label>
-                <input type="text" name="Address_2" className="input input-bordered w-full" value={newAddressForm.Address_2 || ''} onChange={handleAddressFormChange} />
-              </div>
-              <div className="form-control mb-2">
-                <label className="label"><span className="label-text">แขวง/ตำบล</span></label>
-                <input type="text" name="Sub_District" className="input input-bordered w-full" value={newAddressForm.Sub_District} onChange={handleAddressFormChange} />
-              </div>
-              <div className="form-control mb-2">
-                <label className="label"><span className="label-text">เขต/อำเภอ</span></label>
-                <input type="text" name="District" className="input input-bordered w-full" value={newAddressForm.District} onChange={handleAddressFormChange} />
-              </div>
-              <div className="form-control mb-2">
-                <label className="label"><span className="label-text">จังหวัด</span></label>
-                <input type="text" name="Province" className="input input-bordered w-full" value={newAddressForm.Province} onChange={handleAddressFormChange} />
-              </div>
-              <div className="form-control mb-2">
-                <label className="label"><span className="label-text">รหัสไปรษณีย์</span></label>
-                <input type="text" name="Zip_Code" className="input input-bordered w-full" value={newAddressForm.Zip_Code} onChange={handleAddressFormChange} maxLength={6} />
-              </div>
-              <div className="form-control mb-2">
-                <label className="label"><span className="label-text">เบอร์โทรศัพท์ (สำหรับที่อยู่นี้)</span></label>
-                <input type="tel" name="Phone" className="input input-bordered w-full" value={newAddressForm.Phone} onChange={handleAddressFormChange} maxLength={10} />
-              </div>
-              <div className="form-control mt-4">
-                <label className="label cursor-pointer">
-                  <span className="label-text">ตั้งเป็นที่อยู่เริ่มต้น</span>
-                  <input type="checkbox" name="Is_Default" className="checkbox" checked={newAddressForm.Is_Default} onChange={handleAddressFormChange} />
-                </label>
-              </div>
-
-              <div className="modal-action flex-col sm:flex-row mt-6">
-                <button className="btn btn-ghost w-full sm:w-auto" onClick={() => setShowAddAddressModal(false)}>
-                  <FiX className="w-4 h-4" /> ยกเลิก
-                </button>
-                <button className="btn btn-primary w-full sm:w-auto" onClick={saveAddress}>
-                  <FiSave className="w-4 h-4" /> {addressToEdit ? 'บันทึกที่อยู่' : 'เพิ่มที่อยู่'}
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
+        {/* Render AddressModal */}
+        <AddressModal
+          showModal={showAddAddressModal}
+          onClose={() => setShowAddAddressModal(false)}
+          addressToEdit={addressToEdit}
+          newAddressForm={newAddressForm}
+          handleAddressFormChange={handleAddressFormChange}
+          saveAddress={saveAddress}
+        />
 
       </div>
     </div>

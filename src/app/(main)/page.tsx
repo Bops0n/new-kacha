@@ -65,7 +65,7 @@ const mockFeaturedCategories = [
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen bg-base-200 pt-50">
+    <div className="min-h-screen bg-base-200">
       {/* Hero Section */}
       <div className="relative bg-gradient-to-r from-blue-700 to-blue-500 text-white py-16 md:py-24 overflow-hidden">
         <div className="absolute inset-0 bg-cover bg-center opacity-30" style={{ backgroundImage: "url('https://placehold.co/1920x1080/0A2342/FFFFFF?text=Construction+Site')" }}></div>

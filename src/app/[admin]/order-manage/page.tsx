@@ -16,8 +16,8 @@ import {
 } from 'react-icons/fi';
 
 import { Order, OrderStatus, StatusConfig, EditFormData } from '../../../types';
-import OrderRow from '../order-management/OrderRow';
-import OrderCard from '../order-management/OrderCard';
+import OrderRow from '../components/Order/OrderRow';
+import OrderCard from '../components/Order/OrderCard';
 
 const mockOrders: Order[] = [
   {

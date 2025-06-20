@@ -1,3 +1,4 @@
+import { CartCountProvider } from "../context/CartCount";
 import UserNavbar from "./components/UserNavbar";
 
 export default function RootLayout({
@@ -7,8 +8,12 @@ export default function RootLayout({
 }) {
     return(
         <>
+        <CartCountProvider>
         <UserNavbar/>
+        <div className="45">
         {children}
+        </div>
+        </CartCountProvider>
         </>
     )
 }
