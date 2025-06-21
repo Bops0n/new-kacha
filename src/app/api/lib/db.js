@@ -16,9 +16,9 @@ const config = {
 
 const pool = new Pool(config);
 
-// export default pool
 
 module.exports = {
+    pool,
     poolQuery : (queryString, params) => pool.query(queryString,params)
 }
 // console.log(poolQuery('SELECT ()'));

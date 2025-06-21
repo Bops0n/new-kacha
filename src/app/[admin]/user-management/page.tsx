@@ -334,7 +334,7 @@ export default function UserManagement() {
     setShowAddAddressModal(true);
   };
 
-  const saveAddress = () => {
+  const saveAddress = async() => {
     if (!newAddressForm.Address_1 || !newAddressForm.District || !newAddressForm.Province || !newAddressForm.Zip_Code || !newAddressForm.Sub_District || !newAddressForm.Phone) {
       // alert('กรุณากรอกข้อมูลที่อยู่ให้ครบถ้วน');
       // Using a placeholder for custom alert
@@ -352,11 +352,25 @@ export default function UserManagement() {
       };
 
       if (addressToEdit) {
+
+        const k = await fetch('../api/admin/user/updateAddress',{
+          method: 'PATCH',
+          body : JSON.stringify(newOrUpdatedAddress)
+        })
+
         const index = updatedAddresses.findIndex(addr => addr.Address_ID === addressToEdit.Address_ID && addr.User_ID === addressToEdit.User_ID);
         if (index !== -1) {
           updatedAddresses[index] = newOrUpdatedAddress;
+          
         }
       } else {
+        console.log('add new address')
+
+        const k = await fetch('../api/admin/user/addAddress',{
+          method: 'POST',
+          body : JSON.stringify(newOrUpdatedAddress)
+        })
+
         updatedAddresses.push(newOrUpdatedAddress);
       }
 
@@ -379,12 +393,19 @@ export default function UserManagement() {
       });
       setAddressToEdit(null);
     }
+    
   };
 
 
-  const deleteAddress = (addressId: number, userId: number) => {
+  const deleteAddress = async(addressId: number, userId: number) => {
     // if (window.confirm('คุณแน่ใจหรือไม่ที่จะลบที่อยู่นี้?')) {
       if (selectedUser) {
+
+
+        const result = await fetch(`../api/admin/user/addAddress?id=${addressId}`,{
+          method:'DELETE'
+        })
+
         const updatedAddresses = editFormData.Addresses.filter(addr => !(addr.Address_ID === addressId && addr.User_ID === userId));
 
         if (updatedAddresses.length > 0 && !updatedAddresses.some(addr => addr.Is_Default)) {

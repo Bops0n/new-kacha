@@ -28,7 +28,7 @@ export async function GET(req: NextRequest) {
 
     // --- Get query parameters (only id and userId remain) ---
     const addressId = req.nextUrl.searchParams.get('id');       // To fetch a single address by Address_ID
-    const userId = req.nextUrl.searchParams.get('userId');     // To fetch all addresses for a specific User_ID
+    const userId = req.nextUrl.searchParams.get('UserId');     // To fetch all addresses for a specific User_ID
 
     let addresses: Address[] = [];
     let sql: string;
@@ -53,11 +53,13 @@ export async function GET(req: NextRequest) {
         // Fetch a single address by Address_ID
         sql = `SELECT ${selectColumns} FROM public."Address" WHERE "Address_ID" = $1`;
         queryParams.push(parseInt(addressId, 10));
+        console.log(`getAddress Select by AddressID : ${userId}`)
 
     } else if (userId) {
         // Fetch all addresses for a specific User_ID
         sql = `SELECT ${selectColumns} FROM public."Address" WHERE "User_ID" = $1`;
         queryParams.push(parseInt(userId, 10));
+        console.log(`getAddress Select by UserID : ${userId}`)
 
     } else {
         // Fetch all addresses if no specific ID is provided
@@ -80,7 +82,7 @@ export async function GET(req: NextRequest) {
              return NextResponse.json({ message: `No addresses found for User ID ${userId}` }, { status: 404 });
         }
 
-        console.log("Addresses fetched:", addresses);
+        console.log("Addresses fetched:", userId);
 
     } catch (dbError: any) {
         console.error("Error fetching addresses from database:", dbError);

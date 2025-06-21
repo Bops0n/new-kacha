@@ -19,7 +19,7 @@ export async function GET(req: NextRequest) {
     // --- Database Query ---
     let usersFromDb: User[] = []; // Initialize an empty array to hold user data
     // No parameters are expected, so the SQL is straightforward
-    const sql = `SELECT * FROM public."User"`; // Selecting all columns as requested
+    const sql = `SELECT * FROM public."User" ORDER BY "User_ID"`; // Selecting all columns as requested
 
     try {
         const result = await poolQuery(sql);
