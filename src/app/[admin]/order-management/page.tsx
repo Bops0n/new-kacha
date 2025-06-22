@@ -21,25 +21,27 @@ import {
 // This interface represents the shape of an order record as received from the API.
 interface Order {
   id: number; // Maps to Order_ID from DB (number)
-  userId: number; // NEW: Added userId to match data from API
+  userId: number; // Added userId to match data from API
   customerName: string; // From User.FullName via API
   email: string | null; // From User.Email via API
-  phone: string | null; // From Address.Phone via API
+  phone: string | null; // From Order.Phone via API (now a snapshot)
   products: Array<{ name: string; quantity: number; price: number; discount: number }>; // From Order_Detail & Product tables
   total: number; // Calculated from products in API
   status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled'; // Maps to status from DB
   orderDate: string; // From DB
-  deliveryDate: string | null; // From Order table
-  address: string; // From Order table (snapshot)
-  trackingId: string | null; // From Order table
-  shippingCarrier: string | null; // From Order table
-  transferSlipImageUrl: string | null; // From Order table
-  cancellationReason: string | null; // From Order table
+  deliveryDate: string | null; // From Order table (DeliveryDate)
+  address: string; // From Order table (Address snapshot)
+  addressId: number; // From Order table (original Address_ID)
+  trackingId: string | null; // From Order table (TrackingId)
+  shippingCarrier: string | null; // From Order table (ShippingCarrier)
+  transferSlipImageUrl: string | null; // From Order table (TransferSlipImageUrl)
+  cancellationReason: string | null; // From Order table (CancellationReason)
   paymentType: string; // From DB (Payment_Type)
   invoiceId: string | null; // From DB (Invoice_ID)
 }
 
 type OrderStatus = 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
+type TransferSlipStatusFilter = 'all' | 'has_slip' | 'no_slip'; // New type for slip filter
 
 interface StatusConfig {
   [key: string]: {
@@ -95,17 +97,54 @@ const statusConfig: StatusConfig = {
   }
 };
 
+// --- Helper Functions ---
+
+// Helper for currency formatting
+const formatPrice = (price: number): string => {
+  return new Intl.NumberFormat('th-TH', {
+    style: 'currency',
+    currency: 'THB'
+  }).format(price);
+};
+
+// Helper for date formatting to dd-mm-yyyy
+const formatDate = (dateString: string | null): string => {
+  if (!dateString) return '-';
+  try {
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return '-'; // Check for invalid date
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0'); // Month is 0-indexed
+    const year = date.getFullYear();
+    return `${day}-${month}-${year}`;
+  } catch (e) {
+    console.error("Error formatting date:", e);
+    return '-';
+  }
+};
+
+// Helper to get transfer slip status label with more universal terms
+const getTransferSlipStatusLabel = (imageUrl: string | null): boolean => {
+  if (imageUrl && imageUrl.trim() !== '') {
+    // return 'แนบสลิปแล้ว'; // More universal and formal
+    return true; // More universal and formal
+  }
+  // return 'ยังไม่แนบสลิป'; // More universal and formal
+  return false; // More universal and formal
+};
 
 // --- OrderRow Component (for Desktop Table View) ---
 interface OrderRowProps {
   order: Order;
   statusConfig: StatusConfig;
   formatPrice: (price: number) => string;
+  formatDate: (dateString: string | null) => string; // Pass formatDate
+  getTransferSlipStatusLabel: (imageUrl: string | null) => string; // Pass getTransferSlipStatusLabel
   viewOrderDetails: (order: Order) => void;
   deleteOrder: (orderId: number) => void;
 }
 
-const OrderRow: React.FC<OrderRowProps> = ({ order, statusConfig, formatPrice, viewOrderDetails, deleteOrder }) => {
+const OrderRow: React.FC<OrderRowProps> = ({ order, statusConfig, formatPrice, formatDate, getTransferSlipStatusLabel, viewOrderDetails, deleteOrder }) => {
   const StatusIcon = statusConfig[order.status].icon;
 
   return (
@@ -128,8 +167,8 @@ const OrderRow: React.FC<OrderRowProps> = ({ order, statusConfig, formatPrice, v
           <StatusIcon className="w-3 h-3 mr-1" /> {statusConfig[order.status].label}
         </span>
       </td>
-      <td>{order.orderDate.split('T')[0]}</td>
-      <td>{order.deliveryDate !== null ? order.deliveryDate.split('T')[0] : '-'}</td>
+      <td>{formatDate(order.orderDate)}</td> {/* Use formatDate */}
+      <td>{getTransferSlipStatusLabel(order.transferSlipImageUrl) ? <FiCheckCircle className='text-center m-auto text-xl text-green-700 '></FiCheckCircle> : ''}</td> {/* Display transfer slip status instead of deliveryDate */}
       <td>{order.trackingId || '-'}</td>
       <td>
         <div className="flex gap-1">
@@ -164,10 +203,11 @@ interface OrderCardProps {
   order: Order;
   statusConfig: StatusConfig;
   formatPrice: (price: number) => string;
-  viewOrderDetails: (order: Order) => void;
+  formatDate: (dateString: string | null) => string; // Pass formatDate
+  viewOrderDetails: (order: Order) => void; // Add viewOrderDetails to props
 }
 
-const OrderCard: React.FC<OrderCardProps> = ({ order, statusConfig, formatPrice, viewOrderDetails }) => {
+const OrderCard: React.FC<OrderCardProps> = ({ order, statusConfig, formatPrice, formatDate, viewOrderDetails }) => {
   const StatusIcon = statusConfig[order.status].icon;
 
   return (
@@ -184,7 +224,7 @@ const OrderCard: React.FC<OrderCardProps> = ({ order, statusConfig, formatPrice,
           </span>
         </p>
         <p className="text-sm">
-          <strong>วันที่สั่ง:</strong> {order.orderDate.split('T')[0]}
+          <strong>วันที่สั่ง:</strong> {formatDate(order.orderDate)} {/* Use formatDate */}
         </p>
         {order.trackingId && (
           <p className="text-sm">
@@ -217,6 +257,7 @@ export default function OrderManagement() {
   // Search & Filter States
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [statusFilter, setStatusFilter] = useState<OrderStatus | 'all'>('all');
+  const [transferSlipFilter, setTransferSlipFilter] = useState<TransferSlipStatusFilter>('all'); // New filter state
 
   // Modal & Form States
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
@@ -395,7 +436,7 @@ export default function OrderManagement() {
       const result = await response.json(); // Always parse response, even on error, for message
 
       if (!response.ok) {
-        throw new Error(result.message || response.statusText || 'Failed to delete order.');
+        throw new Error(result.message || response.statusText || 'API request failed.'); // Use generic error if statusText is empty
       }
 
       setMessage(result.message || 'Order deleted successfully!');
@@ -422,7 +463,7 @@ export default function OrderManagement() {
       shippingCarrier: order.shippingCarrier || '',
       deliveryDate: order.deliveryDate || '',
       status: order.status,
-      transferSlipImageUrl: order.transferSlipImageUrl || '',
+      transferSlipImageUrl: order.transferSlipImageUrl || '', // Initialize with current slip URL
       cancellationReason: order.cancellationReason || '',
     });
   };
@@ -437,6 +478,22 @@ export default function OrderManagement() {
       ...prev,
       [name]: value
     }));
+  };
+
+  // Function to toggle between view and edit mode, resetting form if exiting edit
+  const toggleEditMode = () => {
+    if (isEditing && selectedOrder) {
+      // If exiting edit mode, reset form data to current selectedOrder's values
+      setEditFormData({
+        trackingId: selectedOrder.trackingId || '',
+        shippingCarrier: selectedOrder.shippingCarrier || '',
+        deliveryDate: selectedOrder.deliveryDate || '',
+        status: selectedOrder.status,
+        transferSlipImageUrl: selectedOrder.transferSlipImageUrl || '',
+        cancellationReason: selectedOrder.cancellationReason || '',
+      });
+    }
+    setIsEditing(prev => !prev);
   };
 
   // --- Search & Filter Logic ---
@@ -455,9 +512,16 @@ export default function OrderManagement() {
       filtered = filtered.filter(order => order.status === statusFilter);
     }
 
+    // New filter for transfer slip status
+    if (transferSlipFilter === 'has_slip') {
+        filtered = filtered.filter(order => order.transferSlipImageUrl !== null && order.transferSlipImageUrl.trim() !== '');
+    } else if (transferSlipFilter === 'no_slip') {
+        filtered = filtered.filter(order => order.transferSlipImageUrl === null || order.transferSlipImageUrl.trim() === '');
+    }
+
     setFilteredOrders(filtered);
     setCurrentPage(1); // Reset to first page on filter/search change
-  }, [searchTerm, statusFilter, orders]);
+  }, [searchTerm, statusFilter, transferSlipFilter, orders]);
 
   // --- Pagination Logic ---
   useEffect(() => {
@@ -477,14 +541,6 @@ export default function OrderManagement() {
     setItemsPerPage(newItemsPerPage);
     setCurrentPage(1);
   };
-
-  // --- Helper Functions (Memoized for performance) ---
-  const formatPrice = useMemo(() => (price: number): string => {
-    return new Intl.NumberFormat('th-TH', {
-      style: 'currency',
-      currency: 'THB'
-    }).format(price);
-  }, []);
 
   // --- Order Statistics Calculation (Memoized for performance) ---
   interface OrderStats {
@@ -607,8 +663,8 @@ export default function OrderManagement() {
 
         {/* Filters Section */}
         <div className="bg-base-100 rounded-lg shadow-sm p-6 mb-6">
-          <div className="flex flex-col md:flex-row gap-4">
-            <div className="flex-1">
+          <div className="flex flex-col md:flex-row flex-wrap gap-4">
+            <div className="flex-1 min-w-[200px]">
               <div className="relative">
                 <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-base-content/50 w-4 h-4" />
                 <input
@@ -620,7 +676,7 @@ export default function OrderManagement() {
                 />
               </div>
             </div>
-            <div className="md:w-64">
+            <div className="w-full sm:w-auto flex-grow">
               <select
                 className="select select-bordered w-full"
                 value={statusFilter}
@@ -630,6 +686,18 @@ export default function OrderManagement() {
                 {Object.keys(statusConfig).map(statusKey => (
                     <option key={statusKey} value={statusKey}>{statusConfig[statusKey as OrderStatus].label}</option>
                 ))}
+              </select>
+            </div>
+            {/* New: Transfer Slip Status Filter */}
+            <div className="w-full sm:w-auto flex-grow">
+              <select
+                className="select select-bordered w-full"
+                value={transferSlipFilter}
+                onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setTransferSlipFilter(e.target.value as TransferSlipStatusFilter)}
+              >
+                <option value="all">สถานะสลิปโอนเงินทั้งหมด</option>
+                <option value="has_slip">แนบสลิปแล้ว</option> {/* Updated label */}
+                <option value="no_slip">ยังไม่แนบสลิป</option> {/* Updated label */}
               </select>
             </div>
             <div className="md:w-40">
@@ -680,7 +748,7 @@ export default function OrderManagement() {
                   <th>ยอดรวม</th>
                   <th>สถานะ</th>
                   <th>วันที่สั่ง</th>
-                  <th>วันส่ง</th>
+                  <th>สถานะสลิป</th> {/* Changed from วันส่ง to สถานะสลิป */}
                   <th>Tracking ID</th>
                   <th>จัดการ</th>
                 </tr>
@@ -692,6 +760,8 @@ export default function OrderManagement() {
                     order={order}
                     statusConfig={statusConfig}
                     formatPrice={formatPrice}
+                    formatDate={formatDate} // Pass formatDate
+                    getTransferSlipStatusLabel={getTransferSlipStatusLabel} // Pass getTransferSlipStatusLabel
                     viewOrderDetails={viewOrderDetails}
                     deleteOrder={deleteOrder}
                   />
@@ -713,7 +783,8 @@ export default function OrderManagement() {
                   order={order}
                   statusConfig={statusConfig}
                   formatPrice={formatPrice}
-                  viewOrderDetails={viewOrderDetails}
+                  formatDate={formatDate} // Pass formatDate
+                  viewOrderDetails={viewOrderDetails} // Pass viewOrderDetails
                 />
               ))}
             </div>
@@ -828,11 +899,12 @@ export default function OrderManagement() {
                 <div>
                   <h4 className="font-semibold mb-2">ข้อมูลลูกค้า</h4>
                   <div className="bg-base-200 rounded-lg p-4">
-                    <p><strong>User ID:</strong> {selectedOrder.userId}</p> {/* NEW: Display User ID */}
+                    <p><strong>User ID:</strong> {selectedOrder.userId}</p>
                     <p><strong>ชื่อ:</strong> {selectedOrder.customerName}</p>
                     <p><strong>อีเมล:</strong> {selectedOrder.email || '-'}</p>
                     <p><strong>เบอร์โทร:</strong> {selectedOrder.phone || '-'}</p>
-                    <p><strong>ที่อยู่:</strong> {selectedOrder.address}</p>
+                    <p><strong>ที่อยู่ (Snapshot):</strong> {selectedOrder.address}</p>
+                    <p><strong>Address ID:</strong> {selectedOrder.addressId}</p>
                   </div>
                 </div>
 
@@ -841,7 +913,7 @@ export default function OrderManagement() {
                   <h4 className="font-semibold mb-2">ข้อมูลคำสั่งซื้อ</h4>
                   <div className="bg-base-200 rounded-lg p-4">
                     <p><strong>รหัส:</strong> {selectedOrder.id}</p>
-                    <p><strong>วันที่สั่ง:</strong> {selectedOrder.orderDate.split('T')[0]}</p>
+                    <p><strong>วันที่สั่ง:</strong> {formatDate(selectedOrder.orderDate)}</p> {/* Use formatDate */}
 
                     {isEditing ? (
                       <>
@@ -853,7 +925,7 @@ export default function OrderManagement() {
                             type="date"
                             name="deliveryDate"
                             className="input input-bordered w-full"
-                            value={editFormData.deliveryDate.split('T')[0]}
+                            value={editFormData.deliveryDate} // Keep YYYY-MM-DD for HTML input
                             onChange={handleEditFormChange}
                           />
                         </div>
@@ -931,8 +1003,9 @@ export default function OrderManagement() {
                         )}
                       </>
                     ) : (
+                      // Display mode
                       <>
-                        <p><strong>วันที่ส่ง:</strong> {selectedOrder.deliveryDate !== null ? selectedOrder.deliveryDate.split('T')[0] : '-'}</p>
+                        <p><strong>วันที่ส่ง:</strong> {formatDate(selectedOrder.deliveryDate)}</p> {/* Use formatDate */}
                         <p>
                           <strong>Tracking ID:</strong>{' '}
                           {selectedOrder.trackingId ? selectedOrder.trackingId : 'ยังไม่มี'}
@@ -1018,7 +1091,7 @@ export default function OrderManagement() {
               <div className="modal-action flex-col sm:flex-row">
                 {isEditing ? (
                   <>
-                    <button className="btn btn-ghost w-full sm:w-auto" onClick={() => setIsEditing(false)}>
+                    <button className="btn btn-ghost w-full sm:w-auto" onClick={toggleEditMode}>
                       <FiX className="w-4 h-4" /> ยกเลิก
                     </button>
                     <button className="btn btn-primary w-full sm:w-auto" onClick={updateOrderDetails}>

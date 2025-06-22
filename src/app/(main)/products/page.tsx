@@ -19,7 +19,7 @@ import {
   FullCategoryPath
 } from '../../types';
 
-import ProductDisplayCard from '../components/ProductDisplayCard';
+import ProductDisplayCard from '../components/ProductDisplayCard'; // Import the ProductDisplayCard component
 
 // --- Mock Data for Products and Categories ---
 const mockCategories: Category[] = [
@@ -54,52 +54,52 @@ const mockProducts: ProductInventory[] = [
   {
     Product_ID: 1, Child_ID: 1001, Name: 'Samsung Galaxy S23', Brand: 'Samsung', Description: 'โทรศัพท์เรือธง Android ล่าสุด',
     Unit: 'ชิ้น', Quantity: 50, Sale_Cost: 25000, Sale_Price: 22500, Reorder_Point: 10, Visibility: true,
-    Review_Rating: 4.5, Image_URL: 'https://placehold.co/400x300/FFDAB9/000000?text=S23&format=png',
+    Review_Rating: 4.5, Image_URL: 'https://placehold.co/400x300/FFDAB9/000000?text=S23&format=png', Dimensions: '146.3 x 70.9 x 7.6 mm', Material: 'Glass, Aluminum',
   },
   {
     Product_ID: 2, Child_ID: 1003, Name: 'Acer Predator Helios 300', Brand: 'Acer', Description: 'แล็ปท็อปเกมมิ่งประสิทธิภาพสูง',
     Unit: 'ชิ้น', Quantity: 15, Sale_Cost: 42000, Sale_Price: 42000, Reorder_Point: 5, Visibility: true,
-    Review_Rating: 4, Image_URL: 'https://placehold.co/400x300/B0E0E6/000000?text=Helios300&format=png',
+    Review_Rating: 4, Image_URL: 'https://placehold.co/400x300/B0E0E6/000000?text=Helios300&format=png', Dimensions: '359 x 255 x 23.9 mm', Material: 'Plastic, Metal',
   },
   {
     Product_ID: 3, Child_ID: 3001, Name: 'Modern Fabric Sofa', Brand: 'IKEA', Description: 'โซฟา 3 ที่นั่งนั่งสบายสำหรับห้องนั่งเล่น',
     Unit: 'ชิ้น', Quantity: 5, Sale_Cost: 15000, Sale_Price: 12000, Reorder_Point: 2, Visibility: true,
-    Review_Rating: 3.8, Image_URL: 'https://placehold.co/400x300/D8BFD8/000000?text=โซฟา&format=png',
+    Review_Rating: 3.8, Image_URL: 'https://placehold.co/400x300/D8BFD8/000000?text=โซฟา&format=png', Dimensions: '200 x 90 x 80 cm', Material: 'Fabric, Wood',
   },
   {
     Product_ID: 4, Child_ID: 2001, Name: 'Philips Blender HR2118', Brand: 'Philips', Description: 'เครื่องปั่นทรงพลังสำหรับสมูทตี้และอื่นๆ',
     Unit: 'ชิ้น', Quantity: 30, Sale_Cost: 2500, Sale_Price: 2200, Reorder_Point: 10, Visibility: true,
-    Review_Rating: 4.2, Image_URL: 'https://placehold.co/400x300/FFD700/000000?text=เครื่องปั่น&format=png',
+    Review_Rating: 4.2, Image_URL: 'https://placehold.co/400x300/FFD700/000000?text=เครื่องปั่น&format=png', Dimensions: '18 x 18 x 40 cm', Material: 'Plastic, Stainless Steel',
   },
   {
     Product_ID: 5, Child_ID: 3004, Name: 'Wooden Wardrobe', Brand: 'HomePro', Description: 'ตู้เสื้อผ้าขนาดกว้างขวางพร้อมประตูบานเลื่อน',
     Unit: 'ชิ้น', Quantity: 7, Sale_Cost: 15000, Sale_Price: 15000, Reorder_Point: 3, Visibility: true,
-    Review_Rating: 5, Image_URL: 'https://placehold.co/400x300/A2DAA2/000000?text=ตู้เสื้อผ้า&format=png',
+    Review_Rating: 5, Image_URL: 'https://placehold.co/400x300/A2DAA2/000000?text=ตู้เสื้อผ้า&format=png', Dimensions: '120 x 60 x 200 cm', Material: 'Wood',
   },
   {
     Product_ID: 6, Child_ID: 1002, Name: 'iPhone 15 Pro Max', Brand: 'Apple', Description: 'สมาร์ทโฟนระดับสูงสุดของ Apple',
     Unit: 'ชิ้น', Quantity: 20, Sale_Cost: 45000, Sale_Price: 43000, Reorder_Point: 8, Visibility: true,
-    Review_Rating: 4.9, Image_URL: 'https://placehold.co/400x300/C0C0C0/000000?text=iPhone15&format=png',
+    Review_Rating: 4.9, Image_URL: 'https://placehold.co/400x300/C0C0C0/000000?text=iPhone15&format=png', Dimensions: '159.9 x 76.7 x 8.25 mm', Material: 'Titanium, Ceramic Shield',
   },
   {
     Product_ID: 7, Child_ID: 1004, Name: 'Dell XPS 15', Brand: 'Dell', Description: 'อัลตร้าบุ๊กพรีเมียมสำหรับมืออาชีพ',
     Unit: 'ชิ้น', Quantity: 10, Sale_Cost: 48000, Sale_Price: 48000, Reorder_Point: 4, Visibility: true,
-    Review_Rating: 4.7, Image_URL: 'https://placehold.co/400x300/F8F8FF/000000?text=DellXPS&format=png',
+    Review_Rating: 4.7, Image_URL: 'https://placehold.co/400x300/F8F8FF/000000?text=DellXPS&format=png', Dimensions: '344.72 x 230.14 x 18 mm', Material: 'Aluminum, Carbon Fiber',
   },
   {
     Product_ID: 8, Child_ID: 2002, Name: 'Panasonic Microwave NN-ST25JW', Brand: 'Panasonic', Description: 'เตาอบไมโครเวฟขนาดกะทัดรัดและมีประสิทธิภาพ',
     Unit: 'ชิ้น', Quantity: 25, Sale_Cost: 3000, Sale_Price: 2800, Reorder_Point: 7, Visibility: true,
-    Review_Rating: 4.1, Image_URL: 'https://placehold.co/400x300/E0FFFF/000000?text=ไมโครเวฟ&format=png',
+    Review_Rating: 4.1, Image_URL: 'https://placehold.co/400x300/E0FFFF/000000?text=ไมโครเวฟ&format=png', Dimensions: '443 x 330 x 258 mm', Material: 'Metal, Plastic',
   },
   {
     Product_ID: 9, Child_ID: 3002, Name: 'Glass Coffee Table', Brand: 'Chic Home', Description: 'การออกแบบที่ทันสมัยด้วยท็อปกระจกนิรภัย',
     Unit: 'ชิ้น', Quantity: 8, Sale_Cost: 5000, Sale_Price: 4500, Reorder_Point: 2, Visibility: true,
-    Review_Rating: 3.5, Image_URL: 'https://placehold.co/400x300/F5DEB3/000000?text=โต๊ะกาแฟ&format=png',
+    Review_Rating: 3.5, Image_URL: 'https://placehold.co/400x300/F5DEB3/000000?text=โต๊ะกาแฟ&format=png', Dimensions: '100 x 50 x 45 cm', Material: 'Glass, Metal',
   },
   {
     Product_ID: 10, Child_ID: 3003, Name: 'Queen Size Bed Frame', Brand: 'SleepWell', Description: 'โครงเตียงไม้แข็งแรงทนทาน',
     Unit: 'ชิ้น', Quantity: 6, Sale_Cost: 12000, Sale_Price: 10000, Reorder_Point: 2, Visibility: true,
-    Review_Rating: 4.0, Image_URL: 'https://placehold.co/400x300/FFC0CB/000000?text=โครงเตียง&format=png',
+    Review_Rating: 4.0, Image_URL: 'https://placehold.co/400x300/FFC0CB/000000?text=โครงเตียง&format=png', Dimensions: '203 x 152 x 30 cm', Material: 'Wood',
   },
 ];
 
@@ -141,6 +141,46 @@ export default function ProductsPage() {
 
   const [products] = useState<ProductInventory[]>(mockProducts);
   const [filteredProducts, setFilteredProducts] = useState<ProductInventory[]>(mockProducts);
+
+  // States for Add to Cart Modal
+  const [showAddToCartModal, setShowAddToCartModal] = useState<boolean>(false);
+  const [selectedProductForCart, setSelectedProductForCart] = useState<ProductInventory | null>(null);
+  const [quantityToAdd, setQuantityToAdd] = useState<number>(1);
+
+  // Function to handle "Add to Cart" button click from ProductDisplayCard
+  const handleAddToCartClick = (product: ProductInventory) => {
+    setSelectedProductForCart(product);
+    setQuantityToAdd(1); // Reset quantity to 1 when modal opens for a new product
+    setShowAddToCartModal(true);
+  };
+
+  // Function to handle quantity change in the modal
+  const handleQuantityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseInt(e.target.value, 10);
+    // Ensure quantity is at least 1 and not more than available stock
+    if (selectedProductForCart) {
+      setQuantityToAdd(Math.max(1, Math.min(value || 1, selectedProductForCart.Quantity)));
+    } else {
+      setQuantityToAdd(Math.max(1, value || 1));
+    }
+  };
+
+  // Function to confirm adding to cart (simulated for now)
+  const confirmAddToCart = () => {
+    if (selectedProductForCart) {
+      console.log(`Added ${quantityToAdd} of ${selectedProductForCart.Name} (ID: ${selectedProductForCart.Product_ID}) to cart.`);
+      // In a real application, you would send this to a cart API or update cart state
+      alert(`เพิ่ม ${selectedProductForCart.Name} จำนวน ${quantityToAdd} ชิ้นลงในรถเข็นแล้ว!`);
+    }
+    closeAddToCartModal();
+  };
+
+  // Function to close the Add to Cart modal
+  const closeAddToCartModal = () => {
+    setShowAddToCartModal(false);
+    setSelectedProductForCart(null);
+    setQuantityToAdd(1);
+  };
 
   // Filter products whenever URL search parameters change
   useEffect(() => {
@@ -381,6 +421,7 @@ export default function ProductsPage() {
                   key={product.Product_ID}
                   product={product}
                   formatPrice={formatPrice}
+                  onAddToCartClick={handleAddToCartClick} // Pass the handler down
                 />
               ))}
             </div>
@@ -392,6 +433,42 @@ export default function ProductsPage() {
           )}
         </main>
       </div>
+
+      {/* Add to Cart Modal */}
+      {showAddToCartModal && selectedProductForCart && (
+        <div className="modal modal-open">
+          <div className="modal-box w-11/12 max-w-lg">
+            <h3 className="font-bold text-lg mb-4">เพิ่มสินค้าลงรถเข็น: {selectedProductForCart.Name}</h3>
+            <p className="mb-2">ราคา: {formatPrice(selectedProductForCart.Sale_Price)}</p>
+            <p className="mb-4">จำนวนในสต็อก: {selectedProductForCart.Quantity} {selectedProductForCart.Unit}</p>
+
+            <div className="form-control">
+              <label className="label">
+                <span className="label-text">จำนวนที่ต้องการเพิ่ม</span>
+              </label>
+              <input
+                type="number"
+                min="1"
+                max={selectedProductForCart.Quantity}
+                value={quantityToAdd}
+                onChange={handleQuantityChange}
+                className="input input-bordered w-full"
+              />
+            </div>
+
+            <div className="modal-action">
+              <button className="btn btn-ghost" onClick={closeAddToCartModal}>ปิด</button>
+              <button
+                className="btn btn-primary"
+                onClick={confirmAddToCart}
+                disabled={quantityToAdd <= 0 || quantityToAdd > selectedProductForCart.Quantity}
+              >
+                เพิ่มลงรถเข็น
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
