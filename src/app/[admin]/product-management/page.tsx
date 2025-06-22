@@ -1,6 +1,6 @@
-'use client'; // Client Component for interactivity
+'use client'; // This component will run on the client side
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react'; // Added useMemo for optimization
 import {
   FiSearch,
   FiDownload,
@@ -17,25 +17,84 @@ import {
   FiEyeOff, // For hidden visibility
   FiX,
   FiSave,
-  FiAlertTriangle, // New: Icon for low stock
-  FiAlertCircle,   // New: Icon for out of stock
-  FiCheckCircle    // New: Icon for in stock (already there, but confirm usage)
+  FiAlertTriangle, // Icon for low stock
+  FiAlertCircle,   // Icon for out of stock
+  FiCheckCircle    // Icon for in stock
 } from 'react-icons/fi';
 
-import {
-  ProductInventory,
-  Category,
-  SubCategory,
-  ChildSubCategory,
-  ProductEditForm,
-  FullCategoryPath
-} from '../../../types';
+// --- Type Definitions (You can move these to a separate '../../../types.ts' file) ---
+interface ProductInventory {
+  Product_ID: number;
+  Child_ID: number | null;
+  Name: string;
+  Brand: string;
+  Description: string | null;
+  Unit: string;
+  Quantity: number;
+  Sale_Cost: number;
+  Sale_Price: number;
+  Reorder_Point: number;
+  Visibility: boolean;
+  Review_Rating: number | null;
+  Image_URL: string | null;
+  Dimensions: string | null; // NEW: Added Dimensions
+  Material: string | null;   // NEW: Added Material
+  // created_at?: string; // Add if your DB returns these, typically managed by DB
+  // updated_at?: string; // Add if your DB returns these, typically managed by DB
+}
 
-import ProductRow from './ProductRow';
-import ProductCard from './ProductCard';
+interface Category {
+  Category_ID: number;
+  Name: string;
+}
 
-// --- Mock Data for Products and Categories ---
-// In a real app, this would come from an API/database
+interface SubCategory {
+  Category_ID: number;
+  Sub_Category_ID: number;
+  Name: string;
+}
+
+interface ChildSubCategory {
+  Category_ID: number;
+  Sub_Category_ID: number;
+  Child_ID: number;
+  Name: string;
+}
+
+// Form state specifically for adding/editing a product
+interface ProductEditForm {
+  Product_ID: number | null; // Null for new products, ID for existing
+  Child_ID: number; // This will be the actual ID sent to DB
+  Name: string;
+  Brand: string;
+  Description: string;
+  Unit: string;
+  Quantity: number;
+  Sale_Cost: number;
+  Sale_Price: number;
+  Reorder_Point: number;
+  Visibility: boolean;
+  Review_Rating: number | null;
+  Image_URL: string;
+  Dimensions: string; // NEW: Added Dimensions (string for input, null if empty)
+  Material: string;   // NEW: Added Material (string for input, null if empty)
+  // These are for managing the dropdown selections in the form only
+  Selected_Category_ID: number | null;
+  Selected_Sub_Category_ID: number | null;
+  Selected_Child_ID: number | null;
+}
+
+interface FullCategoryPath {
+  Category_ID: number;
+  Category_Name: string;
+  Sub_Category_ID: number;
+  Sub_Category_Name: string;
+  Child_ID: number;
+  Child_Name: string;
+}
+
+// --- Mock Data for Categories (as they are usually static and often fetched once or hardcoded) ---
+// In a real application, you might fetch these from your API (e.g., /api/admin/categories)
 const mockCategories: Category[] = [
   { Category_ID: 1, Name: 'Electronics' },
   { Category_ID: 2, Name: 'Home Appliances' },
@@ -64,60 +123,7 @@ const mockChildSubCategories: ChildSubCategory[] = [
   { Category_ID: 3, Sub_Category_ID: 302, Child_ID: 3004, Name: 'Wardrobes' },
 ];
 
-const mockProducts: ProductInventory[] = [
-  {
-    Product_ID: 1, Child_ID: 1001, Name: 'Samsung Galaxy S23', Brand: 'Samsung', Description: 'Latest Android flagship phone',
-    Unit: 'Pcs', Quantity: 50, Sale_Cost: 20000, Sale_Price: 25000, Reorder_Point: 10, Visibility: true,
-    Review_Rating: 5, Image_URL: 'https://via.placeholder.com/150x150/FFDAB9/000000?text=S23',
-  },
-  {
-    Product_ID: 2, Child_ID: 1003, Name: 'Acer Predator Helios 300', Brand: 'Acer', Description: 'High-performance gaming laptop',
-    Unit: 'Pcs', Quantity: 15, Sale_Cost: 35000, Sale_Price: 42000, Reorder_Point: 5, Visibility: true, // Quantity (15) > Reorder_Point (5) -> In Stock
-    Review_Rating: 4, Image_URL: 'https://via.placeholder.com/150x150/B0E0E6/000000?text=Helios300',
-  },
-  {
-    Product_ID: 3, Child_ID: 3001, Name: 'Modern Fabric Sofa', Brand: 'IKEA', Description: 'Comfortable 3-seater sofa for living room',
-    Unit: 'Pcs', Quantity: 2, Sale_Cost: 8000, Sale_Price: 12000, Reorder_Point: 2, Visibility: true, // Quantity (2) <= Reorder_Point (2) -> Low Stock
-    Review_Rating: 4, Image_URL: 'https://via.placeholder.com/150x150/D8BFD8/000000?text=Sofa',
-  },
-  {
-    Product_ID: 4, Child_ID: 2001, Name: 'Philips Blender HR2118', Brand: 'Philips', Description: 'Powerful blender for smoothies and more',
-    Unit: 'Pcs', Quantity: 0, Sale_Cost: 1500, Sale_Price: 2200, Reorder_Point: 10, Visibility: false, // Quantity (0) -> Out of Stock
-    Review_Rating: 3, Image_URL: 'https://via.placeholder.com/150x150/FFD700/000000?text=Blender',
-  },
-  {
-    Product_ID: 5, Child_ID: 3004, Name: 'Wooden Wardrobe', Brand: 'HomePro', Description: 'Spacious wardrobe with sliding doors',
-    Unit: 'Pcs', Quantity: 7, Sale_Cost: 9000, Sale_Price: 15000, Reorder_Point: 3, Visibility: true,
-    Review_Rating: 5, Image_URL: 'https://via.placeholder.com/150x150/A2DAA2/000000?text=Wardrobe',
-  },
-  {
-    Product_ID: 6, Child_ID: 1002, Name: 'iPhone 15 Pro Max', Brand: 'Apple', Description: 'Apple\'s top-tier smartphone',
-    Unit: 'Pcs', Quantity: 8, Sale_Cost: 38000, Sale_Price: 45000, Reorder_Point: 8, Visibility: true, // Quantity (8) <= Reorder_Point (8) -> Low Stock
-    Review_Rating: 5, Image_URL: 'https://via.placeholder.com/150x150/C0C0C0/000000?text=iPhone15',
-  },
-  {
-    Product_ID: 7, Child_ID: 1004, Name: 'Dell XPS 15', Brand: 'Dell', Description: 'Premium ultrabook for professionals',
-    Unit: 'Pcs', Quantity: 10, Sale_Cost: 40000, Sale_Price: 48000, Reorder_Point: 4, Visibility: true,
-    Review_Rating: 4, Image_URL: 'https://placehold.co/150x150/F8F8FF/000000?text=DellXPS',
-  },
-  {
-    Product_ID: 8, Child_ID: 2002, Name: 'Panasonic Microwave NN-ST25JW', Brand: 'Panasonic', Description: 'Compact and efficient microwave oven',
-    Unit: 'Pcs', Quantity: 0, Sale_Cost: 2000, Sale_Price: 2800, Reorder_Point: 7, Visibility: true, // Quantity (0) -> Out of Stock
-    Review_Rating: 4, Image_URL: 'https://placehold.co/150x150/E0FFFF/000000?text=Microwave',
-  },
-  {
-    Product_ID: 9, Child_ID: 3002, Name: 'Glass Coffee Table', Brand: 'Chic Home', Description: 'Sleek design with tempered glass top',
-    Unit: 'Pcs', Quantity: 8, Sale_Cost: 3000, Sale_Price: 4500, Reorder_Point: 2, Visibility: true,
-    Review_Rating: 3, Image_URL: 'https://placehold.co/150x150/F5DEB3/000000?text=CoffeeTable',
-  },
-  {
-    Product_ID: 10, Child_ID: 3003, Name: 'Queen Size Bed Frame', Brand: 'SleepWell', Description: 'Sturdy wooden bed frame',
-    Unit: 'Pcs', Quantity: 6, Sale_Cost: 7000, Sale_Price: 10000, Reorder_Point: 2, Visibility: true,
-    Review_Rating: 4, Image_URL: 'https://placehold.co/150x150/FFC0CB/000000?text=BedFrame',
-  },
-];
-
-// Combine all category data into a single, easy-to-lookup map
+// Combine all category data into a single, easy-to-lookup map for full path names
 const allCategoriesMap: Map<number, FullCategoryPath> = new Map();
 mockCategories.forEach(cat => {
   mockSubCategories.filter(sub => sub.Category_ID === cat.Category_ID).forEach(sub => {
@@ -134,7 +140,7 @@ mockCategories.forEach(cat => {
   });
 });
 
-// --- Helper to get Product Stock Status ---
+// --- Helper for Product Stock Status ---
 type StockStatus = 'in_stock' | 'low_stock' | 'out_of_stock';
 
 const getProductStockStatus = (product: ProductInventory): StockStatus => {
@@ -147,23 +153,207 @@ const getProductStockStatus = (product: ProductInventory): StockStatus => {
   return 'in_stock';
 };
 
+// --- ProductRow Component (for Desktop Table View) ---
+interface ProductRowProps {
+  product: ProductInventory;
+  formatPrice: (price: number) => string;
+  getFullCategoryName: (childId: number | null) => string;
+  openProductModal: (product: ProductInventory, initialMode: 'view' | 'edit') => void;
+  deleteProduct: (productId: number) => void;
+  getProductStockStatus: (product: ProductInventory) => StockStatus;
+}
+
+const ProductRow: React.FC<ProductRowProps> = ({
+  product,
+  formatPrice,
+  getFullCategoryName,
+  openProductModal,
+  deleteProduct,
+  getProductStockStatus,
+}) => {
+  const stockStatus = getProductStockStatus(product);
+  const isOutOfStock = stockStatus === 'out_of_stock';
+  const isLowStock = stockStatus === 'low_stock';
+
+  return (
+    <tr className="hover cursor-pointer" onClick={() => openProductModal(product, 'view')}>
+      <td><div className="font-bold text-primary">{product.Product_ID}</div></td>
+      {/* Image */}
+      <td>
+        <div className="avatar">
+          <div className="mask mask-squircle w-12 h-12">
+            <img
+              src={product.Image_URL || 'https://placehold.co/48x48/EEEEEE/333333?text=No+Image'}
+              alt={product.Name}
+              onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = 'https://placehold.co/48x48/CCCCCC/666666?text=Error'; }}
+            />
+          </div>
+        </div>
+      </td>
+      <td><div className="font-bold">{product.Name}</div></td>
+      <td>{product.Brand}</td>
+      <td>{getFullCategoryName(product.Child_ID)}</td>
+      {/* Quantity with Status Badges */}
+      <td>
+        <div className="flex items-center">
+          {product.Quantity} {product.Unit}
+        </div>
+        {isOutOfStock && <span className="badge badge-error badge-xs ml-1">หมด</span>}
+        {isLowStock && !isOutOfStock && <span className="badge badge-warning badge-xs ml-1">ใกล้หมด</span>}
+      </td>
+      {/* Sale Price */}
+      <td><div className="font-bold">{formatPrice(product.Sale_Price)}</div></td>
+      {/* Visibility Status */}
+      <td>
+        {product.Visibility ? (
+          <span className="badge badge-success">แสดงผล</span>
+        ) : (
+          <span className="badge badge-neutral">ซ่อน</span>
+        )}
+      </td>
+      {/* Actions */}
+      <td>
+        <div className="flex gap-1">
+          <button
+            className="btn btn-sm btn-ghost btn-square"
+            onClick={(e) => {
+              e.stopPropagation(); // Prevent row click from also triggering
+              openProductModal(product, 'view'); // Open in view mode
+            }}
+            title="ดูรายละเอียด"
+          >
+            <FiEye className="w-4 h-4" />
+          </button>
+          <button
+            className="btn btn-sm btn-ghost btn-square text-error"
+            onClick={(e) => {
+              e.stopPropagation(); // Prevent row click from also triggering
+              deleteProduct(product.Product_ID);
+            }}
+            title="ลบ"
+          >
+            <FiTrash2 className="w-4 h-4" />
+          </button>
+        </div>
+      </td>
+    </tr>
+  );
+};
+
+// --- ProductCard Component (for Mobile Grid View) ---
+interface ProductCardProps {
+  product: ProductInventory;
+  formatPrice: (price: number) => string;
+  getFullCategoryName: (childId: number | null) => string;
+  openProductModal: (product: ProductInventory, initialMode: 'view' | 'edit') => void;
+  getProductStockStatus: (product: ProductInventory) => StockStatus;
+}
+
+const ProductCard: React.FC<ProductCardProps> = ({
+  product,
+  formatPrice,
+  getFullCategoryName,
+  openProductModal,
+  getProductStockStatus,
+}) => {
+  const stockStatus = getProductStockStatus(product);
+  const isOutOfStock = stockStatus === 'out_of_stock';
+  const isLowStock = stockStatus === 'low_stock';
+
+  return (
+    // Make the entire card clickable to open the modal in view mode
+    <div className="card bg-base-200 shadow-sm cursor-pointer" onClick={() => openProductModal(product, 'view')}>
+      <div className="card-body p-4">
+        <div className="flex items-start gap-4 mb-3">
+          {/* Product Image */}
+          <div className="avatar">
+            <div className="mask mask-squircle w-16 h-16">
+              <img
+                src={product.Image_URL || 'https://placehold.co/64x64/EEEEEE/333333?text=No+Image'}
+                alt={product.Name}
+                onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = 'https://placehold.co/64x64/CCCCCC/666666?text=Error'; }}
+              />
+            </div>
+          </div>
+          {/* Product Info */}
+          <div className="flex-1">
+            <h2 className="card-title text-base">{product.Name}</h2>
+            <p className="text-sm text-base-content/70 flex items-center gap-1">
+              <FiTag className="w-3 h-3" />
+              {product.Brand}
+            </p>
+            <p className="text-xs text-base-content/60 mt-1">
+              {getFullCategoryName(product.Child_ID)}
+            </p>
+          </div>
+        </div>
+
+        <p className="text-sm mb-1 flex items-center gap-1">
+          <FiBox className="w-3 h-3" />
+          <strong>จำนวน:</strong>{' '}
+          <span className={`font-bold ${isOutOfStock ? 'text-error' : isLowStock ? 'text-warning' : ''}`}>
+            {product.Quantity} {product.Unit}
+          </span>
+          {isOutOfStock && <span className="badge badge-error badge-xs ml-1">หมด</span>}
+          {isLowStock && !isOutOfStock && <span className="badge badge-warning badge-xs ml-1">ใกล้หมด</span>}
+        </p>
+        <p className="text-sm mb-3 flex items-center gap-1">
+          <FiDollarSign className="w-3 h-3" />
+          <strong>ราคาขาย:</strong> {formatPrice(product.Sale_Price)}
+        </p>
+
+        {/* Visibility Status */}
+        <p className="text-sm">
+          <strong>สถานะ:</strong>{' '}
+          {product.Visibility ? (
+            <span className="badge badge-success badge-sm ml-1">แสดงผล</span>
+          ) : (
+            <span className="badge badge-neutral badge-sm ml-1">ซ่อน</span>
+          )}
+        </p>
+
+        <div className="card-actions justify-end mt-4">
+          <button
+            className="btn btn-sm btn-outline"
+            onClick={(e) => {
+              e.stopPropagation(); // Prevent card click from also triggering
+              openProductModal(product, 'view'); // Open in view mode
+            }}
+          >
+            <FiEye className="w-4 h-4" /> ดู
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+
 // --- Main Product Management Component ---
 export default function ProductManagement() {
-  const [products, setProducts] = useState<ProductInventory[]>(mockProducts);
-  const [filteredProducts, setFilteredProducts] = useState<ProductInventory[]>(mockProducts);
+  // --- States ---
+  const [products, setProducts] = useState<ProductInventory[]>([]); // All products fetched from API
+  const [filteredProducts, setFilteredProducts] = useState<ProductInventory[]>([]); // Products after applying filters/search
+  
+  // Search & Filter States
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [brandFilter, setBrandFilter] = useState<string>('all');
   const [categoryFilter, setCategoryFilter] = useState<number | 'all'>('all');
   const [subCategoryFilter, setSubCategoryFilter] = useState<number | 'all'>('all');
   const [childCategoryFilter, setChildCategoryFilter] = useState<number | 'all'>('all');
   const [visibilityFilter, setVisibilityFilter] = useState<boolean | 'all'>('all');
-  const [stockStatusFilter, setStockStatusFilter] = useState<StockStatus | 'all'>('all'); // New: Stock status filter
+  const [stockStatusFilter, setStockStatusFilter] = useState<StockStatus | 'all'>('all');
 
-  const [selectedProduct, setSelectedProduct] = useState<ProductInventory | null>(null);
-  const [showProductModal, setShowProductModal] = useState<boolean>(false);
-  const [isEditing, setIsEditing] = useState<boolean>(false); // True for edit mode, false for add new or view
+  // Modal & Form States
+  const [selectedProduct, setSelectedProduct] = useState<ProductInventory | null>(null); // Product currently selected for view/edit in modal
+  const [showProductModal, setShowProductModal] = useState<boolean>(false); // Controls modal visibility
+  const [isEditing, setIsEditing] = useState<boolean>(false); // True if modal is in edit mode, false for view/add
 
-  const [editFormData, setEditFormData] = useState<ProductEditForm>({
+  // This state is used to track the Product_ID when an existing product is being edited
+  // It helps differentiate between adding a new product and updating an existing one in saveProductDetails
+  const [editingProductId, setEditingProductId] = useState<number | null>(null); 
+
+  const initialFormState: ProductEditForm = useMemo(() => ({
     Product_ID: null,
     Child_ID: mockChildSubCategories[0]?.Child_ID || 0, // Default to first child category
     Name: '',
@@ -177,18 +367,371 @@ export default function ProductManagement() {
     Visibility: true,
     Review_Rating: null,
     Image_URL: '',
+    Dimensions: '', // NEW: Default for new product
+    Material: '',   // NEW: Default for new product
     Selected_Category_ID: null,
     Selected_Sub_Category_ID: null,
     Selected_Child_ID: null,
-  });
+  }), []);
 
-  // Pagination states
+  const [editFormData, setEditFormData] = useState<ProductEditForm>(initialFormState);
+
+  // Pagination States
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [itemsPerPage, setItemsPerPage] = useState<number>(10);
   const [paginatedProducts, setPaginatedProducts] = useState<ProductInventory[]>([]);
   const [totalPages, setTotalPages] = useState<number>(1);
 
-  // --- Filter Logic ---
+  // API Loading, Error, and Message Display States
+  const [loading, setLoading] = useState<boolean>(true); // Initial loading state for fetching products
+  const [error, setError] = useState<string | null>(null); // For general page errors (e.g., failed initial fetch)
+  const [message, setMessage] = useState<string | null>(null); // For success/error messages from API actions (add/update/delete)
+  const [messageType, setMessageType] = useState<'success' | 'error' | null>(null); // Type of message
+
+  // --- API Interaction Functions ---
+
+  // Function to fetch all products from the backend API
+  const fetchProducts = async () => {
+    setLoading(true); // Set loading true before fetch
+    setError(null);    // Clear any previous error
+    try {
+      const response = await fetch('/api/admin/products'); // Your API endpoint
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to fetch products.');
+      }
+      const data = await response.json();
+      setProducts(data.products || []); // Update products state with fetched data
+    } catch (err: any) {
+      console.error('Error fetching products:', err);
+      setError(err.message || 'An error occurred while fetching products.'); // Set error state
+    } finally {
+      setLoading(false); // Set loading false after fetch completes
+    }
+  };
+
+  // Function to save product details (add new or update existing)
+  const saveProductDetails = async () => {
+    setMessage(null); // Clear previous messages
+    setMessageType(null);
+
+    // Basic client-side validation
+    // Ensure all required fields from schema are present and valid
+    if (!editFormData.Name || !editFormData.Brand || !editFormData.Unit || 
+        editFormData.Child_ID === null || editFormData.Sale_Cost === null || 
+        editFormData.Sale_Price === null || editFormData.Reorder_Point === null || 
+        editFormData.Quantity === null || editFormData.Sale_Price <= 0) {
+      
+      // In a real app, replace alert with a custom modal/notification system
+      alert('กรุณากรอกข้อมูลสินค้า (ชื่อ, แบรนด์, หน่วย, ราคาขาย, ต้นทุน, ราคาขาย, จุดสั่งซื้อซ้ำ, จำนวน) และเลือกหมวดหมู่ย่อยให้ครบถ้วน. ราคาขายต้องมากกว่า 0.'); 
+      setMessage('Validation Error: Required fields are missing or invalid.');
+      setMessageType('error');
+      return;
+    }
+
+    // Prepare payload for API, ensuring nullable fields are explicitly null if empty string
+    const productPayload: Omit<ProductInventory, 'Product_ID'> & { Product_ID?: number | null } = {
+        Child_ID: editFormData.Child_ID,
+        Name: editFormData.Name,
+        Brand: editFormData.Brand === '' ? null : editFormData.Brand, // Brand can be null in schema
+        Description: editFormData.Description === '' ? null : editFormData.Description,
+        Unit: editFormData.Unit,
+        Quantity: editFormData.Quantity,
+        Sale_Cost: editFormData.Sale_Cost,
+        Sale_Price: editFormData.Sale_Price,
+        Reorder_Point: editFormData.Reorder_Point,
+        Visibility: editFormData.Visibility,
+        Review_Rating: editFormData.Review_Rating,
+        Image_URL: editFormData.Image_URL === '' ? null : editFormData.Image_URL,
+        Dimensions: editFormData.Dimensions === '' ? null : editFormData.Dimensions, // NEW: Include Dimensions
+        Material: editFormData.Material === '' ? null : editFormData.Material,       // NEW: Include Material
+    };
+
+    let apiResponse;
+    try {
+        if (isEditing && editFormData.Product_ID !== null) {
+            // Update existing product (PATCH request)
+            apiResponse = await fetch('/api/admin/products', {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ...productPayload, Product_ID: editFormData.Product_ID }), // Include ID for update
+            });
+        } else {
+            // Add new product (POST request)
+            apiResponse = await fetch('/api/admin/products', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(productPayload),
+            });
+        }
+
+        const result = await apiResponse.json();
+
+        if (!apiResponse.ok) {
+            // Handle API errors (e.g., 400 Bad Request, 409 Conflict, 500 Internal Server Error)
+            throw new Error(result.message || apiResponse.statusText || 'API request failed.');
+        }
+
+        setMessage(result.message || (isEditing ? 'Product updated successfully!' : 'Product added successfully!'));
+        setMessageType('success');
+        
+        // Reset form to initial state, clear editing status, close modal, and refresh product list
+        setEditFormData(initialFormState);
+        setEditingProductId(null); // Clear editing state
+        setShowProductModal(false);
+        fetchProducts(); // Re-fetch all products to get the latest data including new IDs
+
+    } catch (err: any) {
+        console.error('Error submitting product details:', err);
+        setMessage(err.message || 'An error occurred during product submission.');
+        setMessageType('error');
+    }
+  };
+
+  // Function to delete a product by its ID
+  const handleDelete = async (productId: number) => {
+    // In a real app, replace confirm with a custom modal for better UX
+    if (!confirm(`คุณแน่ใจหรือไม่ที่จะลบสินค้า Product ID: ${productId}?`)) { 
+      return;
+    }
+
+    setMessage(null);
+    setMessageType(null);
+    try {
+        const response = await fetch(`/api/admin/products?id=${productId}`, {
+            method: 'DELETE',
+        });
+
+        const result = await response.json(); // Always parse response, even on error, for message
+
+        if (!response.ok) {
+            throw new Error(result.message || response.statusText || 'API request failed.');
+        }
+
+        setMessage(result.message || 'Product deleted successfully!');
+        setMessageType('success');
+        setShowProductModal(false); // Close modal if the deleted product was being viewed
+        fetchProducts(); // Re-fetch products after deletion
+
+    } catch (err: any) {
+        console.error('Error deleting product:', err);
+        setMessage(err.message || 'An error occurred during deletion.');
+        setMessageType('error');
+    }
+  };
+
+
+  // --- UI Interaction Functions ---
+
+  // Function to open the product modal in view or edit mode
+  const openProductModal = (product: ProductInventory | null, initialMode: 'view' | 'edit') => {
+    if (product) {
+      setSelectedProduct(product); // Set the product being viewed/edited
+      const fullCat = allCategoriesMap.get(product.Child_ID);
+      // Populate form data based on selected product for editing
+      setEditFormData({
+        Product_ID: product.Product_ID,
+        Child_ID: product.Child_ID,
+        Name: product.Name,
+        Brand: product.Brand,
+        Description: product.Description || '', // Convert null to empty string for form inputs
+        Unit: product.Unit,
+        Quantity: product.Quantity,
+        Sale_Cost: product.Sale_Cost,
+        Sale_Price: product.Sale_Price,
+        Reorder_Point: product.Reorder_Point,
+        Visibility: product.Visibility,
+        Review_Rating: product.Review_Rating,
+        Image_URL: product.Image_URL || '', // Convert null to empty string for form inputs
+        Dimensions: product.Dimensions || '', // NEW: Populate Dimensions
+        Material: product.Material || '',     // NEW: Populate Material
+        Selected_Category_ID: fullCat?.Category_ID || null,
+        Selected_Sub_Category_ID: fullCat?.Sub_Category_ID || null,
+        Selected_Child_ID: fullCat?.Child_ID || null,
+      });
+    } else {
+      // For adding new product, reset form to initial state and clear selected product
+      setEditFormData(initialFormState);
+      setSelectedProduct(null);
+    }
+    setIsEditing(initialMode === 'edit'); // Set modal mode
+    setEditingProductId(product?.Product_ID || null); // Set editing product ID
+    setShowProductModal(true); // Show the modal
+  };
+
+  // Toggles between VIEW and EDIT mode within the modal
+  const toggleEditMode = () => {
+    // If currently in view mode and switching to edit, populate form from selectedProduct
+    if (!isEditing && selectedProduct) {
+      const fullCat = allCategoriesMap.get(selectedProduct.Child_ID);
+      setEditFormData({
+        Product_ID: selectedProduct.Product_ID,
+        Child_ID: selectedProduct.Child_ID,
+        Name: selectedProduct.Name,
+        Brand: selectedProduct.Brand,
+        Description: selectedProduct.Description || '',
+        Unit: selectedProduct.Unit,
+        Quantity: selectedProduct.Quantity,
+        Sale_Cost: selectedProduct.Sale_Cost,
+        Sale_Price: selectedProduct.Sale_Price,
+        Reorder_Point: selectedProduct.Reorder_Point,
+        Visibility: selectedProduct.Visibility,
+        Review_Rating: selectedProduct.Review_Rating,
+        Image_URL: selectedProduct.Image_URL || '',
+        Dimensions: selectedProduct.Dimensions || '', // NEW: Populate Dimensions
+        Material: selectedProduct.Material || '',     // NEW: Populate Material
+        Selected_Category_ID: fullCat?.Category_ID || null,
+        Selected_Sub_Category_ID: fullCat?.Sub_Category_ID || null,
+        Selected_Child_ID: fullCat?.Child_ID || null,
+      });
+    }
+    // If currently in edit mode and canceling back to view, reset editFormData to original selectedProduct values
+    if (isEditing && selectedProduct) {
+      const fullCat = allCategoriesMap.get(selectedProduct.Child_ID);
+      setEditFormData({
+        Product_ID: selectedProduct.Product_ID,
+        Child_ID: selectedProduct.Child_ID,
+        Name: selectedProduct.Name,
+        Brand: selectedProduct.Brand,
+        Description: selectedProduct.Description || '',
+        Unit: selectedProduct.Unit,
+        Quantity: selectedProduct.Quantity,
+        Sale_Cost: selectedProduct.Sale_Cost,
+        Sale_Price: selectedProduct.Sale_Price,
+        Reorder_Point: selectedProduct.Reorder_Point,
+        Visibility: selectedProduct.Visibility,
+        Review_Rating: selectedProduct.Review_Rating,
+        Image_URL: selectedProduct.Image_URL || '',
+        Dimensions: selectedProduct.Dimensions || '', // NEW: Populate Dimensions
+        Material: selectedProduct.Material || '',     // NEW: Populate Material
+        Selected_Category_ID: fullCat?.Category_ID || null,
+        Selected_Sub_Category_ID: fullCat?.Sub_Category_ID || null,
+        Selected_Child_ID: fullCat?.Child_ID || null,
+      });
+    }
+    setIsEditing(prev => !prev);
+    setMessage(null); // Clear messages when toggling mode
+    setMessageType(null);
+  };
+
+  // Handles click on "Add New Product" button, opens modal directly in edit mode for new product
+  const handleAddProductClick = () => {
+    openProductModal(null, 'edit');
+  };
+
+  // --- Form Change Handler ---
+  const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+    const { name, value, type, checked } = e.target;
+
+    setEditFormData(prev => {
+      const newState = { ...prev };
+
+      if (type === 'checkbox') {
+        newState[name as keyof ProductEditForm] = checked as any;
+      } else if (['Quantity', 'Sale_Cost', 'Sale_Price', 'Reorder_Point', 'Review_Rating', 'Selected_Category_ID', 'Selected_Sub_Category_ID', 'Selected_Child_ID'].includes(name)) {
+        // For numeric inputs, convert to Number. If empty string, treat as null.
+        newState[name as keyof ProductEditForm] = value === '' ? null : Number(value) as any;
+      } else {
+        newState[name as keyof ProductEditForm] = value as any;
+      }
+
+      // Logic for updating category dropdowns and syncing Child_ID for payload
+      if (name === 'Selected_Category_ID') {
+        const categoryId = Number(value);
+        const firstSubCatInNewCategory = mockSubCategories.find(sub => sub.Category_ID === categoryId);
+        const firstChildCatInNewSubCat = firstSubCatInNewCategory ? mockChildSubCategories.find(child => child.Sub_Category_ID === firstSubCatInNewCategory.Sub_Category_ID) : null;
+        newState.Selected_Category_ID = categoryId;
+        newState.Selected_Sub_Category_ID = firstSubCatInNewCategory?.Sub_Category_ID || null;
+        newState.Selected_Child_ID = firstChildCatInNewSubCat?.Child_ID || null;
+        newState.Child_ID = firstChildCatInNewSubCat?.Child_ID || 0; // Update actual Child_ID for payload
+      } else if (name === 'Selected_Sub_Category_ID') {
+        const subCategoryId = Number(value);
+        const firstChildCatInNewSubCat = mockChildSubCategories.find(child => child.Sub_Category_ID === subCategoryId);
+        newState.Selected_Sub_Category_ID = subCategoryId;
+        newState.Selected_Child_ID = firstChildCatInNewSubCat?.Child_ID || null;
+        newState.Child_ID = firstChildCatInNewSubCat?.Child_ID || 0; // Update actual Child_ID for payload
+      } else if (name === 'Selected_Child_ID') {
+        const childId = Number(value);
+        newState.Selected_Child_ID = childId;
+        newState.Child_ID = childId; // Update actual Child_ID for payload
+      }
+      return newState;
+    });
+  };
+
+  // --- Pagination Handlers ---
+  const handlePageChange = (page: number) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+    }
+  };
+
+  const handleItemsPerPageChange = (newItemsPerPage: number) => {
+    setItemsPerPage(newItemsPerPage);
+    setCurrentPage(1); // Reset to first page when items per page changes
+  };
+
+  // --- Helper Functions (Memoized for performance) ---
+  const formatPrice = useMemo(() => (price: number): string => {
+    return new Intl.NumberFormat('th-TH', {
+      style: 'currency',
+      currency: 'THB'
+    }).format(price);
+  }, []);
+
+  const getFullCategoryName = useMemo(() => (childId: number | null): string => {
+    if (childId === null) return 'N/A';
+    const categoryPath = allCategoriesMap.get(childId);
+    if (!categoryPath) return 'Uncategorized';
+    return `${categoryPath.Category_Name} > ${categoryPath.Sub_Category_Name} > ${categoryPath.Child_Name}`;
+  }, []);
+
+  // --- Product Statistics Calculation (Memoized for performance) ---
+  interface ProductStats {
+    total: number;
+    inStock: number;
+    lowStock: number;
+    outOfStock: number;
+    visible: number;
+    hidden: number;
+  }
+
+  const getProductStats = useMemo((): ProductStats => {
+    const stats: ProductStats = {
+      total: products.length,
+      inStock: products.filter(p => getProductStockStatus(p) === 'in_stock').length,
+      lowStock: products.filter(p => getProductStockStatus(p) === 'low_stock').length,
+      outOfStock: products.filter(p => getProductStockStatus(p) === 'out_of_stock').length,
+      visible: products.filter(p => p.Visibility).length,
+      hidden: products.filter(p => !p.Visibility).length,
+    };
+    return stats;
+  }, [products]); // Recalculate if products change
+
+  const stats: ProductStats = getProductStats; // Use the memoized value
+
+  // Get unique brands for filter dropdown (Memoized)
+  const uniqueBrands = useMemo(() => ['all', ...Array.from(new Set(products.map(p => p.Brand)))], [products]);
+
+  // Get filtered sub-categories based on selected main category (Memoized)
+  const filteredSubCategories = useMemo(() => 
+    editFormData.Selected_Category_ID
+      ? mockSubCategories.filter(sub => sub.Category_ID === editFormData.Selected_Category_ID)
+      : [], 
+    [editFormData.Selected_Category_ID]
+  );
+
+  // Get filtered child sub-categories based on selected sub-category (Memoized)
+  const filteredChildSubCategories = useMemo(() => 
+    editFormData.Selected_Sub_Category_ID
+      ? mockChildSubCategories.filter(child => child.Sub_Category_ID === editFormData.Selected_Sub_Category_ID)
+      : [], 
+    [editFormData.Selected_Sub_Category_ID]
+  );
+
+  // --- useEffect Hooks ---
+
+  // Effect for applying filters and search, and resetting pagination
   useEffect(() => {
     let filtered: ProductInventory[] = products;
 
@@ -231,17 +774,16 @@ export default function ProductManagement() {
       filtered = filtered.filter(product => product.Visibility === visibilityFilter);
     }
 
-    // New: Filter by Stock Status
+    // Filter by Stock Status
     if (stockStatusFilter !== 'all') {
       filtered = filtered.filter(product => getProductStockStatus(product) === stockStatusFilter);
     }
 
-
     setFilteredProducts(filtered);
-    setCurrentPage(1); // Reset to first page on filter change
-  }, [searchTerm, brandFilter, categoryFilter, subCategoryFilter, childCategoryFilter, visibilityFilter, stockStatusFilter, products]); // Add stockStatusFilter to dependencies
+    setCurrentPage(1); // Reset to first page on filter/search change
+  }, [searchTerm, brandFilter, categoryFilter, subCategoryFilter, childCategoryFilter, visibilityFilter, stockStatusFilter, products]);
 
-  // --- Pagination Logic ---
+  // Effect for pagination logic
   useEffect(() => {
     const startIndex: number = (currentPage - 1) * itemsPerPage;
     const endIndex: number = startIndex + itemsPerPage;
@@ -251,254 +793,12 @@ export default function ProductManagement() {
     setTotalPages(Math.ceil(filteredProducts.length / itemsPerPage));
   }, [filteredProducts, currentPage, itemsPerPage]);
 
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page);
-  };
+  // Initial data fetch on component mount
+  useEffect(() => {
+    fetchProducts();
+  }, []); // Empty dependency array means this runs once on mount
 
-  const handleItemsPerPageChange = (newItemsPerPage: number) => {
-    setItemsPerPage(newItemsPerPage);
-    setCurrentPage(1);
-  };
-
-  // --- Product Actions ---
-
-  // Function to open modal in a specific mode (view or edit)
-  const openProductModal = (product: ProductInventory | null, initialMode: 'view' | 'edit') => {
-    if (product) {
-      // Set selected product and populate form data for editing
-      setSelectedProduct(product);
-      const fullCat = allCategoriesMap.get(product.Child_ID);
-      setEditFormData({
-        Product_ID: product.Product_ID,
-        Child_ID: product.Child_ID,
-        Name: product.Name,
-        Brand: product.Brand,
-        Description: product.Description || '',
-        Unit: product.Unit,
-        Quantity: product.Quantity,
-        Sale_Cost: product.Sale_Cost,
-        Sale_Price: product.Sale_Price,
-        Reorder_Point: product.Reorder_Point,
-        Visibility: product.Visibility,
-        Review_Rating: product.Review_Rating,
-        Image_URL: product.Image_URL || '',
-        Selected_Category_ID: fullCat?.Category_ID || null,
-        Selected_Sub_Category_ID: fullCat?.Sub_Category_ID || null,
-        Selected_Child_ID: fullCat?.Child_ID || null,
-      });
-    } else {
-      // For adding new product, reset form and clear selected product
-      setEditFormData({
-        Product_ID: null,
-        Child_ID: mockChildSubCategories[0]?.Child_ID || 0,
-        Name: '',
-        Brand: '',
-        Description: '',
-        Unit: 'Pcs',
-        Quantity: 0,
-        Sale_Cost: 0,
-        Sale_Price: 0,
-        Reorder_Point: 0,
-        Visibility: true,
-        Review_Rating: null,
-        Image_URL: '',
-        Selected_Category_ID: mockCategories[0]?.Category_ID || null,
-        Selected_Sub_Category_ID: mockSubCategories.find(sub => sub.Category_ID === mockCategories[0]?.Category_ID)?.Sub_Category_ID || null,
-        Selected_Child_ID: mockChildSubCategories.find(child => child.Sub_Category_ID === mockSubCategories.find(sub => sub.Category_ID === mockCategories[0]?.Category_ID)?.Sub_Category_ID)?.Child_ID || null,
-      });
-      setSelectedProduct(null);
-    }
-    setIsEditing(initialMode === 'edit');
-    setShowProductModal(true);
-  };
-
-
-  // Toggles between VIEW and EDIT mode within the modal
-  const toggleEditMode = () => {
-    // If switching from view to edit, ensure editFormData is up-to-date with selectedProduct
-    if (!isEditing && selectedProduct) {
-      const fullCat = allCategoriesMap.get(selectedProduct.Child_ID);
-      setEditFormData({
-        Product_ID: selectedProduct.Product_ID,
-        Child_ID: selectedProduct.Child_ID,
-        Name: selectedProduct.Name,
-        Brand: selectedProduct.Brand,
-        Description: selectedProduct.Description || '',
-        Unit: selectedProduct.Unit,
-        Quantity: selectedProduct.Quantity,
-        Sale_Cost: selectedProduct.Sale_Cost,
-        Sale_Price: selectedProduct.Sale_Price,
-        Reorder_Point: selectedProduct.Reorder_Point,
-        Visibility: selectedProduct.Visibility,
-        Review_Rating: selectedProduct.Review_Rating,
-        Image_URL: selectedProduct.Image_URL || '',
-        Selected_Category_ID: fullCat?.Category_ID || null,
-        Selected_Sub_Category_ID: fullCat?.Sub_Category_ID || null,
-        Selected_Child_ID: fullCat?.Child_ID || null,
-      });
-    }
-    // If switching from edit to view (via cancel), reset editFormData to original selectedProduct values
-    if (isEditing && selectedProduct) {
-      const fullCat = allCategoriesMap.get(selectedProduct.Child_ID);
-      setEditFormData({
-        Product_ID: selectedProduct.Product_ID,
-        Child_ID: selectedProduct.Child_ID,
-        Name: selectedProduct.Name,
-        Brand: selectedProduct.Brand,
-        Description: selectedProduct.Description || '',
-        Unit: selectedProduct.Unit,
-        Quantity: selectedProduct.Quantity,
-        Sale_Cost: selectedProduct.Sale_Cost,
-        Sale_Price: selectedProduct.Sale_Price,
-        Reorder_Point: selectedProduct.Reorder_Point,
-        Visibility: selectedProduct.Visibility,
-        Review_Rating: selectedProduct.Review_Rating,
-        Image_URL: selectedProduct.Image_URL || '',
-        Selected_Category_ID: fullCat?.Category_ID || null,
-        Selected_Sub_Category_ID: fullCat?.Sub_Category_ID || null,
-        Selected_Child_ID: fullCat?.Child_ID || null,
-      });
-    }
-    setIsEditing(prev => !prev);
-  };
-
-  // Handles adding a new product, opens modal directly in ADD/EDIT mode
-  const handleAddProductClick = () => {
-    openProductModal(null, 'edit'); // Open for new product, directly in edit mode
-  };
-
-  const saveProductDetails = () => {
-    if (!editFormData.Name || !editFormData.Brand || !editFormData.Unit || editFormData.Selected_Child_ID === null) {
-      alert('กรุณากรอกข้อมูลสินค้าให้ครบถ้วนและเลือกหมวดหมู่ย่อย'); // Use custom modal in real app
-      return;
-    }
-
-    const newOrUpdatedProduct: ProductInventory = {
-      Product_ID: isEditing && editFormData.Product_ID !== null ? editFormData.Product_ID : Date.now(), // Use existing ID or generate new for mock
-      Child_ID: editFormData.Selected_Child_ID,
-      Name: editFormData.Name,
-      Brand: editFormData.Brand,
-      Description: editFormData.Description,
-      Unit: editFormData.Unit,
-      Quantity: editFormData.Quantity,
-      Sale_Cost: editFormData.Sale_Cost,
-      Sale_Price: editFormData.Sale_Price,
-      Reorder_Point: editFormData.Reorder_Point,
-      Visibility: editFormData.Visibility,
-      Review_Rating: editFormData.Review_Rating,
-      Image_URL: editFormData.Image_URL || null,
-    };
-
-    if (isEditing && editFormData.Product_ID !== null) {
-      // Update existing product
-      setProducts(prev => prev.map(p =>
-        p.Product_ID === newOrUpdatedProduct.Product_ID ? newOrUpdatedProduct : p
-      ));
-      setSelectedProduct(newOrUpdatedProduct); // Update selectedProduct to reflect changes
-    } else {
-      // Add new product
-      setProducts(prev => [...prev, newOrUpdatedProduct]);
-    }
-    setIsEditing(false); // Switch back to view mode after saving
-  };
-
-  const deleteProduct = (productId: number) => {
-    if (window.confirm(`คุณแน่ใจหรือไม่ที่จะลบสินค้า Product ID: ${productId}?`)) {
-      setProducts(prev => prev.filter(p => p.Product_ID !== productId));
-      setShowProductModal(false); // Close modal if the deleted product was being viewed
-    }
-  };
-
-  // --- Form Change Handlers ---
-  const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-    const { name, value, type, checked } = e.target;
-
-    setEditFormData(prev => {
-      const newState = { ...prev };
-
-      if (type === 'checkbox') {
-        newState[name as keyof ProductEditForm] = checked as any; // Cast for boolean
-      } else if (['Quantity', 'Sale_Cost', 'Sale_Price', 'Reorder_Point', 'Review_Rating', 'Selected_Category_ID', 'Selected_Sub_Category_ID', 'Selected_Child_ID'].includes(name)) {
-        newState[name as keyof ProductEditForm] = value === '' ? null : Number(value) as any;
-      } else {
-        newState[name as keyof ProductEditForm] = value as any;
-      }
-
-      if (name === 'Selected_Category_ID') {
-        const categoryId = Number(value);
-        const firstSubCatInNewCategory = mockSubCategories.find(sub => sub.Category_ID === categoryId);
-        const firstChildCatInNewSubCat = firstSubCatInNewCategory ? mockChildSubCategories.find(child => child.Sub_Category_ID === firstSubCatInNewCategory.Sub_Category_ID) : null;
-        newState.Selected_Category_ID = categoryId;
-        newState.Selected_Sub_Category_ID = firstSubCatInNewCategory?.Sub_Category_ID || null;
-        newState.Selected_Child_ID = firstChildCatInNewSubCat?.Child_ID || null;
-        newState.Child_ID = firstChildCatInNewSubCat?.Child_ID || 0;
-      } else if (name === 'Selected_Sub_Category_ID') {
-        const subCategoryId = Number(value);
-        const firstChildCatInNewSubCat = mockChildSubCategories.find(child => child.Sub_Category_ID === subCategoryId);
-        newState.Selected_Sub_Category_ID = subCategoryId;
-        newState.Selected_Child_ID = firstChildCatInNewSubCat?.Child_ID || null;
-        newState.Child_ID = firstChildCatInNewSubCat?.Child_ID || 0;
-      } else if (name === 'Selected_Child_ID') {
-        const childId = Number(value);
-        newState.Selected_Child_ID = childId;
-        newState.Child_ID = childId;
-      }
-      return newState;
-    });
-  };
-
-  // --- Helper Functions ---
-  const formatPrice = (price: number): string => {
-    return new Intl.NumberFormat('th-TH', {
-      style: 'currency',
-      currency: 'THB'
-    }).format(price);
-  };
-
-  const getFullCategoryName = (childId: number | null): string => {
-    if (childId === null) return 'N/A';
-    const categoryPath = allCategoriesMap.get(childId);
-    if (!categoryPath) return 'Uncategorized';
-    return `${categoryPath.Category_Name} > ${categoryPath.Sub_Category_Name} > ${categoryPath.Child_Name}`;
-  };
-
-  // --- Stats Calculation ---
-  interface ProductStats {
-    total: number;
-    inStock: number;
-    lowStock: number;
-    outOfStock: number; // New stat
-    visible: number;
-    hidden: number;
-  }
-
-  const getProductStats = (): ProductStats => {
-    const stats: ProductStats = {
-      total: products.length,
-      inStock: products.filter(p => getProductStockStatus(p) === 'in_stock').length,
-      lowStock: products.filter(p => getProductStockStatus(p) === 'low_stock').length,
-      outOfStock: products.filter(p => getProductStockStatus(p) === 'out_of_stock').length, // New stat
-      visible: products.filter(p => p.Visibility).length,
-      hidden: products.filter(p => !p.Visibility).length,
-    };
-    return stats;
-  };
-
-  const stats: ProductStats = getProductStats();
-
-  // Get unique brands for filter dropdown
-  const uniqueBrands = ['all', ...Array.from(new Set(products.map(p => p.Brand)))];
-
-  // Get filtered sub-categories based on selected main category
-  const filteredSubCategories = editFormData.Selected_Category_ID
-    ? mockSubCategories.filter(sub => sub.Category_ID === editFormData.Selected_Category_ID)
-    : [];
-
-  // Get filtered child sub-categories based on selected sub-category
-  const filteredChildSubCategories = editFormData.Selected_Sub_Category_ID
-    ? mockChildSubCategories.filter(child => child.Sub_Category_ID === editFormData.Selected_Sub_Category_ID)
-    : [];
-
+  // --- Render Logic ---
   return (
     <div className="min-h-screen bg-base-200 p-4">
       <div className="max-w-7xl mx-auto">
@@ -551,7 +851,7 @@ export default function ProductManagement() {
           <div className="bg-base-100 rounded-lg p-4 shadow-sm">
             <div className="flex items-center gap-3">
               <div className="p-2 bg-warning/10 rounded-lg">
-                <FiAlertTriangle className="w-5 h-5 text-warning" /> {/* Changed icon to FiAlertTriangle */}
+                <FiAlertTriangle className="w-5 h-5 text-warning" />
               </div>
               <div>
                 <p className="text-sm text-base-content/70">สินค้าใกล้หมด</p>
@@ -563,7 +863,7 @@ export default function ProductManagement() {
           <div className="bg-base-100 rounded-lg p-4 shadow-sm">
             <div className="flex items-center gap-3">
               <div className="p-2 bg-error/10 rounded-lg">
-                <FiAlertCircle className="w-5 h-5 text-error" /> {/* Changed icon to FiAlertCircle */}
+                <FiAlertCircle className="w-5 h-5 text-error" />
               </div>
               <div>
                 <p className="text-sm text-base-content/70">สินค้าหมดแล้ว</p>
@@ -590,7 +890,7 @@ export default function ProductManagement() {
         <div className="bg-base-100 rounded-lg shadow-sm p-6 mb-6">
           <div className="flex flex-col md:flex-row flex-wrap gap-4">
             <div className="flex-1/3 min-w-[200px]">
-              <div className="flex flex-row">
+              <div className="relative">
                 <input
                   type="text"
                   placeholder="ค้นหาด้วยชื่อ, แบรนด์, รหัสสินค้า..."
@@ -598,7 +898,7 @@ export default function ProductManagement() {
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
-                <FiSearch className="absolute z left-3 top-1/2 transform -translate-y-1/2 text-black w-4 h-4" />
+                <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
               </div>
             </div>
             <div className="w-full sm:w-auto flex-grow">
@@ -633,7 +933,7 @@ export default function ProductManagement() {
                 disabled={categoryFilter === 'all'}
               >
                 <option value="all">ทุกหมวดหมู่ย่อย</option>
-                {mockSubCategories.filter(sub => categoryFilter === 'all' || sub.Category_ID === categoryFilter).map(sub => (
+                {filteredSubCategories.map(sub => (
                   <option key={`sub-${sub.Sub_Category_ID}`} value={sub.Sub_Category_ID}>{sub.Name}</option>
                 ))}
               </select>
@@ -646,7 +946,7 @@ export default function ProductManagement() {
                 disabled={subCategoryFilter === 'all'}
               >
                 <option value="all">ทุกหมวดหมู่ย่อยย่อย</option>
-                {mockChildSubCategories.filter(child => subCategoryFilter === 'all' || child.Sub_Category_ID === subCategoryFilter).map(child => (
+                {filteredChildSubCategories.map(child => (
                   <option key={`child-${child.Child_ID}`} value={child.Child_ID}>{child.Name}</option>
                 ))}
               </select>
@@ -662,7 +962,7 @@ export default function ProductManagement() {
                 <option value="false">ซ่อน</option>
               </select>
             </div>
-            {/* New: Stock Status Filter */}
+            {/* Stock Status Filter */}
             <div className="w-full sm:w-auto flex-grow">
               <select
                 className="select select-bordered w-full"
@@ -691,7 +991,22 @@ export default function ProductManagement() {
           </div>
         </div>
 
+        {/* Display Loading/Error states */}
+        {loading && (
+            <div className="flex justify-center items-center h-48 bg-base-100 rounded-lg shadow-sm">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
+                <p className="ml-4 text-lg text-base-content/70">กำลังโหลดสินค้า...</p>
+            </div>
+        )}
+        {error && (
+            <div className="text-center p-6 bg-error/10 text-error rounded-lg shadow-md max-w-xl mx-auto my-8">
+                <p className="font-bold text-xl mb-2">เกิดข้อผิดพลาด!</p>
+                <p>{error}</p>
+            </div>
+        )}
+        
         {/* Products Table - Desktop View */}
+        {!loading && !error && (
         <div className="hidden md:block bg-base-100 rounded-lg shadow-sm overflow-hidden">
           <div className="overflow-x-auto">
             <table className="table table-zebra w-full">
@@ -705,7 +1020,6 @@ export default function ProductManagement() {
                   <th>จำนวน</th>
                   <th>ราคาขาย</th>
                   <th>สถานะการแสดงผล</th>
-                  
                   <th>จัดการ</th>
                 </tr>
               </thead>
@@ -717,16 +1031,18 @@ export default function ProductManagement() {
                     formatPrice={formatPrice}
                     getFullCategoryName={getFullCategoryName}
                     openProductModal={openProductModal}
-                    deleteProduct={deleteProduct}
-                    getProductStockStatus={getProductStockStatus} // Pass helper function
+                    deleteProduct={handleDelete}
+                    getProductStockStatus={getProductStockStatus}
                   />
                 ))}
               </tbody>
             </table>
           </div>
         </div>
+        )}
 
         {/* Products List - Mobile View */}
+        {!loading && !error && (
         <div className="block md:hidden bg-base-100 rounded-lg shadow-sm p-4">
           {paginatedProducts.length > 0 ? (
             <div className="grid grid-cols-1 gap-4">
@@ -737,7 +1053,7 @@ export default function ProductManagement() {
                   formatPrice={formatPrice}
                   getFullCategoryName={getFullCategoryName}
                   openProductModal={openProductModal}
-                  getProductStockStatus={getProductStockStatus} // Pass helper function
+                  getProductStockStatus={getProductStockStatus}
                 />
               ))}
             </div>
@@ -748,9 +1064,10 @@ export default function ProductManagement() {
             </div>
           )}
         </div>
+        )}
 
-        {/* No products found message */}
-        {paginatedProducts.length === 0 && filteredProducts.length === 0 && (
+        {/* No products found message - only show if not loading and no error, and filters result in no products */}
+        {!loading && !error && paginatedProducts.length === 0 && filteredProducts.length === 0 && (
           <div className="text-center py-12">
             <FiBox className="w-12 h-12 text-base-content/30 mx-auto mb-4" />
             <p className="text-base-content/70">ไม่พบสินค้าที่ตรงกับเงื่อนไขการค้นหา</p>
@@ -759,7 +1076,7 @@ export default function ProductManagement() {
 
 
         {/* Pagination Section */}
-        {filteredProducts.length > 0 && (
+        {!loading && !error && filteredProducts.length > 0 && (
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 border-t bg-base-100 rounded-b-lg shadow-sm mt-4">
             <div className="text-sm text-base-content/70">
               แสดงรายการ {((currentPage - 1) * itemsPerPage) + 1} ถึง {Math.min(currentPage * itemsPerPage, filteredProducts.length)} จากทั้งหมด {filteredProducts.length} รายการ
@@ -785,6 +1102,7 @@ export default function ProductManagement() {
                     startPage = Math.max(1, endPage - maxVisiblePages + 1);
                   }
 
+                  // Add ellipsis if needed at the start
                   if (startPage > 1) {
                     pages.push(
                       <button key={1} className="btn btn-sm" onClick={() => handlePageChange(1)}>1</button>
@@ -794,6 +1112,7 @@ export default function ProductManagement() {
                     }
                   }
 
+                  // Add main page numbers
                   for (let i = startPage; i <= endPage; i++) {
                     pages.push(
                       <button
@@ -806,6 +1125,7 @@ export default function ProductManagement() {
                     );
                   }
 
+                  // Add ellipsis if needed at the end
                   if (endPage < totalPages) {
                     if (endPage < totalPages - 1) {
                       pages.push(<span key="ellipsis2" className="px-2">...</span>);
@@ -894,14 +1214,26 @@ export default function ProductManagement() {
                           <label className="label"><span className="label-text">หน่วย</span></label>
                           <input type="text" name="Unit" className="input input-bordered w-full" value={editFormData.Unit} onChange={handleFormChange} />
                         </div>
+                         {/* NEW: Dimensions Input */}
+                         <div className="form-control mb-2">
+                          <label className="label"><span className="label-text">ขนาด (Dimensions)</span></label>
+                          <input type="text" name="Dimensions" className="input input-bordered w-full" value={editFormData.Dimensions} onChange={handleFormChange} />
+                        </div>
+                        {/* NEW: Material Input */}
+                        <div className="form-control mb-2">
+                          <label className="label"><span className="label-text">วัสดุ (Material)</span></label>
+                          <input type="text" name="Material" className="input input-bordered w-full" value={editFormData.Material} onChange={handleFormChange} />
+                        </div>
                       </>
                     ) : (
                       selectedProduct && (
                         <>
                           <p><strong>ชื่อสินค้า:</strong> {selectedProduct.Name}</p>
-                          <p><strong>แบรนด์:</strong> {selectedProduct.Brand}</p>
+                          <p><strong>แบรนด์:</strong> {selectedProduct.Brand || '-'}</p>
                           <p><strong>รายละเอียด:</strong> {selectedProduct.Description || '-'}</p>
                           <p><strong>หน่วย:</strong> {selectedProduct.Unit}</p>
+                          <p><strong>ขนาด:</strong> {selectedProduct.Dimensions || '-'}</p> {/* NEW: Display Dimensions */}
+                          <p><strong>วัสดุ:</strong> {selectedProduct.Material || '-'}</p>     {/* NEW: Display Material */}
                         </>
                       )
                     )}

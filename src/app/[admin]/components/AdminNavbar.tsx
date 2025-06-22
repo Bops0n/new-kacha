@@ -126,6 +126,9 @@ export default function AdminNavbar() {
                              <Link href="/admin/product-management" className="px-6 py-4  hover:text-yellow-600 hover:bg-gray-300 transition-colors">
                                 จัดการคลังสินค้า
                             </Link>
+                             <Link href="/admin/category-management" className="px-6 py-4  hover:text-yellow-600 hover:bg-gray-300 transition-colors">
+                                จัดการหมวดหมู่สินค้า
+                            </Link>
                              <Link href="/admin/order-management" className="px-6 py-4  hover:text-yellow-600 hover:bg-gray-300 transition-colors">
                                 จัดการคำสั่งซื้อ
                             </Link>

@@ -1,10 +1,8 @@
-'use client';
+'use client'; // This component will run on the client side
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react'; // Added useMemo for optimization
 import {
   FiSearch,
-  FiDownload,
-  FiPlus,
   FiPackage,
   FiTruck,
   FiCheckCircle,
@@ -12,384 +10,58 @@ import {
   FiClock,
   FiSave,
   FiX,
-  FiEdit
+  FiEdit,
+  FiTrash2, // Added FiTrash2 for delete icon
+  FiEye, // Added FiEye for view icon
+  FiDownload, // Added FiDownload for export button (if needed later)
+  FiPlus, // Added FiPlus for add button (if needed later)
 } from 'react-icons/fi';
 
-import { Order, OrderStatus, StatusConfig, EditFormData } from '../../../types';
-import OrderRow from './OrderRow';
-import OrderCard from './OrderCard';
+// --- Type Definitions (Refined to match API output exactly) ---
+// This interface represents the shape of an order record as received from the API.
+interface Order {
+  id: number; // Maps to Order_ID from DB (number)
+  userId: number; // NEW: Added userId to match data from API
+  customerName: string; // From User.FullName via API
+  email: string | null; // From User.Email via API
+  phone: string | null; // From Address.Phone via API
+  products: Array<{ name: string; quantity: number; price: number; discount: number }>; // From Order_Detail & Product tables
+  total: number; // Calculated from products in API
+  status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled'; // Maps to status from DB
+  orderDate: string; // From DB
+  deliveryDate: string | null; // From Order table
+  address: string; // From Order table (snapshot)
+  trackingId: string | null; // From Order table
+  shippingCarrier: string | null; // From Order table
+  transferSlipImageUrl: string | null; // From Order table
+  cancellationReason: string | null; // From Order table
+  paymentType: string; // From DB (Payment_Type)
+  invoiceId: string | null; // From DB (Invoice_ID)
+}
 
-const mockOrders: Order[] = [
-  {
-    id: 'ORD-001',
-    customerName: 'สมชาย ใจดี',
-    email: 'somchai@email.com',
-    phone: '081-234-5678',
-    products: [
-      { name: 'โซฟา 3 ที่นั่ง', quantity: 1, price: 15000 },
-      { name: 'โต๊ะกาแฟ', quantity: 1, price: 3500 }
-    ],
-    total: 18500,
-    status: 'pending',
-    orderDate: '2024-12-01',
-    deliveryDate: '2024-12-15',
-    address: '123 ถนนสุขุมวิท กรุงเทพฯ 10110',
-    trackingId: null,
-    shippingCarrier: null,
-    transferSlipImageUrl: 'https://via.placeholder.com/300x200/ADD8E6/000000?text=Slip_ORD-001',
-    cancellationReason: null,
-  },
-  {
-    id: 'ORD-002',
-    customerName: 'สมหญิง สวยงาม',
-    email: 'somying@email.com',
-    phone: '082-345-6789',
-    products: [
-      { name: 'เตียงนอน King Size', quantity: 1, price: 25000 },
-      { name: 'ตู้เสื้อผ้า', quantity: 1, price: 12000 }
-    ],
-    total: 37000,
-    status: 'processing',
-    orderDate: '2024-12-02',
-    deliveryDate: '2024-12-20',
-    address: '456 ถนนพหลโยธิน กรุงเทพฯ 10400',
-    trackingId: null,
-    shippingCarrier: null,
-    transferSlipImageUrl: 'https://via.placeholder.com/300x200/90EE90/000000?text=Slip_ORD-002',
-    cancellationReason: null,
-  },
-  {
-    id: 'ORD-003',
-    customerName: 'วิชัย รวยมาก',
-    email: 'wichai@email.com',
-    phone: '083-456-7890',
-    products: [
-      { name: 'ชุดโต๊ะอาหาร 6 ที่นั่ง', quantity: 1, price: 22000 }
-    ],
-    total: 22000,
-    status: 'shipped',
-    orderDate: '2024-11-28',
-    deliveryDate: '2024-12-10',
-    address: '789 ถนนรัชดาภิเษก กรุงเทพฯ 10320',
-    trackingId: 'TPL003456789',
-    shippingCarrier: 'Kerry Express',
-    transferSlipImageUrl: 'https://via.placeholder.com/300x200/DDA0DD/000000?text=Slip_ORD-003',
-    cancellationReason: null,
-  },
-  {
-    id: 'ORD-004',
-    customerName: 'มาลี ขยัน',
-    email: 'malee@email.com',
-    phone: '084-567-8901',
-    products: [
-      { name: 'เก้าอี้สำนักงาน', quantity: 2, price: 4500 },
-      { name: 'โต๊ะทำงาน', quantity: 1, price: 8500 }
-    ],
-    total: 17500,
-    status: 'delivered',
-    orderDate: '2024-11-25',
-    deliveryDate: '2024-12-05',
-    address: '321 ถนนลาดพร้าว กรุงเทพฯ 10230',
-    trackingId: 'DHL987654321',
-    shippingCarrier: 'DHL',
-    transferSlipImageUrl: 'https://via.placeholder.com/300x200/ADD8E6/000000?text=Slip_ORD-004',
-    cancellationReason: null,
-  },
-  {
-    id: 'ORD-005',
-    customerName: 'ประยุทธ์ มั่นคง',
-    email: 'prayuth@email.com',
-    phone: '085-678-9012',
-    products: [
-      { name: 'หิ้งหนังสือ', quantity: 2, price: 6000 }
-    ],
-    total: 12000,
-    status: 'cancelled',
-    orderDate: '2024-11-30',
-    deliveryDate: '2024-12-18',
-    address: '654 ถนนเพชรบุรี กรุงเทพฯ 10400',
-    trackingId: null,
-    shippingCarrier: null,
-    transferSlipImageUrl: null,
-    cancellationReason: 'ลูกค้าเปลี่ยนใจ', // Added cancellation reason
-  },
-  {
-    id: 'ORD-006',
-    customerName: 'สุทธิรักษ์ จริงใจ',
-    email: 'suttirak@email.com',
-    phone: '086-123-4567',
-    products: [
-      { name: 'เก้าอี้ผู้บริหาร', quantity: 1, price: 12500 }
-    ],
-    total: 12500,
-    status: 'pending',
-    orderDate: '2024-12-03',
-    deliveryDate: '2024-12-17',
-    address: '111 ถนนวิภาวดี กรุงเทพฯ 10900',
-    trackingId: null,
-    shippingCarrier: null,
-    transferSlipImageUrl: 'https://via.placeholder.com/300x200/F08080/000000?text=Slip_ORD-006',
-    cancellationReason: null,
-  },
-  {
-    id: 'ORD-007',
-    customerName: 'นิภา สุขสม',
-    email: 'nipa@email.com',
-    phone: '087-234-5678',
-    products: [
-      { name: 'โต๊ะข้าง', quantity: 2, price: 2500 },
-      { name: 'โคมไฟตั้งโต๊ะ', quantity: 2, price: 1800 }
-    ],
-    total: 8600,
-    status: 'processing',
-    orderDate: '2024-12-04',
-    deliveryDate: '2024-12-18',
-    address: '222 ถนนพระราม 4 กรุงเทพฯ 10500',
-    trackingId: null,
-    shippingCarrier: null,
-    transferSlipImageUrl: null,
-    cancellationReason: null,
-  },
-  {
-    id: 'ORD-008',
-    customerName: 'ชัยวัฒน์ กล้าหาญ',
-    email: 'chaiwat@email.com',
-    phone: '088-345-6789',
-    products: [
-      { name: 'ตู้โชว์', quantity: 1, price: 18000 }
-    ],
-    total: 18000,
-    status: 'shipped',
-    orderDate: '2024-11-29',
-    deliveryDate: '2024-12-13',
-    address: '333 ถนนงามวงศ์วาน กรุงเทพฯ 10900',
-    trackingId: 'FEDEX654321098',
-    shippingCarrier: 'FedEx',
-    transferSlipImageUrl: 'https://via.placeholder.com/300x200/ADD8E6/000000?text=Slip_ORD-008',
-    cancellationReason: null,
-  },
-  {
-    id: 'ORD-009',
-    customerName: 'อัญชลี รื่นเริง',
-    email: 'anchalee@email.com',
-    phone: '089-456-7890',
-    products: [
-      { name: 'ชั้นวางของ', quantity: 3, price: 3200 }
-    ],
-    total: 9600,
-    status: 'delivered',
-    orderDate: '2024-11-26',
-    deliveryDate: '2024-12-06',
-    address: '444 ถนนจรัญสนิทวงศ์ กรุงเทพฯ 10700',
-    trackingId: 'J&T1122334455',
-    shippingCarrier: 'J&T Express',
-    transferSlipImageUrl: null,
-    cancellationReason: null,
-  },
-  {
-    id: 'ORD-010',
-    customerName: 'พิทักษ์ มั่นใจ',
-    email: 'pitak@email.com',
-    phone: '090-567-8901',
-    products: [
-      { name: 'เก้าอี้บาร์', quantity: 4, price: 2200 }
-    ],
-    total: 8800,
-    status: 'cancelled',
-    orderDate: '2024-12-01',
-    deliveryDate: '2024-12-15',
-    address: '555 ถนนเพชรเกษม กรุงเทพฯ 10160',
-    trackingId: null,
-    shippingCarrier: null,
-    transferSlipImageUrl: 'https://via.placeholder.com/300x200/DAA520/000000?text=Slip_ORD-010',
-    cancellationReason: 'สินค้าหมด', // Added cancellation reason
-  },
-  {
-    id: 'ORD-011',
-    customerName: 'วรรณา สดใส',
-    email: 'wanna@email.com',
-    phone: '091-678-9012',
-    products: [
-      { name: 'โต๊ะแป้ง', quantity: 1, price: 8500 },
-      { name: 'เก้าอี้แป้ง', quantity: 1, price: 3500 }
-    ],
-    total: 12000,
-    status: 'pending',
-    orderDate: '2024-12-05',
-    deliveryDate: '2024-12-19',
-    address: '666 ถนนราชพฤกษ์ กรุงเทพฯ 10160',
-    trackingId: null,
-    shippingCarrier: null,
-    transferSlipImageUrl: null,
-    cancellationReason: null,
-  },
-  {
-    id: 'ORD-012',
-    customerName: 'กิตติ เด่นดวง',
-    email: 'kitti@email.com',
-    phone: '092-789-0123',
-    products: [
-      { name: 'โซฟา 2 ที่นั่ง', quantity: 1, price: 12000 }
-    ],
-    total: 12000,
-    status: 'processing',
-    orderDate: '2024-12-06',
-    deliveryDate: '2024-12-20',
-    address: '777 ถนนรามอินทรา กรุงเทพฯ 10230',
-    trackingId: null,
-    shippingCarrier: null,
-    transferSlipImageUrl: 'https://via.placeholder.com/300x200/F0E68C/000000?text=Slip_ORD-012',
-    cancellationReason: null,
-  },
-  {
-    id: 'ORD-013',
-    customerName: 'ปรารถนา ฝันดี',
-    email: 'prartana@email.com',
-    phone: '093-890-1234',
-    products: [
-      { name: 'ตู้รองเท้า', quantity: 1, price: 4500 }
-    ],
-    total: 4500,
-    status: 'shipped',
-    orderDate: '2024-11-30',
-    deliveryDate: '2024-12-14',
-    address: '888 ถนนบางนา กรุงเทพฯ 10260',
-    trackingId: 'FLASH55667788',
-    shippingCarrier: 'Flash Express',
-    transferSlipImageUrl: null,
-    cancellationReason: null,
-  },
-  {
-    id: 'ORD-014',
-    customerName: 'เสาวรส หวานใจ',
-    email: 'saowaros@email.com',
-    phone: '094-901-2345',
-    products: [
-      { name: 'โต๊ะเครื่องแป้ง', quantity: 1, price: 15000 },
-      { name: 'กระจกแต่งตัว', quantity: 1, price: 3500 }
-    ],
-    total: 18500,
-    status: 'delivered',
-    orderDate: '2024-11-27',
-    deliveryDate: '2024-12-07',
-    address: '999 ถนนศรีนครินทร์ กรุงเทพฯ 10250',
-    trackingId: 'BESTEX123456789',
-    shippingCarrier: 'Best Express',
-    transferSlipImageUrl: 'https://via.placeholder.com/300x200/ADD8E6/000000?text=Slip_ORD-014',
-    cancellationReason: null,
-  },
-  {
-    id: 'ORD-015',
-    customerName: 'บุญเกื้อ ช่วยเหลือ',
-    email: 'boonkuea@email.com',
-    phone: '095-012-3456',
-    products: [
-      { name: 'โต๊ะทำงานมุม', quantity: 1, price: 9800 }
-    ],
-    total: 9800,
-    status: 'cancelled',
-    orderDate: '2024-12-02',
-    deliveryDate: '2024-12-16',
-    address: '101 ถนนสีลม กรุงเทพฯ 10500',
-    trackingId: null,
-    shippingCarrier: null,
-    transferSlipImageUrl: null,
-    cancellationReason: 'ที่อยู่ไม่ถูกต้อง', // Added cancellation reason
-  },
-  {
-    id: 'ORD-016',
-    customerName: 'จันทร์เพ็ญ แสงส่อง',
-    email: 'janpen@email.com',
-    phone: '096-123-4567',
-    products: [
-      { name: 'หิ้งแขวนผนัง', quantity: 5, price: 1200 }
-    ],
-    total: 6000,
-    status: 'pending',
-    orderDate: '2024-12-07',
-    deliveryDate: '2024-12-21',
-    address: '202 ถนนสาทร กรุงเทพฯ 10120',
-    trackingId: null,
-    shippingCarrier: null,
-    transferSlipImageUrl: 'https://via.placeholder.com/300x200/F0E68C/000000?text=Slip_ORD-016',
-    cancellationReason: null,
-  },
-  {
-    id: 'ORD-017',
-    customerName: 'วรัญ อารมณ์ดี',
-    email: 'waran@email.com',
-    phone: '097-234-5678',
-    products: [
-      { name: 'เตียงเดี่ยว', quantity: 1, price: 8500 },
-      { name: 'ที่นอน', quantity: 1, price: 4500 }
-    ],
-    total: 13000,
-    status: 'processing',
-    orderDate: '2024-12-08',
-    deliveryDate: '2024-12-22',
-    address: '303 ถนนอโศก กรุงเทพฯ 10110',
-    trackingId: null,
-    shippingCarrier: null,
-    transferSlipImageUrl: null,
-    cancellationReason: null,
-  },
-  {
-    id: 'ORD-018',
-    customerName: 'ศุภกร โชคดี',
-    email: 'supakorn@email.com',
-    phone: '098-345-6789',
-    products: [
-      { name: 'ตู้เก็บเอกสาร', quantity: 2, price: 5500 }
-    ],
-    total: 11000,
-    status: 'shipped',
-    orderDate: '2024-12-01',
-    deliveryDate: '2024-12-15',
-    address: '404 ถนนพลับพลา กรุงเทพฯ 10330',
-    trackingId: 'THAIPOST123456789',
-    shippingCarrier: 'Thailand Post',
-    transferSlipImageUrl: 'https://via.placeholder.com/300x200/B0E0E6/000000?text=Slip_ORD-018',
-    cancellationReason: null,
-  },
-  {
-    id: 'ORD-019',
-    customerName: 'กนกวรรณ สวยงาม',
-    email: 'kanokwan@email.com',
-    phone: '099-456-7890',
-    products: [
-      { name: 'โต๊ะวางทีวี', quantity: 1, price: 7800 }
-    ],
-    total: 7800,
-    status: 'delivered',
-    orderDate: '2024-11-28',
-    deliveryDate: '2024-12-08',
-    address: '505 ถนนวิทยุ กรุงเทพฯ 10330',
-    trackingId: 'NINJAVAN987654321',
-    shippingCarrier: 'Ninja Van',
-    transferSlipImageUrl: null,
-    cancellationReason: null,
-  },
-  {
-    id: 'ORD-020',
-    customerName: 'อุดร น่ารัก',
-    email: 'udon@email.com',
-    phone: '080-567-8901',
-    products: [
-      { name: 'เก้าอี้พักผ่อน', quantity: 1, price: 14500 },
-      { name: 'โต๊ะข้างเตียง', quantity: 2, price: 2800 }
-    ],
-    total: 20100,
-    status: 'pending',
-    orderDate: '2024-12-09',
-    deliveryDate: '2024-12-23',
-    address: '606 ถนนรัชดา กรุงเทพฯ 10400',
-    trackingId: null,
-    shippingCarrier: null,
-    transferSlipImageUrl: 'https://via.placeholder.com/300x200/F0E68C/000000?text=Slip_ORD-020',
-    cancellationReason: null,
-  }
-];
+type OrderStatus = 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
 
+interface StatusConfig {
+  [key: string]: {
+    label: string;
+    color: string; // Tailwind CSS class for badge color
+    icon: React.ElementType; // Icon component from react-icons/fi
+    bgColor: string; // Tailwind CSS class for background color
+  };
+}
+
+// Form data structure for editing an order in the modal
+// Only includes fields that can be updated via PATCH in the API
+interface EditFormData {
+  trackingId: string;
+  shippingCarrier: string;
+  deliveryDate: string;
+  status: OrderStatus;
+  transferSlipImageUrl: string;
+  cancellationReason: string;
+}
+
+// --- Status Configuration ---
 const statusConfig: StatusConfig = {
   pending: {
     label: 'รอดำเนินการ',
@@ -423,23 +95,145 @@ const statusConfig: StatusConfig = {
   }
 };
 
+
+// --- OrderRow Component (for Desktop Table View) ---
+interface OrderRowProps {
+  order: Order;
+  statusConfig: StatusConfig;
+  formatPrice: (price: number) => string;
+  viewOrderDetails: (order: Order) => void;
+  deleteOrder: (orderId: number) => void;
+}
+
+const OrderRow: React.FC<OrderRowProps> = ({ order, statusConfig, formatPrice, viewOrderDetails, deleteOrder }) => {
+  const StatusIcon = statusConfig[order.status].icon;
+
+  return (
+    // Make the entire row clickable to view details
+    <tr className="hover cursor-pointer" onClick={() => viewOrderDetails(order)}>
+      <td><div className="font-bold text-primary">{order.id}</div></td>
+      <td>
+        <div className="font-bold">{order.customerName}</div>
+        {/* Email and Phone are now pulled from User/Address tables and displayed in modal details */}
+        {/* <div className="text-sm opacity-50">{order.email || '-'}</div> */}
+      </td>
+      <td>
+        {order.products.map((p, idx) => (
+          <div key={idx} className="text-sm">{p.name} (x{p.quantity})</div>
+        ))}
+      </td>
+      <td><div className="font-bold">{formatPrice(order.total)}</div></td>
+      <td>
+        <span className={`badge ${statusConfig[order.status].color}`}>
+          <StatusIcon className="w-3 h-3 mr-1" /> {statusConfig[order.status].label}
+        </span>
+      </td>
+      <td>{order.orderDate.split('T')[0]}</td>
+      <td>{order.deliveryDate !== null ? order.deliveryDate.split('T')[0] : '-'}</td>
+      <td>{order.trackingId || '-'}</td>
+      <td>
+        <div className="flex gap-1">
+          <button
+            className="btn btn-sm btn-ghost btn-square"
+            onClick={(e) => {
+              e.stopPropagation(); // Prevent row click from also triggering
+              viewOrderDetails(order);
+            }}
+            title="ดูรายละเอียด"
+          >
+            <FiEye className="w-4 h-4" />
+          </button>
+          <button
+            className="btn btn-sm btn-ghost btn-square text-error"
+            onClick={(e) => {
+              e.stopPropagation(); // Prevent row click from also triggering
+              deleteOrder(order.id);
+            }}
+            title="ลบคำสั่งซื้อ"
+          >
+            <FiTrash2 className="w-4 h-4" />
+          </button>
+        </div>
+      </td>
+    </tr>
+  );
+};
+
+// --- OrderCard Component (for Mobile Grid View) ---
+interface OrderCardProps {
+  order: Order;
+  statusConfig: StatusConfig;
+  formatPrice: (price: number) => string;
+  viewOrderDetails: (order: Order) => void;
+}
+
+const OrderCard: React.FC<OrderCardProps> = ({ order, statusConfig, formatPrice, viewOrderDetails }) => {
+  const StatusIcon = statusConfig[order.status].icon;
+
+  return (
+    <div className="card bg-base-200 shadow-sm cursor-pointer" onClick={() => viewOrderDetails(order)}>
+      <div className="card-body p-4">
+        <h2 className="card-title text-base">{order.customerName} (ID: {order.id})</h2>
+        <p className="text-sm text-base-content/70">
+          <strong>ยอดรวม:</strong> {formatPrice(order.total)}
+        </p>
+        <p className="text-sm flex items-center gap-1">
+          <strong>สถานะ:</strong>
+          <span className={`badge ${statusConfig[order.status].color}`}>
+            <StatusIcon className="w-3 h-3 mr-1" /> {statusConfig[order.status].label}
+          </span>
+        </p>
+        <p className="text-sm">
+          <strong>วันที่สั่ง:</strong> {order.orderDate.split('T')[0]}
+        </p>
+        {order.trackingId && (
+          <p className="text-sm">
+            <strong>Tracking ID:</strong> {order.trackingId}
+          </p>
+        )}
+        <div className="card-actions justify-end mt-4">
+          <button
+            className="btn btn-sm btn-outline"
+            onClick={(e) => {
+              e.stopPropagation(); // Prevent card click from also triggering
+              viewOrderDetails(order);
+            }}
+          >
+            <FiEye className="w-4 h-4" /> ดู
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+
+// --- Main Order Management Component ---
 export default function OrderManagement() {
-  const [orders, setOrders] = useState<Order[]>(mockOrders);
-  const [filteredOrders, setFilteredOrders] = useState<Order[]>(mockOrders);
+  // --- States ---
+  const [orders, setOrders] = useState<Order[]>([]); // All orders fetched from API
+  const [filteredOrders, setFilteredOrders] = useState<Order[]>([]); // Orders after applying filters/search
+  
+  // Search & Filter States
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [statusFilter, setStatusFilter] = useState<OrderStatus | 'all'>('all');
+
+  // Modal & Form States
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [showOrderModal, setShowOrderModal] = useState<boolean>(false);
   const [isEditing, setIsEditing] = useState<boolean>(false);
+
+  // Form data state for editing order details
   const [editFormData, setEditFormData] = useState<EditFormData>({
     trackingId: '',
     shippingCarrier: '',
     deliveryDate: '',
-    status: 'pending',
+    status: 'pending', // Default status, will be overwritten by selectedOrder
     transferSlipImageUrl: '',
-    cancellationReason: '', // Initialize cancellation reason
+    cancellationReason: '',
   });
 
+  // Pagination States
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [itemsPerPage, setItemsPerPage] = useState<number>(10);
   const [paginatedOrders, setPaginatedOrders] = useState<Order[]>([]);
@@ -447,17 +241,212 @@ export default function OrderManagement() {
 
   // State for cancellation confirmation modal
   const [showCancelConfirmModal, setShowCancelConfirmModal] = useState<boolean>(false);
-  const [orderToCancel, setOrderToCancel] = useState<{ id: string, newStatus: OrderStatus } | null>(null);
+  const [orderToCancel, setOrderToCancel] = useState<{ id: number, newStatus: OrderStatus, reason: string | null } | null>(null);
 
+  // API Loading, Error, and Message Display States
+  const [loading, setLoading] = useState<boolean>(true); // Initial loading state for fetching orders
+  const [error, setError] = useState<string | null>(null); // For general page errors (e.g., failed initial fetch)
+  const [message, setMessage] = useState<string | null>(null); // For success/error messages from API actions (add/update/delete)
+  const [messageType, setMessageType] = useState<'success' | 'error' | null>(null); // Type of message
+
+  // --- API Interaction Functions ---
+
+  // Function to fetch all orders from the backend API
+  const fetchOrders = async () => {
+    setLoading(true); // Set loading true before fetch
+    setError(null);    // Clear any previous error
+    setMessage(null);  // Clear any previous message
+    setMessageType(null);
+
+    try {
+      // Adjusted API endpoint to /api/admin/order
+      const response = await fetch('/api/admin/order'); 
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to fetch orders.');
+      }
+      const data = await response.json();
+      setOrders(data.orders || []); // Update orders state with fetched data
+    } catch (err: any) {
+      console.error('Error fetching orders:', err);
+      setError(err.message || 'An error occurred while fetching orders.'); // Set error state
+    } finally {
+      setLoading(false); // Set loading false after fetch completes
+    }
+  };
+
+  // Function to update an order's details via API (PATCH)
+  const updateOrderDetails = async () => {
+    if (!selectedOrder) return;
+
+    setMessage(null); // Clear previous messages
+    setMessageType(null);
+
+    const newStatus = editFormData.status;
+    const newCancellationReason = (newStatus === 'cancelled' && editFormData.cancellationReason.trim() !== '') 
+                                 ? editFormData.cancellationReason.trim() 
+                                 : null;
+
+    // If changing to cancelled, trigger the confirmation modal
+    if (newStatus === 'cancelled' && selectedOrder.status !== 'cancelled') {
+      setOrderToCancel({ id: selectedOrder.id, newStatus: newStatus, reason: newCancellationReason });
+      setShowCancelConfirmModal(true);
+      return; // Stop here and wait for confirmation
+    }
+
+    // Prepare payload for API
+    const payload = {
+      id: selectedOrder.id, // Use numeric ID
+      trackingId: editFormData.trackingId.trim() === '' ? null : editFormData.trackingId.trim(),
+      shippingCarrier: editFormData.shippingCarrier.trim() === '' ? null : editFormData.shippingCarrier.trim(),
+      // Ensure deliveryDate is properly formatted for DB (YYYY-MM-DD)
+      deliveryDate: editFormData.deliveryDate.trim() === '' ? null : editFormData.deliveryDate.trim(),
+      status: newStatus,
+      transferSlipImageUrl: editFormData.transferSlipImageUrl.trim() === '' ? null : editFormData.transferSlipImageUrl.trim(),
+      cancellationReason: newCancellationReason, // Ensure reason is null if not cancelled
+    };
+
+    try {
+      // Adjusted API endpoint to /api/admin/order
+      const response = await fetch('/api/admin/order', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      const result = await response.json(); // Always parse response, even on error, for message
+
+      if (!response.ok) {
+        throw new Error(result.message || response.statusText || 'Failed to update order details.');
+      }
+
+      setMessage(result.message || 'Order updated successfully!');
+      setMessageType('success');
+      
+      fetchOrders(); // Re-fetch orders to update the UI with latest data
+      setIsEditing(false); // Exit edit mode
+      setShowOrderModal(false); // Close modal
+    } catch (err: any) {
+      console.error('Error updating order details:', err);
+      setMessage(err.message || 'An error occurred during order update.');
+      setMessageType('error');
+    }
+  };
+
+  // Confirms the cancellation and updates the order status via API
+  const confirmCancellation = async (reason: string | null) => {
+    if (!orderToCancel) return;
+
+    setMessage(null); // Clear previous messages
+    setMessageType(null);
+
+    const payload = {
+      id: orderToCancel.id,
+      status: orderToCancel.newStatus,
+      cancellationReason: reason,
+    };
+
+    try {
+      // Adjusted API endpoint to /api/admin/order
+      const response = await fetch('/api/admin/order', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      const result = await response.json(); // Always parse response, even on error, for message
+
+      if (!response.ok) {
+        throw new Error(result.message || response.statusText || 'Failed to cancel order.');
+      }
+
+      setMessage(result.message || 'Order cancelled successfully!');
+      setMessageType('success');
+
+      fetchOrders(); // Re-fetch orders to update UI
+      setShowCancelConfirmModal(false);
+      setOrderToCancel(null);
+      setIsEditing(false);
+      setShowOrderModal(false);
+    } catch (err: any) {
+      console.error('Error confirming cancellation:', err);
+      setMessage(err.message || 'An error occurred during cancellation confirmation.');
+      setMessageType('error');
+    }
+  };
+
+
+  // Function to delete an order via API (DELETE)
+  const deleteOrder = async (orderId: number) => {
+    setMessage(null); // Clear previous messages
+    setMessageType(null);
+
+    // In a real app, replace confirm with a custom modal for better UX
+    if (!confirm(`คุณแน่ใจหรือไม่ที่จะลบคำสั่งซื้อ ID: ${orderId}?`)) { 
+      return;
+    }
+
+    try {
+      // Adjusted API endpoint to /api/admin/order
+      const response = await fetch(`/api/admin/order?id=${orderId}`, { 
+        method: 'DELETE',
+      });
+
+      const result = await response.json(); // Always parse response, even on error, for message
+
+      if (!response.ok) {
+        throw new Error(result.message || response.statusText || 'Failed to delete order.');
+      }
+
+      setMessage(result.message || 'Order deleted successfully!');
+      setMessageType('success');
+      
+      fetchOrders(); // Re-fetch orders to update UI
+      setShowOrderModal(false); // Close modal if open
+    } catch (err: any) {
+      console.error('Error deleting order:', err);
+      setMessage(err.message || 'An error occurred during deletion.');
+      setMessageType('error');
+    }
+  };
+
+  // --- UI Interaction Handlers ---
+
+  const viewOrderDetails = (order: Order) => {
+    setSelectedOrder(order);
+    setShowOrderModal(true);
+    setIsEditing(false); // Always open in view mode initially
+    // Populate edit form data for potential editing later
+    setEditFormData({
+      trackingId: order.trackingId || '',
+      shippingCarrier: order.shippingCarrier || '',
+      deliveryDate: order.deliveryDate || '',
+      status: order.status,
+      transferSlipImageUrl: order.transferSlipImageUrl || '',
+      cancellationReason: order.cancellationReason || '',
+    });
+  };
+
+  const handleEditClick = () => {
+    setIsEditing(true); // Switch modal to edit mode
+  };
+
+  const handleEditFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setEditFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  // --- Search & Filter Logic ---
   useEffect(() => {
     let filtered: Order[] = orders;
 
     if (searchTerm) {
       filtered = filtered.filter(order =>
-        order.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        order.id.toString().includes(searchTerm) || // Search by numeric ID
         order.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        order.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        order.phone.includes(searchTerm) ||
         (order.trackingId && order.trackingId.toLowerCase().includes(searchTerm.toLowerCase()))
       );
     }
@@ -467,9 +456,10 @@ export default function OrderManagement() {
     }
 
     setFilteredOrders(filtered);
-    setCurrentPage(1);
+    setCurrentPage(1); // Reset to first page on filter/search change
   }, [searchTerm, statusFilter, orders]);
 
+  // --- Pagination Logic ---
   useEffect(() => {
     const startIndex: number = (currentPage - 1) * itemsPerPage;
     const endIndex: number = startIndex + itemsPerPage;
@@ -488,121 +478,15 @@ export default function OrderManagement() {
     setCurrentPage(1);
   };
 
-  // Function to update an order's status, now with cancellation confirmation
-  const updateOrderStatus = (orderId: string, newStatus: OrderStatus, reason: string | null = null) => {
-    if (newStatus === 'cancelled') {
-      setOrderToCancel({ id: orderId, newStatus: newStatus });
-      setShowCancelConfirmModal(true);
-      // Do NOT update state immediately, wait for confirmation
-    } else {
-      // For non-cancellation status changes, proceed directly
-      setOrders(prev => prev.map(order =>
-        order.id === orderId ? { ...order, status: newStatus, cancellationReason: reason } : order
-      ));
-      if (selectedOrder && selectedOrder.id === orderId) {
-        setSelectedOrder(prev => (prev ? { ...prev, status: newStatus, cancellationReason: reason } : null));
-      }
-    }
-  };
-
-  // Confirms the cancellation and updates the order status
-  const confirmCancellation = (reason: string | null = null) => {
-    if (orderToCancel) {
-      setOrders(prev => prev.map(order =>
-        order.id === orderToCancel.id ? { ...order, status: orderToCancel.newStatus, cancellationReason: reason } : order
-      ));
-      // Update selectedOrder if it was the one being cancelled
-      if (selectedOrder && selectedOrder.id === orderToCancel.id) {
-        setSelectedOrder(prev => (prev ? { ...prev, status: orderToCancel.newStatus, cancellationReason: reason } : null));
-      }
-      setShowCancelConfirmModal(false);
-      setOrderToCancel(null); // Clear the order to cancel
-      setIsEditing(false); // Ensure modal exits edit mode after cancellation
-      setShowOrderModal(false); // Close the detail modal after cancellation
-    }
-  };
-
-  const deleteOrder = (orderId: string) => {
-    if (window.confirm(`คุณแน่ใจหรือไม่ที่จะลบคำสั่งซื้อ ${orderId}?`)) {
-      setOrders(prev => prev.filter(order => order.id !== orderId));
-      setShowOrderModal(false);
-    }
-  };
-
-  const viewOrderDetails = (order: Order) => {
-    setSelectedOrder(order);
-    setShowOrderModal(true);
-    setIsEditing(false);
-  };
-
-  const handleEditClick = () => {
-    if (selectedOrder) {
-      setEditFormData({
-        trackingId: selectedOrder.trackingId || '',
-        shippingCarrier: selectedOrder.shippingCarrier || '',
-        deliveryDate: selectedOrder.deliveryDate || '',
-        status: selectedOrder.status,
-        transferSlipImageUrl: selectedOrder.transferSlipImageUrl || '',
-        cancellationReason: selectedOrder.cancellationReason || '', // Load cancellation reason
-      });
-      setIsEditing(true);
-    }
-  };
-
-  const handleEditFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setEditFormData(prev => ({
-      ...prev,
-      [name]: value as string
-    }));
-  };
-
-  const updateOrderDetails = () => {
-    if (selectedOrder) {
-      const newStatus = editFormData.status;
-      const newCancellationReason = editFormData.status === 'cancelled' ? editFormData.cancellationReason : null;
-
-      // If changing to cancelled, use the confirmation flow
-      if (newStatus === 'cancelled' && selectedOrder.status !== 'cancelled') {
-        setOrderToCancel({ id: selectedOrder.id, newStatus: newStatus });
-        setShowCancelConfirmModal(true);
-      } else {
-        // Otherwise, directly update the order
-        setOrders(prevOrders => prevOrders.map(order =>
-          order.id === selectedOrder.id
-            ? {
-              ...order,
-              trackingId: editFormData.trackingId,
-              shippingCarrier: editFormData.shippingCarrier,
-              deliveryDate: editFormData.deliveryDate,
-              status: newStatus,
-              transferSlipImageUrl: editFormData.transferSlipImageUrl || null,
-              cancellationReason: newCancellationReason, // Update cancellation reason
-            }
-            : order
-        ));
-        setSelectedOrder(prev => (prev ? {
-          ...prev,
-          trackingId: editFormData.trackingId,
-          shippingCarrier: editFormData.shippingCarrier,
-          deliveryDate: editFormData.deliveryDate,
-          status: newStatus,
-          transferSlipImageUrl: editFormData.transferSlipImageUrl || null,
-          cancellationReason: newCancellationReason,
-        } : null));
-        setIsEditing(false);
-      }
-    }
-  };
-
-
-  const formatPrice = (price: number): string => {
+  // --- Helper Functions (Memoized for performance) ---
+  const formatPrice = useMemo(() => (price: number): string => {
     return new Intl.NumberFormat('th-TH', {
       style: 'currency',
       currency: 'THB'
     }).format(price);
-  };
+  }, []);
 
+  // --- Order Statistics Calculation (Memoized for performance) ---
   interface OrderStats {
     total: number;
     pending: number;
@@ -612,7 +496,7 @@ export default function OrderManagement() {
     cancelled: number;
   }
 
-  const getStatusStats = (): OrderStats => {
+  const getStatusStats = useMemo((): OrderStats => {
     const stats: OrderStats = {
       total: orders.length,
       pending: orders.filter(o => o.status === 'pending').length,
@@ -622,10 +506,16 @@ export default function OrderManagement() {
       cancelled: orders.filter(o => o.status === 'cancelled').length
     };
     return stats;
-  };
+  }, [orders]);
 
-  const stats: OrderStats = getStatusStats();
+  const stats: OrderStats = getStatusStats;
 
+  // --- Initial Data Fetch on Component Mount ---
+  useEffect(() => {
+    fetchOrders(); // Fetch orders from the API on component mount
+  }, []); // Empty dependency array means this runs once on mount
+
+  // --- Render Logic ---
   return (
     <div className="min-h-screen bg-base-200 p-4">
       <div className="max-w-7xl mx-auto">
@@ -636,16 +526,7 @@ export default function OrderManagement() {
               <h1 className="text-3xl font-bold text-base-content">จัดการคำสั่งซื้อ</h1>
               <p className="text-base-content/70 mt-1">จัดการและติดตามคำสั่งซื้อทั้งหมด</p>
             </div>
-            <div className="flex flex-col sm:flex-row gap-2">
-              <button className="btn btn-primary w-full sm:w-auto">
-                <FiPlus className="w-4 h-4" />
-                เพิ่มคำสั่งซื้อ
-              </button>
-              <button className="btn btn-outline w-full sm:w-auto">
-                <FiDownload className="w-4 h-4" />
-                ส่งออก
-              </button>
-            </div>
+            {/* Removed "เพิ่มคำสั่งซื้อ" and "ส่งออก" buttons as per previous request */}
           </div>
         </div>
 
@@ -732,7 +613,7 @@ export default function OrderManagement() {
                 <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-base-content/50 w-4 h-4" />
                 <input
                   type="text"
-                  placeholder="ค้นหาด้วยรหัสคำสั่งซื้อ, ชื่อลูกค้า, อีเมล, เบอร์โทร หรือ Tracking ID..."
+                  placeholder="ค้นหาด้วยรหัสคำสั่งซื้อ, ชื่อลูกค้า, Tracking ID..."
                   className="input input-bordered w-full pl-10"
                   value={searchTerm}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)}
@@ -746,11 +627,9 @@ export default function OrderManagement() {
                 onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setStatusFilter(e.target.value as OrderStatus | 'all')}
               >
                 <option value="all">สถานะทั้งหมด</option>
-                <option value="pending">รอดำเนินการ</option>
-                <option value="processing">กำลังเตรียม</option>
-                <option value="shipped">จัดส่งแล้ว</option>
-                <option value="delivered">ส่งเรียบร้อย</option>
-                <option value="cancelled">ยกเลิก</option>
+                {Object.keys(statusConfig).map(statusKey => (
+                    <option key={statusKey} value={statusKey}>{statusConfig[statusKey as OrderStatus].label}</option>
+                ))}
               </select>
             </div>
             <div className="md:w-40">
@@ -769,7 +648,27 @@ export default function OrderManagement() {
           </div>
         </div>
 
-        {/* Orders Table - Desktop View (hidden on small screens) */}
+        {/* Display Loading/Error/Message states */}
+        {loading && (
+            <div className="flex justify-center items-center h-48 bg-base-100 rounded-lg shadow-sm">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
+                <p className="ml-4 text-lg text-base-content/70">กำลังโหลดคำสั่งซื้อ...</p>
+            </div>
+        )}
+        {error && (
+            <div className="text-center p-6 bg-error/10 text-error rounded-lg shadow-md max-w-xl mx-auto my-8">
+                <p className="font-bold text-xl mb-2">เกิดข้อผิดพลาด!</p>
+                <p>{error}</p>
+            </div>
+        )}
+        {message && (
+            <div className={`text-center p-4 rounded-lg shadow-md max-w-xl mx-auto my-4 ${messageType === 'success' ? 'bg-success/10 text-success' : 'bg-error/10 text-error'}`}>
+                <p>{message}</p>
+            </div>
+        )}
+        
+        {/* Orders Table - Desktop View */}
+        {!loading && !error && (
         <div className="hidden md:block bg-base-100 rounded-lg shadow-sm overflow-hidden">
           <div className="overflow-x-auto">
             <table className="table table-zebra w-full">
@@ -794,7 +693,6 @@ export default function OrderManagement() {
                     statusConfig={statusConfig}
                     formatPrice={formatPrice}
                     viewOrderDetails={viewOrderDetails}
-                    updateOrderStatus={updateOrderStatus} // Passed to OrderRow
                     deleteOrder={deleteOrder}
                   />
                 ))}
@@ -802,8 +700,10 @@ export default function OrderManagement() {
             </table>
           </div>
         </div>
+        )}
 
-        {/* Orders List - Mobile View (hidden on medium and larger screens) */}
+        {/* Orders List - Mobile View */}
+        {!loading && !error && (
         <div className="block md:hidden bg-base-100 rounded-lg shadow-sm p-4">
           {paginatedOrders.length > 0 ? (
             <div className="grid grid-cols-1 gap-4">
@@ -824,17 +724,19 @@ export default function OrderManagement() {
             </div>
           )}
         </div>
+        )}
 
-        {/* No orders found message for both views if no filtered orders */}
-        {paginatedOrders.length === 0 && filteredOrders.length === 0 && (
+        {/* No orders found message - only show if not loading and no error, and filters result in no products */}
+        {!loading && !error && paginatedOrders.length === 0 && filteredOrders.length === 0 && (
           <div className="text-center py-12">
             <FiPackage className="w-12 h-12 text-base-content/30 mx-auto mb-4" />
             <p className="text-base-content/70">ไม่พบคำสั่งซื้อที่ตรงกับเงื่อนไขการค้นหา</p>
           </div>
         )}
 
+
         {/* Pagination Section */}
-        {filteredOrders.length > 0 && (
+        {!loading && !error && filteredOrders.length > 0 && (
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 border-t bg-base-100 rounded-b-lg shadow-sm mt-4">
             <div className="text-sm text-base-content/70">
               แสดงรายการ {((currentPage - 1) * itemsPerPage) + 1} ถึง {Math.min(currentPage * itemsPerPage, filteredOrders.length)} จากทั้งหมด {filteredOrders.length} รายการ
@@ -860,21 +762,17 @@ export default function OrderManagement() {
                     startPage = Math.max(1, endPage - maxVisiblePages + 1);
                   }
 
+                  // Add ellipsis if needed at the start
                   if (startPage > 1) {
                     pages.push(
-                      <button
-                        key={1}
-                        className="btn btn-sm"
-                        onClick={() => handlePageChange(1)}
-                      >
-                        1
-                      </button>
+                      <button key={1} className="btn btn-sm" onClick={() => handlePageChange(1)}>1</button>
                     );
                     if (startPage > 2) {
                       pages.push(<span key="ellipsis1" className="px-2">...</span>);
                     }
                   }
 
+                  // Add main page numbers
                   for (let i = startPage; i <= endPage; i++) {
                     pages.push(
                       <button
@@ -887,6 +785,7 @@ export default function OrderManagement() {
                     );
                   }
 
+                  // Add ellipsis if needed at the end
                   if (endPage < totalPages) {
                     if (endPage < totalPages - 1) {
                       pages.push(<span key="ellipsis2" className="px-2">...</span>);
@@ -901,7 +800,6 @@ export default function OrderManagement() {
                       </button>
                     );
                   }
-
                   return pages;
                 })()}
               </div>
@@ -930,9 +828,10 @@ export default function OrderManagement() {
                 <div>
                   <h4 className="font-semibold mb-2">ข้อมูลลูกค้า</h4>
                   <div className="bg-base-200 rounded-lg p-4">
+                    <p><strong>User ID:</strong> {selectedOrder.userId}</p> {/* NEW: Display User ID */}
                     <p><strong>ชื่อ:</strong> {selectedOrder.customerName}</p>
-                    <p><strong>อีเมล:</strong> {selectedOrder.email}</p>
-                    <p><strong>เบอร์โทร:</strong> {selectedOrder.phone}</p>
+                    <p><strong>อีเมล:</strong> {selectedOrder.email || '-'}</p>
+                    <p><strong>เบอร์โทร:</strong> {selectedOrder.phone || '-'}</p>
                     <p><strong>ที่อยู่:</strong> {selectedOrder.address}</p>
                   </div>
                 </div>
@@ -942,7 +841,7 @@ export default function OrderManagement() {
                   <h4 className="font-semibold mb-2">ข้อมูลคำสั่งซื้อ</h4>
                   <div className="bg-base-200 rounded-lg p-4">
                     <p><strong>รหัส:</strong> {selectedOrder.id}</p>
-                    <p><strong>วันที่สั่ง:</strong> {selectedOrder.orderDate}</p>
+                    <p><strong>วันที่สั่ง:</strong> {selectedOrder.orderDate.split('T')[0]}</p>
 
                     {isEditing ? (
                       <>
@@ -954,7 +853,7 @@ export default function OrderManagement() {
                             type="date"
                             name="deliveryDate"
                             className="input input-bordered w-full"
-                            value={editFormData.deliveryDate}
+                            value={editFormData.deliveryDate.split('T')[0]}
                             onChange={handleEditFormChange}
                           />
                         </div>
@@ -1023,7 +922,7 @@ export default function OrderManagement() {
                             </label>
                             <textarea
                               name="cancellationReason"
-                              placeholder="ระบุเหตุผลการยกเลิก"
+                              placeholder="ระบุเหตุผลในการยกเลิก"
                               className="textarea textarea-bordered h-24 w-full"
                               value={editFormData.cancellationReason}
                               onChange={handleEditFormChange}
@@ -1033,7 +932,7 @@ export default function OrderManagement() {
                       </>
                     ) : (
                       <>
-                        <p><strong>วันที่ส่ง:</strong> {selectedOrder.deliveryDate}</p>
+                        <p><strong>วันที่ส่ง:</strong> {selectedOrder.deliveryDate !== null ? selectedOrder.deliveryDate.split('T')[0] : '-'}</p>
                         <p>
                           <strong>Tracking ID:</strong>{' '}
                           {selectedOrder.trackingId ? selectedOrder.trackingId : 'ยังไม่มี'}
@@ -1091,6 +990,7 @@ export default function OrderManagement() {
                         <th>สินค้า</th>
                         <th>จำนวน</th>
                         <th>ราคาต่อหน่วย</th>
+                        <th>ส่วนลด</th>
                         <th>รวม</th>
                       </tr>
                     </thead>
@@ -1100,13 +1000,14 @@ export default function OrderManagement() {
                           <td>{product.name}</td>
                           <td>{product.quantity}</td>
                           <td>{formatPrice(product.price)}</td>
-                          <td>{formatPrice(product.price * product.quantity)}</td>
+                          <td>{formatPrice(product.discount)}</td>
+                          <td>{formatPrice((product.price * product.quantity) - product.discount)}</td>
                         </tr>
                       ))}
                     </tbody>
                     <tfoot>
                       <tr>
-                        <th colSpan={3}>ยอดรวมทั้งสิ้น</th>
+                        <th colSpan={4}>ยอดรวมทั้งสิ้น</th>
                         <th>{formatPrice(selectedOrder.total)}</th>
                       </tr>
                     </tfoot>
@@ -1160,9 +1061,9 @@ export default function OrderManagement() {
                   name="cancellationReason" // Ensure name matches
                 ></textarea>
               </div>
-              <div className="modal-action">
+              <div className="modal-action flex-col sm:flex-row">
                 <button
-                  className="btn btn-ghost"
+                  className="btn btn-ghost w-full sm:w-auto"
                   onClick={() => {
                     setShowCancelConfirmModal(false);
                     setOrderToCancel(null);
@@ -1175,9 +1076,9 @@ export default function OrderManagement() {
                   ยกเลิก
                 </button>
                 <button
-                  className="btn btn-error"
+                  className="btn btn-error w-full sm:w-auto"
                   onClick={() => confirmCancellation(editFormData.cancellationReason)}
-                  disabled={!editFormData.cancellationReason} // Disable confirm if reason is empty
+                  disabled={!editFormData.cancellationReason.trim()} // Disable confirm if reason is empty
                 >
                   ยืนยันการยกเลิก
                 </button>

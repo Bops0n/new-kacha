@@ -242,16 +242,6 @@ export default function UserManagement() {
 
   const saveUserDetails = async() => {
 
-    if (selectedUser){
-      const response = await fetch('../api/admin/user/updateUser',{
-        method : 'PATCH',
-        body : JSON.stringify(editFormData)
-      })
-      console.log(response)
-      
-    }else{
-      console.log('nouserslect')
-    }
     if (!editFormData.Username || !editFormData.Full_Name) {
       // alert('กรุณากรอก Username และ Full Name'); // Replace with custom modal
       // Using a placeholder for custom alert
@@ -266,8 +256,34 @@ export default function UserManagement() {
       return;
     }
 
+    let newID : number = 0;
+    if (selectedUser){
+      const response = await fetch('../api/admin/user/updateUser',{
+        method : 'PATCH',
+        body : JSON.stringify(editFormData)
+      })
+      // console.log(response)
+    }else{
+        try{
+          const response = await fetch('../api/admin/user/addUser',{
+            method : 'POST',
+            body : JSON.stringify(editFormData)
+          })
+          const data = await response.json()
+          newID = data.User_ID
+          setEditFormData(prevFormData => ({ ...prevFormData, User_ID: newID }))
+        }catch(error){
+          return
+        }
+
+      // console.log
+
+    }
+
+    console.log(editFormData.User_ID)
+
     const newOrUpdatedUser: User = {
-      User_ID: isEditing && editFormData.User_ID !== null ? editFormData.User_ID : Date.now(), // Generate new ID for mock
+      User_ID: editFormData.User_ID !== null? editFormData.User_ID : newID, // Generate new ID for mock
       Username: editFormData.Username,
       Password: editFormData.Password, // Caution: In real app, never handle passwords like this
       Full_Name: editFormData.Full_Name,
@@ -290,11 +306,15 @@ export default function UserManagement() {
     // setShowUserModal(false); // Keep modal open in view mode after save
   };
 
-  const deleteUser = (userId: number) => {
-    // if (window.confirm(`คุณแน่ใจหรือไม่ที่จะลบผู้ใช้ User ID: ${userId}?`)) {
-      setUsers(prev => prev.filter(u => u.User_ID !== userId));
-      setShowUserModal(false);
-    // }
+  const deleteUser = async(userId: number) => {
+    if (!window.confirm(`คุณแน่ใจหรือไม่ที่จะลบผู้ใช้ User ID: ${userId}?`)) return
+    setUsers(prev => prev.filter(u => u.User_ID !== userId));
+    const response = await fetch(`../api/admin/user/deleteUser?id=${userId}`,{
+      method : 'DELETE',
+    })
+    const result = await response.json()
+    setShowUserModal(false);
+    
   };
 
   // --- Address Actions within User Modal ---
@@ -366,10 +386,14 @@ export default function UserManagement() {
       } else {
         console.log('add new address')
 
-        const k = await fetch('../api/admin/user/addAddress',{
+        const response = await fetch('../api/admin/user/addAddress',{
           method: 'POST',
           body : JSON.stringify(newOrUpdatedAddress)
         })
+
+        const data = await response.json()
+
+        newOrUpdatedAddress.Address_ID = data.Address_ID;
 
         updatedAddresses.push(newOrUpdatedAddress);
       }

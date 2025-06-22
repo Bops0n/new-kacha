@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth'; // For session handling (optional)
 import { authOptions } from '../../../auth/[...nextauth]/route'; // Updated path
-import { poolQuery } from '../../../lib/db'; // Updated path
+import { pool, poolQuery } from '../../../lib/db'; // Updated path
 
 // Define the Address interface based on the provided schema
 interface Address {
@@ -58,7 +58,7 @@ export async function POST(req: NextRequest) {
 
 
     // --- Start a database transaction for atomicity ---
-    const client = await poolQuery.pool.connect(); // Get a client directly from the pool
+    const client = await pool.connect(); // Get a client directly from the pool
     try {
         await client.query('BEGIN'); // Start transaction
 
