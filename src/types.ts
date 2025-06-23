@@ -168,3 +168,19 @@ export type NewAddressForm = {
 };
 
 
+export type AlertModalType = 'info' | 'success' | 'warning' | 'error';
+
+/**
+ * Interface for the props that the AlertModal component accepts.
+ *
+ * @property {boolean} isOpen - Controls the visibility of the modal. If true, the modal is displayed.
+ * @property {string} message - The main message text to be shown inside the alert modal.
+ * @property {() => void} onClose - A callback function that is invoked when the user closes the modal (e.g., by clicking the 'OK' button).
+ * @property {AlertModalType} [type='info'] - The type of alert, which determines the icon and button color. Defaults to 'info'.
+ */
+export interface AlertModalProps {
+  isOpen: boolean;
+  message: string;
+  onClose: () => void;
+  type?: AlertModalType;
+}
