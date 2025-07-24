@@ -1,10 +1,20 @@
 'use client'; // This component needs to be a Client Component for interactivity
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { FiMail, FiLock, FiUser, FiCheckCircle } from 'react-icons/fi'; // Icons for inputs
+import { useSession } from 'next-auth/react';
+import { redirect } from 'next/navigation';
+// import { redirect } from 'next/dist/server/api-utils';
 
 export default function AuthPage() {
+
+  const session = useSession()
+  
+  useEffect(()=>{
+    if (session.status === 'authenticated')
+      redirect('/')
+  },[session.status])
   const [activeTab, setActiveTab] = useState<'login' | 'register'>('login'); // State to control active tab
 
   const [loginFormData, setLoginFormData] = useState({
@@ -55,6 +65,10 @@ export default function AuthPage() {
     // In a real app, you would send this data to your backend registration endpoint
     alert('Register attempted! (Check console for data)'); // Replace with proper feedback UI
   };
+
+    if(session.status === 'loading')
+    return (
+      <>loading</>)
 
   return (
     <div className="min-h-screen bg-base-200 flex items-center justify-center p-4 pt-60">

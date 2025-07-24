@@ -6,15 +6,15 @@ import CredentialsProvider from "next-auth/providers/credentials";
 // ในระบบจริง คุณจะต้องเชื่อมต่อกับฐานข้อมูลของคุณ (เช่น PostgreSQL)
 // เพื่อดึงข้อมูลผู้ใช้และตรวจสอบรหัสผ่าน
 const MOCK_USERS = [
-  { id: "101", username: "somchai.k", password: "password123", fullName: "สมชาย คชาโฮม", email: "somchai.k@example.com", accessLevel: "0" },
+  { id: "103", username: "somchai.k", password: "password123", fullName: "สมชาย คชาโฮม", email: "somchai.k@example.com", accessLevel: "0" },
   { id: "102", username: "suda.p", password: "password123", fullName: "สุดา พลังสร้าง", email: "suda.p@example.com", accessLevel: "0" },
-  { id: "admin", username: "admin", password: "adminpassword", fullName: "แอดมิน ระบบ", email: "admin@example.com", accessLevel: "1" },
+  { id: "101", username: "admin", password: "adminpassword", fullName: "แอดมิน ระบบ", email: "admin@example.com", accessLevel: "1" },
 ];
 
 export const authOptions = {
   // ตั้งค่า Session Strategy เป็น JWT (แนะนำสำหรับ App Router)
   session: {
-    strategy: "jwt",
+    strategy: 'jwt',
     // กำหนดเวลาหมดอายุของ Session ในหน่วยวินาที (เช่น 30 วัน)
     // NextAuth จะใช้ค่านี้นำไปกำหนด exp (expiration time) ใน JWT
     maxAge: 30 * 24 * 60 * 60, // 30 days

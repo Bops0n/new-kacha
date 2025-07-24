@@ -9,7 +9,8 @@ import AuthModal from './AuthModal';
 import { FiShoppingCart } from "react-icons/fi";
 import { useCounter } from '../../context/CartCount';
 import { signOut, useSession } from "next-auth/react";
-
+import { useAlert } from "@/app/context/AlertModalContext";
+import { CartDetailSchema } from "@/types";
 // --- Mock Data for Categories (copied here for self-containment of navbar) ---
 const mockCategories = [
     { Category_ID: 1, Name: 'เครื่องใช้ไฟฟ้า' },
@@ -50,23 +51,27 @@ export default function UserNavbar() {
 
     const router = useRouter();
     const { count: cartItemCount, setCounter } = useCounter();
+    const { showAlert, hideAlert } = useAlert()
     const session = useSession();
 
     useEffect(() => {
         if (session.status == 'authenticated') {
             const fetchInitialCartCount = async () => {
                 console.log("กำลังดึงจำนวนสินค้าในตะกร้าสำหรับผู้ใช้ที่เข้าสู่ระบบ...");
-                await new Promise(resolve => setTimeout(resolve, 300));
-                const mockInitialCount = 5;
+                // await new Promise(resolve => setTimeout(resolve, 300));
+                const result = await fetch('/api/cart?userId=' + session.data.user.id)
+                const data = await result.json()
+                const mockInitialCount = data.cartItems.length;
                 setCounter(mockInitialCount);
                 console.log(`จำนวนสินค้าในตะกร้าถูกตั้งค่าเป็น: ${mockInitialCount}`);
                 handleLoginSuccess('test name')
             };
             fetchInitialCartCount();
         } else {
+            console.log('l')
             setCounter(0);
         }
-    }, [isLoggedIn, setCounter,]);
+    }, [session.status, setCounter]);
 
     useEffect(()=>{
         if (session.status == 'authenticated'){
@@ -108,8 +113,10 @@ export default function UserNavbar() {
             {/* Top Bar */}
             <button onClick={async()=>{
                 console.log(session.data?.user, session.status)
-                const k = await fetch('api/testApi')
-                console.log(k)
+                // const k = await fetch('api/testApi')
+                // showAlert('test','info','kacha982',()=>{ console.log('k')
+                    // return 'k'})
+
 
             }}>test</button>
             <div className="bg-gray-200 border-b border-gray-300 text-gray-700">
@@ -290,7 +297,7 @@ export default function UserNavbar() {
                             </Link>
 
                             {session.data?.user.accessLevel === "1" ? 
-                            <Link href="#" className="px-6 py-4 hover:bg-gray-200 transition-colors bg-amber-500">
+                            <Link href="/admin/dashboard" className="px-6 py-4 hover:bg-gray-200 transition-colors bg-amber-500">
                                 จัดการระบบ
                             </Link> :
                             <></>

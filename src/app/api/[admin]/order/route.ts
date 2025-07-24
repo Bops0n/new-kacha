@@ -4,6 +4,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { poolQuery } from '../../lib/db'; // Adjusted path for new route location
+import { Order, OrderProductDetail } from '../../../../types'; // Import Order and OrderProductDetail
 
 // Define interfaces that map to your database tables and the combined UI structure
 interface DbOrder {
@@ -21,6 +22,7 @@ interface DbOrder {
     CancellationReason: string | null; // PascalCase
     Address: string | null; // PascalCase
     Phone: string | null; // PascalCase, re-added
+    Total_Amount: number | null; // Added Total_Amount to DB schema interface
 }
 
 interface DbOrderDetail {
@@ -29,6 +31,10 @@ interface DbOrderDetail {
     Quantity: number;
     Price: number; // Price from Order_Detail is numeric(10,2)
     Discount: number; // Discount from Order_Detail is numeric(10,2)
+    Product_Name: string; // Snapshotted product name
+    Product_Brand: string | null; // Snapshotted product brand
+    Product_Unit: string; // Snapshotted product unit
+    Product_Image_URL: string | null; // Snapshotted product image URL
 }
 
 interface DbProduct {
@@ -39,41 +45,17 @@ interface DbProduct {
 // Assuming these schemas for User table
 interface DbUser {
     User_ID: number;
-    FullName: string; // Used for customerName
+    Full_Name: string; // Used for customerName
     Email: string | null; // Used for email
 }
 
-// Interface for the combined Order data sent to the UI
-// This is the shape the frontend `Order` interface should match.
-interface OrderUI {
-    id: number; // Maps to Order_ID
-    userId: number; // Added userId for UI display
-    customerName: string; // From User.FullName
-    email: string | null; // From User.Email
-    phone: string | null; // From Order.Phone (snapshot)
-    products: Array<{ name: string; quantity: number; price: number; discount: number }>; // Detailed products
-    total: number; // Calculated total
-    status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled'; // Maps to Status from DB
-    orderDate: string;
-    deliveryDate: string | null; // From Order.DeliveryDate
-    address: string; // From Order.Address (snapshot)
-    addressId: number; // From Order.Address_ID
-    trackingId: string | null; // From Order.TrackingId
-    shippingCarrier: string | null; // From Order.ShippingCarrier
-    transferSlipImageUrl: string | null; // From Order.TransferSlipImageUrl
-    cancellationReason: string | null; // From Order.CancellationReason
-    paymentType: string; // From DB (Payment_Type)
-    invoiceId: string | null; // From DB (Invoice_ID)
-}
-
-
 /**
- * Helper function to map database rows to the OrderUI interface.
+ * Helper function to map database rows to the Order interface.
  * This aggregates order details and calculates total.
  */
-const mapDbOrderToUiOrder = (dbOrders: any[]): OrderUI[] => {
+const mapDbOrderToUiOrder = (dbOrders: any[]): Order[] => {
     // Group order details by Order_ID
-    const ordersMap = new Map<number, OrderUI>();
+    const ordersMap = new Map<number, Order>();
 
     dbOrders.forEach(row => {
         const orderId = row.Order_ID;
@@ -81,57 +63,62 @@ const mapDbOrderToUiOrder = (dbOrders: any[]): OrderUI[] => {
         if (!ordersMap.has(orderId)) {
             // Initialize new order if not already in map
             ordersMap.set(orderId, {
-                id: row.Order_ID,
-                userId: row.User_ID, // Map User_ID from DB to userId in UI
-                customerName: row.UserName || 'N/A', // Pulled from User table
-                email: row.UserEmail || null,       // Pulled from User table
-                phone: row.Phone || null,           // Pulled from Order.Phone
-                products: [], // Initialize empty products array
-                total: 0, // Initialize total
-                status: row.Status, // Map DB 'Status' to UI 'status'
-                orderDate: row.Order_Date,
-                deliveryDate: row.DeliveryDate || null, // Map from DeliveryDate
-                address: row.Address || 'N/A', // Map from Address
-                addressId: row.Address_ID, // Map from Address_ID
-                trackingId: row.TrackingId || null, // Map from TrackingId
-                shippingCarrier: row.ShippingCarrier || null, // Map from ShippingCarrier
-                transferSlipImageUrl: row.TransferSlipImageUrl || null, // Map from TransferSlipImageUrl
-                cancellationReason: row.CancellationReason || null, // Map from CancellationReason
-                paymentType: row.Payment_Type,
-                invoiceId: row.Invoice_ID || null,
+                Order_ID: row.Order_ID,
+                User_ID: row.User_ID,
+                Customer_Name: row.UserFullName || 'N/A', // Pulled from User table
+                Email: row.UserEmail || null,       // Pulled from User table
+                Phone: row.Phone || null,           // Pulled from Order.Phone
+                Products: [], // Initialize empty products array
+                Total_Amount: parseFloat(row.Total_Amount), // Directly use Total_Amount from DB
+                Status: row.Status,
+                Order_Date: row.Order_Date,
+                DeliveryDate: row.DeliveryDate || null,
+                Address: row.Address || 'N/A',
+                Shipping_Address_ID: row.Address_ID,
+                Tracking_ID: row.Tracking_ID || null, // Use Tracking_ID from DB
+                Shipping_Carrier: row.Shipping_Carrier || null, // Use Shipping_Carrier from DB
+                Transfer_Slip_Image_URL: row.Transfer_Slip_Image_URL || null, // Use Transfer_Slip_Image_URL from DB
+                Cancellation_Reason: row.Cancellation_Reason || null, // Use Cancellation_Reason from DB
+                Payment_Type: row.Payment_Type,
+                Invoice_ID: row.Invoice_ID || null,
             });
         }
 
         const currentOrder = ordersMap.get(orderId)!;
 
-        // Add product detail if available for this row
+        // Add product detail if available (an order might exist without products if badly formed, but unlikely)
         if (row.Product_ID) { // Check if product detail exists for this row
             const productPrice = parseFloat(row.Price);
             const productDiscount = parseFloat(row.Discount);
             const productQuantity = row.Quantity;
-            const itemTotal = (productPrice * productQuantity) - productDiscount;
+            const itemSubtotal = (productPrice * productQuantity) - productDiscount;
 
-            currentOrder.products.push({
-                name: row.ProductName, // From Product table
-                quantity: productQuantity,
-                price: productPrice,
-                discount: productDiscount,
+            currentOrder.Products.push({
+                Product_ID: row.Product_ID,
+                Product_Name: row.ProductName,
+                Product_Brand: row.ProductBrand,
+                Product_Unit: row.ProductUnit,
+                Product_Image_URL: row.ProductImageUrl,
+                Quantity: productQuantity,
+                Price: productPrice,
+                Discount: productDiscount,
+                Subtotal: itemSubtotal,
             });
-            currentOrder.total += itemTotal; // Accumulate total
+            // Total_Amount is now directly from DB, no longer accumulated here
         }
     });
 
     // Sort products within each order for consistent display (optional)
     ordersMap.forEach(order => {
-        order.products.sort((a, b) => a.name.localeCompare(b.name));
+        order.Products.sort((a, b) => a.Product_Name.localeCompare(b.Product_Name));
     });
 
 
     return Array.from(ordersMap.values()).sort((a, b) => {
         // Sort by orderDate descending, then by Order_ID ascending
-        if (a.orderDate < b.orderDate) return 1;
-        if (a.orderDate > b.orderDate) return -1;
-        return a.id - b.id;
+        if (a.Order_Date < b.Order_Date) return 1;
+        if (a.Order_Date > b.Order_Date) return -1;
+        return a.Order_ID - b.Order_ID;
     });
 };
 
@@ -160,30 +147,32 @@ export async function GET(req: NextRequest) {
             o."Order_ID",
             o."User_ID",
             o."Order_Date",
-            o."Status",                -- Changed to Status (PascalCase)
+            o."Status",
             o."Payment_Type",
             o."Invoice_ID",
-            o."Address_ID",            -- Included Address_ID
-            o."DeliveryDate",          -- Included DeliveryDate (PascalCase)
-            o."TrackingId",            -- Included TrackingId (PascalCase)
-            o."ShippingCarrier",       -- Included ShippingCarrier (PascalCase)
-            o."TransferSlipImageUrl",  -- Included TransferSlipImageUrl (PascalCase)
-            o."CancellationReason",    -- Included CancellationReason (PascalCase)
-            o."Address",               -- Included Address (PascalCase)
-            o."Phone",                 -- Included Phone
+            o."Address_ID",
+            o."DeliveryDate",
+            o."Tracking_ID", -- Selected with underscore
+            o."Shipping_Carrier", -- Selected with underscore
+            o."Transfer_Slip_Image_URL", -- Selected with underscore
+            o."Cancellation_Reason", -- Selected with underscore
+            o."Address",
+            o."Phone",
+            o."Total_Amount", -- Selected Total_Amount from DB
             od."Product_ID",
             od."Quantity",
             od."Price",
             od."Discount",
-            p."Name" AS "ProductName",
-            u."Full_Name" AS "UserName",
+            od."Product_Name" AS "ProductName",
+            od."Product_Brand" AS "ProductBrand",
+            od."Product_Unit" AS "ProductUnit",
+            od."Product_Image_URL" AS "ProductImageUrl",
+            u."Full_Name" AS "UserFullName",
             u."Email" AS "UserEmail"
         FROM
             public."Order" AS o
         LEFT JOIN
             public."Order_Detail" AS od ON o."Order_ID" = od."Order_ID"
-        LEFT JOIN
-            public."Product" AS p ON od."Product_ID" = p."Product_ID"
         LEFT JOIN
             public."User" AS u ON o."User_ID" = u."User_ID"
     `;
@@ -222,7 +211,7 @@ export async function PATCH(req: NextRequest) {
     //     return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     // }
 
-    let updatedOrderData: Partial<OrderUI>; // Use OrderUI interface for incoming data
+    let updatedOrderData: Partial<Order>; // Use Order interface for incoming data
     try {
         updatedOrderData = await req.json();
     } catch (error) {
@@ -230,36 +219,38 @@ export async function PATCH(req: NextRequest) {
         return NextResponse.json({ message: "Invalid JSON in request body." }, { status: 400 });
     }
 
-    if (typeof updatedOrderData.id === 'undefined' || updatedOrderData.id === null) {
-        return NextResponse.json({ message: "Order 'id' is required for update." }, { status: 400 });
+    if (typeof updatedOrderData.Order_ID === 'undefined' || updatedOrderData.Order_ID === null) {
+        return NextResponse.json({ message: "Order 'Order_ID' is required for update." }, { status: 400 });
     }
 
-    const orderIdToUpdate = updatedOrderData.id;
+    const orderIdToUpdate = updatedOrderData.Order_ID;
     const updateColumns: string[] = [];
     const queryParams: (string | number | null)[] = [];
     let paramIndex = 1;
 
-    // Map UI field names (camelCase from frontend) to DB column names (PascalCase)
+    // Map UI field names (PascalCase from frontend) to DB column names (PascalCase)
+    // Adjusted fieldMap to use PascalCase with underscores for DB column names
     const fieldMap: { [key: string]: string } = {
-        status: 'Status',
-        deliveryDate: 'DeliveryDate',
-        trackingId: 'TrackingId',
-        shippingCarrier: 'ShippingCarrier',
-        transferSlipImageUrl: 'TransferSlipImageUrl',
-        cancellationReason: 'CancellationReason',
-        address: 'Address',
-        phone: 'Phone',
-        addressId: 'Address_ID', // Map for Address_ID if it were to be updated
-        // userId is not typically updated directly from UI in this context
+        Status: 'Status',
+        DeliveryDate: 'DeliveryDate',
+        Tracking_ID: 'Tracking_ID', // Matched to new DB column name
+        Shipping_Carrier: 'Shipping_Carrier', // Matched to new DB column name
+        Transfer_Slip_Image_URL: 'Transfer_Slip_Image_URL', // Matched to new DB column name
+        Cancellation_Reason: 'Cancellation_Reason', // Matched to new DB column name
+        Address: 'Address',
+        Phone: 'Phone',
+        Shipping_Address_ID: 'Address_ID',
+        // Total_Amount is removed from fieldMap to prevent direct updates
+        // Total_Amount: 'Total_Amount', // Removed from fieldMap
     };
 
     for (const uiKey in updatedOrderData) {
         if (Object.prototype.hasOwnProperty.call(updatedOrderData, uiKey) &&
-            updatedOrderData[uiKey as keyof Partial<OrderUI>] !== undefined &&
+            updatedOrderData[uiKey as keyof Partial<Order>] !== undefined &&
             fieldMap[uiKey]) { // Only include fields that are mapped and present
             
             const dbColumn = fieldMap[uiKey];
-            let valueToSet: any = updatedOrderData[uiKey as keyof Partial<OrderUI>];
+            let valueToSet: any = updatedOrderData[uiKey as keyof Partial<Order>];
 
             // Handle empty strings for nullable text/date fields (should become NULL in DB)
             if (typeof valueToSet === 'string' && valueToSet.trim() === '') {

@@ -17,30 +17,9 @@ import {
   FiPlus, // Added FiPlus for add button (if needed later)
 } from 'react-icons/fi';
 
-// --- Type Definitions (Refined to match API output exactly) ---
-// This interface represents the shape of an order record as received from the API.
-interface Order {
-  id: number; // Maps to Order_ID from DB (number)
-  userId: number; // Added userId to match data from API
-  customerName: string; // From User.FullName via API
-  email: string | null; // From User.Email via API
-  phone: string | null; // From Order.Phone via API (now a snapshot)
-  products: Array<{ name: string; quantity: number; price: number; discount: number }>; // From Order_Detail & Product tables
-  total: number; // Calculated from products in API
-  status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled'; // Maps to status from DB
-  orderDate: string; // From DB
-  deliveryDate: string | null; // From Order table (DeliveryDate)
-  address: string; // From Order table (Address snapshot)
-  addressId: number; // From Order table (original Address_ID)
-  trackingId: string | null; // From Order table (TrackingId)
-  shippingCarrier: string | null; // From Order table (ShippingCarrier)
-  transferSlipImageUrl: string | null; // From Order table (TransferSlipImageUrl)
-  cancellationReason: string | null; // From Order table (CancellationReason)
-  paymentType: string; // From DB (Payment_Type)
-  invoiceId: string | null; // From DB (Invoice_ID)
-}
+// Using the imported Order type from '../../../types'
+import { Order, OrderStatus, StatusConfig, EditFormData } from '../../../../types'; 
 
-type OrderStatus = 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
 type TransferSlipStatusFilter = 'all' | 'has_slip' | 'no_slip'; // New type for slip filter
 
 interface StatusConfig {
@@ -124,13 +103,11 @@ const formatDate = (dateString: string | null): string => {
 };
 
 // Helper to get transfer slip status label with more universal terms
-const getTransferSlipStatusLabel = (imageUrl: string | null): boolean => {
+const getTransferSlipStatusLabel = (imageUrl: string | null): string => {
   if (imageUrl && imageUrl.trim() !== '') {
-    // return 'แนบสลิปแล้ว'; // More universal and formal
-    return true; // More universal and formal
+    return 'แนบสลิปแล้ว'; // More universal and formal
   }
-  // return 'ยังไม่แนบสลิป'; // More universal and formal
-  return false; // More universal and formal
+  return 'ยังไม่แนบสลิป'; // More universal and formal
 };
 
 // --- OrderRow Component (for Desktop Table View) ---
@@ -145,31 +122,30 @@ interface OrderRowProps {
 }
 
 const OrderRow: React.FC<OrderRowProps> = ({ order, statusConfig, formatPrice, formatDate, getTransferSlipStatusLabel, viewOrderDetails, deleteOrder }) => {
-  const StatusIcon = statusConfig[order.status].icon;
+  const StatusIcon = statusConfig[order.Status].icon;
+
 
   return (
     // Make the entire row clickable to view details
     <tr className="hover cursor-pointer" onClick={() => viewOrderDetails(order)}>
-      <td><div className="font-bold text-primary">{order.id}</div></td>
+      <td><div className="font-bold text-primary">{order.Order_ID}</div></td>
       <td>
-        <div className="font-bold">{order.customerName}</div>
-        {/* Email and Phone are now pulled from User/Address tables and displayed in modal details */}
-        {/* <div className="text-sm opacity-50">{order.email || '-'}</div> */}
+        <div className="font-bold">{order.Customer_Name}</div>
       </td>
       <td>
-        {order.products.map((p, idx) => (
-          <div key={idx} className="text-sm">{p.name} (x{p.quantity})</div>
+        {order.Products.map((p, idx) => (
+          <div key={idx} className="text-sm">{p.Product_Name} (x{p.Quantity})</div>
         ))}
       </td>
-      <td><div className="font-bold">{formatPrice(order.total)}</div></td>
+      <td><div className="font-bold">{formatPrice(order.Total_Amount)}</div></td>
       <td>
-        <span className={`badge ${statusConfig[order.status].color}`}>
-          <StatusIcon className="w-3 h-3 mr-1" /> {statusConfig[order.status].label}
+        <span className={`badge ${statusConfig[order.Status].color}`}>
+          <StatusIcon className="w-3 h-3 mr-1" /> {statusConfig[order.Status].label}
         </span>
       </td>
-      <td>{formatDate(order.orderDate)}</td> {/* Use formatDate */}
-      <td>{getTransferSlipStatusLabel(order.transferSlipImageUrl) ? <FiCheckCircle className='text-center m-auto text-xl text-green-700 '></FiCheckCircle> : ''}</td> {/* Display transfer slip status instead of deliveryDate */}
-      <td>{order.trackingId || '-'}</td>
+      <td>{formatDate(order.Order_Date)}</td>
+      <td>{getTransferSlipStatusLabel(order.Transfer_Slip_Image_URL)}</td>
+      <td>{order.Tracking_ID || '-'}</td>
       <td>
         <div className="flex gap-1">
           <button
@@ -186,7 +162,7 @@ const OrderRow: React.FC<OrderRowProps> = ({ order, statusConfig, formatPrice, f
             className="btn btn-sm btn-ghost btn-square text-error"
             onClick={(e) => {
               e.stopPropagation(); // Prevent row click from also triggering
-              deleteOrder(order.id);
+              deleteOrder(order.Order_ID);
             }}
             title="ลบคำสั่งซื้อ"
           >
@@ -208,27 +184,27 @@ interface OrderCardProps {
 }
 
 const OrderCard: React.FC<OrderCardProps> = ({ order, statusConfig, formatPrice, formatDate, viewOrderDetails }) => {
-  const StatusIcon = statusConfig[order.status].icon;
+  const StatusIcon = statusConfig[order.Status].icon;
 
   return (
     <div className="card bg-base-200 shadow-sm cursor-pointer" onClick={() => viewOrderDetails(order)}>
       <div className="card-body p-4">
-        <h2 className="card-title text-base">{order.customerName} (ID: {order.id})</h2>
+        <h2 className="card-title text-base">{order.Customer_Name} (ID: {order.Order_ID})</h2>
         <p className="text-sm text-base-content/70">
-          <strong>ยอดรวม:</strong> {formatPrice(order.total)}
+          <strong>ยอดรวม:</strong> {formatPrice(order.Total_Amount)}
         </p>
         <p className="text-sm flex items-center gap-1">
           <strong>สถานะ:</strong>
-          <span className={`badge ${statusConfig[order.status].color}`}>
-            <StatusIcon className="w-3 h-3 mr-1" /> {statusConfig[order.status].label}
+          <span className={`badge ${statusConfig[order.Status].color}`}>
+            <StatusIcon className="w-3 h-3 mr-1" /> {statusConfig[order.Status].label}
           </span>
         </p>
         <p className="text-sm">
-          <strong>วันที่สั่ง:</strong> {formatDate(order.orderDate)} {/* Use formatDate */}
+          <strong>วันที่สั่ง:</strong> {formatDate(order.Order_Date)} {/* Use formatDate */}
         </p>
-        {order.trackingId && (
+        {order.Tracking_ID && (
           <p className="text-sm">
-            <strong>Tracking ID:</strong> {order.trackingId}
+            <strong>Tracking ID:</strong> {order.Tracking_ID}
           </p>
         )}
         <div className="card-actions justify-end mt-4">
@@ -329,22 +305,22 @@ export default function OrderManagement() {
                                  : null;
 
     // If changing to cancelled, trigger the confirmation modal
-    if (newStatus === 'cancelled' && selectedOrder.status !== 'cancelled') {
-      setOrderToCancel({ id: selectedOrder.id, newStatus: newStatus, reason: newCancellationReason });
+    if (newStatus === 'cancelled' && selectedOrder.Status !== 'cancelled') {
+      setOrderToCancel({ id: selectedOrder.Order_ID, newStatus: newStatus, reason: newCancellationReason });
       setShowCancelConfirmModal(true);
       return; // Stop here and wait for confirmation
     }
 
     // Prepare payload for API
     const payload = {
-      id: selectedOrder.id, // Use numeric ID
-      trackingId: editFormData.trackingId.trim() === '' ? null : editFormData.trackingId.trim(),
-      shippingCarrier: editFormData.shippingCarrier.trim() === '' ? null : editFormData.shippingCarrier.trim(),
+      Order_ID: selectedOrder.Order_ID, // Use numeric ID
+      Tracking_ID: editFormData.trackingId.trim() === '' ? null : editFormData.trackingId.trim(),
+      Shipping_Carrier: editFormData.shippingCarrier.trim() === '' ? null : editFormData.shippingCarrier.trim(),
       // Ensure deliveryDate is properly formatted for DB (YYYY-MM-DD)
-      deliveryDate: editFormData.deliveryDate.trim() === '' ? null : editFormData.deliveryDate.trim(),
-      status: newStatus,
-      transferSlipImageUrl: editFormData.transferSlipImageUrl.trim() === '' ? null : editFormData.transferSlipImageUrl.trim(),
-      cancellationReason: newCancellationReason, // Ensure reason is null if not cancelled
+      DeliveryDate: editFormData.deliveryDate.trim() === '' ? null : editFormData.deliveryDate.trim(),
+      Status: newStatus,
+      Transfer_Slip_Image_URL: editFormData.transferSlipImageUrl.trim() === '' ? null : editFormData.transferSlipImageUrl.trim(),
+      Cancellation_Reason: newCancellationReason, // Ensure reason is null if not cancelled
     };
 
     try {
@@ -382,9 +358,9 @@ export default function OrderManagement() {
     setMessageType(null);
 
     const payload = {
-      id: orderToCancel.id,
-      status: orderToCancel.newStatus,
-      cancellationReason: reason,
+      Order_ID: orderToCancel.id,
+      Status: orderToCancel.newStatus,
+      Cancellation_Reason: reason,
     };
 
     try {
@@ -748,7 +724,7 @@ export default function OrderManagement() {
                   <th>ยอดรวม</th>
                   <th>สถานะ</th>
                   <th>วันที่สั่ง</th>
-                  <th>สถานะสลิป</th> {/* Changed from วันส่ง to สถานะสลิป */}
+                  <th>สถานะสลิป</th>
                   <th>Tracking ID</th>
                   <th>จัดการ</th>
                 </tr>
@@ -756,7 +732,7 @@ export default function OrderManagement() {
               <tbody>
                 {paginatedOrders.map((order: Order) => (
                   <OrderRow
-                    key={order.id}
+                    key={order.Order_ID}
                     order={order}
                     statusConfig={statusConfig}
                     formatPrice={formatPrice}
@@ -779,7 +755,7 @@ export default function OrderManagement() {
             <div className="grid grid-cols-1 gap-4">
               {paginatedOrders.map((order: Order) => (
                 <OrderCard
-                  key={order.id}
+                  key={order.Order_ID}
                   order={order}
                   statusConfig={statusConfig}
                   formatPrice={formatPrice}
@@ -891,7 +867,7 @@ export default function OrderManagement() {
           <div className="modal modal-open">
             <div className="modal-box w-11/12 max-w-3xl">
               <h3 className="font-bold text-lg mb-4">
-                {isEditing ? `แก้ไขคำสั่งซื้อ ${selectedOrder.id}` : `รายละเอียดคำสั่งซื้อ ${selectedOrder.id}`}
+                {isEditing ? `แก้ไขคำสั่งซื้อ ${selectedOrder.Order_ID}` : `รายละเอียดคำสั่งซื้อ ${selectedOrder.Order_ID}`}
               </h3>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -899,12 +875,12 @@ export default function OrderManagement() {
                 <div>
                   <h4 className="font-semibold mb-2">ข้อมูลลูกค้า</h4>
                   <div className="bg-base-200 rounded-lg p-4">
-                    <p><strong>User ID:</strong> {selectedOrder.userId}</p>
-                    <p><strong>ชื่อ:</strong> {selectedOrder.customerName}</p>
-                    <p><strong>อีเมล:</strong> {selectedOrder.email || '-'}</p>
-                    <p><strong>เบอร์โทร:</strong> {selectedOrder.phone || '-'}</p>
-                    <p><strong>ที่อยู่ (Snapshot):</strong> {selectedOrder.address}</p>
-                    <p><strong>Address ID:</strong> {selectedOrder.addressId}</p>
+                    <p><strong>User ID:</strong> {selectedOrder.User_ID}</p>
+                    <p><strong>ชื่อ:</strong> {selectedOrder.Customer_Name}</p>
+                    <p><strong>อีเมล:</strong> {selectedOrder.Email || '-'}</p>
+                    <p><strong>เบอร์โทร:</strong> {selectedOrder.Phone || '-'}</p>
+                    <p><strong>ที่อยู่ (Snapshot):</strong> {selectedOrder.Address}</p>
+                    <p><strong>Address ID:</strong> {selectedOrder.Shipping_Address_ID}</p>
                   </div>
                 </div>
 
@@ -912,8 +888,8 @@ export default function OrderManagement() {
                 <div>
                   <h4 className="font-semibold mb-2">ข้อมูลคำสั่งซื้อ</h4>
                   <div className="bg-base-200 rounded-lg p-4">
-                    <p><strong>รหัส:</strong> {selectedOrder.id}</p>
-                    <p><strong>วันที่สั่ง:</strong> {formatDate(selectedOrder.orderDate)}</p> {/* Use formatDate */}
+                    <p><strong>รหัส:</strong> {selectedOrder.Order_ID}</p>
+                    <p><strong>วันที่สั่ง:</strong> {formatDate(selectedOrder.Order_Date)}</p> {/* Use formatDate */}
 
                     {isEditing ? (
                       <>
@@ -1005,27 +981,27 @@ export default function OrderManagement() {
                     ) : (
                       // Display mode
                       <>
-                        <p><strong>วันที่ส่ง:</strong> {formatDate(selectedOrder.deliveryDate)}</p> {/* Use formatDate */}
+                        <p><strong>วันที่ส่ง:</strong> {formatDate(selectedOrder.DeliveryDate)}</p> {/* Use formatDate */}
                         <p>
                           <strong>Tracking ID:</strong>{' '}
-                          {selectedOrder.trackingId ? selectedOrder.trackingId : 'ยังไม่มี'}
+                          {selectedOrder.Tracking_ID ? selectedOrder.Tracking_ID : 'ยังไม่มี'}
                         </p>
-                        {selectedOrder.shippingCarrier && (
+                        {selectedOrder.Shipping_Carrier && (
                           <p>
-                            <strong>บริษัทขนส่ง:</strong> {selectedOrder.shippingCarrier}
+                            <strong>บริษัทขนส่ง:</strong> {selectedOrder.Shipping_Carrier}
                           </p>
                         )}
                         <div className="flex items-center gap-2 mt-2">
                           <strong>สถานะ:</strong>
-                          <span className={`badge ${statusConfig[selectedOrder.status].color}`}>
-                            {statusConfig[selectedOrder.status].label}
+                          <span className={`badge ${statusConfig[selectedOrder.Status].color}`}>
+                            {statusConfig[selectedOrder.Status].label}
                           </span>
                         </div>
                         {/* Display Cancellation Reason if status is cancelled and reason exists */}
-                        {selectedOrder.status === 'cancelled' && selectedOrder.cancellationReason && (
+                        {selectedOrder.Status === 'cancelled' && selectedOrder.Cancellation_Reason && (
                           <div className="mt-2">
                             <p><strong>เหตุผลการยกเลิก:</strong></p>
-                            <p className="text-sm text-base-content/80">{selectedOrder.cancellationReason}</p>
+                            <p className="text-sm text-base-content/80">{selectedOrder.Cancellation_Reason}</p>
                           </div>
                         )}
                       </>
@@ -1038,10 +1014,10 @@ export default function OrderManagement() {
               <div className="mt-6">
                 <h4 className="font-semibold mb-2">หลักฐานการโอนเงิน</h4>
                 <div className="bg-base-200 rounded-lg p-4 flex justify-center items-center h-48 sm:h-64 overflow-hidden">
-                  {selectedOrder.transferSlipImageUrl ? (
+                  {selectedOrder.Transfer_Slip_Image_URL ? (
                     <img
-                      src={selectedOrder.transferSlipImageUrl}
-                      alt={`หลักฐานการโอนเงินของ ${selectedOrder.id}`}
+                      src={selectedOrder.Transfer_Slip_Image_URL}
+                      alt={`หลักฐานการโอนเงินของ ${selectedOrder.Order_ID}`}
                       className="max-w-full max-h-full object-contain"
                       onError={(e) => {
                         e.currentTarget.onerror = null; // prevents infinite loop
@@ -1068,20 +1044,20 @@ export default function OrderManagement() {
                       </tr>
                     </thead>
                     <tbody>
-                      {selectedOrder.products.map((product, idx) => (
+                      {selectedOrder.Products.map((product, idx) => (
                         <tr key={idx}>
-                          <td>{product.name}</td>
-                          <td>{product.quantity}</td>
-                          <td>{formatPrice(product.price)}</td>
-                          <td>{formatPrice(product.discount)}</td>
-                          <td>{formatPrice((product.price * product.quantity) - product.discount)}</td>
+                          <td>{product.Product_Name}</td>
+                          <td>{product.Quantity}</td>
+                          <td>{formatPrice(product.Price)}</td>
+                          <td>{formatPrice(product.Discount)}</td>
+                          <td>{formatPrice((product.Price * product.Quantity) - product.Discount)}</td>
                         </tr>
                       ))}
                     </tbody>
                     <tfoot>
                       <tr>
                         <th colSpan={4}>ยอดรวมทั้งสิ้น</th>
-                        <th>{formatPrice(selectedOrder.total)}</th>
+                        <th>{formatPrice(selectedOrder.Total_Amount)}</th>
                       </tr>
                     </tfoot>
                   </table>
@@ -1104,7 +1080,7 @@ export default function OrderManagement() {
                     <button
                       className="btn btn-primary w-full sm:w-auto"
                       onClick={handleEditClick}
-                      disabled={selectedOrder.status === 'cancelled'} // Disable edit button if cancelled
+                      disabled={selectedOrder.Status === 'cancelled'} // Disable edit button if cancelled
                     >
                       <FiEdit className="w-4 h-4" /> แก้ไข
                     </button>
@@ -1142,7 +1118,7 @@ export default function OrderManagement() {
                     setOrderToCancel(null);
                     // Reset editFormData status if it was changed to 'cancelled' but cancelled
                     if (selectedOrder) {
-                      setEditFormData(prev => ({ ...prev, status: selectedOrder.status, cancellationReason: selectedOrder.cancellationReason || '' }));
+                      setEditFormData(prev => ({ ...prev, status: selectedOrder.Status, cancellationReason: selectedOrder.Cancellation_Reason || '' }));
                     }
                   }}
                 >

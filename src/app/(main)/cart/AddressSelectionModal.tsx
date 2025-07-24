@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { FiX, FiMapPin, FiCheckCircle, FiPlus } from 'react-icons/fi';
-import { AddressSchema } from '../../types'; // Adjust path
+import { AddressSchema } from '../../../types'; // Adjust path
 import Link from 'next/link';
 
 interface AddressSelectionModalProps {

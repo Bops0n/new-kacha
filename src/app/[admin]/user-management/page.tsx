@@ -13,6 +13,7 @@ import UserRow from './UserRow'; // Correct path to components
 import UserCard from './UserCard'; // Correct path to components
 import UserModal from './modal/UserModal'; // <-- นำเข้า UserModal
 import AddressModal from './modal/AddressModal'; // <-- นำเข้า AddressModal
+import { useAlert } from '@/app/context/AlertModalContext';
 
 // --- Mock Data ---
 const mockUsers: User[] = [
@@ -96,6 +97,8 @@ const getAccessLevelLabel = (level: AccessLevel): string => {
 };
 
 export default function UserManagement() {
+  const { showAlert } = useAlert()
+
   const [users, setUsers] = useState<User[]>(mockUsers);
   const [filteredUsers, setFilteredUsers] = useState<User[]>(mockUsers);
   const [searchTerm, setSearchTerm] = useState<string>('');
@@ -104,6 +107,7 @@ export default function UserManagement() {
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [showUserModal, setShowUserModal] = useState<boolean>(false);
   const [isEditing, setIsEditing] = useState<boolean>(false); // True for edit mode, false for add new
+
 
   const [editFormData, setEditFormData] = useState<UserEditForm>({
     User_ID: null,

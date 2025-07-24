@@ -1,81 +1,30 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { FiEdit, FiSave, FiX, FiUser, FiMail, FiPhone, FiMapPin, FiGlobe, FiHash, FiHome, FiPlus, FiTrash2, FiStar } from 'react-icons/fi';
+import { useSession } from 'next-auth/react'; // Import useSession
+import { useRouter } from 'next/navigation'; // Import useRouter
+import { useAlert } from '@/app/context/AlertModalContext'; // Import useAlert
 
 // Import types
-import { UserSchema, AddressSchema, UserProfilePageData } from '../../types'; // Adjust path as needed
-
-// Mock Data representing a user and their addresses from the database
-const mockUser: UserSchema = {
-  User_ID: 101,
-  Username: 'somchai.k',
-  // Password: 'hashedpassword', // Never include password here
-  Full_Name: 'สมชาย คชาโฮม',
-  Email: 'somchai.k@example.com',
-  Phone: '0812345678', // Phone from User table
-  Access_Level: '0',
-  // Token: 'dummy_token_abc123', // Never include token here
-};
-
-const mockAddresses: AddressSchema[] = [
-  {
-    Address_ID: 1,
-    User_ID: 101,
-    Address_1: '123 ถนนสุขุมวิท ซอย 55',
-    Address_2: 'ตึกคชาโฮม ชั้น 10',
-    Sub_District: 'คลองตันเหนือ',
-    District: 'วัฒนา',
-    Province: 'กรุงเทพมหานคร',
-    Zip_Code: '10110',
-    Is_Default: true,
-    Phone: '0987654321', // Phone specific to this address
-  },
-  {
-    Address_ID: 2,
-    User_ID: 101,
-    Address_1: '456 ถนนพหลโยธิน',
-    Address_2: 'อาคาร ABC',
-    Sub_District: 'สามเสนใน',
-    District: 'พญาไท',
-    Province: 'กรุงเทพมหานคร',
-    Zip_Code: '10400',
-    Is_Default: false,
-    Phone: '0612345678',
-  },
-  {
-    Address_ID: 3,
-    User_ID: 101,
-    Address_1: '789 ถนนลาดพร้าว',
-    Address_2: 'บ้านเดี่ยว',
-    Sub_District: 'ลาดพร้าว',
-    District: 'ลาดพร้าว',
-    Province: 'กรุงเทพมหานคร',
-    Zip_Code: '10230',
-    Is_Default: false,
-    Phone: '0887776666',
-  },
-];
-
-// Initial profile data for the page (combined for simplicity)
-const initialUserProfileData: UserProfilePageData = {
-    user: mockUser,
-    addresses: mockAddresses
-};
+import { UserSchema, AddressSchema, UserProfilePageData, NewAddressForm } from '../../types'; // Adjust path as needed
 
 export default function ProfilePage() {
-  const [isEditingUserProfile, setIsEditingUserProfile] = useState(false); // State for user general info editing
-  const [userProfile, setUserProfile] = useState<UserSchema>(initialUserProfileData.user);
-  const [userAddresses, setUserAddresses] = useState<AddressSchema[]>(initialUserProfileData.addresses);
+  const { data: session, status } = useSession();
+  const router = useRouter();
+  const { showAlert } = useAlert();
+
+  const [isEditingUserProfile, setIsEditingUserProfile] = useState(false);
+  const [userProfile, setUserProfile] = useState<UserSchema | null>(null); // Initialize as null
+  const [userAddresses, setUserAddresses] = useState<AddressSchema[]>([]);
 
   const [showAddressModal, setShowAddressModal] = useState(false);
-  const [editingAddress, setEditingAddress] = useState<AddressSchema | null>(null); // For add/edit in modal
+  const [editingAddress, setEditingAddress] = useState<AddressSchema | null>(null);
 
-  // State for the modal's form data (for adding/editing addresses)
-  const [modalAddressFormData, setModalAddressFormData] = useState<AddressSchema>({
-    Address_ID: 0,
-    User_ID: userProfile.User_ID, // Use the actual user's ID from state
+  const [modalAddressFormData, setModalAddressFormData] = useState<NewAddressForm>({ // Use NewAddressForm
+    Address_ID: null, // Null for new address
+    User_ID: 0, // Placeholder, will be set from session
     Address_1: '',
     Address_2: '',
     Sub_District: '',
@@ -86,21 +35,99 @@ export default function ProfilePage() {
     Phone: '',
   });
 
-  // Effect to load initial data (mocked for now, but would be fetched from API)
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Effect สำหรับ Redirect ถ้าไมได้ Authenticate
   useEffect(() => {
-    setUserProfile(mockUser);
-    setUserAddresses(mockAddresses);
-  }, []);
+    if (status === 'unauthenticated') {
+      router.push('/login');
+    }
+  }, [status, router]);
+
+  // --- Fetch User Profile ---
+  const fetchUserProfile = useCallback(async () => {
+    // ไม่ต้อง redirect ในนี้แล้ว เพราะ useEffect ด้านบนจะจัดการให้
+    if (!session?.user?.id) { // ตรวจสอบ userId ก่อนเรียก API
+      setLoading(false);
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await fetch('/api/profile');
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to fetch user profile.');
+      }
+      const data = await response.json();
+      setUserProfile(data.user);
+    } catch (err: any) {
+      console.error('Error fetching user profile:', err);
+      setError(err.message || 'ไม่สามารถโหลดข้อมูลโปรไฟล์ได้');
+      showAlert(err.message || 'ไม่สามารถโหลดข้อมูลโปรไฟล์ได้', 'error');
+    } finally {
+      setLoading(false);
+    }
+  }, [session, showAlert]); // เพิ่ม session ใน dependencies
+
+  // --- Fetch User Addresses ---
+  const fetchUserAddresses = useCallback(async () => {
+    // ไม่ต้อง redirect ในนี้แล้ว
+    if (!session?.user?.id) { // ตรวจสอบ userId ก่อนเรียก API
+      setLoading(false);
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await fetch('/api/address'); // GET /api/address (collection)
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to fetch addresses.');
+      }
+      const data = await response.json();
+      setUserAddresses(data.addresses || []);
+    } catch (err: any) {
+      console.error('Error fetching addresses:', err);
+      setError(err.message || 'ไม่สามารถโหลดข้อมูลที่อยู่ได้');
+      showAlert(err.message || 'ไม่สามารถโหลดข้อมูลที่อยู่ได้', 'error');
+    } finally {
+      setLoading(false);
+    }
+  }, [session, showAlert]); // เพิ่ม session ใน dependencies
+
+  // Initial data fetch - จะทำงานเมื่อ session.status เปลี่ยนเป็น 'authenticated' และ session.user.id มีค่า
+  useEffect(() => {
+    if (status === 'authenticated') {
+      fetchUserProfile();
+      fetchUserAddresses();
+    }
+  }, [status, fetchUserProfile, fetchUserAddresses]);
+
 
   // Effect to reset modal form data when modal opens or editingAddress changes
   useEffect(() => {
-    if (showAddressModal) {
+    if (showAddressModal && userProfile) {
       if (editingAddress) {
-        setModalAddressFormData(editingAddress);
+        setModalAddressFormData({
+          Address_ID: editingAddress.Address_ID,
+          User_ID: editingAddress.User_ID,
+          Address_1: editingAddress.Address_1,
+          Address_2: editingAddress.Address_2 || '',
+          Sub_District: editingAddress.Sub_District,
+          District: editingAddress.District,
+          Province: editingAddress.Province,
+          Zip_Code: editingAddress.Zip_Code,
+          Is_Default: editingAddress.Is_Default,
+          Phone: editingAddress.Phone || '',
+        });
       } else {
         setModalAddressFormData({
-          Address_ID: 0,
-          User_ID: userProfile.User_ID,
+          Address_ID: null,
+          User_ID: userProfile.User_ID, // Use actual user's ID
           Address_1: '',
           Address_2: '',
           Sub_District: '',
@@ -108,43 +135,61 @@ export default function ProfilePage() {
           Province: '',
           Zip_Code: '',
           Is_Default: false,
-          Phone: '',
+          Phone: userProfile.Phone || '', // Default phone from user profile
         });
       }
     }
-  }, [showAddressModal, editingAddress, userProfile.User_ID]); // Add userProfile.User_ID to dependencies
+  }, [showAddressModal, editingAddress, userProfile]);
 
   // --- User Profile (General Info) Handlers ---
   const handleUserProfileChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setUserProfile(prevData => ({
+    setUserProfile(prevData => prevData ? ({
       ...prevData,
-      [name as keyof UserSchema]: value,
-    }));
+      [name]: value,
+    }) : null);
   };
 
   const handleSaveUserProfile = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Saving user profile:', userProfile);
-    // Simulate API call to update user table
-    try {
-      await new Promise(resolve => setTimeout(resolve, 500)); // Simulate network delay
-      alert('บันทึกข้อมูลส่วนตัวสำเร็จ!');
-      setIsEditingUserProfile(false);
-      // In real app: refresh data or update global user state
-    } catch (error) {
-      console.error('Failed to save user profile:', error);
-      alert('เกิดข้อผิดพลาดในการบันทึกข้อมูลส่วนตัว');
-    }
+    if (!userProfile) return;
+
+    showAlert('คุณแน่ใจหรือไม่ที่จะบันทึกการเปลี่ยนแปลงโปรไฟล์?', 'info', 'ยืนยันการบันทึก', async () => {
+      try {
+        const payload = {
+          Full_Name: userProfile.Full_Name,
+          Email: userProfile.Email,
+          Phone: userProfile.Phone,
+        };
+        const response = await fetch('/api/profile', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+          throw new Error(result.message || 'Failed to save user profile.');
+        }
+
+        showAlert('บันทึกข้อมูลส่วนตัวสำเร็จ!', 'success');
+        setIsEditingUserProfile(false);
+        fetchUserProfile(); // Re-fetch to ensure latest data consistency
+      } catch (error: any) {
+        console.error('Failed to save user profile:', error);
+        showAlert(error.message || 'เกิดข้อผิดพลาดในการบันทึกข้อมูลส่วนตัว', 'error');
+      }
+    });
   };
 
   const handleCancelUserProfileEdit = () => {
-    setUserProfile(mockUser); // Revert to original mock data
+    fetchUserProfile(); // Revert to last fetched data
     setIsEditingUserProfile(false);
   };
 
-  // --- Address Modal Form Handlers (now inside ProfilePage) ---
-  const handleModalAddressInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  // --- Address Modal Form Handlers ---
+  const handleModalAddressInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type, checked } = e.target;
     setModalAddressFormData(prevData => ({
       ...prevData,
@@ -154,75 +199,56 @@ export default function ProfilePage() {
 
   const handleSaveAddress = async (e: React.FormEvent) => {
     e.preventDefault();
-    const newOrUpdatedAddress = modalAddressFormData;
+    if (!userProfile) return;
 
-    // Basic validation
-    if (!newOrUpdatedAddress.Address_1 || !newOrUpdatedAddress.Sub_District || !newOrUpdatedAddress.District || !newOrUpdatedAddress.Province || !newOrUpdatedAddress.Zip_Code || !newOrUpdatedAddress.Phone) {
-      alert('กรุณากรอกข้อมูลที่อยู่ให้ครบถ้วน');
-      return;
-    }
+    showAlert('คุณแน่ใจหรือไม่ที่จะบันทึกที่อยู่นี้?', 'info', 'ยืนยันการบันทึกที่อยู่', async () => {
+      try {
+        const payload: NewAddressForm = {
+          ...modalAddressFormData,
+          User_ID: userProfile.User_ID,
+          Address_2: modalAddressFormData.Address_2 === '' ? null : modalAddressFormData.Address_2,
+          Phone: modalAddressFormData.Phone === '' ? null : modalAddressFormData.Phone,
+          Is_Default: modalAddressFormData.Is_Default, // Ensure boolean value
+        };
 
-    if (editingAddress) {
-      // Update existing address
-      setUserAddresses(prevAddresses =>
-        prevAddresses.map(addr =>
-          addr.Address_ID === newOrUpdatedAddress.Address_ID ? newOrUpdatedAddress : addr
-        ).map(addr => ({ // Ensure only one default address
-            ...addr,
-            Is_Default: newOrUpdatedAddress.Is_Default && addr.Address_ID !== newOrUpdatedAddress.Address_ID ? false : addr.Is_Default
-        }))
-      );
-      console.log('Updating address:', newOrUpdatedAddress);
-      alert('แก้ไขที่อยู่สำเร็จ!');
-      // In real app: call API to update address
-    } else {
-      // Add new address
-      const newAddressId = Math.max(...userAddresses.map(a => a.Address_ID || 0), 0) + 1; // Generate new ID for mock, handling case of no addresses
-      const addressToAdd = { ...newOrUpdatedAddress, Address_ID: newAddressId, User_ID: userProfile.User_ID };
-
-      setUserAddresses(prevAddresses => {
-        const updatedAddresses = [...prevAddresses];
-        if (addressToAdd.Is_Default) {
-            // If new address is default, set all others to false
-            return [...updatedAddresses.map(addr => ({ ...addr, Is_Default: false })), addressToAdd];
+        let response;
+        if (editingAddress) {
+          // Update existing address: Call PUT /api/address/[addressId]
+          response = await fetch(`/api/address/${editingAddress.Address_ID}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+          });
         } else {
-            return [...updatedAddresses, addressToAdd];
+          // Add new address: Call POST /api/address
+          response = await fetch('/api/address', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+          });
         }
-      });
-      console.log('Adding new address:', addressToAdd);
-      alert('เพิ่มที่อยู่สำเร็จ!');
-      // In real app: call API to add address
-    }
 
-    // After saving, ensure correct default status across all addresses
-    setUserAddresses(prev => {
-        if (newOrUpdatedAddress.Is_Default) {
-            return prev.map(addr => ({
-                ...addr,
-                Is_Default: addr.Address_ID === newOrUpdatedAddress.Address_ID // Only the saved/new address is default
-            }));
-        } else {
-            // If the saved address is not default, and if there's no other default,
-            // make sure *some* address is default if any exist.
-            const hasDefault = prev.some(addr => addr.Is_Default);
-            if (!hasDefault && prev.length > 0) {
-                const newPrev = [...prev];
-                newPrev[0] = { ...newPrev[0], Is_Default: true }; // Set first as default
-                return newPrev;
-            }
+        const result = await response.json();
+
+        if (!response.ok) {
+          throw new Error(result.message || (editingAddress ? 'Failed to update address.' : 'Failed to add address.'));
         }
-        return prev;
+
+        showAlert(result.message || (editingAddress ? 'แก้ไขที่อยู่สำเร็จ!' : 'เพิ่มที่อยู่สำเร็จ!'), 'success');
+        setShowAddressModal(false);
+        setEditingAddress(null);
+        fetchUserAddresses(); // Re-fetch addresses to update the list
+      } catch (error: any) {
+        console.error('Failed to save address:', error);
+        showAlert(error.message || 'เกิดข้อผิดพลาดในการบันทึกที่อยู่', 'error');
+      }
     });
-
-    setShowAddressModal(false);
-    setEditingAddress(null);
   };
 
   const handleCloseAddressModal = () => {
     setShowAddressModal(false);
     setEditingAddress(null); // Clear editing state
   };
-
 
   // --- Address Actions (Add, Edit, Delete, Set Default) ---
   const handleAddAddressClick = () => {
@@ -236,53 +262,89 @@ export default function ProfilePage() {
   };
 
   const handleDeleteAddress = async (addressId: number) => {
-    // DaisyUI modal confirmation (or custom component for better UX)
-    const confirmation = window.confirm('คุณแน่ใจหรือไม่ที่จะลบที่อยู่นี้?');
-    if (!confirmation) {
-        return;
-    }
+    showAlert('คุณแน่ใจหรือไม่ที่จะลบที่อยู่นี้?', 'warning', 'ยืนยันการลบที่อยู่', async () => {
+      try {
+        // Delete address: Call DELETE /api/address/[addressId]
+        const response = await fetch(`/api/address/${addressId}`, {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' },
+        });
 
-    console.log('Deleting address with ID:', addressId);
-    try {
-      await new Promise(resolve => setTimeout(resolve, 300)); // Simulate network delay
+        const result = await response.json();
 
-      setUserAddresses(prevAddresses => {
-        const updatedAddresses = prevAddresses.filter(addr => addr.Address_ID !== addressId);
-        // If the deleted address was the default, and there are other addresses, set a new default
-        if (prevAddresses.find(addr => addr.Address_ID === addressId)?.Is_Default && updatedAddresses.length > 0) {
-            updatedAddresses[0] = { ...updatedAddresses[0], Is_Default: true };
+        if (!response.ok) {
+          throw new Error(result.message || 'Failed to delete address.');
         }
-        return updatedAddresses;
-      });
-      alert('ลบที่อยู่สำเร็จ!');
-    } catch (error) {
-      console.error('Failed to delete address:', error);
-      alert('เกิดข้อผิดพลาดในการลบที่อยู่');
-    }
+
+        showAlert(result.message || 'ลบที่อยู่สำเร็จ!', 'success');
+        fetchUserAddresses(); // Re-fetch addresses to update the list
+      } catch (error: any) {
+        console.error('Failed to delete address:', error);
+        showAlert(error.message || 'เกิดข้อผิดพลาดในการลบที่อยู่', 'error');
+      }
+    });
   };
 
   const handleSetDefaultAddress = async (addressId: number) => {
-    console.log('Setting default address to ID:', addressId);
-    try {
-      await new Promise(resolve => setTimeout(resolve, 300)); // Simulate network delay
-      setUserAddresses(prevAddresses =>
-        prevAddresses.map(addr => ({
-          ...addr,
-          Is_Default: addr.Address_ID === addressId,
-        }))
-      );
-      alert('ตั้งที่อยู่เริ่มต้นสำเร็จ!');
-    } catch (error) {
-      console.error('Failed to set default address:', error);
-      alert('เกิดข้อผิดพลาดในการตั้งที่อยู่เริ่มต้น');
-    }
+    if (!userProfile) return;
+
+    showAlert('คุณแน่ใจหรือไม่ที่จะตั้งค่าที่อยู่นี้เป็นค่าเริ่มต้น?', 'info', 'ยืนยันที่อยู่เริ่มต้น', async () => {
+      try {
+        // Set default address: Call PUT /api/address/[addressId] to update Is_Default
+        // The backend /api/address/[addressId] PUT handler will handle unsetting other defaults.
+        const response = await fetch(`/api/address/${addressId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ Is_Default: true, User_ID: userProfile.User_ID }), // User_ID for backend security check
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+          throw new Error(result.message || 'Failed to set default address.');
+        }
+
+        showAlert(result.message || 'ตั้งที่อยู่เริ่มต้นสำเร็จ!', 'success');
+        fetchUserAddresses(); // Re-fetch addresses to update the list
+      } catch (error: any) {
+        console.error('Failed to set default address:', error);
+        showAlert(error.message || 'เกิดข้อผิดพลาดในการตั้งที่อยู่เริ่มต้น', 'error');
+      }
+    });
   };
+
+  if (status === 'loading' || loading) {
+    return (
+      <div className="min-h-screen bg-base-200 flex items-center justify-center p-4">
+        <span className="loading loading-spinner loading-lg text-primary"></span>
+        <p className="ml-4 text-base-content">กำลังโหลดข้อมูลโปรไฟล์...</p>
+      </div>
+    );
+  }
+
+  if (status === 'unauthenticated') {
+    // Redirect handled by useEffect, just return null here to prevent flashing content
+    return null; 
+  }
+
+  if (!userProfile) { // Authenticated but userProfile is null (e.g., initial fetch failed)
+    return (
+      <div className="min-h-screen bg-base-200 flex flex-col items-center justify-center p-4">
+        <p className="text-error text-lg mb-4">ไม่สามารถโหลดข้อมูลโปรไฟล์ได้ อาจมีข้อผิดพลาดเกิดขึ้น</p>
+        <button className="btn btn-primary" onClick={() => {
+          setError(null);
+          fetchUserProfile();
+          fetchUserAddresses();
+        }}>ลองอีกครั้ง</button>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-base-200 flex items-center justify-center p-4">
-      <div className="w-full max-w-4xl bg-base-100 rounded-lg shadow-xl p-8 flex flex-col lg:flex-row gap-8"> {/* Adjusted flex classes */}
+      <div className="w-full max-w-4xl bg-base-100 rounded-lg shadow-xl p-8 flex flex-col lg:flex-row gap-8">
         {/* User Profile Section */}
-        <div className="flex-1 pb-8 border-b border-base-300 lg:pb-0 lg:border-b-0 lg:pr-8 lg:border-r"> {/* Adjusted borders and padding */}
+        <div className="flex-1 pb-8 border-b border-base-300 lg:pb-0 lg:border-b-0 lg:pr-8 lg:border-r">
           <div className="flex justify-between items-center mb-6">
             <h1 className="text-3xl font-bold text-base-content">ข้อมูลส่วนตัว</h1>
             {!isEditingUserProfile ? (
@@ -313,7 +375,7 @@ export default function ProfilePage() {
             )}
           </div>
 
-          <form onSubmit={handleSaveUserProfile} className="space-y-4"> {/* Adjusted spacing */}
+          <form onSubmit={handleSaveUserProfile} className="space-y-4">
             {/* User ID - Display only */}
             <div className="form-control">
               <label className="label">
@@ -402,7 +464,7 @@ export default function ProfilePage() {
         </div>
 
         {/* Address Management Section */}
-        <div className="flex-1 pt-8 lg:pt-0 lg:pl-8"> {/* Adjusted padding */}
+        <div className="flex-1 pt-8 lg:pt-0 lg:pl-8">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-2xl font-bold text-base-content">ที่อยู่สำหรับจัดส่ง</h2>
             <button
@@ -424,8 +486,8 @@ export default function ProfilePage() {
                 <div key={address.Address_ID} className={`card border rounded-lg p-6 shadow-sm ${address.Is_Default ? 'border-primary bg-primary/10' : 'border-base-300 bg-base-200'}`}>
                   <div className="flex justify-between items-start mb-2">
                     <h3 className="text-lg font-semibold text-base-content flex items-center gap-2">
-                      <FiMapPin className="w-5 h-5 text-primary" />
-                      ที่อยู่ {address.Is_Default && <span className="badge badge-primary text-primary-content">เริ่มต้น</span>}
+                      <FiMapPin className={`w-5 h-5 ${address.Is_Default ? 'text-primary' : 'text-base-content/70'}`} />
+                      {address.Is_Default && <span className="badge badge-primary text-primary-content">เริ่มต้น</span>}
                     </h3>
                     <div className="flex gap-2">
                       <button

@@ -1,8 +1,9 @@
 'use client'; // Client Component
 
-import React from 'react';
+import React, { useState } from 'react';
 import { FiX, FiSave } from 'react-icons/fi';
 import { Address, NewAddressForm } from '../../../types'; // ต้องปรับ Path ให้ถูกต้องตามโครงสร้างโปรเจกต์ของคุณ
+import { AlertModalProps } from '@/types';
 
 // กำหนด Props สำหรับ AddressModal
 interface AddressModalProps {
@@ -13,6 +14,7 @@ interface AddressModalProps {
   handleAddressFormChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
   saveAddress: () => void;
 }
+
 
 const AddressModal: React.FC<AddressModalProps> = ({
   showModal,
@@ -28,7 +30,7 @@ const AddressModal: React.FC<AddressModalProps> = ({
   const showAlert = (message: string) => {
     // Implement your custom alert modal here instead of window.alert
     // For now, using a placeholder:
-    alert(message);
+    // alert(message);
   };
 
   const handleSave = () => {
@@ -38,6 +40,15 @@ const AddressModal: React.FC<AddressModalProps> = ({
     }
     saveAddress();
   };
+
+  const [alert, setAlert] = useState<AlertModalProps>({
+    isOpen: false,
+    message: '',
+    type: 'success',
+    onClose: () => {
+      setAlert({ ...alert, isOpen: false });
+  }})
+
 
   return (
     <div className="modal modal-open">

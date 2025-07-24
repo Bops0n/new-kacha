@@ -1,9 +1,13 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { use, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { FiShoppingCart, FiStar, FiPlus, FiMinus } from 'react-icons/fi'; // Added FiPlus, FiMinus for quantity selection
+import { useSession } from 'next-auth/react';
+import { useAlert } from '../../context/AlertModalContext';
+import { useCounter } from '@/app/context/CartCount';
+
 
 // Assuming ProductInventory type is defined in src/types.ts
 interface ProductInventory {
@@ -167,13 +171,40 @@ const AddToCartQuantityModal: React.FC<{
 
 export default function ProductDisplayCard({ product, formatPrice }: ProductDisplayCardProps) {
   const [isQuantityModalOpen, setIsQuantityModalOpen] = useState(false);
-
+  const session = useSession();
+  const { showAlert } = useAlert()
+  const { increment } = useCounter()
+ 
   // This function will be called when the user confirms adding to cart from the modal
-  const handleConfirmAddToCart = (productToAdd: ProductInventory, quantityToAdd: number) => {
+  const handleConfirmAddToCart = async(productToAdd: ProductInventory, quantityToAdd: number) => {
     console.log(`Adding Product ID: ${productToAdd.Product_ID}, Name: ${productToAdd.Name}, Quantity: ${quantityToAdd} to cart.`);
     // Here you would typically dispatch an action to add the item to a global cart state
     // For example: dispatch(addToCart(productToAdd.Product_ID, quantityToAdd));
     // Or make an API call to update the backend cart
+
+    const data = {
+        userId: session.data?.user?.id,
+        productId: productToAdd.Product_ID,
+        quantity: quantityToAdd,
+      }
+      console.log(data, session.data)
+    const result = await fetch('/api/cart/',{
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+
+    })
+    if (result.ok){
+      showAlert(`เพิ่มสินค้า ${productToAdd.Name} จำนวน ${quantityToAdd} ชิ้นลงในรถเข็นแล้ว!`,'success')
+      increment()
+    }else{
+      showAlert(`${'a'}`,'error')
+
+      console.log(await result.json())
+    }
+
     setIsQuantityModalOpen(false); // Close the modal after confirmation
   };
 

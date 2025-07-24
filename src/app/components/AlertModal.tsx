@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { AlertModalProps, AlertModalType } from '../../types';
-import { FiInfo, FiCheckCircle, FiAlertTriangle, FiXCircle } from 'react-icons/fi';
+import { FiInfo, FiCheckCircle, FiAlertTriangle, FiXCircle, FiImage } from 'react-icons/fi';
 
 /**
  * A reusable Alert Modal component, styled with DaisyUI and Tailwind CSS.
@@ -12,7 +12,7 @@ import { FiInfo, FiCheckCircle, FiAlertTriangle, FiXCircle } from 'react-icons/f
  * @param {AlertModalProps} props - The props for the AlertModal component.
  * @returns {JSX.Element | null} The AlertModal component, or null if isOpen is false.
  */
-const AlertModal: React.FC<AlertModalProps> = ({ isOpen, message, onClose, type = 'info' }) => {
+const AlertModal: React.FC<AlertModalProps> = ({ isOpen, message, onClose, type = 'info' , title, onConfirm }) => {
   // If the modal is not open, return null to not render anything
   if (!isOpen) {
     return null;
@@ -22,7 +22,7 @@ const AlertModal: React.FC<AlertModalProps> = ({ isOpen, message, onClose, type 
   // This replaces the lengthy switch statement, making the code more concise.
   const alertConfig = {
     info: {
-      IconComponent: FiInfo, // Reverted to IconComponent
+      IconComponent: FiInfo, // Reverted to IconComponent 
       buttonClass: 'btn-info',
       iconTextColor: 'text-blue-500', // Tailwind CSS class for icon color
     },
@@ -52,6 +52,8 @@ const AlertModal: React.FC<AlertModalProps> = ({ isOpen, message, onClose, type 
     // `modal` makes it a modal, `modal-open` forces it to be visible
     <dialog className={`modal ${isOpen ? 'modal-open' : ''}`} onClose={onClose}>
       <div className="modal-box w-full max-w-sm rounded-xl shadow-2xl p-6 md:p-8 flex flex-col items-center text-center">
+        {/* Title */}
+        <h1 className='text-2xl mb-4'>{title || 'แจ้งเตือน'}</h1>
         {/* Icon */}
         <IconComponent className={`text-5xl mb-4 ${iconTextColor}`} /> {/* Reverted to IconComponent */}
 
@@ -62,13 +64,27 @@ const AlertModal: React.FC<AlertModalProps> = ({ isOpen, message, onClose, type 
 
         {/* Action Button */}
         <div className="modal-action mt-0 justify-center"> {/* modal-action usually flex-end, override to center */}
+          {onConfirm &&
           <button
-            onClick={onClose}
+            onClick={() => {
+              onConfirm();
+            }}
             className={`btn ${buttonClass} w-full max-w-[150px] py-3 rounded-lg text-white font-semibold shadow-md transition-all duration-300 hover:opacity-80 focus:outline-none focus:ring-2 focus:ring-opacity-75`}
             aria-label="ปิดการแจ้งเตือน"
           >
-            ตกลง
+            ยืนยัน
+          </button>}
+          
+          <button
+            onClick={() => {
+              onClose();
+            }}
+            className={`btn bg-gray-300 w-full max-w-[150px] py-3 rounded-lg text-black font-semibold shadow-md transition-all duration-300 hover:opacity-80 focus:outline-none focus:ring-2 focus:ring-opacity-75`}
+            aria-label="ปิดการแจ้งเตือน"
+          >
+            ปิด
           </button>
+         
         </div>
       </div>
       {/* Optional: Add a hidden button for closing modal with Escape key or click outside */}

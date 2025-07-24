@@ -421,7 +421,7 @@ export default function ProductsPage() {
                   key={product.Product_ID}
                   product={product}
                   formatPrice={formatPrice}
-                  onAddToCartClick={handleAddToCartClick} // Pass the handler down
+                  onAddToCart={handleAddToCartClick} // Pass the handler down
                 />
               ))}
             </div>
