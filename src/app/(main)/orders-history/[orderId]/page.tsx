@@ -3,7 +3,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { FiClock, FiPackage, FiTruck, FiCheckCircle, FiXCircle, FiArrowLeft, FiMapPin, FiShoppingCart } from 'react-icons/fi';
-import { Order, OrderStatus } from '../../../../types'; // Adjust path as needed
+import { Order, OrderStatus } from '../../../../types/types'; // Adjust path as needed
 import { useRouter, useParams } from 'next/navigation'; // Import useParams
 
 // Define StatusConfig here for local use within the page
@@ -136,7 +136,7 @@ const OrderDetailsPage: React.FC = () => {
           },
         ];
         console.log('test')
-        const response = await fetch(`/api/orders/${orderId}`, {
+        const response = await fetch(`/api/main/orders/${orderId}`, {
           method: 'GET',
         }
       );

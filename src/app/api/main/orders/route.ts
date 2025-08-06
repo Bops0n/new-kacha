@@ -1,9 +1,9 @@
 // src/app/api/orders/route.ts
 import { NextResponse } from 'next/server';
-import { poolQuery } from '../lib/db'; // Adjust path if your db.js is elsewhere
+import { poolQuery } from '../../lib/db'; // Adjust path if your db.js is elsewhere
 import { getServerSession } from 'next-auth';
-import { authOptions } from '../auth/[...nextauth]/route'; // Adjust path to your NextAuth config
-import { AddressSchema, ProductInventory, AccessLevel, OrderProductDetail, OrderStatus, Order } from '../../../types'; // Import types as needed
+import { authOptions } from '../../auth/[...nextauth]/route'; // Adjust path to your NextAuth config
+import { AddressSchema, ProductInventory, AccessLevel, OrderProductDetail, OrderStatus, Order } from '../../../../types/types'; // Import types as needed
 
 // --- Define Types specific to this API's data flow ---
 // These types reflect the data structures expected/returned by this API,

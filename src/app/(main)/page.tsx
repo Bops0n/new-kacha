@@ -7,7 +7,7 @@ import { FiTruck, FiAward, FiDollarSign, FiHeadphones } from 'react-icons/fi'; /
 // Assuming ProductDisplayCard is in src/app/components/ProductDisplayCard.tsx
 import ProductDisplayCard from './components/ProductDisplayCard';
 // Assuming ProductInventory type is in src/types.ts
-import { ProductInventory } from '../../types';
+import { ProductInventory } from '../../types/types';
 
 // Helper for currency formatting - Reusing from previous components
 const formatPrice = (price: number): string => {

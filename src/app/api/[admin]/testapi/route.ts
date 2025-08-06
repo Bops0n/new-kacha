@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '../../auth/[...nextauth]/route'
 import { NextApiResponse } from 'next'
-import { User } from '@/types'
+import { User } from '@/types/types'
 import { poolQuery } from '../../lib/db'
 import { useStyleRegistry } from 'styled-jsx'
 

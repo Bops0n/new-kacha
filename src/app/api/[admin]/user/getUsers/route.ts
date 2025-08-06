@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth'; // For session handling (optional)
 import { authOptions } from '../../../auth/[...nextauth]/route'; // For session handling (optional)
-import { User } from '@/types'; // Assuming you have a 'User' type defined
+import { User } from '@/types/types'; // Assuming you have a 'User' type defined
 import { poolQuery } from '../../../lib/db'; // Assuming your poolQuery works correctly
 
 // You can remove this import if not used elsewhere in this file

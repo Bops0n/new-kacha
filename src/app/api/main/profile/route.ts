@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { authenticateRequest } from '../auth/utils'; // Path to your authentication utility
 import { poolQuery } from '../lib/db'; // Path to your database utility
-import { UserSchema } from '../../../types'; // Path to your UserSchema type
+import { UserSchema } from '../../../types/types'; // Path to your UserSchema type
 
 /**
  * GET /api/user/profile

@@ -15,7 +15,7 @@ import {
   FiEdit
 } from 'react-icons/fi';
 
-import { Order, OrderStatus, StatusConfig, EditFormData } from '../../../types';
+import { Order, OrderStatus, StatusConfig, EditFormData } from '../../../types/types';
 import OrderRow from '../components/Order/OrderRow';
 import OrderCard from '../components/Order/OrderCard';
 

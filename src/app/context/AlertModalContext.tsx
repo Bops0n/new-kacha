@@ -1,7 +1,7 @@
 'use client';
 
 import { createContext, useContext } from 'react';
-import { AlertModalType } from '../../types';
+import { AlertModalType } from '../../types/types';
 
 // Define the shape of the context value
 interface AlertContextType {

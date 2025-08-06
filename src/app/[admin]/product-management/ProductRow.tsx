@@ -1,6 +1,6 @@
 import React from 'react';
 import { FiEye, FiTrash2 } from 'react-icons/fi'; // Changed FiEdit to FiEye, removed FiEdit from import
-import { ProductInventory } from '../../../types'; // Correct path to types
+import { ProductInventory } from '../../../types/types'; // Correct path to types
 
 interface ProductRowProps {
   product: ProductInventory;

@@ -1,9 +1,9 @@
 // src/app/api/orders/[orderId]/route.ts
 import { NextResponse, NextRequest } from 'next/server';
-import { poolQuery } from '../../lib/db'; // Adjust this path if your db.js is elsewhere
+import { poolQuery } from '../../../lib/db'; // Adjust this path if your db.js is elsewhere
 // Import authenticateRequest from the new utility file
-import { authenticateRequest } from '../../auth/utils'; // <--- UPDATED PATH
-import { AccessLevel, Order, OrderProductDetail, OrderStatus } from '../../../../types'; // Adjust path for types.ts
+import { authenticateRequest } from '../../../auth/utils'; // <--- UPDATED PATH
+import { AccessLevel, Order, OrderProductDetail, OrderStatus } from '../../../../../types/types'; // Adjust path for types.ts
 import { v4 as uuidv4 } from 'uuid';
 import path from 'path';
 import fs from 'fs/promises';

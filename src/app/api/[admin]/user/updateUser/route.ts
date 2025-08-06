@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../../../auth/[...nextauth]/route';
 import { poolQuery } from '../../../lib/db'; // Your database utility
-import { User } from '@/types'; // Assuming you have a 'User' type defined
+import { User } from '@/types/types'; // Assuming you have a 'User' type defined
 
 export async function PATCH(req: NextRequest) {
     // --- Optional: Session Check for Authorization ---

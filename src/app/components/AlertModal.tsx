@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { AlertModalProps, AlertModalType } from '../../types';
+import { AlertModalProps, AlertModalType } from '../../types/types';
 import { FiInfo, FiCheckCircle, FiAlertTriangle, FiXCircle, FiImage } from 'react-icons/fi';
 
 /**

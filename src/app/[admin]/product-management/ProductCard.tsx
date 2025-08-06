@@ -1,6 +1,6 @@
 import React from 'react';
 import { FiTag, FiBox, FiDollarSign, FiEye } from 'react-icons/fi'; // Changed FiEdit to FiEye
-import { ProductInventory } from '../../../types'; // Correct path to types
+import { ProductInventory } from '../../../types/types'; // Correct path to types
 
 interface ProductCardProps {
   product: ProductInventory;

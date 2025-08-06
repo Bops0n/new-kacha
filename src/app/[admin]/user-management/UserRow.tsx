@@ -1,6 +1,6 @@
 import React from 'react';
 import { FiEdit, FiTrash2 } from 'react-icons/fi'; // Removed FiEye
-import { User, AccessLevel } from '../../../types'; // Correct path to types
+import { User, AccessLevel } from '../../../types/types'; // Correct path to types
 
 interface UserRowProps {
   user: User;

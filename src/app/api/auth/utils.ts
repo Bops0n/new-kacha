@@ -4,7 +4,7 @@ import { getServerSession } from 'next-auth';
 // Adjust path to your NextAuth route if different
 import { authOptions } from './[...nextauth]/route';
 // Adjust path to your types.ts if different
-import { AccessLevel } from '../../../types';
+import { AccessLevel } from '../../../types/types';
 
 /**
  * Authenticates the request by checking the user's session.

@@ -7,7 +7,7 @@ import {
   FiUser,
 } from 'react-icons/fi';
 
-import { User, Address, UserEditForm, AccessLevel, NewAddressForm } from '../../../types'; // Correct path to types
+import { User, Address, UserEditForm, AccessLevel, NewAddressForm } from '../../../types/types'; // Correct path to types
 
 import UserRow from './UserRow'; // Correct path to components
 import UserCard from './UserCard'; // Correct path to components

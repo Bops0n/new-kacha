@@ -7,7 +7,7 @@ import Link from "next/link";
 import { useRouter } from 'next/navigation';
 import AuthModal from './AuthModal';
 import { FiShoppingCart } from "react-icons/fi";
-import { useCounter } from '../../context/CartCount';
+import { useCounter } from '@/app/context/CartCount';
 import { signOut, useSession } from "next-auth/react";
 import { useAlert } from "@/app/context/AlertModalContext";
 import { CartDetailSchema } from "@/types";
@@ -59,7 +59,7 @@ export default function UserNavbar() {
             const fetchInitialCartCount = async () => {
                 console.log("กำลังดึงจำนวนสินค้าในตะกร้าสำหรับผู้ใช้ที่เข้าสู่ระบบ...");
                 // await new Promise(resolve => setTimeout(resolve, 300));
-                const result = await fetch('/api/cart?userId=' + session.data.user.id)
+                const result = await fetch('/api/main/cart?userId=' + session.data.user.id)
                 const data = await result.json()
                 const mockInitialCount = data.cartItems.length;
                 setCounter(mockInitialCount);

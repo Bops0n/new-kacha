@@ -1,7 +1,7 @@
 'use client';
 
  import React, { useState } from 'react';
- import { OrderAPIResponse, OrderStatus } from '../../../types'; // Adjust path as needed
+ import { OrderAPIResponse, OrderStatus } from '../../../types/types'; // Adjust path as needed
  import { FiX, FiClock, FiPackage, FiTruck, FiCheckCircle, FiXCircle } from 'react-icons/fi';
 
  // Define StatusConfig here for local use within the modal, or import from a shared utility if preferred.

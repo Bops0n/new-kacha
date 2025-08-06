@@ -69,9 +69,9 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess, initialTab 
     })
     session.update()
     console.log(result, session.data?.user.accessLevel)
-    const res = await fetch('/api/testApi',{
-      method: 'GET'
-    })
+    // const res = await fetch('/api/testApi',{
+    //   method: 'GET'
+    // })
     // console.log(res)
     if (!loginFormData.email || !loginFormData.password) {
       

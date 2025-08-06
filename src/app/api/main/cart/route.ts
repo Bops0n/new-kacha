@@ -1,9 +1,9 @@
 // src/app/api/cart/route.ts
 import { NextResponse } from 'next/server';
-import { poolQuery } from '../lib/db'; // Adjust this path if your db.js is elsewhere
-import { ProductInventory } from '../../../types'; // Import ProductInventory from types.ts
+import { poolQuery } from '../../lib/db'; // Adjust this path if your db.js is elsewhere
+import { ProductInventory } from '../../../../types/types'; // Import ProductInventory from types.ts
 import { getServerSession } from 'next-auth'; // Import getServerSession
-import { authOptions } from '../auth/[...nextauth]/route'; // Import your NextAuth config (adjust path as needed)
+import { authOptions } from '../../auth/[...nextauth]/route'; // Import your NextAuth config (adjust path as needed)
 
 // Define Type for CartItem to be sent to the Frontend
 // This combines data from ProductInventory and Cart_Detail

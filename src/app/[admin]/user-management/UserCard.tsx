@@ -1,6 +1,6 @@
 import React from 'react';
 import { FiUser, FiMail, FiPhone, FiKey, FiEdit } from 'react-icons/fi'; // Removed FiEye, added FiEdit
-import { User, AccessLevel } from '../../../types'; // Correct path to types
+import { User, AccessLevel } from '../../../types/types'; // Correct path to types
 
 interface UserCardProps {
   user: User;

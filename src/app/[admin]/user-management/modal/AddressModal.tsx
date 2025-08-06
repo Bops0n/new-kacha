@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { FiX, FiSave } from 'react-icons/fi';
 import { Address, NewAddressForm } from '../../../types'; // ต้องปรับ Path ให้ถูกต้องตามโครงสร้างโปรเจกต์ของคุณ
-import { AlertModalProps } from '@/types';
+import { AlertModalProps } from '@/types/types';
 
 // กำหนด Props สำหรับ AddressModal
 interface AddressModalProps {

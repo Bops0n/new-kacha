@@ -4,7 +4,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { poolQuery } from '../../lib/db'; // Adjusted path for new route location
-import { Order, OrderProductDetail } from '../../../../types'; // Import Order and OrderProductDetail
+import { Order, OrderProductDetail } from '../../../../types/types'; // Import Order and OrderProductDetail
 
 // Define interfaces that map to your database tables and the combined UI structure
 interface DbOrder {

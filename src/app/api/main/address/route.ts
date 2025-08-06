@@ -1,13 +1,13 @@
 // src/app/api/addresses/route.ts
 import { NextResponse } from 'next/server';
-import { poolQuery } from '../lib/db'; // Adjust path as per your project structure
+import { poolQuery } from '../../lib/db'; // Adjust path as per your project structure
 
 // Import types from your shared types.ts file
-import { AddressSchema, NewAddressForm } from '../../../types'; // Adjust path if types.ts is located differently
+import { AddressSchema, NewAddressForm } from '../../../../types/types'; // Adjust path if types.ts is located differently
 
 // For authentication
 import { getServerSession } from 'next-auth';
-import { authOptions } from '../auth/[...nextauth]/route'; // Adjust path to your Nextauth'; // Adjust path to your NextAuth config
+import { authOptions } from '../../auth/[...nextauth]/route'; // Adjust path to your Nextauth'; // Adjust path to your NextAuth config
 
 /**
  * Helper function to authenticate the request and get the user ID.

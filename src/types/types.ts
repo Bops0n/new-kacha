@@ -31,19 +31,19 @@ export interface OrderProductDetail {
 // and PascalCase WITH underscores for specific fields as requested by user's initial proposal).
 export type Order = {
   Order_ID: number;
-  User_ID: number;
+  User_ID: number | null; // Can be null if order is manually created
   Customer_Name: string; // From User table, not Order table
   Email: string | null;   // From User table, not Order table
   Order_Date: string; // ISO 8601 string
   Total_Amount: number;
   Status: OrderStatus;
-  Shipping_Address_ID: number; // Matches DB "Address_ID"
+  Shipping_Address_ID: number | null; // Can be null
   Payment_Type: string; // e.g., 'Bank Transfer', 'Cash on Delivery'
   Tracking_ID: string | null; // **Adjusted to use underscore as requested for consistency**
   Shipping_Carrier: string | null; // **Adjusted to use underscore as requested for consistency**
   Cancellation_Reason: string | null; // **Adjusted to use underscore as requested for consistency**
   Transfer_Slip_Image_URL: string | null; // **Adjusted to use underscore as requested for consistency**
-  DeliveryDate: string | null; // ISO 8601 string
+  Delivery_Date: string | null; // ISO 8601 string - **Adjusted to use underscore**
   Invoice_ID: string | null;
   Address: string; // Snapshotted full address string
   Phone: string; // Snapshotted phone number
@@ -184,11 +184,11 @@ export interface AlertModalProps {
   onConfirm?: () => void;
 }
 
-// Cart Detail Schema (as seen in API response)
-export interface CartDetailSchema {
+// Cart Item Type (as seen in API response)
+export interface CartItem {
   Product_ID: number;
   Name: string;
-  Brand: string;
+  Brand: string | null;
   Unit: string;
   Sale_Price: number;
   Image_URL: string | null;
