@@ -6,7 +6,7 @@ export async function GET(
   request: NextRequest,
   { params }: { params: { productId: string } }
 ) {
-  const { productId } = params;
+  const { productId } = await params;
 
   if (!productId || isNaN(Number(productId))) {
     return NextResponse.json({ message: 'Product ID ไม่ถูกต้อง' }, { status: 400 });

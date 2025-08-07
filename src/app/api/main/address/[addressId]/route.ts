@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
-import { authOptions } from '../../auth/[...nextauth]/route';
-import { poolQuery, pool } from '../../lib/db';
-import { AddressSchema } from '../../../../types/types'; // Corrected import path and type name
+import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { poolQuery, pool } from '@/app/api/lib/db';
+import { AddressSchema } from '@/types'; // Corrected import path and type name
 
 /**
  * Helper function to authenticate the request and get the user ID.

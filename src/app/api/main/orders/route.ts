@@ -250,7 +250,7 @@ export async function POST(request: Request) {
                 productId: product.Product_ID,
                 quantity: item.CartQuantity,
                 price: product.Sale_Price,
-                discount: 0.00,
+                discount: product,
                 name: product.Name,
                 brand: product.Brand,
                 unit: product.Unit,
