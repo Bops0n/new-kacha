@@ -3,58 +3,35 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { FiSearch, FiPlus, FiEye, FiEdit, FiTrash2, FiBox, FiSave, FiX, FiDownload, FiCheckCircle, FiAlertTriangle, FiAlertCircle } from 'react-icons/fi';
 import { useProductManagement } from '@/app/hooks/admin/useProductManagement';
-import { Category, ChildSubCategory, FullCategoryPath, ProductInventory, SubCategory } from '@/types';
+import { ProductInventory, Category, SubCategory, ChildSubCategory, FullCategoryPath } from '@/types';
 import LoadingSpinner from '@/app/components/LoadingSpinner';
 import { formatPrice } from '@/app/utils/formatters';
-import ProductRow from './ProductRow';
-import ProductCard from './ProductCard';
 
-// --- Product Modal Component ---
-const ProductModal = ({ isOpen, onClose, onSave, product, isEditing: initialIsEditing, categories, subCategories, childSubCategories, allCategoriesMap, getFullCategoryName, getProductStockStatus }
-    : { isOpen: boolean, onClose: () => void, onSave: (formData: Partial<ProductInventory>) => void, product: ProductInventory | null, isEditing: boolean, categories: Category[], subCategories: SubCategory[], childSubCategories: ChildSubCategory[], allCategoriesMap: Map<number, FullCategoryPath>, getFullCategoryName: (childId: number) => string, getProductStockStatus: (product: ProductInventory) => 'in_stock' | 'low_stock' | 'out_of_stock' }
-) => {
+// --- Product Modal Component (Co-located with the page) ---
+const ProductModal = ({ isOpen, onClose, onSave, product, isEditing: initialIsEditing, categories, subCategories, childSubCategories, allCategoriesMap, getFullCategoryName, getProductStockStatus }) => {
     const [formData, setFormData] = useState<Partial<ProductInventory> & { Selected_Category_ID?: number | null, Selected_Sub_Category_ID?: number | null }>({});
     const [isEditing, setIsEditing] = useState(initialIsEditing);
 
     useEffect(() => {
-        const initialFormState = product || { Visibility: true, Unit: 'ชิ้น', Quantity: 0, Sale_Cost: 0, Sale_Price: 0, Discount_Price: null, Reorder_Point: 0 };
+        const initialFormState = product || { Visibility: true, Unit: 'ชิ้น', Quantity: 0, Sale_Cost: 0, Sale_Price: 0, Reorder_Point: 0 };
         const catPath = product?.Child_ID ? allCategoriesMap.get(product.Child_ID) : null;
-        setFormData({ 
-            ...initialFormState, 
-            Selected_Category_ID: catPath?.Category_ID || null, 
-            Selected_Sub_Category_ID: catPath?.Sub_Category_ID || null 
-        });
+        setFormData({ ...initialFormState, Selected_Category_ID: catPath?.Category_ID || null, Selected_Sub_Category_ID: catPath?.Sub_Category_ID || null });
         setIsEditing(initialIsEditing);
     }, [product, initialIsEditing, allCategoriesMap]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-        const { name, value, type } = e.target;
-        const checked = (e.target as HTMLInputElement).checked;
+        const { name, value, type, checked } = e.target;
         let val: any = value;
-
-        if (type === 'checkbox') {
-            val = checked;
-        } else if (e.target.type === 'number') {
-            val = value === '' ? null : Number(value);
-        }
+        if (type === 'checkbox') val = checked;
+        else if (e.target.type === 'number' && value !== '') val = Number(value);
         
         const newFormData = { ...formData, [name]: val };
-
-        if (name === 'Selected_Category_ID') {
-            newFormData.Selected_Sub_Category_ID = null;
-            newFormData.Child_ID = null;
-        } else if (name === 'Selected_Sub_Category_ID') {
-            newFormData.Child_ID = null;
-        }
+        if (name === 'Selected_Category_ID') { newFormData.Selected_Sub_Category_ID = null; newFormData.Child_ID = null; }
+        else if (name === 'Selected_Sub_Category_ID') { newFormData.Child_ID = null; }
         setFormData(newFormData);
     };
 
-    const handleSubmit = (e: React.FormEvent) => { 
-        e.preventDefault(); 
-        const { Selected_Category_ID,
-    Selected_Sub_Category_ID,...ProductInventoryData} = formData; 
-        onSave(ProductInventoryData); 
-    };
+    const handleSubmit = (e: React.FormEvent) => { e.preventDefault(); onSave(formData); };
 
     const filteredSubCategories = useMemo(() => formData.Selected_Category_ID ? subCategories.filter(s => s.Category_ID === formData.Selected_Category_ID) : [], [formData.Selected_Category_ID, subCategories]);
     const filteredChildSubCategories = useMemo(() => formData.Selected_Sub_Category_ID ? childSubCategories.filter(c => c.Sub_Category_ID === formData.Selected_Sub_Category_ID) : [], [formData.Selected_Sub_Category_ID, childSubCategories]);
@@ -88,8 +65,7 @@ const ProductModal = ({ isOpen, onClose, onSave, product, isEditing: initialIsEd
                               <div className="space-y-4">
                                   <div><label className="label"><span className="label-text">จำนวน</span></label><input name="Quantity" type="number" value={formData.Quantity ?? ''} onChange={handleChange} className="input input-bordered w-full" required /></div>
                                   <div><label className="label"><span className="label-text">ต้นทุน</span></label><input name="Sale_Cost" type="number" step="0.01" value={formData.Sale_Cost ?? ''} onChange={handleChange} className="input input-bordered w-full" required /></div>
-                                  <div><label className="label"><span className="label-text">ราคาขายปกติ</span></label><input name="Sale_Price" type="number" step="0.01" value={formData.Sale_Price ?? ''} onChange={handleChange} className="input input-bordered w-full" required /></div>
-                                  <div><label className="label"><span className="label-text">ราคาลด (ถ้ามี)</span></label><input name="Discount_Price" type="number" step="0.01" value={formData.Discount_Price ?? ''} onChange={handleChange} className="input input-bordered w-full" /></div>
+                                  <div><label className="label"><span className="label-text">ราคาขาย</span></label><input name="Sale_Price" type="number" step="0.01" value={formData.Sale_Price ?? ''} onChange={handleChange} className="input input-bordered w-full" required /></div>
                                   <div><label className="label"><span className="label-text">จุดสั่งซื้อซ้ำ</span></label><input name="Reorder_Point" type="number" value={formData.Reorder_Point ?? ''} onChange={handleChange} className="input input-bordered w-full" required /></div>
                                   <div><label className="label"><span className="label-text">คะแนนรีวิว (1-5)</span></label><input name="Review_Rating" type="number" step="0.1" value={formData.Review_Rating || ''} onChange={handleChange} className="input input-bordered w-full" min="0" max="5" /></div>
                                   <div><label className="label"><span className="label-text">หมวดหมู่หลัก</span></label><select name="Selected_Category_ID" value={formData.Selected_Category_ID || ''} onChange={handleChange} className="select select-bordered w-full" required><option disabled value="">เลือกหมวดหมู่</option>{categories.map(c => <option key={c.Category_ID} value={c.Category_ID}>{c.Name}</option>)}</select></div>
@@ -98,13 +74,8 @@ const ProductModal = ({ isOpen, onClose, onSave, product, isEditing: initialIsEd
                                   <label className="label cursor-pointer"><span className="label-text">แสดงผลบนเว็บ</span><input type="checkbox" name="Visibility" checked={!!formData.Visibility} onChange={handleChange} className="checkbox checkbox-primary" /></label>
                               </div>
                           </div>
-                        <div className='modal-action'>
-                            <button type="button" onClick={onClose} className="btn btn-ghost"><FiX/> ยกเลิก</button>
-                            <button type="submit" form="product-form" className="btn btn-primary"><FiSave/> บันทึก</button>
-                        </div>
                       </form>
                   ) : (
-                    <>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="space-y-2">
                             <h4 className="font-semibold mb-2">ข้อมูลสินค้า</h4>
@@ -120,8 +91,7 @@ const ProductModal = ({ isOpen, onClose, onSave, product, isEditing: initialIsEd
                             <h4 className="font-semibold mb-2">ข้อมูลคลังและหมวดหมู่</h4>
                             <p><strong>จำนวน:</strong> {product?.Quantity} {product?.Unit}</p>
                             <p><strong>ต้นทุน:</strong> {formatPrice(product?.Sale_Cost || 0)}</p>
-                            <p><strong>ราคาขายปกติ:</strong> {formatPrice(product?.Sale_Price || 0)}</p>
-                             <p><strong>ราคาลด:</strong> {product?.Discount_Price ? formatPrice(product.Discount_Price) : '-'}</p>
+                            <p><strong>ราคาขาย:</strong> {formatPrice(product?.Sale_Price || 0)}</p>
                             <p><strong>จุดสั่งซื้อซ้ำ:</strong> {product?.Reorder_Point}</p>
                             <p><strong>คะแนนรีวิว:</strong> {product?.Review_Rating || '-'}</p>
                             <p><strong>สถานะการแสดงผล:</strong> {product?.Visibility ? 'แสดงผล' : 'ซ่อน'}</p>
@@ -133,28 +103,27 @@ const ProductModal = ({ isOpen, onClose, onSave, product, isEditing: initialIsEd
                             </div>
                         </div>
                     </div>
-                    <div className='modal-action'>
-                        <button type="button" onClick={onClose} className="btn">ปิด</button>
-                        <button onClick={() => setIsEditing(true)} className="btn btn-primary"><FiEdit/> แก้ไข</button>
-                    </div>
-                    </>
                   )}
                 </div>
 
-                {/* <div className="modal-action">
+                <div className="modal-action">
                     {isEditing ? (
-                        <></>
+                        <>
+                            <button type="button" onClick={onClose} className="btn btn-ghost"><FiX/> ยกเลิก</button>
+                            <button type="submit" form="product-form" className="btn btn-primary"><FiSave/> บันทึก</button>
+                        </>
                     ) : (
                         <>
                             <button type="button" onClick={onClose} className="btn">ปิด</button>
-                            <button onClick={() => setIsEditing(true)} className="btn btn-primary"><FiEdit/> แก้ไข</button>
+                            <button type="button" onClick={() => setIsEditing(true)} className="btn btn-primary"><FiEdit/> แก้ไข</button>
                         </>
                     )}
-                </div> */}
+                </div>
             </div>
         </dialog>
     );
 };
+
 
 export default function ProductManagementPage() {
   const { loading, error, data, filteredProducts, allCategoriesMap, filters, setFilters, actions } = useProductManagement();
@@ -179,21 +148,16 @@ export default function ProductManagementPage() {
     setCurrentPage(1);
   };
   
-  const openModal = (product, mode) => { 
-      setSelectedProduct(product); 
-      setModalMode(mode); 
-      setIsModalOpen(true); 
-  };
+  const openModal = (product, mode) => { setSelectedProduct(product); setModalMode(mode); setIsModalOpen(true); };
   const closeModal = () => setIsModalOpen(false);
-  const handleSave = async (formData) => { 
-      if (await actions.saveProduct(formData)) {
-          closeModal(); 
-      }
-  };
+  const handleSave = async (formData) => { if (await actions.saveProduct(formData)) closeModal(); };
+
+  if (loading) return <LoadingSpinner />;
+  if (error) return <div>Error: {error}</div>;
 
   const uniqueBrands = useMemo(() => ['all', ...Array.from(new Set(data.products.map(p => p.Brand).filter(Boolean)))], [data.products]);
   const getFullCategoryName = (childId) => allCategoriesMap.get(childId) ? `${allCategoriesMap.get(childId)?.Category_Name} > ${allCategoriesMap.get(childId)?.Sub_Category_Name} > ${allCategoriesMap.get(childId)?.Child_Name}` : 'N/A';
-  
+
   const stats = useMemo(() => ({
     total: data.products.length,
     inStock: data.products.filter(p => actions.getProductStockStatus(p) === 'in_stock').length,
@@ -204,9 +168,6 @@ export default function ProductManagementPage() {
   
   const filteredSubCategoriesForFilter = useMemo(() => filters.categoryFilter !== 'all' ? data.subCategories.filter(s => s.Category_ID === Number(filters.categoryFilter)) : [], [filters.categoryFilter, data.subCategories]);
   const filteredChildSubCategoriesForFilter = useMemo(() => filters.subCategoryFilter !== 'all' ? data.childSubCategories.filter(c => c.Sub_Category_ID === Number(filters.subCategoryFilter)) : [], [filters.subCategoryFilter, data.childSubCategories]);
-  
-  if (loading) return <LoadingSpinner />;
-  if (error) return <div className="text-center p-8 text-error">Error: {error}</div>;
   
   return (
     <div className="min-h-screen bg-base-200 p-4">
@@ -242,40 +203,36 @@ export default function ProductManagementPage() {
                 </div>
             </div>
 
-            <div className="hidden md:block bg-base-100 rounded-lg shadow-sm overflow-x-auto">
-                <table className="table w-full">
-                    <thead><tr><th>รหัส</th><th>สินค้า</th><th>หมวดหมู่</th><th>จำนวน</th><th>ราคาขาย</th><th>สถานะ</th><th>จัดการ</th></tr></thead>
+            <div className="overflow-x-auto bg-base-100 rounded-lg shadow-sm">
+                <table className="table">
+                    <thead><tr><th>รหัส</th><th>สินค้า</th><th>หมวดหมู่</th><th>จำนวน</th><th>ราคาขาย</th><th>สถานะการแสดงผล</th><th>จัดการ</th></tr></thead>
                     <tbody>
                         {paginatedProducts.map(product => (
-                            <ProductRow key={product.Product_ID} product={product} getFullCategoryName={getFullCategoryName} formatPrice={formatPrice} openProductModal={openModal} deleteProduct={actions.deleteProduct} />
+                            <tr key={product.Product_ID} className="hover">
+                                <td>{product.Product_ID}</td>
+                                <td><div className="flex items-center gap-3"><div className="avatar"><div className="mask mask-squircle w-12 h-12"><img src={product.Image_URL || 'https://placehold.co/100x100'} alt={product.Name} /></div></div><div><div className="font-bold">{product.Name}</div><div className="text-sm opacity-50">{product.Brand}</div></div></div></td>
+                                <td className="text-xs">{getFullCategoryName(product.Child_ID)}</td>
+                                <td>{product.Quantity} {product.Unit}</td>
+                                <td>{formatPrice(product.Sale_Price)}</td>
+                                <td><span className={`badge ${product.Visibility ? 'badge-success' : 'badge-ghost'}`}>{product.Visibility ? 'แสดงผล' : 'ซ่อน'}</span></td>
+                                <td>
+                                    <button onClick={() => openModal(product, 'view')} className="btn btn-ghost btn-xs"><FiEye/></button>
+                                    <button onClick={() => openModal(product, 'edit')} className="btn btn-ghost btn-xs"><FiEdit/></button>
+                                    <button onClick={() => actions.deleteProduct(product.Product_ID)} className="btn btn-ghost btn-xs text-error"><FiTrash2/></button>
+                                </td>
+                            </tr>
                         ))}
                     </tbody>
                 </table>
-            </div>
-
-            <div className="grid md:hidden grid-cols-1 gap-4 mt-4">
-                 {paginatedProducts.map(product => (
-                    <ProductCard key={product.Product_ID} product={product} getFullCategoryName={getFullCategoryName} formatPrice={formatPrice} openProductModal={openModal} />
-                ))}
             </div>
             
             <div className="join mt-4 flex justify-center">
                 {[...Array(totalPages).keys()].map(page => (<button key={page} onClick={() => setCurrentPage(page + 1)} className={`join-item btn ${currentPage === page + 1 ? 'btn-active' : ''}`}>{page + 1}</button>))}
             </div>
 
-            <ProductModal 
-                isOpen={isModalOpen} 
-                onClose={closeModal} 
-                onSave={handleSave} 
-                product={selectedProduct} 
-                isEditing={modalMode !== 'view'}
-                categories={data.categories} 
-                subCategories={data.subCategories} 
-                childSubCategories={data.childSubCategories}
-                allCategoriesMap={allCategoriesMap} 
-                getFullCategoryName={getFullCategoryName} 
-                getProductStockStatus={actions.getProductStockStatus} 
-            />
+            <ProductModal isOpen={isModalOpen} onClose={closeModal} onSave={handleSave} product={selectedProduct} isEditing={modalMode !== 'view'}
+                categories={data.categories} subCategories={data.subCategories} childSubCategories={data.childSubCategories}
+                allCategoriesMap={allCategoriesMap} getFullCategoryName={getFullCategoryName} getProductStockStatus={actions.getProductStockStatus} />
         </div>
     </div>
   );
