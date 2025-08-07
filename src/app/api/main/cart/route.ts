@@ -13,6 +13,7 @@ interface CartItem {
     Brand: string;
     Unit: string;
     Sale_Price: number;
+    Discount_Price: number | null; // Added Discount_Price
     Image_URL: string | null;
     Quantity: number; // Quantity in cart
     AvailableStock: number; // Available stock (from ProductInventory.Quantity)
@@ -61,6 +62,7 @@ export async function GET(request: Request) {
                 pi."Brand",
                 pi."Unit",
                 pi."Sale_Price",
+                pi."Discount_Price",
                 pi."Image_URL",
                 pi."Quantity" AS "AvailableStock" -- Quantity from Product (actual stock)
             FROM
@@ -79,6 +81,7 @@ export async function GET(request: Request) {
             Brand: row.Brand,
             Unit: row.Unit,
             Sale_Price: parseFloat(row.Sale_Price), // Ensure Sale_Price is parsed to number
+            Discount_Price: row.Discount_Price ? parseFloat(row.Discount_Price) : null, // Ensure Discount_Price is parsed to number or null
             Image_URL: row.Image_URL,
             Quantity: row.CartQuantity,
             AvailableStock: row.AvailableStock,

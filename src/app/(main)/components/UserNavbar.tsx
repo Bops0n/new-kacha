@@ -14,7 +14,7 @@ import AuthModal from '@/app/(main)/components/AuthModal';
 import { Category, SubCategory, ChildSubCategory } from '@/types';
 
 // --- Component ย่อยสำหรับ Render เมนู (จัดการ Child Category ที่นี่) ---
-const CategoryMenuItems = ({ categories, subCategories, childSubCategories, closeMobileMenu }) => {
+const CategoryMenuItems = ({ categories, subCategories, childSubCategories, closeMobileMenu } : { categories: Category[], subCategories: SubCategory[], childSubCategories: ChildSubCategory[], closeMobileMenu: () => void }) => {
   if (!categories || categories.length === 0) {
     return <li><a>ไม่มีหมวดหมู่</a></li>;
   }
@@ -162,7 +162,7 @@ export default function UserNavbar() {
                             <li><Link href="#">โปรโมชั่น</Link></li>
                             <li><Link href="#">ข่าวสาร</Link></li>
                         </ul>
-                        {session?.user?.accessLevel === '9' && (<div className="hidden lg:block ml-auto px-4"><Link href="/dashboard" className="btn btn-warning btn-sm">จัดการระบบ</Link></div>)}
+                        {session?.user?.accessLevel === '1' && (<div className="hidden lg:block ml-auto px-4"><Link href="/dashboard" className="btn btn-warning btn-sm">จัดการระบบ</Link></div>)}
                         
                         {/* Mobile Menu */}
                         <ul className="menu lg:hidden px-4 py-2">

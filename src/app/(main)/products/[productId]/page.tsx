@@ -53,8 +53,8 @@ export default function ProductDetailPage() {
   if (error) return <div className="text-center py-20 text-error"><h2 className="text-2xl font-bold">เกิดข้อผิดพลาด</h2><p>{error}</p></div>;
   if (!product) return <div className="text-center py-20">ไม่พบสินค้า</div>;
 
-  const hasDiscount = product.Sale_Price < product.Sale_Cost;
-  const discountPercentage = hasDiscount ? ((1 - product.Sale_Price / product.Sale_Cost) * 100).toFixed(0) : '0';
+  const hasDiscount = product.Discount_Price !== null && product.Discount_Price < product.Sale_Price;
+  const displayPrice = hasDiscount ? product.Discount_Price : product.Sale_Price;
 
   return (
     <div className="min-h-screen bg-base-200 p-4 lg:p-8">
@@ -73,7 +73,7 @@ export default function ProductDetailPage() {
               />
               {hasDiscount && (
                 <div className="absolute top-2 left-2 bg-red-500 text-white text-sm font-bold px-3 py-1 rounded">
-                  ลด {discountPercentage}%
+                  ลดราคา
                 </div>
               )}
             </div>
@@ -83,8 +83,8 @@ export default function ProductDetailPage() {
               <h1 className="text-3xl font-bold text-base-content leading-tight">{product.Name}</h1>
               
               <div>
-                {hasDiscount && <p className="text-xl text-base-content/60 line-through">{formatPrice(product.Sale_Cost)}</p>}
-                <p className="text-4xl font-bold text-primary">{formatPrice(product.Sale_Price)}</p>
+                {hasDiscount && <p className="text-xl text-base-content/60 line-through">{formatPrice(product.Sale_Price)}</p>}
+                <p className="text-4xl font-bold text-primary">{formatPrice(displayPrice)}</p>
               </div>
 
               <div className="text-base-content/90 text-sm space-y-2 border-t border-base-300 pt-4">
@@ -152,15 +152,35 @@ export default function ProductDetailPage() {
             <div className="mt-12">
               <h2 className="text-2xl font-bold text-base-content mb-6 text-center">สินค้าที่เกี่ยวข้อง</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                {relatedProducts.map(related => (
-                  <Link key={related.Product_ID} href={`/products/${related.Product_ID}`} className="card bg-base-100 shadow-lg hover:shadow-2xl transition-shadow">
-                    <figure><img src={related.Image_URL || 'https://placehold.co/400x300?text=No+Image'} alt={related.Name} className="h-40 w-full object-cover" /></figure>
-                    <div className="card-body p-4">
-                      <h3 className="card-title text-base line-clamp-2 h-12">{related.Name}</h3>
-                      <p className="text-lg font-semibold text-primary">{formatPrice(related.Sale_Price)}</p>
-                    </div>
-                  </Link>
-                ))}
+                {relatedProducts.map(related => {
+                  const relatedHasDiscount = related.Discount_Price !== null && related.Discount_Price < related.Sale_Price;
+                  const relatedDisplayPrice = relatedHasDiscount ? related.Discount_Price : related.Sale_Price;
+                  return (
+                    <Link key={related.Product_ID} href={`/products/${related.Product_ID}`} className="card bg-base-100 shadow-lg hover:shadow-2xl transition-shadow">
+                      <figure className="relative">
+                        <img src={related.Image_URL || 'https://placehold.co/400x300?text=No+Image'} alt={related.Name} className="h-40 w-full object-cover" />
+                        {relatedHasDiscount && (
+                          <div className="badge badge-error absolute top-2 left-2 text-white font-bold">
+                            ลดราคา
+                          </div>
+                        )}
+                      </figure>
+                      <div className="card-body p-4">
+                        <h3 className="card-title text-base line-clamp-2 h-12">{related.Name}</h3>
+                        <div>
+                          {relatedHasDiscount && (
+                            <p className="text-sm text-base-content/60 line-through">
+                              {formatPrice(related.Sale_Price)}
+                            </p>
+                          )}
+                          <p className="text-lg font-semibold text-primary">
+                            {formatPrice(relatedDisplayPrice)}
+                          </p>
+                        </div>
+                      </div>
+                    </Link>
+                  );
+                })}
               </div>
             </div>
           )}

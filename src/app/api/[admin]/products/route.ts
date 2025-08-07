@@ -16,6 +16,7 @@ interface Product {
     Quantity: number;
     Sale_Cost: number;
     Sale_Price: number;
+    Discount_Price: number | null; // Added Discount_Price
     Reorder_Point: number;
     Visibility: boolean;
     Review_Rating: number | null;
@@ -41,7 +42,7 @@ export async function GET(req: NextRequest) {
     // Ensure column names match your DB schema (PascalCase)
     const selectColumns = `
         "Product_ID", "Child_ID", "Name", "Brand", "Description", "Unit",
-        "Quantity", "Sale_Cost", "Sale_Price", "Reorder_Point", "Visibility",
+        "Quantity", "Sale_Cost", "Sale_Price", "Discount_Price", "Reorder_Point", "Visibility",
         "Review_Rating", "Image_URL", "Dimensions", "Material"
     `;
 
@@ -115,10 +116,10 @@ export async function POST(req: NextRequest) {
     const sql = `
         INSERT INTO public."Product" (
             "Child_ID", "Name", "Brand", "Description", "Unit",
-            "Quantity", "Sale_Cost", "Sale_Price", "Reorder_Point", "Visibility",
+            "Quantity", "Sale_Cost", "Sale_Price", "Discount_Price", "Reorder_Point", "Visibility",
             "Review_Rating", "Image_URL", "Dimensions", "Material"
         ) VALUES (
-            $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14
+            $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15
         )
         RETURNING "Product_ID";
     `;
@@ -131,6 +132,7 @@ export async function POST(req: NextRequest) {
         newProductData.Quantity,
         newProductData.Sale_Cost,
         newProductData.Sale_Price,
+        newProductData.Discount_Price ?? null, // Handle optional nullable fields
         newProductData.Reorder_Point,
         newProductData.Visibility,
         newProductData.Review_Rating ?? null, // Handle optional nullable fields
@@ -205,6 +207,9 @@ export async function PATCH(req: NextRequest) {
             }
             if (key === 'Review_Rating' && typeof valueToSet === 'number' && (valueToSet < 0 || valueToSet > 5)) {
                 return NextResponse.json({ message: `"Review_Rating" must be between 0 and 5, or null.` }, { status: 400 });
+            }
+            if (key === 'Discount_Price' && typeof valueToSet === 'number' && valueToSet < 0) {
+                return NextResponse.json({ message: `"Discount_Price" cannot be negative.` }, { status: 400 });
             }
 
             updateColumns.push(`"${key}" = $${paramIndex}`);

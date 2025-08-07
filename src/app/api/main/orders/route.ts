@@ -231,10 +231,10 @@ export async function POST(request: Request) {
         for (const item of cartItems) {
             // Fetch more product details for snapshotting
             const productResult = await poolQuery(
-                `SELECT "Product_ID", "Name", "Brand", "Unit", "Sale_Price", "Quantity", "Image_URL" FROM "Product" WHERE "Product_ID" = $1`,
+                `SELECT "Product_ID", "Name", "Brand", "Unit", "Sale_Price", "Discount_Price", "Quantity", "Image_URL" FROM "Product" WHERE "Product_ID" = $1`,
                 [item.Product_ID]
             );
-            const product: ProductInventory & { Name: string; Brand: string | null; Unit: string; Image_URL: string | null; } | undefined = productResult.rows[0];
+            const product: ProductInventory & { Name: string; Brand: string | null; Unit: string; Image_URL: string | null; Discount_Price: number | null; } | undefined = productResult.rows[0];
 
             if (!product) {
                 await poolQuery('ROLLBACK');
@@ -249,15 +249,15 @@ export async function POST(request: Request) {
             productsToOrder.push({
                 productId: product.Product_ID,
                 quantity: item.CartQuantity,
-                price: product.Sale_Price,
-                discount: product,
+                price: product.Discount_Price !== null && product.Discount_Price < product.Sale_Price ? product.Discount_Price : product.Sale_Price,
+                discount: product.Discount_Price !== null && product.Discount_Price < product.Sale_Price ? (product.Sale_Price - product.Discount_Price) : 0,
                 name: product.Name,
                 brand: product.Brand,
                 unit: product.Unit,
                 imageUrl: product.Image_URL,
                 stock: product.Quantity,
             });
-            calculatedTotalAmount += item.CartQuantity * product.Sale_Price;
+            calculatedTotalAmount += item.CartQuantity * (product.Discount_Price !== null && product.Discount_Price < product.Sale_Price ? product.Discount_Price : product.Sale_Price);
         }
 
         // *** MODIFICATION START ***
