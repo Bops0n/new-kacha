@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link'; // << Import Link
 import { FiBox } from 'react-icons/fi';
@@ -17,6 +17,14 @@ const CategorySidebar = ({ pageData } : { pageData: ProductsPageData }) => {
   const activeSubCategoryId = searchParams.get('subCategoryId');
   const activeChildCategoryId = searchParams.get('childCategoryId');
 
+  useEffect(() => {
+    console.log('activeCategoryId:', activeCategoryId);
+    console.log('activeSubCategoryId:', activeSubCategoryId);
+    console.log('activeChildCategoryId:', activeChildCategoryId);
+  
+
+  },[activeCategoryId, activeSubCategoryId, activeChildCategoryId])
+
   return (
     <aside className="w-full lg:w-72 bg-base-100 rounded-lg shadow-md p-6 sticky top-4 self-start">
       <h2 className="text-2xl font-bold mb-6 text-base-content ">หมวดหมู่สินค้า</h2>
@@ -27,7 +35,8 @@ const CategorySidebar = ({ pageData } : { pageData: ProductsPageData }) => {
         {pageData.categories.map(category => (
           <li key={category.Category_ID}>
             <details open={activeCategoryId == category.Category_ID.toString()}>
-              <summary className="font-semibold">
+              {/* <summary className="font-semibold"> */}
+              <summary className={`${category.Category_ID == Number(activeCategoryId) ? 'bg-red-500' : ''}`}>
                 {/* 1. เพิ่ม Link ให้กับ Category หลัก */}
                 <Link 
                   href={`/products?categoryId=${category.Category_ID}`}
@@ -41,7 +50,7 @@ const CategorySidebar = ({ pageData } : { pageData: ProductsPageData }) => {
                 {pageData.subCategories.filter(sub => sub.Category_ID === category.Category_ID).map(subCategory => (
                   <li key={subCategory.Sub_Category_ID}>
                     <details open={activeSubCategoryId == subCategory.Sub_Category_ID.toString()}>
-                      <summary>
+                      <summary className={`${subCategory.Sub_Category_ID == Number(activeSubCategoryId) ? 'bg-red-500' : ''} m-1`}>
                         {/* 2. เพิ่ม Link ให้กับ Subcategory */}
                         <Link 
                           href={`/products?categoryId=${category.Category_ID}&subCategoryId=${subCategory.Sub_Category_ID}`}
@@ -53,7 +62,7 @@ const CategorySidebar = ({ pageData } : { pageData: ProductsPageData }) => {
                       </summary>
                       <ul>
                         {pageData.childSubCategories.filter(child => child.Sub_Category_ID === subCategory.Sub_Category_ID).map(childCategory => (
-                          <li key={childCategory.Child_ID}>
+                          <li key={childCategory.Child_ID} className={`rounded-sm ${childCategory.Child_ID == Number(activeChildCategoryId) ? 'bg-red-500' : ''} m-1`}>
                             <Link 
                               href={`/products?categoryId=${category.Category_ID}&subCategoryId=${subCategory.Sub_Category_ID}&childCategoryId=${childCategory.Child_ID}`}
                               className={activeChildCategoryId == childCategory.Child_ID.toString() ? 'active' : ''}
@@ -74,7 +83,6 @@ const CategorySidebar = ({ pageData } : { pageData: ProductsPageData }) => {
     </aside>
   );
 };
-
 
 export default function ProductsPage() {
   const { loading, error, pageData, filteredProducts } = useProductsPage();
