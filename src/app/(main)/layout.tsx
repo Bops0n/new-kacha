@@ -10,7 +10,6 @@ export default function RootLayout({
     return(
         <>
         <CartCountProvider>
-
         <UserNavbar/>
           {/* <AlertModalProvider> */}
         <div className="45">
