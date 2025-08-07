@@ -131,9 +131,9 @@ export default function ProductDisplayCard({ product, formatPrice }: ProductDisp
             layout="fill"
             className="rounded-t-lg object-cover group-hover:scale-110 transition-transform duration-300"
           />
-          {product.Sale_Price < product.Sale_Cost && (
+          {product.Discount_Price !== null && product.Discount_Price < product.Sale_Price && (
             <div className="badge badge-error absolute top-2 right-2 text-white font-bold">
-              ลด {((1 - product.Sale_Price / product.Sale_Cost) * 100).toFixed(0)}%
+              ลดราคา
             </div>
           )}
         </figure>
@@ -148,14 +148,20 @@ export default function ProductDisplayCard({ product, formatPrice }: ProductDisp
           </div>
           <div className="card-actions items-center justify-between mt-2">
             <div>
-              {product.Sale_Price < product.Sale_Cost && (
-                <p className="text-sm text-base-content/60 line-through">
-                  {formatPrice(product.Sale_Cost)}
+              {product.Discount_Price !== null && product.Discount_Price < product.Sale_Price ? (
+                <>
+                  <p className="text-sm text-base-content/60 line-through">
+                    {formatPrice(product.Sale_Price)}
+                  </p>
+                  <p className="font-bold text-primary text-lg">
+                    {formatPrice(product.Discount_Price)}
+                  </p>
+                </>
+              ) : (
+                <p className="font-bold text-primary text-lg">
+                  {formatPrice(product.Sale_Price)}
                 </p>
               )}
-              <p className="font-bold text-primary text-lg">
-                {formatPrice(product.Sale_Price)}
-              </p>
             </div>
             <button
               className="btn btn-primary btn-sm btn-circle shadow-md"

@@ -14,7 +14,7 @@ export async function GET(
 
   try {
     // 1. ดึงข้อมูลสินค้าหลัก
-    const productResult = await poolQuery('SELECT * FROM "Product" WHERE "Product_ID" = $1 AND "Visibility" = TRUE', [productId]);
+    const productResult = await poolQuery('SELECT "Product_ID", "Child_ID", "Name", "Brand", "Description", "Unit", "Quantity", "Sale_Cost", "Sale_Price", "Discount_Price", "Reorder_Point", "Visibility", "Review_Rating", "Image_URL", "Dimensions", "Material" FROM "Product" WHERE "Product_ID" = $1 AND "Visibility" = TRUE', [productId]);
 
     if (productResult.rows.length === 0) {
       return NextResponse.json({ message: 'ไม่พบสินค้า' }, { status: 404 });

@@ -11,7 +11,7 @@ export async function GET() {
       subCategoriesResult,
       childSubCategoriesResult
     ] = await Promise.all([
-      poolQuery('SELECT * FROM "Product" WHERE "Visibility" = TRUE ORDER BY "Product_ID" ASC'),
+      poolQuery('SELECT "Product_ID", "Child_ID", "Name", "Brand", "Description", "Unit", "Quantity", "Sale_Cost", "Sale_Price", "Discount_Price", "Reorder_Point", "Visibility", "Review_Rating", "Image_URL", "Dimensions", "Material" FROM "Product" WHERE "Visibility" = TRUE ORDER BY "Product_ID" ASC'),
       poolQuery('SELECT * FROM "Category" ORDER BY "Name" ASC'),
       poolQuery('SELECT * FROM "Sub_Category" ORDER BY "Name" ASC'),
       poolQuery('SELECT * FROM "Child_Sub_Category" ORDER BY "Name" ASC')

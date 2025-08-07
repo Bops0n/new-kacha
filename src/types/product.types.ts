@@ -11,6 +11,7 @@ export interface ProductInventory {
   Quantity: number;
   Sale_Cost: number;
   Sale_Price: number;
+  Discount_Price: number | null;
   Reorder_Point: number;
   Visibility: boolean;
   Review_Rating: number | null;

@@ -69,7 +69,12 @@ export function useCart() {
 
   // --- Calculations ---
   const totalPrice = useMemo(() => {
-    return cartItems.reduce((sum, item) => sum + (item.Quantity * item.Sale_Price), 0);
+    return cartItems.reduce((sum, item) => {
+      const priceToUse = (item.Discount_Price !== null && item.Discount_Price < item.Sale_Price)
+        ? item.Discount_Price
+        : item.Sale_Price;
+      return sum + (item.Quantity * priceToUse);
+    }, 0);
   }, [cartItems]);
 
   // --- Cart Actions ---
