@@ -19,6 +19,14 @@ const pool = new Pool(config);
 
 module.exports = {
     pool,
-    poolQuery : (queryString, params) => pool.query(queryString,params)
+    poolQuery : async (queryString, params) => {
+        const client = await pool.connect();
+        try {
+            const res = await client.query(queryString, params);
+            return res;
+        } finally {
+            client.release();
+        }
+    }
 }
 // console.log(poolQuery('SELECT ()'));
