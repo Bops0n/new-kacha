@@ -165,7 +165,7 @@ export default function UserNavbar() {
                             <li><Link href="#">โปรโมชั่น</Link></li>
                             <li><Link href="#">ข่าวสาร</Link></li>
                         </ul>
-                        {session?.user?.accessLevel === '1' && (<div className="hidden lg:block ml-auto px-4"><Link href="/dashboard" className="btn btn-warning btn-sm">จัดการระบบ</Link></div>)}
+                        {session?.user?.accessLevel === '1' && (<div className="hidden lg:block ml-auto px-4"><Link href="/admin/dashboard" className="btn btn-warning btn-sm">จัดการระบบ</Link></div>)}
                         
                         {/* Mobile Menu */}
                         <ul className="menu lg:hidden px-4 py-2">

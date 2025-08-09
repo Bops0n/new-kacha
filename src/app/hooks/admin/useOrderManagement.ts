@@ -85,10 +85,39 @@ export function useOrderManagement() {
     });
   };
 
-  // --- Filtering Logic ---
+// --- Filtering Logic ---
   const filteredOrders = useMemo(() => {
     return orders.filter(order => {
-      // ... filtering logic ...
+      const { searchTerm, statusFilter, transferSlipFilter } = filters;
+
+      // 1. ตรวจสอบ Status Filter
+      // ถ้า statusFilter ไม่ใช่ 'all' และไม่ตรงกับสถานะของ order ให้คัดออก (return false)
+      if (statusFilter !== 'all' && order.Status !== statusFilter) {
+        return false;
+      }
+
+      // 2. ตรวจสอบ Transfer Slip Filter
+      // ถ้า transferSlipFilter ไม่ใช่ 'all' ให้ตรวจสอบเงื่อนไขของสลิป
+      if (transferSlipFilter !== 'all') {
+        const hasSlip = !!order.Transfer_Slip_Image_URL; // ใช้ !! เพื่อแปลงเป็น boolean (true/false)
+        if (transferSlipFilter === 'has_slip' && !hasSlip) return false;
+        if (transferSlipFilter === 'no_slip' && hasSlip) return false;
+        console.log(hasSlip)
+      }
+
+      // 3. ตรวจสอบ Search Term Filter (ถ้าไม่มี searchTerm ก็ให้ผ่าน)
+      if (searchTerm) {
+        const lowerCaseSearchTerm = searchTerm.toLowerCase();
+        // ตรวจสอบว่ามีอย่างน้อยหนึ่ง field ที่ตรงกับคำค้นหา
+        const searchMatch = 
+          order.Order_ID.toString().includes(lowerCaseSearchTerm) ||
+          order.Customer_Name.toLowerCase().includes(lowerCaseSearchTerm) ||
+          (order.Tracking_ID && order.Tracking_ID.toLowerCase().includes(lowerCaseSearchTerm));
+        
+        if (!searchMatch) return false;
+      }
+
+      // 4. ถ้าผ่านทุกเงื่อนไข ให้เก็บ order นี้ไว้ (return true)
       return true;
     });
   }, [orders, filters]);

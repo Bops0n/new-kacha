@@ -11,6 +11,7 @@ import LoadingSpinner from '@/app/components/LoadingSpinner';
 import OrderDetailModal from './OrderDetailModal';
 import OrderRow from './OrderRow';
 import OrderCard from './OrderCard';
+import Pagination from '@/app/components/Pagination';
 
 // --- UI Configuration ---
 // Object สำหรับกำหนดค่าการแสดงผลของแต่ละสถานะ (สี, ไอคอน, ข้อความ)
@@ -111,19 +112,13 @@ export default function OrderManagementPage() {
         </div>
         
         {/* Pagination Controls */}
-        {totalPages > 1 && (
-            <div className="join mt-6 flex justify-center">
-                {[...Array(totalPages).keys()].map(page => (
-                    <button 
-                        key={page} 
-                        onClick={() => setCurrentPage(page + 1)} 
-                        className={`join-item btn ${currentPage === page + 1 ? 'btn-active' : ''}`}
-                    >
-                        {page + 1}
-                    </button>
-                ))}
-            </div>
-        )}
+        <Pagination
+            currentPage={currentPage}
+            itemsPerPage={itemsPerPage}
+            totalItemsCount={filteredOrders.length}
+            onPageChange={page => setCurrentPage(page)}
+            totalPages={totalPages}
+        />
 
         {/* 4. เรียกใช้ Modal และส่ง Props ทั้งหมดที่จำเป็นเข้าไป */}
         <OrderDetailModal 

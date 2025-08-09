@@ -22,7 +22,6 @@ export interface AlertModalProps {
  */
 export type ModalMode = 'view' | 'edit' | 'add';
 // +++ END: เพิ่ม Type ใหม่สำหรับ Modal Mode +++
-export type TransferSlipStatusFilter = 'all' | 'has_slip' | 'no_slip';
 
 
 // --- UI Configuration Objects ---

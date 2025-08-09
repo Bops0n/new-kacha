@@ -14,6 +14,7 @@ import { formatPrice } from '@/app/utils/formatters';
 import ProductRow from './ProductRow';
 import ProductCard from './ProductCard';
 import Link from 'next/link';
+import Pagination from '@/app/components/Pagination';
 
 // --- Presentational Modal Component ---
 // คอมโพเนนต์นี้มีหน้าที่แสดงผล UI ของ Modal เท่านั้น โดยรับ Logic ทั้งหมดมาจาก Props
@@ -222,9 +223,13 @@ export default function ProductManagementPage() {
                 ))}
             </div>
             
-            <div className="join mt-4 flex justify-center">
-                {[...Array(totalPages).keys()].map(page => (<button key={page} onClick={() => setCurrentPage(page + 1)} className={`join-item btn ${currentPage === page + 1 ? 'btn-active' : ''}`}>{page + 1}</button>))}
-            </div>
+            <Pagination
+                currentPage={currentPage}
+                itemsPerPage={itemsPerPage}
+                totalItemsCount={filteredProducts.length}
+                onPageChange={page => setCurrentPage(page)}
+                totalPages={totalPages}
+                />
 
             <ProductModal 
                 {...modalProps}

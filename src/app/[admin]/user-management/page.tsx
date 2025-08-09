@@ -14,6 +14,7 @@ import UserCard from './UserCard'; // Correct path to components
 import UserModal from './modal/UserModal'; // <-- นำเข้า UserModal
 import AddressModal from './modal/AddressModal'; // <-- นำเข้า AddressModal
 import { useAlert } from '@/app/context/AlertModalContext';
+import Pagination from '@/app/components/Pagination';
 
 // --- Mock Data ---
 const mockUsers: User[] = [
@@ -602,53 +603,13 @@ export default function UserManagement() {
               </button>
 
               <div className="flex flex-wrap justify-center gap-1">
-                {(() => {
-                  const pages: JSX.Element[] = [];
-                  const maxVisiblePages: number = 5;
-                  let startPage: number = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
-                  let endPage: number = Math.min(totalPages, startPage + maxVisiblePages - 1);
-
-                  if (endPage - startPage + 1 < maxVisiblePages) {
-                    startPage = Math.max(1, endPage - maxVisiblePages + 1);
-                  }
-
-                  if (startPage > 1) {
-                    pages.push(
-                      <button key={1} className="btn btn-sm" onClick={() => handlePageChange(1)}>1</button>
-                    );
-                    if (startPage > 2) {
-                      pages.push(<span key="ellipsis1" className="px-2">...</span>);
-                    }
-                  }
-
-                  for (let i = startPage; i <= endPage; i++) {
-                    pages.push(
-                      <button
-                        key={i}
-                        className={`btn btn-sm ${i === currentPage ? 'btn-primary' : ''}`}
-                        onClick={() => handlePageChange(i)}
-                      >
-                        {i}
-                      </button>
-                    );
-                  }
-
-                  if (endPage < totalPages) {
-                    if (endPage < totalPages - 1) {
-                      pages.push(<span key="ellipsis2" className="px-2">...</span>);
-                    }
-                    pages.push(
-                      <button
-                        key={totalPages}
-                        className="btn btn-sm"
-                        onClick={() => handlePageChange(totalPages)}
-                      >
-                        {totalPages}
-                      </button>
-                    );
-                  }
-                  return pages;
-                })()}
+                <Pagination
+                  currentPage={currentPage}
+                  itemsPerPage={itemsPerPage}
+                  totalItemsCount={filteredUsers.length}
+                  totalPages={totalPages}
+                  onPageChange={handlePageChange}
+                />
               </div>
 
               <button
