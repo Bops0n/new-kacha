@@ -49,9 +49,23 @@ export interface FullCategoryPath {
   Child_Name: string;
 }
 
+export interface SimpleProductDetail {
+  Product_ID: number;
+  Name: string;
+  Image_URL: string | null;
+  Quantity: number; // จำนวนคงเหลือในคลัง (Available Stock)
+}
+
 export interface ProductsPageData {
   products: ProductInventory[];
   categories: Category[];
   subCategories: SubCategory[];
   childSubCategories: ChildSubCategory[];
 }
+
+export type ProductFormData = Partial<ProductInventory> & {
+  Selected_Category_ID?: number | null;
+  Selected_Sub_Category_ID?: number | null;
+};
+
+export type StockStatus = 'in_stock' | 'low_stock' | 'out_of_stock';

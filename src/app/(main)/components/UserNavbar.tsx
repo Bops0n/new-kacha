@@ -7,13 +7,14 @@ import { signOut, useSession } from 'next-auth/react';
 import { FaSearch, FaLine, FaFacebookSquare } from 'react-icons/fa';
 import { GoTriangleDown } from "react-icons/go";
 import { HiMenu, HiX } from "react-icons/hi";
-import { FiShoppingCart, FiLogIn, FiUser } from "react-icons/fi";
+import { FiShoppingCart, FiUser } from "react-icons/fi";
 import { useCounter } from '@/app/context/CartCount';
-import { useNavigation } from '@/app/hooks/useNavigation';
+import { useCategoryData } from '@/app/hooks/useCategoryData'; // << 1. เปลี่ยน hook ที่ import
 import AuthModal from '@/app/(main)/components/AuthModal';
 import { Category, SubCategory, ChildSubCategory } from '@/types';
 
-// --- Component ย่อยสำหรับ Render เมนู (จัดการ Child Category ที่นี่) ---
+// ... (CategoryMenuItems component ไม่มีการเปลี่ยนแปลง) ...
+
 const CategoryMenuItems = ({ categories, subCategories, childSubCategories, closeMobileMenu } : { categories: Category[], subCategories: SubCategory[], childSubCategories: ChildSubCategory[], closeMobileMenu: () => void }) => {
   if (!categories || categories.length === 0) {
     return <li><a>ไม่มีหมวดหมู่</a></li>;
@@ -56,11 +57,13 @@ const CategoryMenuItems = ({ categories, subCategories, childSubCategories, clos
   ));
 };
 
+
 export default function UserNavbar() {
     const { data: session, status } = useSession();
     const router = useRouter();
     const { count: cartItemCount, setCounter } = useCounter();
-    const { categories, subCategories, childSubCategories, loading: navLoading } = useNavigation();
+    // << 2. เรียกใช้ useCategoryData แทน useNavigation
+    const { categories, subCategories, childSubCategories, loading: navLoading } = useCategoryData();
 
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
@@ -102,7 +105,7 @@ export default function UserNavbar() {
     return (
         <>
             <header className="sticky top-0 z-50 bg-base-100 shadow-sm">
-                {/* === Top Bar & Main Header (เหมือนเดิม) === */}
+                {/* Top Bar & Main Header */}
                 <div className="bg-base-200 text-xs text-base-content/80 border-b border-base-300/50">
                     <div className="container mx-auto px-4 sm:px-6 lg:px-8 flex flex-wrap justify-center sm:justify-between items-center py-1 gap-x-4 gap-y-1">
                         <span>สำหรับทุกความต้องการในบ้าน: สินค้าที่ใช่, ครบวงจร, ที่เดียวจบ.</span>
@@ -134,7 +137,7 @@ export default function UserNavbar() {
                                     <ul tabIndex={0} className="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52">
                                         <li className="menu-title"><span>{session.user?.name}</span></li>
                                         <li><Link href="/profile">โปรไฟล์ของฉัน</Link></li>
-                                        <li><Link href="/order-history">ประวัติคำสั่งซื้อ</Link></li>
+                                        <li><Link href="/orders-history">ประวัติคำสั่งซื้อ</Link></li>
                                         <li><a onClick={handleLogout}>ออกจากระบบ</a></li>
                                     </ul>
                                 </div>
@@ -144,7 +147,7 @@ export default function UserNavbar() {
                     </div>
                 </div>
 
-                {/* === Navigation Menu (ส่วนที่แก้ไข) === */}
+                {/* Navigation Menu */}
                 <nav className={`bg-base-200 text-base-content border-t border-base-300/50 lg:block ${isMenuOpen ? 'block' : 'hidden'}`}>
                     <div className="container mx-auto flex flex-col lg:flex-row lg:items-center">
                         <ul className="menu menu-horizontal hidden lg:flex px-4 text-sm">
@@ -171,7 +174,7 @@ export default function UserNavbar() {
                             <li><Link href="/products?discount=true" onClick={closeMobileMenu}>สินค้าลดราคา</Link></li>
                             <li><Link href="#" onClick={closeMobileMenu}>โปรโมชั่น</Link></li>
                             <li><Link href="#" onClick={closeMobileMenu}>ข่าวสาร</Link></li>
-                            {session?.user?.accessLevel === '9' && <li className="mt-2"><Link href="/dashboard" className="btn btn-warning btn-sm w-full" onClick={closeMobileMenu}>จัดการระบบ</Link></li>}
+                            {session?.user?.accessLevel === '1' && <li className="mt-2"><Link href="/dashboard" className="btn btn-warning btn-sm w-full" onClick={closeMobileMenu}>จัดการระบบ</Link></li>}
                         </ul>
                     </div>
                 </nav>

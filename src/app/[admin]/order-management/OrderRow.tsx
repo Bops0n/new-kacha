@@ -1,67 +1,64 @@
+'use client';
+
 import React from 'react';
-import { FiEye, FiTrash2, FiEdit } from 'react-icons/fi'; // Import FiEye
-import { Order, OrderStatus, StatusConfig } from '../../../../types'; // Correct path to types
+import { FiEye, FiTrash2 } from 'react-icons/fi';
+import { Order, StatusConfig } from '@/types';
+import { formatPrice, formatDate } from '@/app/utils/formatters';
 
 interface OrderRowProps {
   order: Order;
   statusConfig: StatusConfig;
-  formatPrice: (price: number) => string;
-  viewOrderDetails: (order: Order, initialMode?: 'view' | 'edit') => void; // Changed prop name
-  updateOrderStatus: (orderId: string, newStatus: OrderStatus, reason?: string | null) => void;
-  deleteOrder: (orderId: string) => void;
+  viewOrderDetails: (order: Order) => void;
+  deleteOrder: (orderId: number) => void;
 }
 
-const OrderRow: React.FC<OrderRowProps> = ({
-  order,
-  statusConfig,
-  formatPrice,
-  viewOrderDetails, // Updated prop name
-  updateOrderStatus,
-  deleteOrder,
-}) => {
-  const Icon = statusConfig[order.status].icon;
+const OrderRow: React.FC<OrderRowProps> = ({ order, statusConfig, viewOrderDetails, deleteOrder }) => {
+  const StatusIcon = statusConfig[order.Status]?.icon;
+  const statusInfo = statusConfig[order.Status];
 
   return (
-    <tr className="hover cursor-pointer" onClick={() => viewOrderDetails(order, 'view')}>
-      <td><div className="font-bold text-primary">{order.id}</div></td>
+    <tr className="hover cursor-pointer" onClick={() => viewOrderDetails(order)}>
+      <td><div className="font-bold text-primary">#{order.Order_ID}</div></td>
       <td>
-        <div className="font-semibold">{order.customerName}</div>
-        <div className="text-sm text-base-content/70">{order.email}</div>
+        <div className="font-bold">{order.Customer_Name}</div>
+        <div className="text-sm opacity-70">{order.Email || '-'}</div>
       </td>
       <td>
         <ul className="list-disc list-inside text-sm">
-          {order.products.map((product, idx) => (
-            <li key={idx}>{product.name} ({product.quantity})</li>
+          {order.Products.slice(0, 2).map((p, idx) => (
+            <li key={idx} className="truncate max-w-xs">{p.Product_Name} (x{p.Quantity})</li>
           ))}
+          {order.Products.length > 2 && <li className="text-xs opacity-60">...และอีก {order.Products.length - 2} รายการ</li>}
         </ul>
       </td>
-      <td><div className="font-bold">{formatPrice(order.total)}</div></td>
+      <td><div className="font-bold">{formatPrice(order.Total_Amount)}</div></td>
       <td>
-        <span className={`badge ${statusConfig[order.status].color.replace('text-', 'badge-')} badge-outline`}>
-          {React.createElement(Icon, { className: "inline-block w-3 h-3 mr-1" })}
-          {statusConfig[order.status].label}
-        </span>
+        {statusInfo && (
+          <span className={`badge ${statusInfo.color}`}>
+            {StatusIcon && <StatusIcon className="w-3 h-3 mr-1" />} 
+            {statusInfo.label}
+          </span>
+        )}
       </td>
-      <td>{order.orderDate}</td>
-      <td>{order.deliveryDate || '-'}</td>
-      <td>{order.trackingId || '-'}</td>
+      <td>{formatDate(order.Order_Date)}</td>
+      <td>{order.Tracking_ID || '-'}</td>
       <td>
         <div className="flex gap-1">
           <button
             className="btn btn-sm btn-ghost btn-square"
             onClick={(e) => {
-              e.stopPropagation(); // Prevent row click
-              viewOrderDetails(order, 'view'); // Open in view mode
+              e.stopPropagation();
+              viewOrderDetails(order);
             }}
             title="ดูรายละเอียด"
           >
-            <FiEye className="w-4 h-4" /> {/* Changed icon to FiEye */}
+            <FiEye className="w-4 h-4" />
           </button>
           <button
             className="btn btn-sm btn-ghost btn-square text-error"
             onClick={(e) => {
-              e.stopPropagation(); // Prevent row click
-              deleteOrder(order.id);
+              e.stopPropagation();
+              deleteOrder(order.Order_ID);
             }}
             title="ลบคำสั่งซื้อ"
           >

@@ -1,0 +1,54 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { authenticateRequest } from '@/app/api/auth/utils';
+import path from 'path';
+import { writeFile, mkdir } from 'fs/promises';
+import { v4 as uuidv4 } from 'uuid';
+
+// Helper function to check for admin access from auth utils
+const requireAdmin = (auth) => {
+    if (!auth.authenticated || auth.accessLevel !== '1') {
+        return NextResponse.json({ message: 'Forbidden' }, { status: 403 });
+    }
+    return null;
+};
+
+export async function POST(req: NextRequest) {
+    // 1. ตรวจสอบสิทธิ์ผู้ใช้
+    const auth = await authenticateRequest();
+    const adminCheck = requireAdmin(auth);
+    if (adminCheck) return adminCheck;
+
+    try {
+        const formData = await req.formData();
+        const file = formData.get('file') as File | null;
+
+        if (!file) {
+            return NextResponse.json({ message: 'No file provided.' }, { status: 400 });
+        }
+
+        // 2. เตรียมข้อมูลสำหรับการบันทึกไฟล์
+        const buffer = Buffer.from(await file.arrayBuffer());
+        const fileExtension = path.extname(file.name);
+        const uniqueFilename = `${uuidv4()}${fileExtension}`;
+        
+        // 3. กำหนด Path ที่จะบันทึกไฟล์
+        const uploadDir = path.join(process.cwd(), 'public', 'uploads', 'products');
+        const relativePath = `/uploads/products/${uniqueFilename}`;
+
+        // 4. ตรวจสอบและสร้าง Directory หากยังไม่มี
+        await mkdir(uploadDir, { recursive: true });
+
+        // 5. เขียนไฟล์ลงบน Server
+        await writeFile(path.join(uploadDir, uniqueFilename), buffer);
+
+        // 6. ส่ง URL ของไฟล์ที่เข้าถึงได้แบบ Public กลับไป
+        return NextResponse.json({ 
+            message: 'File uploaded successfully.', 
+            imageUrl: relativePath 
+        }, { status: 201 });
+
+    } catch (error) {
+        console.error('File upload error:', error);
+        return NextResponse.json({ message: "Server Error during file upload." }, { status: 500 });
+    }
+}

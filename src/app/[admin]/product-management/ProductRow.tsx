@@ -1,12 +1,13 @@
 import React from 'react';
 import { FiEye, FiTrash2 } from 'react-icons/fi'; // Changed FiEdit to FiEye, removed FiEdit from import
-import { ProductInventory } from '../../../types/types'; // Correct path to types
+import { ProductInventory } from '@/types'; // Correct path to types
+import { ModalMode } from '@/types';
 
 interface ProductRowProps {
   product: ProductInventory;
   formatPrice: (price: number) => string;
   getFullCategoryName: (childId: number | null) => string;
-  openProductModal: (product: ProductInventory, initialMode: 'view' | 'edit') => void; // Prop for modal control
+  openProductModal: (product: ProductInventory | null, initialMode: ModalMode) => void
   deleteProduct: (productId: number) => void;
 }
 

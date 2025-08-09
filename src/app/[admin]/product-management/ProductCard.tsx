@@ -1,12 +1,13 @@
 import React from 'react';
-import { FiTag, FiBox, FiDollarSign, FiEye } from 'react-icons/fi'; // Changed FiEdit to FiEye
-import { ProductInventory } from '../../../types/types'; // Correct path to types
+import { FiTag, FiBox, FiDollarSign, FiEye, FiTrash2 } from 'react-icons/fi';
+import { ProductInventory, ModalMode } from '@/types'; // <--- 1. แก้ไขการ import Type
 
 interface ProductCardProps {
   product: ProductInventory;
   formatPrice: (price: number) => string;
   getFullCategoryName: (childId: number | null) => string;
-  openProductModal: (product: ProductInventory, initialMode: 'view' | 'edit') => void; // Prop for modal control
+  openProductModal: (product: ProductInventory, initialMode: ModalMode) => void;
+  deleteProduct: (productId: number) => void; // <--- 2. เพิ่ม Prop สำหรับลบสินค้า
 }
 
 const ProductCard: React.FC<ProductCardProps> = ({
@@ -14,12 +15,12 @@ const ProductCard: React.FC<ProductCardProps> = ({
   formatPrice,
   getFullCategoryName,
   openProductModal,
+  deleteProduct, // <--- 2. รับ Prop สำหรับลบสินค้า
 }) => {
   const isLowStock = product.Quantity <= product.Reorder_Point && product.Quantity > 0;
   const isOutOfStock = product.Quantity === 0;
 
   return (
-    // Make the entire card clickable to open the modal in view mode
     <div className="card bg-base-200 shadow-sm cursor-pointer" onClick={() => openProductModal(product, 'view')}>
       <div className="card-body p-4">
         <div className="flex items-start gap-4 mb-3">
@@ -76,11 +77,22 @@ const ProductCard: React.FC<ProductCardProps> = ({
           <button
             className="btn btn-sm btn-outline"
             onClick={(e) => {
-              e.stopPropagation(); // Prevent card click from also triggering
-              openProductModal(product, 'view'); // Open in view mode
+              e.stopPropagation(); // ป้องกันไม่ให้ Card ถูกคลิกไปด้วย
+              openProductModal(product, 'view');
             }}
           >
             <FiEye className="w-4 h-4" /> ดูรายละเอียด
+          </button>
+
+          {/* 3. เพิ่มปุ่มลบสินค้า */}
+          <button
+            className="btn btn-sm btn-ghost text-error"
+            onClick={(e) => {
+              e.stopPropagation(); // ป้องกันไม่ให้ Card ถูกคลิกไปด้วย
+              deleteProduct(product.Product_ID); // 4. เรียกใช้ฟังก์ชันลบ
+            }}
+          >
+            <FiTrash2 className="w-4 h-4" /> ลบ
           </button>
         </div>
       </div>

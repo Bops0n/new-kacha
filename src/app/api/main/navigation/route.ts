@@ -4,20 +4,13 @@ import { poolQuery } from '@/app/api/lib/db';
 export async function GET() {
   try {
     // ใช้ Promise.all เพื่อดึงข้อมูลทั้ง 3 ตารางพร้อมกัน
-    const [
-      categoriesRes,
-      subCategoriesRes,
-      childSubCategoriesRes
-    ] = await Promise.all([
-      poolQuery('SELECT * FROM "Category" ORDER BY "Category_ID" ASC'),
-      poolQuery('SELECT * FROM "Sub_Category" ORDER BY "Sub_Category_ID" ASC'),
-      poolQuery('SELECT * FROM "Child_Sub_Category" ORDER BY "Child_ID" ASC')
-    ]);
-
+    const allCategories = await poolQuery('SELECT * FROM public."SP_GET_ALL_CATEGORIES"()');
+    const { categories, subCategories, childSubCategories } = allCategories.rows[0];
+    
     return NextResponse.json({
-      categories: categoriesRes.rows,
-      subCategories: subCategoriesRes.rows,
-      childSubCategories: childSubCategoriesRes.rows,
+      categories: categories,
+      subCategories: subCategories,
+      childSubCategories: childSubCategories,
     });
 
   } catch (error) {
