@@ -70,10 +70,18 @@ export default function OrderDetailsPage() {
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
+
       if (file.size > 5 * 1024 * 1024) { // 5MB Limit
+        setSelectedFile(null);
         showAlert('ขนาดไฟล์ต้องไม่เกิน 5MB', 'warning');
-        return;
+        return 
       }
+      if (file.type !== 'image/jpeg' && file.type !== 'image/png') {
+        setSelectedFile(null);
+        showAlert('ไฟล์ต้องเป็นรูปภาพ (JPEG หรือ PNG)', 'warning');
+        return
+      }
+
       setSelectedFile(file);
     }
   };
@@ -232,8 +240,11 @@ export default function OrderDetailsPage() {
             </div>
             {canUploadSlip && (
               <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mt-4 border-t border-base-300 pt-4">
-                  <input type="file" className="file-input file-input-bordered file-input-primary w-full max-w-xs" onChange={handleFileChange} accept="image/png, image/jpeg, image/jpg" />
-                  <button onClick={handleUploadSlip} disabled={!selectedFile || isUploading} className="btn btn-primary">
+                <label className='flex flex-col items-center justify-center'>
+                <input type="file" className="file-input file-input-bordered file-input-primary w-full max-w-xs" onChange={handleFileChange} accept="image/png, image/jpeg, image/jpg" placeholder='s'></input>
+                  {'สามารถอัพโหลดไฟล์ขนาดไม่เกิน 5MB เท่านั้น '}
+                </label>
+                  <button onClick={handleUploadSlip} disabled={!selectedFile || isUploading} className="btn btn-primary mb-auto">
                       {isUploading && <span className="loading loading-spinner"></span>}
                       <FiUploadCloud className="mr-2"/>
                       {isUploading ? 'กำลังอัปโหลด...' : 'ยืนยันสลิป'}

@@ -56,8 +56,7 @@ export async function PATCH(
         return auth.response!;
     }
     const userId = auth.userId;
-
-    const orderId = parseInt(params.orderId, 10);
+    const orderId = parseInt(await params.orderId, 10);
     if (isNaN(orderId)) {
         return NextResponse.json({ message: 'Order ID ไม่ถูกต้อง' }, { status: 400 });
     }
@@ -66,8 +65,15 @@ export async function PATCH(
         // ... (Upload logic remains the same, it correctly targets 'Transfer_Slip_Image_URL')
         const formData = await request.formData();
         const transferSlipFile = formData.get('transferSlip') as File | null;
+
         if (!transferSlipFile) {
             return NextResponse.json({ message: 'ไม่พบไฟล์สลิป' }, { status: 400 });
+        }
+        if (transferSlipFile.size > 5 * 1024 * 1024) {
+            return NextResponse.json({ message: 'ขนาดไฟล์เกิน 5 MB' }, { status: 400 });
+        }
+        if (!['image/jpeg', 'image/png'].includes(transferSlipFile.type)) {
+            return NextResponse.json({ message: 'ไฟล์ไม่ใช่รูปภาพ' }, { status: 400 });
         }
         
         // Logic to save file and update DB URL
@@ -79,7 +85,7 @@ export async function PATCH(
         const filePath = path.join(uploadDir, filename);
         const imageUrl = `/uploads/slips/${filename}`;
 
-        await fs.writeFile(filePath, bytes);
+        await fs.writeFile(filePath, buffer);
         await poolQuery(`UPDATE "Order" SET "Transfer_Slip_Image_URL" = $1 WHERE "Order_ID" = $2 AND "User_ID" = $3`, [imageUrl, orderId, userId]);
 
         return NextResponse.json({ message: 'อัปโหลดสลิปสำเร็จ', imageUrl });
