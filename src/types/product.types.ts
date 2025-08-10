@@ -68,4 +68,13 @@ export type ProductFormData = Partial<ProductInventory> & {
   Selected_Sub_Category_ID?: number | null;
 };
 
+export interface CategoryDisplayItem {
+  id: number;
+  name: string;
+  type: 'main' | 'sub' | 'child';
+  parentId: number | null;
+  parentName?: string;
+  fullPathName?: string;
+}
+
 export type StockStatus = 'in_stock' | 'low_stock' | 'out_of_stock';

@@ -25,25 +25,33 @@ export function useCategoryData() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchCategoryData = async () => {
-      try {
-        const response = await fetch('/api/main/navigation');
-        if (!response.ok) {
-          throw new Error('ไม่สามารถโหลดข้อมูลหมวดหมู่ได้');
-        }
-        const fetchedData = await response.json();
-        setData(fetchedData);
-      } catch (err: any) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
+  const fetchCategoryData = async () => {
+    try {
+      const response = await fetch('/api/main/navigation');
+      if (!response.ok) {
+        throw new Error('ไม่สามารถโหลดข้อมูลหมวดหมู่ได้');
       }
-    };
+      const fetchedData = await response.json();
+      setData(fetchedData);
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  const refetch = useCallback(async() => {
+    setLoading(true);
+    setError(null);
+    await fetchCategoryData();
+  }, []);
+
+
+  useEffect(() => {
     fetchCategoryData();
   }, []); // ดึงข้อมูลแค่ครั้งเดียวเมื่อ hook ถูกใช้งาน
 
+  
   // Memoized map เพื่อการค้นหา Category Path เต็มๆ ที่รวดเร็ว
   const allCategoriesMap = useMemo(() => {
     const map = new Map<number, FullCategoryPath>();
@@ -70,5 +78,5 @@ export function useCategoryData() {
     return `${path?.Category_Name} > ${path?.Sub_Category_Name} > ${path?.Child_Name}`;
   }, [allCategoriesMap]);
 
-  return { ...data, loading, error, allCategoriesMap, getFullCategoryName };
+  return { ...data, loading, error, allCategoriesMap, getFullCategoryName, refetch};
 }

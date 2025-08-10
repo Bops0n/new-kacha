@@ -4,6 +4,8 @@ import { NextRequest, NextResponse } from 'next/server';
 // import { getServerSession } from 'next-auth'; // Optional: for authorization
 // import { authOptions } from '../../auth/[...nextauth]/route'; // Optional: for authorization
 import { poolQuery } from '../../lib/db'; // Adjust path if needed
+import { authenticateRequest } from '@/app/api/auth/utils';
+import * as categoryService from '@/app/api/services/admin/categoryService';
 
 // Define interface for Category, matching your assumed database schema for Category
 interface Category {
@@ -11,15 +13,22 @@ interface Category {
     Name: string;
 }
 
+// Helper: ตรวจสอบสิทธิ์ Admin
+const requireAdmin = (auth : { authenticated: boolean; accessLevel: string; }) => {
+    if (!auth.authenticated || auth.accessLevel !== '1') {
+        return NextResponse.json({ message: 'Forbidden' }, { status: 403 });
+    }
+    return null;
+};
 // --- GET All Categories or by ID ---
 export async function GET(req: NextRequest) {
     // Optional: Authorization check
     // const session = await getServerSession(authOptions);
     // if (!session) {
-    //     return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
-    // }
-
-    const categoryId = req.nextUrl.searchParams.get('id');
+        //     return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+        // }
+        
+        const categoryId = req.nextUrl.searchParams.get('id');
 
     let categories: Category[] = [];
     let sql: string;
@@ -47,168 +56,65 @@ export async function GET(req: NextRequest) {
     }
 }
 
-// --- POST Add New Category ---
+
+
+/**
+ * POST: สำหรับสร้างหมวดหมู่ใหม่ (main, sub, child)
+ * Body: { type: 'main' | 'sub' | 'child', payload: { name, parentId? } }
+ */
 export async function POST(req: NextRequest) {
-    // Optional: Authorization check
-    // const session = await getServerSession(authOptions);
-    // if (!session) {
-    //     return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
-    // }
-
-    let newCategoryData: Omit<Category, 'Category_ID'>;
-    try {
-        newCategoryData = await req.json();
-    } catch (error) {
-        console.error("Invalid JSON in request body:", error);
-        return NextResponse.json({ message: "Invalid JSON in request body." }, { status: 400 });
-    }
-
-    // Basic validation for required fields
-    if (!newCategoryData.Name || newCategoryData.Name.trim() === '') {
-        return NextResponse.json({ message: `"Name" is required to add a category.` }, { status: 400 });
-    }
-
-    const sql = `
-        INSERT INTO public."Category" (
-            "Name"
-        ) VALUES (
-            $1
-        )
-        RETURNING "Category_ID";
-    `;
-    const queryParams = [
-        newCategoryData.Name.trim()
-    ];
+    const auth = await authenticateRequest();
+    const adminCheck = requireAdmin(auth);
+    if (adminCheck) return adminCheck;
 
     try {
-        const result = await poolQuery(sql, queryParams);
-        const newCategoryId = result.rows[0].Category_ID;
-        return NextResponse.json({ message: "Category added successfully.", Category_ID: newCategoryId }, { status: 201 });
-    } catch (dbError: any) {
-        console.error("Error adding category:", dbError);
-        // Handle specific error for duplicate names if your DB has a unique constraint
-        if (dbError.code === '23505') { // PostgreSQL unique violation error code
-            return NextResponse.json({ message: "Category with this name already exists.", error: dbError.message }, { status: 409 });
-        }
-        return NextResponse.json({ message: "Failed to add category.", error: dbError.message }, { status: 500 });
+        const { type, payload } = await req.json();
+        const newData = await categoryService.addCategory(type, payload);
+        return NextResponse.json({ message: 'เพิ่มหมวดหมู่สำเร็จ', data: newData }, { status: 201 });
+    } catch (error: any) {
+        return NextResponse.json({ message: error.message || 'API Error' }, { status: 500 });
     }
 }
 
-// --- PATCH Update Category ---
+/**
+ * PATCH: สำหรับอัปเดตข้อมูลหมวดหมู่ (main, sub, child)
+ * Body: { type: 'main' | 'sub' | 'child', payload: { id, name } }
+ */
 export async function PATCH(req: NextRequest) {
-    // Optional: Authorization check
-    // const session = await getServerSession(authOptions);
-    // if (!session) {
-    //     return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
-    // }
-
-    let updatedCategoryData: Partial<Category>;
-    try {
-        updatedCategoryData = await req.json();
-    } catch (error) {
-        console.error("Invalid JSON in request body:", error);
-        return NextResponse.json({ message: "Invalid JSON in request body." }, { status: 400 });
-    }
-
-    if (typeof updatedCategoryData.Category_ID === 'undefined' || updatedCategoryData.Category_ID === null) {
-        return NextResponse.json({ message: "Category_ID is required for update." }, { status: 400 });
-    }
-
-    const categoryIdToUpdate = updatedCategoryData.Category_ID;
-    const updateColumns: string[] = [];
-    const queryParams: (string | number)[] = [];
-    let paramIndex = 1;
-
-    const excludedFields = ['Category_ID'];
-
-    // Only allow updating 'Name' for now
-    if (updatedCategoryData.Name !== undefined) {
-        if (updatedCategoryData.Name.trim() === '') {
-            return NextResponse.json({ message: `"Name" cannot be empty.` }, { status: 400 });
-        }
-        updateColumns.push(`"Name" = $${paramIndex}`);
-        queryParams.push(updatedCategoryData.Name.trim());
-        paramIndex++;
-    }
-
-    if (updateColumns.length === 0) {
-        return NextResponse.json({ message: "No valid fields provided for update." }, { status: 400 });
-    }
-
-    queryParams.push(categoryIdToUpdate); // Add Category_ID for the WHERE clause
-    const sql = `
-        UPDATE public."Category"
-        SET ${updateColumns.join(', ')}
-        WHERE "Category_ID" = $${paramIndex};
-    `;
+    const auth = await authenticateRequest();
+    const adminCheck = requireAdmin(auth);
+    if (adminCheck) return adminCheck;
 
     try {
-        const result = await poolQuery(sql, queryParams);
-        if (result.rowCount === 0) {
-            return NextResponse.json({ message: `Category with ID ${categoryIdToUpdate} not found.` }, { status: 404 });
-        }
-        return NextResponse.json({ message: `Category ID ${categoryIdToUpdate} updated successfully.` }, { status: 200 });
-    } catch (dbError: any) {
-        console.error("Error updating category:", dbError);
-        if (dbError.code === '23505') { // PostgreSQL unique violation error code
-            return NextResponse.json({ message: "Category with this name already exists.", error: dbError.message }, { status: 409 });
-        }
-        return NextResponse.json({ message: "Failed to update category.", error: dbError.message }, { status: 500 });
+        const { type, payload } = await req.json();
+        const updatedData = await categoryService.updateCategory(type, payload);
+        return NextResponse.json({ message: 'อัปเดตหมวดหมู่สำเร็จ', data: updatedData });
+    } catch (error: any) {
+        return NextResponse.json({ message: error.message || 'API Error' }, { status: 500 });
     }
 }
 
-// --- DELETE Category ---
+/**
+ * DELETE: สำหรับลบหมวดหมู่
+ * Query Params: ?type=main&id=123
+ */
 export async function DELETE(req: NextRequest) {
-    // Optional: Authorization check
-    // const session = await getServerSession(authOptions);
-    // if (!session) {
-    //     return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
-    // }
-
-    const categoryIdToDelete = req.nextUrl.searchParams.get('id');
-
-    if (!categoryIdToDelete) {
-        return NextResponse.json({ message: "Category ID is required as a query parameter for deleting a category." }, { status: 400 });
-    }
-
-    const parsedCategoryId = parseInt(categoryIdToDelete, 10);
-    if (isNaN(parsedCategoryId)) {
-        return NextResponse.json({ message: "Invalid Category ID provided. Must be a number." }, { status: 400 });
-    }
-
-    // --- IMPORTANT: Check for Foreign Key Dependencies ---
-    // Before deleting a main category, check if any sub-categories are linked to it.
-    // If so, deletion should be prevented or handled (e.g., set sub-category's parent_id to null, or delete cascade - but RESTRICT is safer)
-    try {
-        const checkSql = `SELECT COUNT(*) FROM public."Sub_Category" WHERE "Category_ID" = $1;`;
-        const checkResult = await poolQuery(checkSql, [parsedCategoryId]);
-        if (checkResult.rows[0].count > 0) {
-            return NextResponse.json({ message: "Cannot delete category: Sub-categories are linked to it. Please delete linked sub-categories first." }, { status: 409 });
-        }
-
-        // Also check if any products are directly linked to this Category (though typically products link to Child_Sub_Category)
-        // This part might not be strictly necessary if your product only links to child_id
-        // const checkProductSql = `SELECT COUNT(*) FROM public."Product" WHERE "Category_ID" = $1;`; // Assuming direct link for example
-        // const checkProductResult = await poolQuery(checkProductSql, [parsedCategoryId]);
-        // if (checkProductResult.rows[0].count > 0) {
-        //     return NextResponse.json({ message: "Cannot delete category: Products are linked to it. Please reassign or delete linked products first." }, { status: 409 });
-        // }
-
-    } catch (checkError: any) {
-        console.error("Error checking category dependencies:", checkError);
-        return NextResponse.json({ message: "Failed to check category dependencies.", error: checkError.message }, { status: 500 });
-    }
-
-    const deleteSql = `DELETE FROM public."Category" WHERE "Category_ID" = $1;`;
+    const auth = await authenticateRequest();
+    const adminCheck = requireAdmin(auth);
+    if (adminCheck) return adminCheck;
 
     try {
-        const result = await poolQuery(deleteSql, [parsedCategoryId]);
-        if (result.rowCount === 0) {
-            return NextResponse.json({ message: `Category with ID ${parsedCategoryId} not found.` }, { status: 404 });
+        const { searchParams } = new URL(req.url);
+        const type = searchParams.get('type') as 'main' | 'sub' | 'child';
+        const id = Number(searchParams.get('id'));
+
+        if (!type || !id) {
+            return NextResponse.json({ message: 'Missing type or id query parameter' }, { status: 400 });
         }
-        return NextResponse.json({ message: `Category ID ${parsedCategoryId} deleted successfully.` }, { status: 200 });
-    } catch (dbError: any) {
-        console.error("Error deleting category:", dbError);
-        return NextResponse.json({ message: "Failed to delete category.", error: dbError.message }, { status: 500 });
+        
+        await categoryService.deleteCategory(type, { id });
+        return NextResponse.json({ message: 'ลบหมวดหมู่สำเร็จ' });
+    } catch (error: any) {
+        return NextResponse.json({ message: error.message || 'API Error' }, { status: 500 });
     }
 }

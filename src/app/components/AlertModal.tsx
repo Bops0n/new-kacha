@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { AlertModalProps, AlertModalType } from '../../types/types';
+import { AlertModalProps, AlertModalType } from '@/types';
 import { FiInfo, FiCheckCircle, FiAlertTriangle, FiXCircle, FiImage } from 'react-icons/fi';
 
 /**
@@ -58,7 +58,7 @@ const AlertModal: React.FC<AlertModalProps> = ({ isOpen, message, onClose, type 
         <IconComponent className={`text-5xl mb-4 ${iconTextColor}`} /> {/* Reverted to IconComponent */}
 
         {/* Modal Message */}
-        <p className="text-lg text-gray-700 mb-6 leading-relaxed">
+        <p className="text-lg text-gray-700 mb-6 leading-relaxed whitespace-pre-wrap">
           {message}
         </p>
 
