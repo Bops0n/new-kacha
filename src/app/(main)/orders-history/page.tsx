@@ -18,6 +18,7 @@ export const statusConfig: { [key in OrderStatus]: { label: string; color: strin
     cancelled: { label: 'ยกเลิก', color: 'text-red-700', icon: FiXCircle, bgColor: 'bg-red-100' },
 };
 
+
 export default function OrderHistoryPage() {
     // 2. เรียกใช้ Hook เพื่อดึง State และ Logic
     const { loading, error, orders, sessionStatus } = useOrderHistory();

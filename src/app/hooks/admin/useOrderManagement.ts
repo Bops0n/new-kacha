@@ -101,8 +101,8 @@ export function useOrderManagement() {
       if (transferSlipFilter !== 'all') {
         const hasSlip = !!order.Transfer_Slip_Image_URL; // ใช้ !! เพื่อแปลงเป็น boolean (true/false)
         if (transferSlipFilter === 'has_slip' && !hasSlip) return false;
-        if (transferSlipFilter === 'no_slip' && hasSlip) return false;
         console.log(hasSlip)
+        if (transferSlipFilter === 'no_slip' && hasSlip) return false;
       }
 
       // 3. ตรวจสอบ Search Term Filter (ถ้าไม่มี searchTerm ก็ให้ผ่าน)

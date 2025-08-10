@@ -17,6 +17,7 @@ export interface OrderProductDetail {
   Product_Sale_Cost: number;       // ราคาต้นทุน ณ เวลาที่สั่ง
   Product_Sale_Price: number;      // ราคาขาย ณ เวลาที่สั่ง
   Product_Discount_Price: number | null; // ราคาลด ณ เวลาที่สั่ง
+  Price_Paid_Per_Item : number | null;
   Subtotal?: number;
 }
 // Main Order type
@@ -33,7 +34,7 @@ export type Order = {
   Tracking_ID: string | null;
   Shipping_Carrier: string | null;
   Cancellation_Reason: string | null;
-  Transfer_Slip_Image_URL: TransferSlipStatusFilter;
+  Transfer_Slip_Image_URL: string | null;
   DeliveryDate: string | null;
   Invoice_ID: string | null;
   Address: string;

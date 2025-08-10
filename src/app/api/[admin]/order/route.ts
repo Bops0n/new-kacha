@@ -10,6 +10,7 @@ const mapDbRowsToUiOrder = (dbRows: any[]): Order[] => {
         const orderId = row.Order_ID;
         if (!ordersMap.has(orderId)) {
             ordersMap.set(orderId, {
+                // --- Map fields from 'Order' table ---
                 Order_ID: row.Order_ID,
                 User_ID: row.User_ID,
                 Order_Date: row.Order_Date,
@@ -25,6 +26,8 @@ const mapDbRowsToUiOrder = (dbRows: any[]): Order[] => {
                 Address: row.Address,
                 Phone: row.Phone,
                 Total_Amount: parseFloat(row.Total_Amount),
+                
+                // --- Mapped from JOIN ---
                 Customer_Name: row.UserFullName || 'N/A',
                 Products: [],
             });
@@ -33,45 +36,46 @@ const mapDbRowsToUiOrder = (dbRows: any[]): Order[] => {
         const currentOrder = ordersMap.get(orderId)!;
 
         if (row.Product_ID) {
-            const salePrice = parseFloat(row.Product_Sale_Price);
-            const discountPrice = row.Product_Discount_Price ? parseFloat(row.Product_Discount_Price) : null;
-            const quantity = parseInt(row.Quantity, 10);
+            // --- Logic การคำนวณราคาตาม Schema ใหม่ ---
+            const salePrice = parseFloat(row.product_sale_price);
+            const discountPrice = row.product_discount_price ? parseFloat(row.product_discount_price) : null;
+            const quantity = parseInt(row.quantity, 10);
             const pricePaidPerItem = discountPrice ?? salePrice;
 
             currentOrder.Products.push({
                 Product_ID: row.Product_ID,
                 Quantity: quantity,
-                Product_Sale_Cost: parseFloat(row.Product_Sale_Cost),
+                Product_Sale_Cost: parseFloat(row.product_sale_cost),
                 Product_Sale_Price: salePrice,
-                Product_Name: row.Product_Name,
-                Product_Brand: row.Product_Brand,
-                Product_Unit: row.Product_Unit,
-                Product_Image_URL: row.Product_Image_URL,
+                Product_Name: row.product_name,
+                Product_Brand: row.product_brand,
+                Product_Unit: row.product_unit,
+                Product_Image_URL: row.product_image_url,
                 Product_Discount_Price: discountPrice,
                 Price_Paid_Per_Item: pricePaidPerItem,
                 Subtotal: pricePaidPerItem * quantity,
             });
         }
     });
+    console.log((ordersMap).get(1000016)?.Products)
     return Array.from(ordersMap.values()).sort((a, b) => b.Order_ID - a.Order_ID);
 };
 
-/**
- * GET: ดึงข้อมูลคำสั่งซื้อทั้งหมด (สำหรับ Admin)
- */
 export async function GET(req: NextRequest) {
     const orderId = req.nextUrl.searchParams.get('id');
 
-    // *** แก้ไข SQL Query ให้ใช้ "" ครอบชื่อ Column ทั้งหมด ***
     const sql = `
         SELECT
-            o."Order_ID", o."User_ID", o."Order_Date", o."Status", o."Payment_Type",
-            o."Invoice_ID", o."Address_ID", o."DeliveryDate", o."Tracking_ID", o."Shipping_Carrier",
-            o."Transfer_Slip_Image_URL", o."Cancellation_Reason", o."Address", o."Phone",
-            o."Total_Amount",
-            u."Full_Name" AS "UserFullName",
-            od."Product_ID", od."Quantity", od."Product_Sale_Cost", od."Product_Sale_Price",
-            od."Product_Name", od."Product_Brand", od."Product_Unit", od."Product_Image_URL",
+            o.*, -- Select all from Order table
+            u."Full_Name" AS "UserFullName", 
+            od."Product_ID",
+            od."Quantity",
+            od."Product_Sale_Cost",
+            od."Product_Sale_Price",
+            od."Product_Name",
+            od."Product_Brand",
+            od."Product_Unit",
+            od."Product_Image_URL",
             od."Product_Discount_Price"
         FROM
             public."Order" AS o
