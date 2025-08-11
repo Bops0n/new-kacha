@@ -15,6 +15,7 @@ interface OrderRowProps {
 const OrderRow: React.FC<OrderRowProps> = ({ order, statusConfig, viewOrderDetails, deleteOrder }) => {
   const StatusIcon = statusConfig[order.Status]?.icon;
   const statusInfo = statusConfig[order.Status];
+  console.log(order.Products)
 
   return (
     <tr className="hover cursor-pointer" onClick={() => viewOrderDetails(order)}>

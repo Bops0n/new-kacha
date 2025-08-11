@@ -6,8 +6,6 @@ import { Order, OrderStatus, EditOrderFormData, TransferSlipStatusFilter, Simple
 
 /**
  * Hook สำหรับจัดการ State และ Logic ทั้งหมดของหน้า Order Management
- * - ดึงข้อมูล, จัดการ State, กรองข้อมูล, และเชื่อมต่อ API
- * - มี Logic สำหรับ Pre-fetching ข้อมูลสินค้าล่าสุดก่อนเปิด Modal
  */
 export function useOrderManagement() {
   const { showAlert } = useAlert();
@@ -15,21 +13,17 @@ export function useOrderManagement() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // State for filters
   const [filters, setFilters] = useState({
     searchTerm: '',
     statusFilter: 'all' as OrderStatus | 'all',
     transferSlipFilter: 'all' as TransferSlipStatusFilter,
   });
-
-  // State for modal
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [liveProductDetails, setLiveProductDetails] = useState<Map<number, SimpleProductDetail>>(new Map());
   const [isFetchingDetails, setIsFetchingDetails] = useState(false);
 
-  // --- API Interactions ---
   const fetchOrders = useCallback(async () => {
     setLoading(true);
     setError(null);
@@ -41,8 +35,12 @@ export function useOrderManagement() {
       }
       const data = await response.json();
       setOrders(data.orders || []);
-    } catch (err: any)      {
-        showAlert(err.message, 'error');
+      if(selectedOrder){
+        setSelectedOrder(data.orders.find((o : Order) => o.Order_ID === selectedOrder.Order_ID) || null)
+      }
+    } catch (err: any) {
+      setError(err.message);
+      showAlert(err.message, 'error');
     } finally {
       setLoading(false);
     }
@@ -61,7 +59,6 @@ export function useOrderManagement() {
       });
       const result = await response.json();
       if (!response.ok) throw new Error(result.message);
-      showAlert('อัปเดตคำสั่งซื้อสำเร็จ!', 'success');
       await fetchOrders();
       return true;
     } catch (err: any) {
@@ -69,6 +66,48 @@ export function useOrderManagement() {
       return false;
     }
   };
+  
+  const cancelOrderWithoutSlip = useCallback(async (orderId: number, reason: string) => {
+    if (!reason || reason.trim() === '') {
+      showAlert('กรุณาระบุเหตุผลในการยกเลิก', 'warning');
+      return false;
+    }
+    const success = await saveOrder({
+      Order_ID: orderId,
+      Status: 'cancelled',
+      Cancellation_Reason: reason.trim(),
+    });
+    if (success) showAlert('ยกเลิกคำสั่งซื้อสำเร็จ!', 'success');
+    return success;
+  }, [saveOrder, showAlert]);
+
+  const initiateRefund = useCallback((order: Order) => {
+    showAlert(
+      `คำสั่งซื้อนี้มีการแนบสลิปแล้ว\nระบบจะเปลี่ยนสถานะเป็น "กำลังรอคืนเงิน"`,
+      'info',
+      'ดำเนินการคืนเงิน',
+      async () => {
+        const success = await saveOrder({ Order_ID: order.Order_ID, Status: 'refunding' });
+        if (success) {
+          showAlert('เปลี่ยนสถานะเป็น "กำลังรอคืนเงิน" สำเร็จ', 'success');
+        }
+      }
+    );
+  }, [saveOrder, showAlert]);
+  
+  const confirmRefund = useCallback((order: Order) => {
+    showAlert(
+      'ยืนยันว่าคุณได้ทำการโอนเงินคืนให้ลูกค้าสำหรับออเดอร์นี้เรียบร้อยแล้ว?',
+      'warning',
+      'ยืนยันการคืนเงิน',
+      async () => {
+        const success = await saveOrder({ Order_ID: order.Order_ID, Status: 'refunded' });
+        if (success) {
+          showAlert('ยืนยันการคืนเงินสำเร็จ!', 'success');
+        }
+      }
+    );
+  }, [saveOrder, showAlert]);
 
   const deleteOrder = (orderId: number) => {
     showAlert(`คุณแน่ใจหรือไม่ที่จะลบคำสั่งซื้อ #${orderId}?`, 'warning', 'ยืนยันการลบ', async () => {
@@ -85,48 +124,28 @@ export function useOrderManagement() {
     });
   };
 
-// --- Filtering Logic ---
   const filteredOrders = useMemo(() => {
     return orders.filter(order => {
       const { searchTerm, statusFilter, transferSlipFilter } = filters;
-
-      // 1. ตรวจสอบ Status Filter
-      // ถ้า statusFilter ไม่ใช่ 'all' และไม่ตรงกับสถานะของ order ให้คัดออก (return false)
-      if (statusFilter !== 'all' && order.Status !== statusFilter) {
-        return false;
-      }
-
-      // 2. ตรวจสอบ Transfer Slip Filter
-      // ถ้า transferSlipFilter ไม่ใช่ 'all' ให้ตรวจสอบเงื่อนไขของสลิป
+      if (statusFilter !== 'all' && order.Status !== statusFilter) return false;
       if (transferSlipFilter !== 'all') {
-        const hasSlip = !!order.Transfer_Slip_Image_URL; // ใช้ !! เพื่อแปลงเป็น boolean (true/false)
+        const hasSlip = !!order.Transfer_Slip_Image_URL;
         if (transferSlipFilter === 'has_slip' && !hasSlip) return false;
-        console.log(hasSlip)
         if (transferSlipFilter === 'no_slip' && hasSlip) return false;
       }
-
-      // 3. ตรวจสอบ Search Term Filter (ถ้าไม่มี searchTerm ก็ให้ผ่าน)
       if (searchTerm) {
         const lowerCaseSearchTerm = searchTerm.toLowerCase();
-        // ตรวจสอบว่ามีอย่างน้อยหนึ่ง field ที่ตรงกับคำค้นหา
-        const searchMatch = 
-          order.Order_ID.toString().includes(lowerCaseSearchTerm) ||
-          order.Customer_Name.toLowerCase().includes(lowerCaseSearchTerm) ||
-          (order.Tracking_ID && order.Tracking_ID.toLowerCase().includes(lowerCaseSearchTerm));
-        
-        if (!searchMatch) return false;
+        return order.Order_ID.toString().includes(lowerCaseSearchTerm) ||
+               order.Customer_Name.toLowerCase().includes(lowerCaseSearchTerm) ||
+               (order.Tracking_ID && order.Tracking_ID.toLowerCase().includes(lowerCaseSearchTerm));
       }
-
-      // 4. ถ้าผ่านทุกเงื่อนไข ให้เก็บ order นี้ไว้ (return true)
       return true;
     });
   }, [orders, filters]);
 
-  // --- Modal handlers ---
   const openModal = async (order: Order) => {
     setSelectedOrder(order);
     setIsEditing(false);
-
     if (order.Products.length > 0) {
         setIsFetchingDetails(true);
         setIsModalOpen(true);
@@ -137,11 +156,9 @@ export function useOrderManagement() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ productIds }),
             });
-            if (!response.ok) throw new Error('Failed to fetch real-time product details');
-            
+            if (!response.ok) throw new Error('Failed to fetch product details');
             const details: SimpleProductDetail[] = await response.json();
-            const detailsMap = new Map(details.map(p => [p.Product_ID, p]));
-            setLiveProductDetails(detailsMap);
+            setLiveProductDetails(new Map(details.map(p => [p.Product_ID, p])));
         } catch (err: any) {
             showAlert(err.message, 'error');
         } finally {
@@ -167,7 +184,7 @@ export function useOrderManagement() {
     filteredOrders,
     filters,
     setFilters,
-    actions: { saveOrder, deleteOrder },
+    actions: { saveOrder, deleteOrder, cancelOrderWithoutSlip, initiateRefund, confirmRefund },
     modalState: {
       isOpen: isModalOpen,
       isEditing,
