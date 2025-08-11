@@ -138,7 +138,7 @@ export async function updateOrder(payload: Partial<Order>): Promise<Order> {
 
         // Step 2: If status is 'cancelled' or 'refunded', update product cancellation counts
         const newStatus = orderUpdateResult.rows[0].Status;
-        if (newStatus && (newStatus === 'cancelled' || newStatus === 'refunded')) {
+        if (newStatus && (newStatus === 'cancelled' || newStatus === 'refunding')) {
             const orderDetailsResult = await client.query(
                 'SELECT "Product_ID", "Quantity" FROM public."Order_Detail" WHERE "Order_ID" = $1',
                 [Order_ID]

@@ -8,6 +8,7 @@ import AddressSelectionModal from "./AddressSelectionModal";
 import LoadingSpinner from "@/app/components/LoadingSpinner"; // Adjusted path
 import { formatPrice } from "@/app/utils/formatters"; // Adjusted path
 import { CartDetailSchema as CartProduct } from '@/types';
+import { calculateAvailableStock } from '@/app/utils/calculations';
 
 // UI-only component for displaying a single cart item
 interface CartItemProps {
@@ -36,23 +37,23 @@ const CartItem: React.FC<CartItemProps> = ({ item, onUpdateQuantity, onRemove })
                     <div className="flex items-center gap-2 mb-2 md:mb-0">
                         <button
                             className="btn btn-sm btn-circle btn-outline"
-                            onClick={() => onUpdateQuantity(item.Product_ID, item.Quantity - 1)}
-                            disabled={item.Quantity <= 1}
+                            onClick={() => onUpdateQuantity(item.Product_ID, item.CartQuantity - 1)}
+                            disabled={item.CartQuantity <= 1}
                         >
                             <FiMinusCircle />
                         </button>
-                        <span className="font-bold text-xl min-w-[30px] text-center">{item.Quantity}</span>
+                        <span className="font-bold text-xl min-w-[30px] text-center">{item.CartQuantity}</span>
                         <button
                             className="btn btn-sm btn-circle btn-outline"
-                            onClick={() => onUpdateQuantity(item.Product_ID, item.Quantity + 1)}
-                            disabled={item.Quantity >= item.AvailableStock}
+                            onClick={() => onUpdateQuantity(item.Product_ID, item.CartQuantity + 1)}
+                            disabled={item.CartQuantity >= calculateAvailableStock(item)}
                         >
                             <FiPlusCircle />
                         </button>
-                        <span className="text-sm text-base-content/60 ml-2">(คงเหลือ: {item.AvailableStock})</span>
+                        <span className="text-sm text-base-content/60 ml-2">(คงเหลือ: {calculateAvailableStock(item as any)})</span>
                     </div>
                     <div className="font-bold text-xl text-primary text-right md:text-left">
-                        {formatPrice(item.Sale_Price * item.Quantity)}
+                        {formatPrice(item.Sale_Price * item.CartQuantity)}
                     </div>
                 </div>
             </div>
@@ -128,6 +129,7 @@ export default function CartPage() {
                                     item={item} 
                                     onUpdateQuantity={updateItemQuantity} 
                                     onRemove={removeItem}
+
                                 />
                             ))}
                         </div>
@@ -142,8 +144,8 @@ export default function CartPage() {
                             <div className="divider my-4"></div>
                             <h3 className="text-xl font-bold mb-4">ช่องทางการชำระเงิน</h3>
                             <div className="form-control mb-6">
-                                <label className="label cursor-pointer justify-start gap-3"><input type="radio" name="payment_method" className="radio radio-primary" checked={paymentMethod === 'Bank Transfer'} onChange={() => setPaymentMethod('Bank Transfer')} /><span className="label-text text-lg">โอนเงินผ่านธนาคาร</span></label>
-                                <label className="label cursor-pointer justify-start gap-3"><input type="radio" name="payment_method" className="radio radio-primary" checked={paymentMethod === 'COD'} onChange={() => setPaymentMethod('COD')} /><span className="label-text text-lg">เก็บเงินปลายทาง (COD)</span></label>
+                                <label className="label cursor-pointer justify-start gap-3"><input type="radio" name="payment_method" className="radio radio-primary" checked={paymentMethod === 'bank_transfer'} onChange={() => setPaymentMethod('bank_transfer')} /><span className="label-text text-lg">โอนเงินผ่านธนาคาร</span></label>
+                                <label className="label cursor-pointer justify-start gap-3"><input type="radio" name="payment_method" className="radio radio-primary" checked={paymentMethod === 'cash_on_delivery'} onChange={() => setPaymentMethod('cash_on_delivery')} /><span className="label-text text-lg">เก็บเงินปลายทาง (COD)</span></label>
                             </div>
                             <div className="divider my-4"></div>
                             <div className="flex justify-between items-center text-xl font-bold mb-6"><span>ยอดชำระทั้งหมด:</span><span className="text-primary">{formatPrice(totalPrice)}</span></div>

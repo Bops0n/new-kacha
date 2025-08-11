@@ -5,12 +5,13 @@ import { FiSave, FiX, FiEdit, FiImage, FiShoppingBag, FiArchive, FiAlertTriangle
 import { Order, EditOrderFormData, OrderStatus, StatusConfig, SimpleProductDetail, OrderProductDetail } from '@/types';
 import { useAlert } from '@/app/context/AlertModalContext';
 import { formatPrice, formatDate } from '@/app/utils/formatters';
+import { calculateAvailableStock } from '@/app/utils/calculations';
 
 // --- Sub-Component: OrderItemDetail ---
 const OrderItemDetail: React.FC<{ orderProduct: OrderProductDetail; liveProduct?: SimpleProductDetail; }> = ({ orderProduct, liveProduct }) => {
   const name = liveProduct?.Name || orderProduct.Product_Name;
   const imageUrl = liveProduct?.Image_URL || orderProduct.Product_Image_URL;
-  const availableStock = liveProduct?.Quantity;
+  const availableStock = calculateAvailableStock(liveProduct);
   const isStockInsufficient = typeof availableStock !== 'undefined' && availableStock < orderProduct.Quantity;
   const hasDiscount = orderProduct.Product_Discount_Price !== null && orderProduct.Product_Discount_Price < orderProduct.Product_Sale_Price;
   const pricePaidPerItem = orderProduct.Product_Discount_Price ?? orderProduct.Product_Sale_Price;

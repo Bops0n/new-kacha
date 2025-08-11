@@ -1,4 +1,5 @@
-import { ProductInventory } from '@/types/product.types';
+import { CartDetailSchema } from '@/types';
+import { ProductInventory, SimpleProductDetail } from '@/types/product.types';
 
 /**
  * Calculates the available stock for a product based on the perpetual inventory formula.
@@ -6,7 +7,7 @@ import { ProductInventory } from '@/types/product.types';
  * @param product The product inventory object.
  * @returns The number of units available for sale.
  */
-export function calculateAvailableStock(product: ProductInventory): number {
+export function calculateAvailableStock(product: ProductInventory | CartDetailSchema | SimpleProductDetail): number {
   if (!product) {
     return 0;
   }

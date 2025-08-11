@@ -10,6 +10,7 @@ import LoadingSpinner from '@/app/components/LoadingSpinner';
 import { useAddToCart } from '@/app//hooks/useAddToCart';
 import { useProductDetail } from '@/app/hooks/useProductDetail';
 import { FullCategoryPath } from '@/types';
+import { calculateAvailableStock } from '@/app/utils/calculations';
 
 // Component สำหรับ Breadcrumbs (คงไว้เหมือนเดิม)
 const Breadcrumbs = ({ path }: { path: FullCategoryPath | null }) => {
@@ -38,7 +39,7 @@ export default function ProductDetailPage() {
   const handleQuantityChange = (type: 'increase' | 'decrease') => {
     setQuantity(prevQty => {
       if (!product) return prevQty;
-      if (type === 'increase') return Math.min(prevQty + 1, product.Quantity);
+      if (type === 'increase') return Math.min(prevQty + 1, calculateAvailableStock(product));
       return Math.max(prevQty - 1, 1);
     });
   };
@@ -55,7 +56,7 @@ export default function ProductDetailPage() {
 
   const hasDiscount = product.Discount_Price !== null && product.Discount_Price < product.Sale_Price;
   const displayPrice = hasDiscount ? product.Discount_Price : product.Sale_Price;
-
+  console.log(product)
   return (
     <div className="min-h-screen bg-base-200 p-4 lg:p-8">
       <div className="max-w-7xl mx-auto">
@@ -90,8 +91,8 @@ export default function ProductDetailPage() {
               <div className="text-base-content/90 text-sm space-y-2 border-t border-base-300 pt-4">
                 <p><strong>รหัสสินค้า:</strong> {product.Product_ID}</p>
                 <p><strong>สถานะ:</strong> 
-                  <span className={`font-semibold ${product.Quantity > 0 ? 'text-success' : 'text-error'}`}>
-                    {product.Quantity > 0 ? ` มีสินค้า (${product.Quantity} ชิ้น)` : ' สินค้าหมด'}
+                  <span className={`font-semibold ${calculateAvailableStock(product) > 0 ? 'text-success' : 'text-error'}`}>
+                    {calculateAvailableStock(product) > 0 ? ` มีสินค้า (${calculateAvailableStock(product)} ชิ้น)` : ' สินค้าหมด'}
                   </span>
                 </p>
                 {product.Dimensions && <p><strong>ขนาด:</strong> {product.Dimensions}</p>}
@@ -119,11 +120,11 @@ export default function ProductDetailPage() {
                   onChange={(e) => setQuantity(parseInt(e.target.value) || 1)}
                   className="input input-sm input-bordered w-16 text-center focus:outline-none"
                   />
-                  <button onClick={() => handleQuantityChange('increase')} disabled={quantity >= product.Quantity} className="btn btn-sm btn-ghost">+</button>
+                  <button onClick={() => handleQuantityChange('increase')} disabled={quantity >= calculateAvailableStock(product)} className="btn btn-sm btn-ghost">+</button>
                 </div>
               </div>
            
-              <button onClick={handleAddToCartClick} disabled={product.Quantity === 0 || isAdding} className="btn btn-primary btn-lg w-full">
+              <button onClick={handleAddToCartClick} disabled={calculateAvailableStock(product) === 0 || isAdding} className="btn btn-primary btn-lg w-full">
                 {isAdding ? <span className="loading loading-spinner"></span> : <FiShoppingCart className="w-6 h-6 mr-2" />}
                 {isAdding ? 'กำลังเพิ่ม...' : 'เพิ่มลงรถเข็น'}
               </button>

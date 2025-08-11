@@ -1,9 +1,10 @@
 // src/app/api/cart/route.ts
 import { NextResponse } from 'next/server';
 import { poolQuery } from '../../lib/db'; // Adjust this path if your db.js is elsewhere
-import { ProductInventory } from '../../../../types/types'; // Import ProductInventory from types.ts
+import { ProductInventory } from '@/types'; // Import ProductInventory from types.ts
 import { getServerSession } from 'next-auth'; // Import getServerSession
 import { authOptions } from '../../auth/[...nextauth]/route'; // Import your NextAuth config (adjust path as needed)
+import { CartDetailSchema } from '@/types';
 
 // Define Type for CartItem to be sent to the Frontend
 // This combines data from ProductInventory and Cart_Detail
@@ -53,38 +54,41 @@ export async function GET(request: Request) {
     }
 
     try {
-        // Use a JOIN query to fetch data from both Cart_Detail and Product
         const result = await poolQuery(
             `SELECT
                 cd."Product_ID",
-                cd."Quantity" AS "CartQuantity", -- Quantity from Cart_Detail
-                pi."Name",
-                pi."Brand",
-                pi."Unit",
-                pi."Sale_Price",
-                pi."Discount_Price",
-                pi."Image_URL",
-                pi."Quantity" AS "AvailableStock" -- Quantity from Product (actual stock)
+                cd."Quantity" AS "CartQuantity",
+                p."Name",
+                p."Brand",
+                p."Unit",
+                p."Sale_Price",
+                p."Discount_Price",
+                p."Image_URL",
+                p."Quantity", -- Base Stock
+                p."Total_Sales",
+                p."Cancellation_Count"
             FROM
                 "Cart_Detail" cd
             JOIN
-                "Product" pi ON cd."Product_ID" = pi."Product_ID"
+                "Product" p ON cd."Product_ID" = p."Product_ID"
             WHERE
                 cd."User_ID" = $1`,
-            [authenticatedUserId] // Use the authenticated user's ID
+            [authenticatedUserId]
         );
 
-        // Map the joined results directly to the CartItem interface
-        const cartItems: CartItem[] = result.rows.map((row: any) => ({
+        // Map ผลลัพธ์ให้ตรงกับ CartDetailSchema ใหม่
+        const cartItems: CartDetailSchema[] = result.rows.map((row: any) => ({
             Product_ID: row.Product_ID,
             Name: row.Name,
             Brand: row.Brand,
             Unit: row.Unit,
-            Sale_Price: parseFloat(row.Sale_Price), // Ensure Sale_Price is parsed to number
-            Discount_Price: row.Discount_Price ? parseFloat(row.Discount_Price) : null, // Ensure Discount_Price is parsed to number or null
+            Sale_Price: parseFloat(row.Sale_Price),
+            Discount_Price: row.Discount_Price ? parseFloat(row.Discount_Price) : null,
             Image_URL: row.Image_URL,
-            Quantity: row.CartQuantity,
-            AvailableStock: row.AvailableStock,
+            Quantity: row.Quantity,
+            Total_Sales: row.Total_Sales,
+            Cancellation_Count: row.Cancellation_Count,
+            CartQuantity: row.CartQuantity,
         }));
 
         return NextResponse.json({ cartItems, error: false }, { status: 200 });

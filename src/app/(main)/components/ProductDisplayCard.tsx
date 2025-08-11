@@ -8,6 +8,7 @@ import { useSession } from 'next-auth/react';
 import { useAlert } from '@/app/context/AlertModalContext';
 import { useCounter } from '@/app/context/CartCount';
 import { ProductInventory } from '@/types'; // อ้างอิงจากโครงสร้างใหม่
+import { calculateAvailableStock } from '@/app/utils/calculations';
 
 interface ProductDisplayCardProps {
   product: ProductInventory;
@@ -56,7 +57,7 @@ const AddToCartQuantityModal: React.FC<{
           <div>
             <h4 className="font-semibold text-base-content">{product.Name}</h4>
             <p className="text-primary">{formatPrice(product.Sale_Price)}</p>
-            <p className="text-sm text-base-content/70">คงเหลือ: {product.Quantity} {product.Unit}</p>
+            <p className="text-sm text-base-content/70">คงเหลือ: {calculateAvailableStock(product)} {product.Unit}</p>
           </div>
         </div>
         <div className="flex items-center justify-center gap-4 mb-6">

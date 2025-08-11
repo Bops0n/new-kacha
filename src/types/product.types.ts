@@ -55,7 +55,9 @@ export interface SimpleProductDetail {
   Product_ID: number;
   Name: string;
   Image_URL: string | null;
-  Quantity: number; // จำนวนคงเหลือในคลัง (Available Stock)
+  Quantity: number;             // สต็อกตั้งต้น (Base Stock)
+  Total_Sales: number;          // ยอดขายสะสม
+  Cancellation_Count: number;   // ยอดคืน/ยกเลิกสะสม
 }
 
 export interface ProductsPageData {

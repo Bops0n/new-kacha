@@ -21,17 +21,18 @@ export async function POST(req: NextRequest) {
 
     try {
         const { productIds } = await req.json();
-
         if (!Array.isArray(productIds) || productIds.length === 0) {
             return NextResponse.json({ message: 'productIds must be a non-empty array.' }, { status: 400 });
         }
 
+        // --- START: แก้ไข SQL Query ---
         const result = await poolQuery(
-            `SELECT "Product_ID", "Name", "Image_URL", "Quantity" 
+            `SELECT "Product_ID", "Name", "Image_URL", "Quantity", "Total_Sales", "Cancellation_Count"
              FROM "Product" 
-             WHERE "Product_ID" = ANY($1::int[])`, // ใช้ ANY() สำหรับ query ข้อมูลจาก array
+             WHERE "Product_ID" = ANY($1::int[])`,
             [productIds]
         );
+        // --- END: แก้ไข SQL Query ---
 
         const productDetails: SimpleProductDetail[] = result.rows;
         return NextResponse.json(productDetails);
