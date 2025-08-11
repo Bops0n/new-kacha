@@ -9,6 +9,7 @@ interface ProductRowProps {
   getFullCategoryName: (childId: number | null) => string;
   openProductModal: (product: ProductInventory | null, initialMode: ModalMode) => void
   deleteProduct: (productId: number) => void;
+  availableStock: number;
 }
 
 const ProductRow: React.FC<ProductRowProps> = ({
@@ -17,9 +18,10 @@ const ProductRow: React.FC<ProductRowProps> = ({
   getFullCategoryName,
   openProductModal,
   deleteProduct,
+  availableStock
 }) => {
-  const isLowStock = product.Quantity <= product.Reorder_Point && product.Quantity > 0;
-  const isOutOfStock = product.Quantity === 0;
+  const isLowStock = availableStock <= product.Reorder_Point && availableStock > 0;
+  const isOutOfStock = availableStock === 0;
 
   return (
     // Make the entire row clickable to open the modal in view mode
@@ -54,7 +56,7 @@ const ProductRow: React.FC<ProductRowProps> = ({
       {/* Quantity with status indicators */}
       <td>
         <div className="font-bold">
-          {product.Quantity} {product.Unit}
+          {availableStock} {product.Unit}
         </div>
         {isOutOfStock && <span className="badge badge-error badge-xs ml-1">หมด</span>}
         {isLowStock && !isOutOfStock && <span className="badge badge-warning badge-xs ml-1">ใกล้หมด</span>}

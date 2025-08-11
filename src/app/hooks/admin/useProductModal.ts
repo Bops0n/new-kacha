@@ -21,13 +21,19 @@ export function useProductModal({ onSave }: UseProductModalProps) {
   useEffect(() => {
     if (isModalOpen) {
       const initialFormState = selectedProduct || { Visibility: true, Unit: 'ชิ้น', Quantity: 0, Sale_Cost: 0, Sale_Price: 0, Discount_Price: null, Reorder_Point: 0 };
-      setFormData(initialFormState);
+      setFormData({...initialFormState,
+        Selected_Category_ID : selectedProduct?.Child_ID ? childSubCategories.find(sub => sub.Child_ID === selectedProduct.Child_ID)?.Category_ID : null,
+        Selected_Sub_Category_ID : selectedProduct?.Child_ID ? childSubCategories.find(sub => sub.Child_ID === selectedProduct.Child_ID)?.Sub_Category_ID : null,
+      });
       setImageFile(null);
+      console.log(initialFormState)
+      console.log(selectedProduct)
     }
   }, [selectedProduct, isModalOpen]);
 
 
   const openModal = useCallback((product: ProductFormData | null, mode: ModalMode) => {
+    console.log(childSubCategories.find(sub => sub.Child_ID === product?.Child_ID)?.Category_ID)
     setSelectedProduct({
         ...product,
         Selected_Category_ID : product?.Child_ID ? childSubCategories.find(sub => sub.Child_ID === product.Child_ID)?.Category_ID : null,

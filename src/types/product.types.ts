@@ -9,6 +9,8 @@ export interface ProductInventory {
   Description: string | null;
   Unit: string;
   Quantity: number;
+  Total_Sales: number;
+  Cancellation_Count: number;
   Sale_Cost: number;
   Sale_Price: number;
   Discount_Price: number | null;

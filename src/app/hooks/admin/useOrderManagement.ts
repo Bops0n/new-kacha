@@ -51,6 +51,7 @@ export function useOrderManagement() {
   }, [fetchOrders]);
 
   const saveOrder = async (payload: Partial<Order>) => {
+    console.log(payload)
     try {
       const response = await fetch('/api/admin/order', {
         method: 'PATCH',
@@ -62,6 +63,7 @@ export function useOrderManagement() {
       await fetchOrders();
       return true;
     } catch (err: any) {
+      console.log('cheese')
       showAlert(err.message, 'error');
       return false;
     }

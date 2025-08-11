@@ -78,6 +78,7 @@ const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
     const payload: Partial<Order> = { Order_ID: order.Order_ID, Tracking_ID: formData.trackingId || null, Shipping_Carrier: formData.shippingCarrier || null, DeliveryDate: formData.deliveryDate || null, Status: formData.status };
     showAlert(`ยืนยันการบันทึกสำหรับออเดอร์ #${order.Order_ID}?`, 'info', 'ยืนยัน', async () => {
       const success = await onSave(payload);
+      console.log(payload)
       if (success && payload.Status){
         toggleEditMode();
         setFormData({

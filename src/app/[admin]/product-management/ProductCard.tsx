@@ -8,6 +8,7 @@ interface ProductCardProps {
   getFullCategoryName: (childId: number | null) => string;
   openProductModal: (product: ProductInventory, initialMode: ModalMode) => void;
   deleteProduct: (productId: number) => void; // <--- 2. เพิ่ม Prop สำหรับลบสินค้า
+  availableStock: number; // <--- 3. เพิ่ม Prop สำหรับคำนวณจำนวน
 }
 
 const ProductCard: React.FC<ProductCardProps> = ({
@@ -15,10 +16,11 @@ const ProductCard: React.FC<ProductCardProps> = ({
   formatPrice,
   getFullCategoryName,
   openProductModal,
-  deleteProduct, // <--- 2. รับ Prop สำหรับลบสินค้า
+  deleteProduct,
+  availableStock // <--- 2. รับ Prop สำหรับลบสินค้า
 }) => {
-  const isLowStock = product.Quantity <= product.Reorder_Point && product.Quantity > 0;
-  const isOutOfStock = product.Quantity === 0;
+  const isLowStock = availableStock <= product.Reorder_Point && availableStock > 0;
+  const isOutOfStock = availableStock === 0;
 
   return (
     <div className="card bg-base-200 shadow-sm cursor-pointer" onClick={() => openProductModal(product, 'view')}>
@@ -53,7 +55,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
           <FiBox className="w-3 h-3" />
           <strong>จำนวน:</strong>{' '}
           <span className={`font-bold ${isOutOfStock ? 'text-error' : isLowStock ? 'text-warning' : ''}`}>
-            {product.Quantity} {product.Unit}
+            {availableStock} {product.Unit}
           </span>
           {isOutOfStock && <span className="badge badge-error badge-xs ml-1">หมด</span>}
           {isLowStock && !isOutOfStock && <span className="badge badge-warning badge-xs ml-1">ใกล้หมด</span>}

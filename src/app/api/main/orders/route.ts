@@ -1,14 +1,8 @@
 // src/app/api/orders/route.ts
-import { NextResponse } from 'next/server';
-import { pool, poolQuery } from '../../lib/db'; // Adjust path if your db.js is elsewhere
-import { getServerSession } from 'next-auth';
-import { authOptions } from '../../auth/[...nextauth]/route'; // Adjust path to your NextAuth config
-import { AddressSchema, ProductInventory, AccessLevel, OrderProductDetail, OrderStatus, Order } from '../../../../types/types'; // Import types as needed
-import { authenticateRequest } from '../../auth/utils';
-
-// --- Define Types specific to this API's data flow ---
-// These types reflect the data structures expected/returned by this API,
-// complementing (or sometimes duplicating for clarity) those in types.ts.
+import { NextRequest, NextResponse } from 'next/server';
+import { pool, poolQuery } from '@/app/api/lib/db';
+import { authenticateRequest } from '@/app/api/auth/utils';
+import { AddressSchema, Order } from '@/types';
 
 // Type for product items received in the order request body
 interface OrderProductRequestBody {
@@ -21,7 +15,7 @@ interface PlaceOrderRequestBody {
     addressId: number;
     paymentMethod: 'COD' | 'Bank Transfer';
     cartItems: OrderProductRequestBody[];
-    totalPrice: number; // *** ADDED totalPrice TO INTERFACE ***
+    totalPrice: number;
 }
 
 
@@ -132,7 +126,7 @@ export async function GET(request: NextRequest) {
 /**
  * POST /api/orders
  * Places a new order for the authenticated user.
- * This is a transactional operation: checks stock, creates order/details, decrements stock, clears cart.
+ * This is a transactional operation: checks stock, creates order/details, updates sales count, and clears cart.
  * @param {Request} request - The incoming request object. Expected body: PlaceOrderRequestBody
  * @returns {NextResponse} - JSON response indicating success/failure and the new order ID.
  * Authorization: Only allows authenticated users to place orders for themselves.
@@ -163,7 +157,6 @@ export async function POST(request: NextRequest) {
         const shippingAddressString = `${selectedAddress.Address_1}${selectedAddress.Address_2 ? `, ${selectedAddress.Address_2}` : ''}, ${selectedAddress.Sub_District}, ${selectedAddress.District}, ${selectedAddress.Province} ${selectedAddress.Zip_Code}`;
         const shippingPhone = selectedAddress.Phone || '';
 
-        // Insert into Order table with new column names
         const orderInsertResult = await client.query(
             `INSERT INTO "Order" (
                 "User_ID", "Order_Date", "Status", "Payment_Type", "Address_ID", 
@@ -175,7 +168,7 @@ export async function POST(request: NextRequest) {
 
         for (const item of cartItems) {
             const productResult = await client.query(
-                `SELECT "Name", "Brand", "Unit", "Image_URL", "Sale_Cost", "Sale_Price", "Discount_Price", "Quantity" 
+                `SELECT "Name", "Brand", "Unit", "Image_URL", "Sale_Cost", "Sale_Price", "Discount_Price", "Quantity", "Total_Sales", "Cancellation_Count" 
                  FROM "Product" WHERE "Product_ID" = $1 FOR UPDATE`,
                 [item.Product_ID]
             );
@@ -183,11 +176,11 @@ export async function POST(request: NextRequest) {
             if (productResult.rowCount === 0) throw new Error(`ไม่พบสินค้า ID: ${item.Product_ID}`);
             const product = productResult.rows[0];
 
-            if (item.CartQuantity > product.Quantity) {
+            const availableStock = product.Quantity - product.Total_Sales + product.Cancellation_Count;
+            if (item.CartQuantity > availableStock) {
                 throw new Error(`สินค้า "${product.Name}" มีในสต็อกไม่เพียงพอ`);
             }
             
-            // *** START: แก้ไข SQL INSERT ให้ตรงกับ Schema ใหม่ ***
             await client.query(
                 `INSERT INTO "Order_Detail" (
                     "Order_ID", "Product_ID", "Quantity", 
@@ -200,10 +193,9 @@ export async function POST(request: NextRequest) {
                     product.Brand, product.Unit, product.Image_URL, product.Discount_Price
                 ]
             );
-            // *** END: แก้ไข SQL INSERT ***
             
             await client.query(
-                `UPDATE "Product" SET "Quantity" = "Quantity" - $1 WHERE "Product_ID" = $2`,
+                `UPDATE "Product" SET "Total_Sales" = "Total_Sales" + $1 WHERE "Product_ID" = $2`,
                 [item.CartQuantity, item.Product_ID]
             );
         }

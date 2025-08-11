@@ -2,19 +2,21 @@
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useAlert } from '@/app/context/AlertModalContext';
-import { useCategoryData } from '@/app/hooks/useCategoryData'; // << 1. Import hook ใหม่
+import { useCategoryData } from '@/app/hooks/useCategoryData';
 import { ProductFormData, ProductInventory, StockStatus } from '@/types';
+import { calculateAvailableStock } from '@/app/utils/calculations';
 
-const getProductStockStatus = (product: ProductFormData | null): StockStatus => {
-  if (!product || product.Quantity === undefined || product.Reorder_Point === undefined) return 'out_of_stock';
-  if (product.Quantity === 0) return 'out_of_stock'; // Ensure Quantity is not undefined
-  if (product.Quantity <= product.Reorder_Point) return 'low_stock'; // Ensure Reorder_Point is not undefined
+const getProductStockStatus = (product: ProductInventory | null): StockStatus => {
+  if (!product) return 'out_of_stock';
+  const availableStock = calculateAvailableStock(product);
+  if (availableStock <= 0) return 'out_of_stock';
+  if (availableStock <= product.Reorder_Point) return 'low_stock';
   return 'in_stock';
 };
 
 export function useProductManagement() {
   const { showAlert } = useAlert();
-  const { categories, subCategories, childSubCategories, allCategoriesMap, loading: categoriesLoading, error: categoriesError } = useCategoryData(); // << 2. เรียกใช้ hook ใหม่
+  const { categories, subCategories, childSubCategories, allCategoriesMap, loading: categoriesLoading, error: categoriesError } = useCategoryData();
 
   const [products, setProducts] = useState<ProductInventory[]>([]);
   const [loading, setLoading] = useState(true);
@@ -34,7 +36,6 @@ export function useProductManagement() {
     setLoading(true);
     setError(null);
     try {
-      // << 3. ลบการ fetch '/api/main/navigation' ออกไป
       const productsRes = await fetch('/api/admin/products');
       if (!productsRes.ok) throw new Error('ไม่สามารถดึงข้อมูลสินค้าได้');
       const productsData = await productsRes.json();
@@ -79,7 +80,7 @@ export function useProductManagement() {
       const result = await response.json();
       if (!response.ok) throw new Error(result.message);
       showAlert(result.message, 'success');
-      await fetchProducts(); // << 4. เรียก fetchProducts() แทน fetchData()
+      await fetchProducts();
       return true;
     } catch (err: any) {
       showAlert(err.message, 'error');
@@ -94,21 +95,43 @@ export function useProductManagement() {
             const result = await response.json();
             if (!response.ok) throw new Error(result.message);
             showAlert(result.message, 'success');
-            await fetchProducts(); // << 5. เรียก fetchProducts() แทน fetchData()
+            await fetchProducts();
         } catch (err: any) {
             showAlert(err.message, 'error');
         }
     });
   }, [fetchProducts, showAlert]);
 
+  const addStock = useCallback(async (productId: number, amountToAdd: number) => {
+    if (amountToAdd <= 0) {
+        showAlert('จำนวนที่เพิ่มต้องเป็นค่าบวก', 'error');
+        return false;
+    }
+    try {
+      const response = await fetch('/api/admin/products/stock', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ productId, amountToAdd }),
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.message || 'Failed to add stock');
+      showAlert(result.message, 'success');
+      await fetchProducts(); // Refresh product list
+      return true;
+    } catch (err: any) {
+      showAlert(err.message, 'error');
+      return false;
+    }
+  }, [fetchProducts, showAlert]);
+
   return {
-    loading: loading || categoriesLoading, // << 6. รวมสถานะ loading
+    loading: loading || categoriesLoading,
     error: error || categoriesError,
-    data: { products, categories, subCategories, childSubCategories }, // << 7. ส่งข้อมูลทั้งหมดกลับไป
+    data: { products, categories, subCategories, childSubCategories },
     filteredProducts,
     allCategoriesMap,
     filters,
     setFilters,
-    actions: { saveProduct, deleteProduct, getProductStockStatus }
+    actions: { saveProduct, deleteProduct, getProductStockStatus, addStock }
   };
 }

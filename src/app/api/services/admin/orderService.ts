@@ -1,5 +1,5 @@
 import { poolQuery, pool } from '@/app/api/lib/db';
-import { Order, OrderProductDetail } from '@/types';
+import { Order, OrderStatus } from '@/types';
 
 // Helper: แปลงข้อมูลจาก Database Row เป็น Order Object ที่ Frontend ต้องการ
 const mapDbRowsToUiOrder = (dbRows: any[]): Order[] => {
@@ -91,35 +91,86 @@ export async function getOrders(orderId: number | null): Promise<Order[]> {
 }
 
 /**
- * อัปเดตข้อมูลคำสั่งซื้อ
- * @param payload ข้อมูลที่ต้องการอัปเดต
+ * อัปเดตข้อมูลคำสั่งซื้อ และคืนสต็อกหากมีการยกเลิก
+ * @param payload ข้อมูลที่ต้องการอัปเดต, ต้องมี Order_ID
  * @returns ข้อมูล Order ที่ถูกอัปเดตแล้ว
  */
 export async function updateOrder(payload: Partial<Order>): Promise<Order> {
-    const { Order_ID, ...fieldsToUpdate } = payload;
+    const { Order_ID, Status, ...otherFields } = payload;
+    console.log(payload)
 
     if (!Order_ID) {
-        throw new Error("Order_ID is required for update.");
+        throw new Error("Order_ID is required for an update.");
     }
-    const allowedOrderColumns = [ 'Status', 'DeliveryDate', 'Tracking_ID', 'Shipping_Carrier', 'Cancellation_Reason' ];
-    const updateEntries = Object.entries(fieldsToUpdate).filter(([key, value]) => allowedOrderColumns.includes(key) && value !== undefined);
-    
-    if (updateEntries.length === 0) {
-        throw new Error("No valid fields provided for update.");
-    }
-    
-    const setClause = updateEntries.map(([key, value], index) => `"${key}" = $${index + 1}`).join(', ');
-    const queryParams = updateEntries.map(([key, value]) => value);
-    queryParams.push(Order_ID);
 
-    const sql = `UPDATE public."Order" SET ${setClause} WHERE "Order_ID" = $${queryParams.length} RETURNING *`;
-    const result = await poolQuery(sql, queryParams);
+    const client = await pool.connect();
+    try {
+        await client.query('BEGIN');
 
-    if (result.rowCount === 0) {
-        throw new Error(`Order with ID ${Order_ID} not found.`);
+        // Step 1: Update the order status and other details
+        const allowedOrderColumns = ['Status', 'DeliveryDate', 'Tracking_ID', 'Shipping_Carrier', 'Cancellation_Reason'];
+        
+        // We create a new object to avoid mutating the original payload
+        const fieldsToUpdate: { [key: string]: any } = {};
+        if (Status) fieldsToUpdate.Status = Status;
+        Object.assign(fieldsToUpdate, otherFields);
+
+        const updateEntries = Object.entries(fieldsToUpdate)
+            .filter(([key, value]) => allowedOrderColumns.includes(key) && value !== undefined);
+
+        if (updateEntries.length === 0) {
+            throw new Error("No valid fields provided for update.");
+        }
+
+        const setClause = updateEntries.map(([key], index) => `"${key}" = $${index + 1}`).join(', ');
+        const queryParams: (string | number | Date | null)[] = updateEntries.map(([, value]) => value);
+        queryParams.push(Order_ID);
+
+        console.log(setClause,queryParams)
+        
+
+        const updateOrderSql = `UPDATE public."Order" SET ${setClause} WHERE "Order_ID" = $${queryParams.length} RETURNING *`;
+        const orderUpdateResult = await client.query(updateOrderSql, queryParams);
+
+        if (orderUpdateResult.rowCount === 0) {
+            throw new Error(`Order with ID ${Order_ID} not found.`);
+        }
+
+        // Step 2: If status is 'cancelled' or 'refunded', update product cancellation counts
+        const newStatus = orderUpdateResult.rows[0].Status;
+        if (newStatus && (newStatus === 'cancelled' || newStatus === 'refunded')) {
+            const orderDetailsResult = await client.query(
+                'SELECT "Product_ID", "Quantity" FROM public."Order_Detail" WHERE "Order_ID" = $1',
+                [Order_ID]
+            );
+
+            for (const detail of orderDetailsResult.rows) {
+                const { Product_ID, Quantity } = detail;
+                await client.query(
+                    `UPDATE public."Product" 
+                     SET "Cancellation_Count" = "Cancellation_Count" + $1 
+                     WHERE "Product_ID" = $2`,
+                    [Quantity, Product_ID]
+                );
+            }
+        }
+
+        await client.query('COMMIT');
+        return orderUpdateResult.rows[0];
+
+    } catch (error) {
+        await client.query('ROLLBACK');
+        console.error(`Failed to update order ${Order_ID}:`, error);
+        // Re-throw a more specific error to be caught by the API route
+        if (error instanceof Error) {
+            throw new Error(`Database error while updating order: ${error.message}`);
+        }
+        throw new Error('An unknown error occurred during order update.');
+    } finally {
+        client.release();
     }
-    return result.rows[0];
 }
+
 
 /**
  * ลบคำสั่งซื้อและรายละเอียดที่เกี่ยวข้อง
@@ -129,16 +180,27 @@ export async function deleteOrder(orderId: number): Promise<void> {
     const client = await pool.connect();
     try {
         await client.query('BEGIN');
+        // Note: Business logic might require archiving instead of deleting,
+        // or checking order status before allowing deletion.
+        // This implementation is a hard delete.
         await client.query('DELETE FROM public."Order_Detail" WHERE "Order_ID" = $1', [orderId]);
         const result = await client.query('DELETE FROM public."Order" WHERE "Order_ID" = $1', [orderId]);
-        await client.query('COMMIT');
-
+        
         if (result.rowCount === 0) {
+            // If no order was deleted, it means it didn't exist. Rollback is safe.
             throw new Error(`Order with ID ${orderId} not found.`);
         }
+        
+        await client.query('COMMIT');
+
     } catch (error) {
         await client.query('ROLLBACK');
-        throw error;
+        // Log and re-throw the error to be handled by the calling API route
+        console.error(`Failed to delete order ${orderId}:`, error);
+        if (error instanceof Error) {
+            throw new Error(`Database error while deleting order: ${error.message}`);
+        }
+        throw new Error('An unknown error occurred during order deletion.');
     } finally {
         client.release();
     }
