@@ -203,7 +203,7 @@ export default function CategoryManagementPage() {
         
         <div className="hidden md:block overflow-x-auto bg-base-100 rounded-lg shadow-sm">
           <table className="table w-full">
-            <thead><tr><th>ID</th><th>ชื่อ</th><th>ระดับ</th><th>หมวดหมู่แม่</th><th>จัดการ</th></tr></thead>
+            <thead><tr><th>ID</th><th>ชื่อ</th><th>ระดับ</th><th>หมวดหมู่</th><th>จัดการ</th></tr></thead>
             <tbody>
               {paginatedItems.map(item => <CategoryRow key={`${item.type}-${item.id}`} item={item} openModal={modalActions.open} deleteCategory={actions.deleteCategory} />)}
             </tbody>
