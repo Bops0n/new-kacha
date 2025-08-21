@@ -36,7 +36,7 @@ const CategorySidebar = ({ pageData } : { pageData: ProductsPageData }) => {
           <li key={category.Category_ID}>
             <details open={activeCategoryId == category.Category_ID.toString()}>
               {/* <summary className="font-semibold"> */}
-              <summary className={`${category.Category_ID == Number(activeCategoryId) ? 'bg-red-500' : ''}`}>
+              <summary className={`${category.Category_ID == Number(activeCategoryId) ? 'bg-slate-300' : ''}`}>
                 {/* 1. เพิ่ม Link ให้กับ Category หลัก */}
                 <Link 
                   href={`/products?categoryId=${category.Category_ID}`}
@@ -50,7 +50,7 @@ const CategorySidebar = ({ pageData } : { pageData: ProductsPageData }) => {
                 {pageData.subCategories.filter(sub => sub.Category_ID === category.Category_ID).map(subCategory => (
                   <li key={subCategory.Sub_Category_ID}>
                     <details open={activeSubCategoryId == subCategory.Sub_Category_ID.toString()}>
-                      <summary className={`${subCategory.Sub_Category_ID == Number(activeSubCategoryId) ? 'bg-red-500' : ''} m-1`}>
+                      <summary className={`${subCategory.Sub_Category_ID == Number(activeSubCategoryId) ? 'bg-slate-300' : ''} m-1`}>
                         {/* 2. เพิ่ม Link ให้กับ Subcategory */}
                         <Link 
                           href={`/products?categoryId=${category.Category_ID}&subCategoryId=${subCategory.Sub_Category_ID}`}
@@ -62,7 +62,7 @@ const CategorySidebar = ({ pageData } : { pageData: ProductsPageData }) => {
                       </summary>
                       <ul>
                         {pageData.childSubCategories.filter(child => child.Sub_Category_ID === subCategory.Sub_Category_ID).map(childCategory => (
-                          <li key={childCategory.Child_ID} className={`rounded-sm ${childCategory.Child_ID == Number(activeChildCategoryId) ? 'bg-red-500' : ''} m-1`}>
+                          <li key={childCategory.Child_ID} className={`rounded-sm ${childCategory.Child_ID == Number(activeChildCategoryId) ? 'bg-slate-300' : ''} m-1`}>
                             <Link 
                               href={`/products?categoryId=${category.Category_ID}&subCategoryId=${subCategory.Sub_Category_ID}&childCategoryId=${childCategory.Child_ID}`}
                               className={activeChildCategoryId == childCategory.Child_ID.toString() ? 'active' : ''}
