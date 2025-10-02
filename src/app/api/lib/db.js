@@ -8,10 +8,10 @@ const config = {
     database: process.env.DB_NAME,
     idleTimeoutMillis: 30000,
     // database: process.env.DB_NAME,
-    ssl: {
-        rejectUnauthorized: true,
-        ca: process.env.DB_CACERT,
-    },
+    // ssl: {
+    //     rejectUnauthorized: true,
+    //     ca: process.env.DB_CACERT,
+    // },
 };
 
 const pool = new Pool(config);
