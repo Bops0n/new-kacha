@@ -28,8 +28,8 @@ export async function GET(req: NextRequest) {
         //     return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
         // }
         
-        const categoryId = req.nextUrl.searchParams.get('id');
-
+    const categoryId = req.nextUrl.searchParams.get('id');
+    
     let categories: Category[] = [];
     let sql: string;
     let queryParams: (string | number)[] = [];

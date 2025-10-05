@@ -76,10 +76,10 @@ export async function deleteCategory(type: 'main' | 'sub' | 'child', payload: { 
 
     try {
         // --- เรียกใช้ฟังก์ชันใน DB ใน 1 Query ---
-        await poolQuery('SELECT public."DELETE_CATEGORY_CASCADING"($1, $2)', [type, payload.id]);
+        await poolQuery('SELECT public."SP_ADMIN_CATEGORY_DEL"($1, $2)', [type, payload.id]);
         return true;
     } catch (error) {
-        console.error("Call to delete_category_cascading failed:", error);
+        console.error("Call to category delete failed:", error);
         throw error; // Re-throw the error to be caught by the API route
     }
 }
