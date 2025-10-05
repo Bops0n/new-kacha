@@ -8,7 +8,6 @@ import { UserSchema, AddressSchema, NewAddressForm } from '@/types';
  */
 export async function getUserProfileById(userId: number): Promise<UserSchema | null> {
   const result = await poolQuery(`SELECT * FROM "SP_USER_ACCOUNT_GET"($1)`, [userId]);
-  console.log(result.rows[0]);
   return result.rows[0] || null;
 }
 
@@ -16,8 +15,13 @@ export async function getUserProfileById(userId: number): Promise<UserSchema | n
  * อัปเดตข้อมูลโปรไฟล์ของผู้ใช้
  */
 export async function updateUserProfile(userId: number, data: Partial<UserSchema>): Promise<boolean> {
-  const { Full_Name, Email, Phone } = data; // Whitelist editable fields
-  const result = await poolQuery(`SELECT * FROM "SP_USER_ACCOUNT_UPD"($1, $2, $3, $4)`, [Full_Name, Email, Phone, userId]);
+  
+  delete data.Token;
+  delete data.Addresses;
+  delete data.Access_Level;
+  delete data.User_ID;
+  
+  const result = await poolQuery(`SELECT * FROM "SP_USER_ACCOUNT_UPD"($1, $2, $3)`, [userId, JSON.stringify(data)]);
   return result.rowCount > 0;
 }
 

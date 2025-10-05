@@ -149,7 +149,6 @@ export default function UserManagement() {
     async function callData(){
       const data = await fetch('../api/admin/user/getUsers')
       const response = await data.json()
-      console.log(response.users)
       setUsers(response.users)
     }
     callData()
@@ -203,8 +202,6 @@ export default function UserManagement() {
 
     const response = await fetch(`../api/admin/user/getAddress?UserId=${user.User_ID}`)
     const data = await response.json()
-    console.log(data.addresses)
-
 
     // Populate form data with current user's data for potential edit later
     setEditFormData({
@@ -262,30 +259,49 @@ export default function UserManagement() {
     }
 
     let newID : number = 0;
-    if (selectedUser){
-      const response = await fetch('../api/admin/user/updateUser',{
-        method : 'PATCH',
-        body : JSON.stringify(editFormData)
-      })
-      // console.log(response)
-    }else{
-        try{
+    if (selectedUser) {
+      try {
+        const response = await fetch('../api/admin/user/updateUser', {
+          method : 'PATCH',
+          body : JSON.stringify(editFormData)
+        });
+
+        if (!response.ok) {
+          const body = await response.json();
+          throw new Error(body.message || `HTTP Error ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        showAlert(data.message, 'success');
+      }
+      catch (error : any) {
+        showAlert(error.message, 'error');
+        return;
+      }
+      
+    } else {
+      try {
           const response = await fetch('../api/admin/user/addUser',{
             method : 'POST',
             body : JSON.stringify(editFormData)
-          })
-          const data = await response.json()
-          newID = data.User_ID
-          setEditFormData(prevFormData => ({ ...prevFormData, User_ID: newID }))
-        }catch(error){
-          return
+          });
+
+          if (!response.ok) {
+            const body = await response.json();
+            throw new Error(body.message || `HTTP Error ${response.status}`);
+          }
+
+          const data = await response.json();
+          newID = data.User_ID;
+          setEditFormData(prevFormData => ({ ...prevFormData, User_ID: newID }));
+
+          showAlert(data.message, 'success');
+        } catch (error : any) {
+          showAlert(error.message, 'error');
+          return;
         }
-
-      // console.log
-
     }
-
-    console.log(editFormData.User_ID)
 
     const newOrUpdatedUser: User = {
       User_ID: editFormData.User_ID !== null? editFormData.User_ID : newID, // Generate new ID for mock
@@ -303,12 +319,13 @@ export default function UserManagement() {
       setUsers(prev => prev.map(u =>
         u.User_ID === newOrUpdatedUser.User_ID ? newOrUpdatedUser : u
       ));
-      setSelectedUser(newOrUpdatedUser); // Update selectedUser to reflect changes
     } else {
       setUsers(prev => [...prev, newOrUpdatedUser]);
     }
+
+    setSelectedUser(newOrUpdatedUser);
     setIsEditing(false); // Switch back to view mode after saving
-    // setShowUserModal(false); // Keep modal open in view mode after save
+    //setShowUserModal(false); // Keep modal open in view mode after save
   };
 
   const deleteUser = async(userId: number) => {
@@ -378,16 +395,24 @@ export default function UserManagement() {
 
       if (addressToEdit) {
 
-        const k = await fetch('../api/admin/user/updateAddress',{
+        const response = await fetch('../api/admin/user/updateAddress',{
           method: 'PATCH',
           body : JSON.stringify(newOrUpdatedAddress)
-        })
+        });
+
+        if (!response.ok) {
+          const body = await response.json();
+          throw new Error(body.message || `HTTP Error ${response.status}`);
+        }
 
         const index = updatedAddresses.findIndex(addr => addr.Address_ID === addressToEdit.Address_ID && addr.User_ID === addressToEdit.User_ID);
         if (index !== -1) {
           updatedAddresses[index] = newOrUpdatedAddress;
-          
         }
+
+        const data = await response.json();
+
+        showAlert(data.message, 'success');
       } else {
         console.log('add new address')
 

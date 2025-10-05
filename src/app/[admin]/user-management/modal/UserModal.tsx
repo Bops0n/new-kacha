@@ -75,12 +75,18 @@ const UserModal: React.FC<UserModalProps> = ({
     <div className="modal modal-open">
       <div className="modal-box w-11/12 max-w-4xl">
         <h3 className="font-bold text-lg mb-4">
-          {isEditing ? `แก้ไขผู้ใช้ ID: ${editFormData.User_ID || ''}` : `รายละเอียดผู้ใช้ ID: ${selectedUser?.User_ID || ''}`}
+          {isEditing ? 
+            (
+              editFormData.User_ID ? 
+              `แก้ไขบัญชี ID: ${editFormData.User_ID || ''}` : `เพิ่มบัญชี`
+            ) : 
+              `รายละเอียดบัญชี ID: ${selectedUser?.User_ID || ''}`
+          }
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* User Information Form / Display */}
           <div>
-            <h4 className="font-semibold mb-2">ข้อมูลผู้ใช้</h4>
+            <h4 className="font-semibold mb-2">ข้อมูลบัญชีผู้ใช้</h4>
             <div className="bg-base-200 rounded-lg p-4">
               {isEditing ? (
                 <>
@@ -116,11 +122,11 @@ const UserModal: React.FC<UserModalProps> = ({
               ) : (
                 selectedUser && (
                   <>
-                    <p><strong>User ID:</strong> {selectedUser.User_ID}</p>
-                    <p><strong>ชื่อผู้ใช้:</strong> {selectedUser.Username}</p>
-                    <p><strong>ชื่อเต็ม:</strong> {selectedUser.Full_Name}</p>
-                    <p><strong>อีเมล:</strong> {selectedUser.Email || '-'}</p>
-                    <p><strong>เบอร์โทร:</strong> {selectedUser.Phone || '-'}</p>
+                    <p><strong>User ID:</strong> {selectedUser.User_ID}</p><br/>
+                    <p><strong>ชื่อผู้ใช้:</strong> {selectedUser.Username}</p><br/>
+                    <p><strong>ชื่อเต็ม:</strong> {selectedUser.Full_Name}</p><br/>
+                    <p><strong>อีเมล:</strong> {selectedUser.Email || '-'}</p><br/>
+                    <p><strong>เบอร์โทร:</strong> {selectedUser.Phone || '-'}</p><br/>
                     <p><strong>ระดับการเข้าถึง:</strong> {getAccessLevelLabel(selectedUser.Access_Level)}</p>
                   </>
                 )
@@ -132,7 +138,7 @@ const UserModal: React.FC<UserModalProps> = ({
           <div>
             <h4 className="font-semibold mb-2 flex justify-between items-center">
               ที่อยู่
-              {isEditing && (
+              {isEditing && editFormData.User_ID && (
                 <button className="btn btn-sm btn-primary" onClick={handleAddAddressClick}>
                   <FiPlus className="w-4 h-4" /> เพิ่มที่อยู่
                 </button>
@@ -180,7 +186,7 @@ const UserModal: React.FC<UserModalProps> = ({
         <div className="modal-action flex-col sm:flex-row mt-6">
           {isEditing ? (
             <>
-              <button className="btn btn-ghost w-full sm:w-auto" onClick={toggleEditMode}>
+              <button className="btn btn-ghost w-full sm:w-auto" onClick={editFormData.User_ID ? toggleEditMode : onClose}>
                 <FiX className="w-4 h-4" /> ยกเลิก
               </button>
               <button className="btn btn-primary w-full sm:w-auto" onClick={saveUserDetails}>

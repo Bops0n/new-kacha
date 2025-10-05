@@ -13,6 +13,17 @@ export interface UserSchema {
   Addresses?: AddressSchema[];
 }
 
+export interface UserAccount {
+    User_ID: number;
+    Username: string;
+    Password: string; // This should be a hashed password
+    Full_Name: string;
+    Email: string;
+    Phone: string | null;
+    Access_Level: string | null; // Defaults to '0' in DB, but can be provided
+    Token: string | null;
+}
+
 // Address schema
 export interface AddressSchema {
   Address_ID: number;

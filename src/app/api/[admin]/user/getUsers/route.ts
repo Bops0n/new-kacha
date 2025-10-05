@@ -1,11 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth'; // For session handling (optional)
 import { authOptions } from '../../../auth/[...nextauth]/route'; // For session handling (optional)
-import { User } from '@/types/types'; // Assuming you have a 'User' type defined
+import { UserSchema } from '@/types'; // Assuming you have a 'User' type defined
 import { poolQuery } from '../../../lib/db'; // Assuming your poolQuery works correctly
+import { authenticateRequest } from '@/app/api/auth/utils';
 
-// You can remove this import if not used elsewhere in this file
-// import { useStyleRegistry } from 'styled-jsx'; 
+const requireAdmin = (auth) => {
+    if (!auth.authenticated) {
+        return auth.response;
+    }
+    if (auth.accessLevel !== '1') {
+        return NextResponse.json({ message: 'Forbidden' }, { status: 403 });
+    }
+    return null;
+};
 
 export async function GET(req: NextRequest) {
     // --- Optional: Session Check (Uncomment if you need authentication) ---
@@ -16,18 +24,17 @@ export async function GET(req: NextRequest) {
     // }
     // console.log("User session:", session);
 
+    const auth = await authenticateRequest();
+    const adminCheck = requireAdmin(auth);
+    if (adminCheck) return adminCheck;
+    
     // --- Database Query ---
-    let usersFromDb: User[] = []; // Initialize an empty array to hold user data
+    let usersFromDb: UserSchema[] = []; // Initialize an empty array to hold user data
     // No parameters are expected, so the SQL is straightforward
-    const sql = `SELECT * FROM public."User" ORDER BY "User_ID"`; // Selecting all columns as requested
-
     try {
-        const result = await poolQuery(sql);
+        const result = await poolQuery(`SELECT * FROM "SP_ADMIN_USER_GET"()`);
         // node-postgres (which poolQuery likely uses) returns results in .rows
         usersFromDb = result.rows; 
-
-        console.log("Users fetched from database:", usersFromDb);
-
     } catch (dbError: any) { // Catch any database errors
         console.error("Error fetching users from database:", dbError);
         // Return a 500 Internal Server Error response if something goes wrong

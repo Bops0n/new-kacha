@@ -2,6 +2,17 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth'; // For session handling (optional)
 import { authOptions } from '../../../auth/[...nextauth]/route'; // Adjust path based on your project structure
 import { poolQuery } from '../../../lib/db'; // Your database utility
+import { authenticateRequest } from '@/app/api/auth/utils';
+
+const requireAdmin = (auth) => {
+    if (!auth.authenticated) {
+        return auth.response;
+    }
+    if (auth.accessLevel !== '1') {
+        return NextResponse.json({ message: 'Forbidden' }, { status: 403 });
+    }
+    return null;
+};
 
 // DELETE API route to delete an existing user by User_ID
 export async function DELETE(req: NextRequest) {
@@ -14,6 +25,10 @@ export async function DELETE(req: NextRequest) {
     //     return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     // }
     // console.log("User session:", session);
+
+    const auth = await authenticateRequest();
+    const adminCheck = requireAdmin(auth);
+    if (adminCheck) return adminCheck;
 
     // --- Get User_ID from query parameters ---
     // Example: /api/user?id=123
@@ -35,14 +50,8 @@ export async function DELETE(req: NextRequest) {
         );
     }
 
-    // --- Construct DELETE SQL query ---
-    const sql = `
-        DELETE FROM public."User", public."Address"
-        WHERE "User_ID" = $1;
-    `;
-
     try {
-        const result = await poolQuery(sql, [parsedUserId]);
+        const result = await poolQuery(`SELECT * FROM "SP_ADMIN_USER_DEL"($1, $2)`, [parsedUserId, auth.userId]);
 
         if (result.rowCount === 0) {
             // No user found with the given ID
@@ -61,16 +70,6 @@ export async function DELETE(req: NextRequest) {
 
     } catch (dbError: any) {
         console.error("Error deleting user from database:", dbError);
-        // Handle specific errors, e.g., if there are foreign key constraints
-        // and the database prevents deletion due to related records.
-        // For example, if a user has addresses and your foreign key constraint
-        // is not set to CASCADE or SET NULL on delete.
-        if (dbError.code === '23503') { // PostgreSQL foreign_key_violation
-            return NextResponse.json(
-                { message: "Failed to delete user: Associated data exists (e.g., addresses).", error: dbError.message },
-                { status: 409 } // Conflict
-            );
-        }
         return NextResponse.json(
             { message: "Failed to delete user.", error: dbError.message },
             { status: 500 }
