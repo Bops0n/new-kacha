@@ -1,5 +1,5 @@
 import { poolQuery, pool } from '@/app/api/lib/db';
-import { UserSchema, AddressSchema, NewAddressForm } from '@/types';
+import { UserSchema, AddressSchema } from '@/types';
 
 // --- Profile Functions ---
 
@@ -54,7 +54,7 @@ export async function addNewAddress(userId: number, addressData: Omit<AddressSch
  */
 export async function updateAddress(addressId: number, userId: number, addressData: Partial<AddressSchema>): Promise<boolean> {
     const result = await poolQuery(`SELECT * FROM "SP_USER_ADDRESS_UPD"($1, $2, $3)`, [addressId, userId, JSON.stringify(addressData)]);
-    return result.rows[0];
+    return result.rowCount > 0;
 }
 
 export async function deleteAddress(addressID: number): Promise<boolean>{

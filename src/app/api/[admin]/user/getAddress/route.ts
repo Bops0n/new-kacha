@@ -20,14 +20,6 @@ export async function GET(req: NextRequest) {
     
     try {
         const result = await getAddressesByUserId(Number(userId));
-
-        // If fetching a single address by ID and not found
-        if (result.length === 0) {
-            return NextResponse.json({ message: 'Address not found' }, { status: 404 });
-        }
-
-        console.log("Addresses fetched:", userId);
-
         return NextResponse.json({
             message: "Addresses fetched successfully",
             status: 200,
