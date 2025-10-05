@@ -16,9 +16,6 @@ export async function addProduct(productData: Partial<ProductInventory>, UserID:
   const result = await poolQuery(
     `SELECT * FROM "SP_ADMIN_PRODUCT_INS"($1, $2)`, [JSON.stringify([productData]), UserID]
   );
-
-  console.log(result.rows[0]);
-
   return result.rows[0];
 }
 

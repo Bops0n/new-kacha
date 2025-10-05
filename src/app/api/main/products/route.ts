@@ -5,13 +5,13 @@ import { poolQuery } from '../../lib/db';
 export async function GET() {
   try {
     // ใช้ Promise.all เพื่อดึงข้อมูลทั้งหมดพร้อมกัน
-    const SP_GET_VISIBLE_PRODUCTS  = await poolQuery(`SELECT * FROM public."SP_GET_VISIBLE_PRODUCTS"()`);
-    const allCategories = await poolQuery('SELECT * FROM public."SP_GET_ALL_CATEGORIES"()');
+    const result  = await poolQuery(`SELECT * FROM "SP_USER_PRODUCT_GET"()`);
+    
+    const allCategories = await poolQuery(`SELECT * FROM "SP_ALL_CATEGORIES_GET"()`);
     const { categories, subCategories, childSubCategories } = allCategories.rows[0];
     
-    console.log(allCategories)
     const payload = {
-      products: SP_GET_VISIBLE_PRODUCTS.rows[0].products,
+      products: result.rows[0].products,
       categories: categories,
       subCategories: subCategories,
       childSubCategories: childSubCategories,

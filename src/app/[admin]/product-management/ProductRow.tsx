@@ -1,5 +1,5 @@
 import React from 'react';
-import { FiEye, FiTrash2 } from 'react-icons/fi'; // Changed FiEdit to FiEye, removed FiEdit from import
+import { FiCheckCircle, FiEye, FiEyeOff, FiTrash2 } from 'react-icons/fi'; // Changed FiEdit to FiEye, removed FiEdit from import
 import { ProductInventory } from '@/types'; // Correct path to types
 import { ModalMode } from '@/types';
 
@@ -66,9 +66,13 @@ const ProductRow: React.FC<ProductRowProps> = ({
       {/* Visibility Status */}
       <td>
         {product.Visibility ? (
-          <span className="badge badge-success">แสดงผล</span>
+          <span className="badge badge-success">
+            <FiCheckCircle className="w-4 h-4" />
+          </span>
         ) : (
-          <span className="badge badge-neutral">ซ่อน</span>
+          <span className="badge badge-neutral">
+            <FiEyeOff className="w-4 h-4" />
+          </span>
         )}
       </td>
       {/* Actions */}

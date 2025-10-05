@@ -267,7 +267,19 @@ export default function ProductManagementPage() {
 
             <div className="hidden md:block bg-base-100 rounded-lg shadow-sm overflow-x-auto">
                 <table className="table w-full">
-                    <thead><tr><th>รหัส</th><th>สินค้า</th><th>หมวดหมู่</th><th>คงเหลือขายได้</th><th>ราคาขาย</th><th>สถานะ</th><th>จัดการ</th></tr></thead>
+                    <thead>
+                        <tr>
+                            <th>รหัส</th>
+                            <th>รูปภาพ</th>
+                            <th>สินค้า</th>
+                            <th>แบรนด์</th>
+                            <th>หมวดหมู่</th>
+                            <th>คงเหลือขายได้</th>
+                            <th>ราคาขาย</th>
+                            <th>สถานะ</th>
+                            <th>จัดการ</th>
+                        </tr>
+                    </thead>
                     <tbody>
                         {paginatedProducts.map(product => (
                             <ProductRow key={product.Product_ID} product={product} getFullCategoryName={getFullCategoryName} formatPrice={formatPrice} openProductModal={openModal} deleteProduct={actions.deleteProduct} availableStock={calculateAvailableStock(product)} />
