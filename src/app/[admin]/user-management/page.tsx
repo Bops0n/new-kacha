@@ -431,7 +431,7 @@ export default function UserManagement() {
       if (selectedUser) {
 
 
-        const result = await fetch(`../api/admin/user/addAddress?id=${addressId}`,{
+        const result = await fetch(`../api/admin/user/deleteAddress?id=${addressId}`,{
           method:'DELETE'
         })
 

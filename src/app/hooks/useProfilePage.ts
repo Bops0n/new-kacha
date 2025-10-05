@@ -27,7 +27,9 @@ export function useProfilePage() {
         fetch('/api/main/profile'),
         fetch('/api/main/address')
       ]);
-      if (!profileRes.ok || !addressesRes.ok) throw new Error('ไม่สามารถโหลดข้อมูลได้');
+      if (!profileRes.ok) throw new Error('ไม่สามารถโหลดข้อมูลโปรไฟล์ได้');
+
+      if (!addressesRes.ok) throw new Error('ไม่สามารถโหลดข้อมูลที่อยู่ได้');
       
       const profileData = await profileRes.json();
       const addressesData = await addressesRes.json();

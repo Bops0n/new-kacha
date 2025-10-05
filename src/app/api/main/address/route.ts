@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const newAddress = await addNewAddress(auth.userId, body);
-    return NextResponse.json({ message: 'เพิ่มที่อยู่สำเร็จ', address: newAddress }, { status: 201 });
+    return NextResponse.json({ message: 'เพิ่มที่อยู่สำเร็จ', address: newAddress }, { status: 200 });
   } catch (error) {
     return NextResponse.json({ message: 'Failed to add address' }, { status: 500 });
   }

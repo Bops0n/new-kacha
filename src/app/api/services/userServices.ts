@@ -28,25 +28,32 @@ export async function updateUserProfile(userId: number, data: Partial<UserSchema
  * ดึงที่อยู่ทั้งหมดของผู้ใช้
  */
 export async function getAddressesByUserId(userId: number): Promise<AddressSchema[]> {
-  const result = await poolQuery(`SELECT * FROM "SP_USER_ADDRESS_GET"($1)`, [userId]);
+  const result = await poolQuery(`SELECT * FROM "SP_USER_ADDRESS_UID_GET"($1)`, [userId]);
+  return result.rows;
+}
+
+export async function getAddressesByAddressId(addressId: number): Promise<AddressSchema[]> {
+  const result = await poolQuery(`SELECT * FROM "SP_USER_ADDRESS_ADDRID_GET"($1)`, [addressId]);
   return result.rows;
 }
 
 /**
  * เพิ่มที่อยู่ใหม่ให้ผู้ใช้ (พร้อม Transaction)
  */
-export async function addNewAddress(userId: number, addressData: NewAddressForm): Promise<AddressSchema> {
-  const result = await poolQuery(`SELECT * FROM "SP_USER_ADDRESS_INS"($1, $2, $3, $4, $5, $6, $7, $8, $9)`, 
-    [userId, addressData.Address_1, addressData.Address_2, addressData.Sub_District, addressData.District, 
-      addressData.Province, addressData.Zip_Code, addressData.Is_Default, addressData.Phone]);
+export async function addNewAddress(userId: number, addressData: Omit<AddressSchema, 'Address_ID'>): Promise<AddressSchema> {
+  const result = await poolQuery(`SELECT * FROM "SP_USER_ADDRESS_INS"($1, $2)`, [userId, JSON.stringify(addressData)]);
   return result.rows[0];
 }
 
 /**
  * อัปเดตที่อยู่ (พร้อม Transaction สำหรับ Is_Default)
  */
-export async function updateAddress(userId: number, addressId: number, addressData: Partial<AddressSchema>): Promise<boolean> {
-    // ... (สามารถเพิ่ม Logic การอัปเดตที่ซับซ้อนที่นี่ได้ในอนาคต) ...
-    // สำหรับตอนนี้ API route จัดการได้ดีอยู่แล้ว แต่ถ้าซับซ้อนขึ้นควรย้ายมาที่นี่
-    return true; // Placeholder
+export async function updateAddress(addressId: number, userId: number, addressData: Partial<AddressSchema>): Promise<boolean> {
+    const result = await poolQuery(`SELECT * FROM "SP_USER_ADDRESS_UPD"($1, $2, $3)`, [addressId, userId, JSON.stringify(addressData)]);
+    return result.rows[0];
+}
+
+export async function deleteAddress(addressID: number): Promise<boolean>{
+  const result = await poolQuery(`SELECT * FROM "SP_USER_ADDRESS_DEL"($1)`, [addressID]);
+  return result.rowCount > 0;
 }

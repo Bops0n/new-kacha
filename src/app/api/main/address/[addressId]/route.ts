@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import { poolQuery, pool } from '@/app/api/lib/db';
 import { AddressSchema } from '@/types'; // Corrected import path and type name
+import { deleteAddress, getAddressesByAddressId, updateAddress } from '@/app/api/services/userServices';
 
 /**
  * Helper function to authenticate the request and get the user ID.
@@ -32,40 +33,6 @@ async function authenticateRequest() {
   return { authenticated: true, userId: authenticatedUserId, response: null };
 }
 
-
-/**
- * GET /api/address/[addressId]
- * Retrieves a single address for the authenticated user by Address_ID.
- */
-export async function GET(request: NextRequest, context: { params: { addressId: string } }) {
-  const auth = await authenticateRequest();
-  if (!auth.authenticated) {
-    return auth.response;
-  }
-  const userId = auth.userId as number;
-
-  const addressId = parseInt(context.params.addressId);
-  if (isNaN(addressId)) {
-    return NextResponse.json({ message: 'Invalid address ID', error: true }, { status: 400 });
-  }
-
-  try {
-    const result = await poolQuery('SELECT * FROM "Address" WHERE "Address_ID" = $1 AND "User_ID" = $2', [addressId, userId]);
-    
-    if (result.rowCount === 0) {
-      return NextResponse.json({ message: 'Address not found or does not belong to the authenticated user', error: true }, { status: 404 });
-    }
-
-    const address: AddressSchema = result.rows[0];
-    return NextResponse.json({ address, error: false }, { status: 200 });
-
-  } catch (error) {
-    console.error('Error fetching address:', error);
-    return NextResponse.json({ message: 'Failed to fetch address', error: true }, { status: 500 });
-  }
-}
-
-
 /**
  * PUT /api/address/[addressId]
  * Updates an existing address for the authenticated user.
@@ -81,8 +48,11 @@ export async function PUT(request: NextRequest, context: { params: { addressId: 
   const userId = auth.userId as number;
 
   // Get addressId from URL params
-  const addressId = parseInt(context.params.addressId);
-  if (isNaN(addressId)) {
+  //const addressId = parseInt(context.params.addressId);
+  const { addressId } = await context.params;
+  const parseId = parseInt(addressId);
+
+  if (isNaN(parseId)) {
     return NextResponse.json({ message: 'Invalid address ID', error: true }, { status: 400 });
   }
 
@@ -97,68 +67,13 @@ export async function PUT(request: NextRequest, context: { params: { addressId: 
     );
   }
 
-  // The dynamic UPDATE query will only update fields that are present in updatedAddressData.
-  // This allows partial updates for this PUT handler.
-  const updateColumns: string[] = [];
-  const queryParams: (string | number | boolean | null)[] = [];
-  let paramIndex = 1;
-
-  // Fields to update based on AddressSchema
-  // Note: User_ID is generally not updatable via this endpoint, it's for ownership check.
-  const updatableFields: Array<keyof AddressSchema> = [
-    'Address_1', 'Address_2', 'Sub_District', 'District', 'Province',
-    'Zip_Code', 'Is_Default', 'Phone'
-  ];
-
-  for (const field of updatableFields) {
-    // Only add to update list if the field is explicitly provided in the request body
-    if (Object.prototype.hasOwnProperty.call(updatedAddressData, field) && updatedAddressData[field] !== undefined) {
-      let valueToSet: any = updatedAddressData[field];
-
-      // Convert empty strings to null for nullable database columns
-      if (typeof valueToSet === 'string' && valueToSet.trim() === '') {
-        valueToSet = null;
-      }
-      // Ensure boolean value for Is_Default if it comes as 0/1 or string
-      if (field === 'Is_Default') {
-        valueToSet = Boolean(valueToSet);
-      }
-
-      updateColumns.push(`"${field}" = $${paramIndex}`);
-      queryParams.push(valueToSet);
-      paramIndex++;
-    }
-  }
-
-  if (updateColumns.length === 0) {
-    return NextResponse.json(
-      { message: 'No valid fields provided for update.', error: true },
-      { status: 400 }
-    );
-  }
-
   const client = await pool.connect();
   try {
     await client.query('BEGIN');
 
-    // If the updated address is set as default, update all existing addresses for THIS user to not be default
-    if (updatedAddressData.Is_Default === true) { // Explicitly check for true
-      await client.query(
-        `UPDATE public."Address" SET "Is_Default" = FALSE WHERE "User_ID" = $1 AND "Address_ID" != $2`,
-        [userId, addressId]
-      );
-    }
+    const result = await updateAddress(parseId, userId, updatedAddressData);
 
-    // Update the address, ensuring it belongs to the authenticated user
-    // and using addressId from URL params
-    const updateResult = await poolQuery(
-      `UPDATE public."Address" SET
-        ${updateColumns.join(', ')}
-      WHERE "Address_ID" = $${paramIndex} AND "User_ID" = $${paramIndex + 1} RETURNING "Address_ID"`,
-      [...queryParams, addressId, userId]
-    );
-
-    if (updateResult.rowCount === 0) {
+    if (!result) {
       await client.query('ROLLBACK');
       return NextResponse.json(
         { message: 'Address not found or does not belong to the authenticated user', error: true },
@@ -191,16 +106,18 @@ export async function DELETE(request: NextRequest, context: { params: { addressI
   const userId = auth.userId as number;
 
   // Get addressId from URL params
-  const addressId = parseInt(context.params.addressId);
-  if (isNaN(addressId)) {
+  const { addressId } = await context.params;
+  const parseId = parseInt(addressId);
+
+  if (isNaN(parseId)) {
     return NextResponse.json({ message: 'Invalid address ID', error: true }, { status: 400 });
   }
 
   try {
     // Delete the address, ensuring it belongs to the authenticated user
-    const deleteResult = await poolQuery('DELETE FROM "Address" WHERE "Address_ID" = $1 AND "User_ID" = $2 RETURNING "Address_ID"', [addressId, userId]);
+    const result = await deleteAddress(parseId);
 
-    if (deleteResult.rowCount === 0) {
+    if (!result) {
       return NextResponse.json({ message: 'Address not found or does not belong to the authenticated user', error: true }, { status: 404 });
     }
 
@@ -224,8 +141,10 @@ export async function PATCH(request: NextRequest, context: { params: { addressId
   }
   const userId = auth.userId as number;
 
-  const addressId = parseInt(context.params.addressId);
-  if (isNaN(addressId)) {
+  const { addressId } = await context.params;
+  const parseId = parseInt(addressId);
+
+  if (isNaN(parseId)) {
     return NextResponse.json({ message: 'Invalid address ID', error: true }, { status: 400 });
   }
 
@@ -240,61 +159,14 @@ export async function PATCH(request: NextRequest, context: { params: { addressId
     );
   }
 
-  const updateColumns: string[] = [];
-  const queryParams: (string | number | boolean | null)[] = [];
-  let paramIndex = 1;
-
-  // Only allow updating Is_Default for this specific PATCH operation (or add other fields if needed)
-  const allowedPatchFields: Array<keyof Partial<AddressSchema>> = ['Is_Default'];
-  // If you want to allow full partial update on any field, use all updatableFields instead
-  // const allowedPatchFields: Array<keyof AddressSchema> = ['Address_1', 'Address_2', 'Sub_District', 'District', 'Province', 'Zip_Code', 'Is_Default', 'Phone'];
-
-
-  for (const field of allowedPatchFields) {
-    if (Object.prototype.hasOwnProperty.call(updatedAddressData, field) && updatedAddressData[field] !== undefined) {
-      let valueToSet: any = updatedAddressData[field];
-
-      if (typeof valueToSet === 'string' && valueToSet.trim() === '') {
-        valueToSet = null;
-      }
-      if (field === 'Is_Default') {
-        valueToSet = Boolean(valueToSet);
-      }
-
-      updateColumns.push(`"${field}" = $${paramIndex}`);
-      queryParams.push(valueToSet);
-      paramIndex++;
-    }
-  }
-
-  if (updateColumns.length === 0) {
-    return NextResponse.json(
-      { message: 'No valid fields provided for partial update.', error: true },
-      { status: 400 }
-    );
-  }
-
   const client = await pool.connect();
   try {
     await client.query('BEGIN');
 
-    // If Is_Default is being set to TRUE, unset all other default addresses for this user
-    if (updatedAddressData.Is_Default === true) {
-      await client.query(
-        `UPDATE public."Address" SET "Is_Default" = FALSE WHERE "User_ID" = $1 AND "Address_ID" != $2`,
-        [userId, addressId]
-      );
-    }
-
     // Update the specific address
-    const updateResult = await client.query(
-      `UPDATE public."Address" SET
-        ${updateColumns.join(', ')}
-      WHERE "Address_ID" = $${paramIndex} AND "User_ID" = $${paramIndex + 1} RETURNING "Address_ID"`,
-      [...queryParams, addressId, userId]
-    );
+    const result = await updateAddress(parseId, userId, updatedAddressData);
 
-    if (updateResult.rowCount === 0) {
+    if (!result) {
       await client.query('ROLLBACK');
       return NextResponse.json(
         { message: 'Address not found or does not belong to the authenticated user', error: true },
