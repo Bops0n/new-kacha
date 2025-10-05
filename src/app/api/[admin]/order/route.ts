@@ -35,9 +35,9 @@ export async function GET(req: NextRequest) {
  * รับข้อมูลที่ต้องการอัปเดตผ่าน body
  */
 export async function PATCH(req: NextRequest) {
-    // const auth = await authenticateRequest();
-    // const adminCheck = requireAdmin(auth);
-    // if (adminCheck) return adminCheck;
+    const auth = await authenticateRequest();
+    const adminCheck = requireAdmin(auth);
+    if (adminCheck) return adminCheck;
 
     try {
         const payload: Partial<Order> = await req.json();
@@ -54,16 +54,19 @@ export async function PATCH(req: NextRequest) {
  * รับ ID ที่ต้องการลบผ่าน query parameter (e.g., ?id=123)
  */
 export async function DELETE(req: NextRequest) {
-    // const auth = await authenticateRequest();
-    // const adminCheck = requireAdmin(auth);
-    // if (adminCheck) return adminCheck;
+    const auth = await authenticateRequest();
+    const adminCheck = requireAdmin(auth);
+    if (adminCheck) return adminCheck;
     
     try {
         const orderId = req.nextUrl.searchParams.get('id');
+
         if (!orderId) {
             return NextResponse.json({ message: "Order ID is required as a query parameter." }, { status: 400 });
         }
-        await orderService.deleteOrder(Number(orderId));
+
+        await orderService.deleteOrder(Number(orderId), Number(auth.userId));
+
         return NextResponse.json({ message: `Order ID ${orderId} and its details deleted successfully.` });
     } catch (error: any) {
         console.error("API DELETE Error:", error.message);

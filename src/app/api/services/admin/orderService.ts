@@ -61,32 +61,12 @@ const mapDbRowsToUiOrder = (dbRows: any[]): Order[] => {
  * @returns Array ของ Order object
  */
 export async function getOrders(orderId: number | null): Promise<Order[]> {
-    const sql = `
-        SELECT
-            o."Order_ID", o."User_ID", o."Order_Date", o."Status", o."Payment_Type",
-            o."Invoice_ID", o."Address_ID", o."DeliveryDate", o."Tracking_ID", o."Shipping_Carrier",
-            o."Transfer_Slip_Image_URL", o."Cancellation_Reason", o."Address", o."Phone",
-            o."Total_Amount",
-            u."Full_Name" AS "UserFullName",
-            od."Product_ID", od."Quantity", od."Product_Sale_Cost", od."Product_Sale_Price",
-            od."Product_Name", od."Product_Brand", od."Product_Unit", od."Product_Image_URL",
-            od."Product_Discount_Price"
-        FROM
-            public."Order" AS o
-        LEFT JOIN
-            public."User" AS u ON o."User_ID" = u."User_ID"
-        LEFT JOIN
-            public."Order_Detail" AS od ON o."Order_ID" = od."Order_ID"
-        ${orderId ? 'WHERE o."Order_ID" = $1' : ''}
-        ORDER BY 
-            o."Order_ID" DESC, od."Product_ID" ASC;
-    `;
-    const queryParams = orderId ? [orderId] : [];
-    const result = await poolQuery(sql, queryParams);
+    const result = await poolQuery(`SELECT * FROM "SP_ADMIN_ORDER_GET"($1)`, [orderId]);
     
     if (orderId && result.rows.length === 0) {
         throw new Error('Order not found');
     }
+    
     return mapDbRowsToUiOrder(result.rows);
 }
 
@@ -122,37 +102,12 @@ export async function updateOrder(payload: Partial<Order>): Promise<Order> {
             throw new Error("No valid fields provided for update.");
         }
 
-        const setClause = updateEntries.map(([key], index) => `"${key}" = $${index + 1}`).join(', ');
-        const queryParams: (string | number | Date | null)[] = updateEntries.map(([, value]) => value);
-        queryParams.push(Order_ID);
-
-        console.log(setClause,queryParams)
+        const setClause = updateEntries.map(([key], value) => `"${key}" = '${value}'`).join(', ');
         
-
-        const updateOrderSql = `UPDATE public."Order" SET ${setClause} WHERE "Order_ID" = $${queryParams.length} RETURNING *`;
-        const orderUpdateResult = await client.query(updateOrderSql, queryParams);
+        const orderUpdateResult = await client.query(`SELECT * FROM "SP_ADMIN_ORDER_UPD"($1, $2)`, Order_ID, setClause);
 
         if (orderUpdateResult.rowCount === 0) {
             throw new Error(`Order with ID ${Order_ID} not found.`);
-        }
-
-        // Step 2: If status is 'cancelled' or 'refunded', update product cancellation counts
-        const newStatus = orderUpdateResult.rows[0].Status;
-        if (newStatus && (newStatus === 'cancelled' || newStatus === 'refunding')) {
-            const orderDetailsResult = await client.query(
-                'SELECT "Product_ID", "Quantity" FROM public."Order_Detail" WHERE "Order_ID" = $1',
-                [Order_ID]
-            );
-
-            for (const detail of orderDetailsResult.rows) {
-                const { Product_ID, Quantity } = detail;
-                await client.query(
-                    `UPDATE public."Product" 
-                     SET "Cancellation_Count" = "Cancellation_Count" + $1 
-                     WHERE "Product_ID" = $2`,
-                    [Quantity, Product_ID]
-                );
-            }
         }
 
         await client.query('COMMIT');
@@ -176,18 +131,14 @@ export async function updateOrder(payload: Partial<Order>): Promise<Order> {
  * ลบคำสั่งซื้อและรายละเอียดที่เกี่ยวข้อง
  * @param orderId ID ของคำสั่งซื้อที่ต้องการลบ
  */
-export async function deleteOrder(orderId: number): Promise<void> {
+export async function deleteOrder(orderId: number, UserID: number): Promise<void> {
     const client = await pool.connect();
     try {
         await client.query('BEGIN');
-        // Note: Business logic might require archiving instead of deleting,
-        // or checking order status before allowing deletion.
-        // This implementation is a hard delete.
-        await client.query('DELETE FROM public."Order_Detail" WHERE "Order_ID" = $1', [orderId]);
-        const result = await client.query('DELETE FROM public."Order" WHERE "Order_ID" = $1', [orderId]);
+
+        const result = await client.query(`SELECT * FROM "SP_ADMIN_ORDER_DEL"($1, $2)`, orderId, UserID);
         
         if (result.rowCount === 0) {
-            // If no order was deleted, it means it didn't exist. Rollback is safe.
             throw new Error(`Order with ID ${orderId} not found.`);
         }
         

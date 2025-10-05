@@ -56,47 +56,12 @@ const mapDbRowsToOrders = (rows: any[]): Order[] => {
     return Array.from(ordersMap.values());
 };
 
-// Base SQL Query with corrected column names
-const BASE_ORDER_QUERY = `
-    SELECT
-        o."Order_ID", o."User_ID", o."Order_Date", o."Total_Amount", o."Status",
-        o."Payment_Type", o."Invoice_ID", o."Address_ID", o."DeliveryDate",
-        o."Tracking_ID", o."Shipping_Carrier", o."Transfer_Slip_Image_URL",
-        o."Cancellation_Reason", o."Address", o."Phone",
-        od."Product_ID", od."Quantity", od."Product_Sale_Cost", od."Product_Sale_Price",
-        od."Product_Name", od."Product_Brand", od."Product_Unit", od."Product_Image_URL",
-        od."Product_Discount_Price",
-        u."Full_Name" AS "UserFullName", u."Email" AS "UserEmail"
-    FROM
-        public."Order" AS o
-    LEFT JOIN
-        public."Order_Detail" AS od ON o."Order_ID" = od."Order_ID"
-    LEFT JOIN
-        public."User" AS u ON o."User_ID" = u."User_ID"
-`;
-
 /**
  * Fetches a single order by its ID.
  * Optional userId can be provided for an authorization check.
  */
-export async function getOrderById(orderId: number, userId?: number): Promise<Order | null> {
-    let sql = `${BASE_ORDER_QUERY} WHERE o."Order_ID" = $1`;
-    const params: (number | string)[] = [orderId];
-
-    if (userId) {
-        sql += ` AND o."User_ID" = $2`;
-        params.push(userId);
-    }
-    
-    const result = await poolQuery(sql, params);
-    if (result.rows.length === 0) {
-        if (userId) {
-            const ownerCheck = await poolQuery('SELECT "Order_ID" FROM "Order" WHERE "Order_ID" = $1', [orderId]);
-            if (ownerCheck.rowCount > 0) throw new Error('Access denied');
-        }
-        return null;
-    }
-    
+export async function getOrderById(orderId: number, userId?: number): Promise<Order | null> {    
+    const result = await poolQuery(`SELECT * FROM "SP_USER_ORDER_GET"($1, $2)`, [orderId, userId]);
     const orders = mapDbRowsToOrders(result.rows);
     return orders[0] || null;
 }
