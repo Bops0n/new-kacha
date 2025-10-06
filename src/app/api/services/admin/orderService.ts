@@ -1,5 +1,17 @@
 import { poolQuery, pool } from '@/app/api/lib/db';
 import { Order, OrderStatus } from '@/types';
+import { NextResponse } from 'next/server';
+import { authenticateRequest } from '../../auth/utils';
+
+const requireAdmin = (auth) => {
+    if (!auth.authenticated) {
+        return auth.response;
+    }
+    if (auth.accessLevel !== '1') {
+        return NextResponse.json({ message: 'Forbidden' }, { status: 403 });
+    }
+    return null;
+};
 
 // Helper: แปลงข้อมูลจาก Database Row เป็น Order Object ที่ Frontend ต้องการ
 const mapDbRowsToUiOrder = (dbRows: any[]): Order[] => {
@@ -15,7 +27,7 @@ const mapDbRowsToUiOrder = (dbRows: any[]): Order[] => {
                 Status: row.Status,
                 Payment_Type: row.Payment_Type,
                 Invoice_ID: row.Invoice_ID,
-                Address_ID: row.Address_ID,
+                Shipping_Address_ID: row.Address_ID,
                 DeliveryDate: row.DeliveryDate,
                 Tracking_ID: row.Tracking_ID,
                 Shipping_Carrier: row.Shipping_Carrier,
@@ -24,8 +36,16 @@ const mapDbRowsToUiOrder = (dbRows: any[]): Order[] => {
                 Address: row.Address,
                 Phone: row.Phone,
                 Total_Amount: parseFloat(row.Total_Amount),
-                Customer_Name: row.UserFullName || 'N/A',
+                Customer_Name: row.User_FullName || 'N/A',
+                Email: row.User_Email || null,
                 Products: [],
+                Action: {
+                    Order_ID: -1,
+                    Status: 'pending',
+                    Update_By: -1,
+                    Update_Name: 'N/A',
+                    Update_Date: 'N/A',
+                }
             });
         }
 
@@ -50,6 +70,14 @@ const mapDbRowsToUiOrder = (dbRows: any[]): Order[] => {
                 Price_Paid_Per_Item: pricePaidPerItem,
                 Subtotal: pricePaidPerItem * quantity,
             });
+        }
+        
+        if (row.OA_Order_ID) {
+            currentOrder.Action.Order_ID = row.OA_Order_ID;
+            currentOrder.Action.Status = row.OA_Status;
+            currentOrder.Action.Update_By = row.OA_Update_By;
+            currentOrder.Action.Update_Name = row.OA_Update_Name;
+            currentOrder.Action.Update_Date = row.OA_Update_Date;
         }
     });
     return Array.from(ordersMap.values()).sort((a, b) => b.Order_ID - a.Order_ID);
@@ -76,8 +104,11 @@ export async function getOrders(orderId: number | null): Promise<Order[]> {
  * @returns ข้อมูล Order ที่ถูกอัปเดตแล้ว
  */
 export async function updateOrder(payload: Partial<Order>): Promise<Order> {
+    const auth = await authenticateRequest();
+    const adminCheck = requireAdmin(auth);
+    if (adminCheck) return adminCheck;
+    
     const { Order_ID, Status, ...otherFields } = payload;
-    console.log(payload)
 
     if (!Order_ID) {
         throw new Error("Order_ID is required for an update.");
@@ -87,24 +118,13 @@ export async function updateOrder(payload: Partial<Order>): Promise<Order> {
     try {
         await client.query('BEGIN');
 
-        // Step 1: Update the order status and other details
-        const allowedOrderColumns = ['Status', 'DeliveryDate', 'Tracking_ID', 'Shipping_Carrier', 'Cancellation_Reason'];
-        
         // We create a new object to avoid mutating the original payload
         const fieldsToUpdate: { [key: string]: any } = {};
         if (Status) fieldsToUpdate.Status = Status;
         Object.assign(fieldsToUpdate, otherFields);
 
-        const updateEntries = Object.entries(fieldsToUpdate)
-            .filter(([key, value]) => allowedOrderColumns.includes(key) && value !== undefined);
-
-        if (updateEntries.length === 0) {
-            throw new Error("No valid fields provided for update.");
-        }
-
-        const setClause = updateEntries.map(([key], value) => `"${key}" = '${value}'`).join(', ');
-        
-        const orderUpdateResult = await client.query(`SELECT * FROM "SP_ADMIN_ORDER_UPD"($1, $2)`, Order_ID, setClause);
+        const orderUpdateResult = await client.query(`SELECT * FROM "SP_ADMIN_ORDER_UPD"($1, $2, $3)`, 
+            [Order_ID, JSON.stringify(fieldsToUpdate), auth.userId]);
 
         if (orderUpdateResult.rowCount === 0) {
             throw new Error(`Order with ID ${Order_ID} not found.`);

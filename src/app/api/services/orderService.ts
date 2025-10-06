@@ -11,8 +11,8 @@ const mapDbRowsToOrders = (rows: any[]): Order[] => {
             ordersMap.set(orderId, {
                 Order_ID: row.Order_ID,
                 User_ID: row.User_ID,
-                Customer_Name: row.UserFullName || 'N/A',
-                Email: row.UserEmail || null,
+                Customer_Name: row.User_FullName || 'N/A',
+                Email: row.User_Email || null,
                 Phone: row.Phone,
                 Products: [],
                 Total_Amount: parseFloat(row.Total_Amount),
@@ -27,6 +27,13 @@ const mapDbRowsToOrders = (rows: any[]): Order[] => {
                 Cancellation_Reason: row.Cancellation_Reason,
                 Payment_Type: row.Payment_Type,
                 Invoice_ID: row.Invoice_ID,
+                Action: {
+                    Order_ID: -1,
+                    Status: 'pending',
+                    Update_By: -1,
+                    Update_Name: 'N/A',
+                    Update_Date: 'N/A',
+                }
             });
         }
 
@@ -60,8 +67,8 @@ const mapDbRowsToOrders = (rows: any[]): Order[] => {
  * Fetches a single order by its ID.
  * Optional userId can be provided for an authorization check.
  */
-export async function getOrderById(orderId: number, userId?: number): Promise<Order | null> {    
-    const result = await poolQuery(`SELECT * FROM "SP_USER_ORDER_GET"($1, $2)`, [orderId, userId]);
+export async function getOrderById(orderId: number): Promise<Order | null> {    
+    const result = await poolQuery(`SELECT * FROM "SP_USER_ORDER_ORDID_GET"($1)`, [orderId]);
     const orders = mapDbRowsToOrders(result.rows);
     return orders[0] || null;
 }

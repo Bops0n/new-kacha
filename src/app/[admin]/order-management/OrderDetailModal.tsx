@@ -79,7 +79,6 @@ const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
     const payload: Partial<Order> = { Order_ID: order.Order_ID, Tracking_ID: formData.trackingId || null, Shipping_Carrier: formData.shippingCarrier || null, DeliveryDate: formData.deliveryDate || null, Status: formData.status };
     showAlert(`ยืนยันการบันทึกสำหรับออเดอร์ #${order.Order_ID}?`, 'info', 'ยืนยัน', async () => {
       const success = await onSave(payload);
-      console.log(payload)
       if (success && payload.Status){
         toggleEditMode();
         setFormData({
@@ -134,7 +133,17 @@ const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
                     <div><label className="label-text text-xs">สถานะ</label><select name="status" value={formData.status} onChange={handleChange} className="select select-bordered w-full select-sm">{Object.keys(statusConfig).map(key => !['cancelled', 'refunding', 'refunded'].includes(key) && (<option key={key} value={key}>{statusConfig[key as OrderStatus].label}</option>))}</select></div>
                   </>
                 ) : (
-                  <><p><strong>Tracking ID:</strong> {order.Tracking_ID || '-'}</p><p><strong>บริษัทขนส่ง:</strong> {order.Shipping_Carrier || '-'}</p><p><strong>วันที่ส่ง:</strong> {formatDate(order.DeliveryDate)}</p><p><strong>สถานะ:</strong> <span className={`badge ${statusConfig[order.Status]?.color}`}>{statusConfig[order.Status]?.label}</span></p>{order.Status === 'cancelled' && <p><strong>เหตุผล:</strong> {order.Cancellation_Reason || '-'}</p>}</>
+                  <>
+                  <p><strong>Tracking ID:</strong> {order.Tracking_ID || '-'}</p>
+                  <p><strong>บริษัทขนส่ง:</strong> {order.Shipping_Carrier || '-'}</p>
+                  <p><strong>วันที่ส่ง:</strong> {formatDate(order.DeliveryDate)}</p>
+                  <p><strong>สถานะ:</strong> <span className={`badge ${statusConfig[order.Status]?.color}`}>{statusConfig[order.Status]?.label}</span></p>
+                  <p><strong>จัดการโดย:</strong> {order.Action.Update_Name}</p>
+                  <p><strong>เมื่อเวลา:</strong> {order.Action.Update_Date}</p>
+                  {
+                    order.Status === 'cancelled' && <p><strong>เหตุผล:</strong> {order.Cancellation_Reason || '-'}</p>
+                  }
+                  </>
                 )}
               </div></div>
           </div>

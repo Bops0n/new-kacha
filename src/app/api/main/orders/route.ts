@@ -34,7 +34,7 @@ const mapDbRowsToUiOrder = (dbRows: any[]): Order[] => {
                 Status: row.Status,
                 Payment_Type: row.Payment_Type,
                 Invoice_ID: row.Invoice_ID,
-                Address_ID: row.Address_ID,
+                Shipping_Address_ID: row.Address_ID,
                 DeliveryDate: row.DeliveryDate,
                 Tracking_ID: row.Tracking_ID,
                 Shipping_Carrier: row.Shipping_Carrier,
@@ -43,10 +43,18 @@ const mapDbRowsToUiOrder = (dbRows: any[]): Order[] => {
                 Address: row.Address,
                 Phone: row.Phone,
                 Total_Amount: parseFloat(row.Total_Amount),
-                
+
                 // Mapped from JOIN
-                Customer_Name: row.UserFullName || 'N/A', // Customer name for their own orders
+                Customer_Name: row.User_FullName || 'N/A', // Customer name for their own orders
+                Email: row.User_Email || null,
                 Products: [],
+                Action: {
+                    Order_ID: -1,
+                    Status: 'pending',
+                    Update_By: -1,
+                    Update_Name: 'N/A',
+                    Update_Date: 'N/A',
+                }
             });
         }
 
@@ -89,29 +97,8 @@ export async function GET(request: NextRequest) {
     const userId = auth.userId;
 
     try {
-        const sql = `
-            SELECT
-                o."Order_ID", o."User_ID", o."Order_Date", o."Status", o."Payment_Type",
-                o."Invoice_ID", o."Address_ID", o."DeliveryDate", o."Tracking_ID", o."Shipping_Carrier",
-                o."Transfer_Slip_Image_URL", o."Cancellation_Reason", o."Address", o."Phone",
-                o."Total_Amount",
-                u."Full_Name" AS "UserFullName",
-                od."Product_ID", od."Quantity", od."Product_Sale_Cost", od."Product_Sale_Price",
-                od."Product_Name", od."Product_Brand", od."Product_Unit", od."Product_Image_URL",
-                od."Product_Discount_Price"
-            FROM
-                public."Order" AS o
-            LEFT JOIN
-                public."User" AS u ON o."User_ID" = u."User_ID"
-            LEFT JOIN
-                public."Order_Detail" AS od ON o."Order_ID" = od."Order_ID"
-            WHERE
-                o."User_ID" = $1
-            ORDER BY 
-                o."Order_ID" DESC, od."Product_ID" ASC;
-        `;
 
-        const result = await poolQuery(sql, [userId]);
+        const result = await poolQuery(`SELECT * FROM "SP_USER_ORDER_UID_GET"($1)`, [userId]);
         const orders: Order[] = mapDbRowsToUiOrder(result.rows);
 
         return NextResponse.json({ orders });

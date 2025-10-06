@@ -18,15 +18,17 @@ export async function GET(
     if (!auth.authenticated || !auth.userId) {
         return auth.response || NextResponse.json({ message: 'Authentication failed' }, { status: 401 });
     }
+
+    const { orderId } = await params;
     
-    const orderId = parseInt(params.orderId, 10);
-    if (isNaN(orderId)) {
+    const parseId = parseInt(orderId, 10);
+    if (isNaN(parseId)) {
         return NextResponse.json({ message: 'Invalid Order ID' }, { status: 400 });
     }
 
     try {
         // เรียกใช้ Service ที่อัปเดตแล้ว
-        const order = await getOrderById(orderId, auth.userId);
+        const order = await getOrderById(parseId);
 
         if (!order) {
             return NextResponse.json({ message: 'ไม่พบคำสั่งซื้อ' }, { status: 404 });

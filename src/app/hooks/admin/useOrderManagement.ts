@@ -51,7 +51,6 @@ export function useOrderManagement() {
   }, [fetchOrders]);
 
   const saveOrder = async (payload: Partial<Order>) => {
-    console.log(payload)
     try {
       const response = await fetch('/api/admin/order', {
         method: 'PATCH',

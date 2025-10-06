@@ -20,6 +20,15 @@ export interface OrderProductDetail {
   Price_Paid_Per_Item : number | null;
   Subtotal?: number;
 }
+
+export interface OrderAction {
+  Order_ID: number;
+  Status: OrderStatus;
+  Update_By: number;
+  Update_Name: string | null;
+  Update_Date: string | null;
+}
+
 // Main Order type
 export type Order = {
   Order_ID: number;
@@ -40,6 +49,7 @@ export type Order = {
   Address: string;
   Phone: string;
   Products: OrderProductDetail[];
+  Action: OrderAction;
 };
 
 // Type for form data when editing an order in admin panel
