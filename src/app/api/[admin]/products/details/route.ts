@@ -4,7 +4,7 @@ import { poolQuery } from '@/app/api/lib/db';
 import { SimpleProductDetail } from '@/types';
 
 const requireAdmin = (auth) => {
-    if (!auth.authenticated || auth.accessLevel !== '1') {
+    if (!auth.authenticated || auth.accessLevel !== '9') {
         return NextResponse.json({ message: 'Forbidden' }, { status: 403 });
     }
     return null;

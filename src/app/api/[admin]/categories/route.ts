@@ -15,7 +15,7 @@ interface Category {
 
 // Helper: ตรวจสอบสิทธิ์ Admin
 const requireAdmin = (auth : { authenticated: boolean; accessLevel: string; }) => {
-    if (!auth.authenticated || auth.accessLevel !== '1') {
+    if (!auth.authenticated || auth.accessLevel !== '9') {
         return NextResponse.json({ message: 'Forbidden' }, { status: 403 });
     }
     return null;

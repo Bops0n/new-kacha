@@ -16,77 +16,6 @@ import AddressModal from './modal/AddressModal'; // <-- นำเข้า Addre
 import { useAlert } from '@/app/context/AlertModalContext';
 import Pagination from '@/app/components/Pagination';
 
-// --- Mock Data ---
-const mockUsers: User[] = [
-  {
-    User_ID: 101,
-    Username: 'john.doe',
-    Password: 'password123',
-    Full_Name: 'John Doe',
-    Email: 'john.doe@example.com',
-    Phone: '0812345678',
-    Access_Level: '9', // Admin
-    Token: 'token_admin_101',
-    Addresses: [
-      {
-        Address_ID: 1, User_ID: 101, Address_1: '123 Main St', Address_2: 'Apt 4B', District: 'Bangkok Yai',
-        Province: 'Bangkok', Zip_Code: '10600', Is_Default: true, Sub_District: 'Wat Arun', Phone: '0812345678'
-      },
-      {
-        Address_ID: 2, User_ID: 101, Address_1: '789 Secondary Rd', Address_2: null, District: 'Chatuchak',
-        Province: 'Bangkok', Zip_Code: '10900', Is_Default: false, Sub_District: 'Lat Yao', Phone: '0812345678'
-      },
-    ],
-  },
-  {
-    User_ID: 102,
-    Username: 'jane.smith',
-    Password: 'password456',
-    Full_Name: 'Jane Smith',
-    Email: 'jane.smith@example.com',
-    Phone: '0823456789',
-    Access_Level: '1', // User
-    Token: 'token_user_102',
-    Addresses: [
-      {
-        Address_ID: 3, User_ID: 102, Address_1: '456 Oak Ave', Address_2: null, District: 'Mueang Chiang Mai',
-        Province: 'Chiang Mai', Zip_Code: '50000', Is_Default: true, Sub_District: 'Suthep', Phone: '0823456789'
-      },
-    ],
-  },
-  {
-    User_ID: 103,
-    Username: 'bob.brown',
-    Password: 'password789',
-    Full_Name: 'Bob Brown',
-    Email: 'bob.brown@example.com',
-    Phone: '0834567890',
-    Access_Level: '0', // Guest
-    Token: 'token_guest_103',
-    Addresses: [], // No addresses
-  },
-  {
-    User_ID: 104,
-    Username: 'alice.white',
-    Password: 'passwordabc',
-    Full_Name: 'Alice White',
-    Email: 'alice.white@example.com',
-    Phone: '0845678901',
-    Access_Level: '1', // User
-    Token: 'token_user_104',
-    Addresses: [
-      {
-        Address_ID: 4, User_ID: 104, Address_1: '101 Pine Ln', Address_2: 'Unit 2A', District: 'Pattaya',
-        Province: 'Chonburi', Zip_Code: '20150', Is_Default: true, Sub_District: 'Nong Prue', Phone: '0845678901'
-      },
-      {
-        Address_ID: 5, User_ID: 104, Address_1: '202 Beach Rd', Address_2: null, District: 'Sattahip',
-        Province: 'Chonburi', Zip_Code: '20180', Is_Default: false, Sub_District: 'Sattahip', Phone: '0845678901'
-      },
-    ],
-  },
-];
-
 // Helper function to map access level char to readable string
 const getAccessLevelLabel = (level: AccessLevel): string => {
   switch (level) {
@@ -100,8 +29,8 @@ const getAccessLevelLabel = (level: AccessLevel): string => {
 export default function UserManagement() {
   const { showAlert } = useAlert()
 
-  const [users, setUsers] = useState<User[]>(mockUsers);
-  const [filteredUsers, setFilteredUsers] = useState<User[]>(mockUsers);
+  const [users, setUsers] = useState<User[]>();
+  const [filteredUsers, setFilteredUsers] = useState<User[]>();
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [accessLevelFilter, setAccessLevelFilter] = useState<AccessLevel | 'all'>('all');
 

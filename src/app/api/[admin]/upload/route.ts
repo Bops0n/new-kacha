@@ -6,7 +6,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 // Helper function to check for admin access from auth utils
 const requireAdmin = (auth) => {
-    if (!auth.authenticated || auth.accessLevel !== '1') {
+    if (!auth.authenticated || auth.accessLevel !== '9') {
         return NextResponse.json({ message: 'Forbidden' }, { status: 403 });
     }
     return null;

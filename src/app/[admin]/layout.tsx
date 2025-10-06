@@ -12,14 +12,14 @@ export default async function RootLayout({
   const session = await getServerSession(authOptions)
   console.log('testsession', session)
   
-  if (session?.user.accessLevel == "1")
+  if (session?.user.accessLevel == "9")
     return(
         <>
         <AdminNavbar/>
         {children}
         </>
     )
-  else if (session === null || session?.user.accessLevel != "1"){
+  else if (session === null || session?.user.accessLevel != "9"){
     return redirect('/404')
   }
 }

@@ -7,7 +7,7 @@ const requireAdmin = (auth) => {
     if (!auth.authenticated) {
         return auth.response;
     }
-    if (auth.accessLevel !== '1') {
+    if (auth.accessLevel !== '9') {
         return NextResponse.json({ message: 'Forbidden' }, { status: 403 });
     }
     return null;

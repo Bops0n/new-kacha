@@ -12,7 +12,7 @@ export default function AdminNavbar() {
     
     
     const session = useSession()
-    if (session?.data?.user?.accessLevel == '1')
+    if (session?.data?.user?.accessLevel == '9')
     return (
         <div className="w-full" data-theme="dark">
             {/* Top Bar */}
