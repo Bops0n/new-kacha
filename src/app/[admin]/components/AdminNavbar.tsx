@@ -83,7 +83,7 @@ export default function AdminNavbar() {
                                     </label>
                                     <ul tabIndex={0} className="dropdown-content menu p-2 shadow-lg bg-white rounded-box w-52 border border-gray-300 mt-0 text-gray-800">
                                         <li> <Link href={"/profile"} className="hover:bg-gray-200 rounded">โปรไฟล์ของฉัน</Link></li>
-                                        <li> <Link href={"/orders"} className="hover:bg-gray-200 rounded">ประวัติคำสั่งซื้อ</Link></li>
+                                        <li> <Link href={"/orders-history"} className="hover:bg-gray-200 rounded">ประวัติคำสั่งซื้อ</Link></li>
                                         <li> <Link href={"/favorites"} className="hover:bg-gray-200 rounded">รายการโปรด</Link></li>
                                         <li> <a onClick={()=> signOut()} className="hover:bg-gray-200 rounded">ออกจากระบบ</a></li>
                                     </ul>
