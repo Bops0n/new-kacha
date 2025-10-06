@@ -4,17 +4,18 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { FiMail, FiLock, FiUser, FiCheckCircle } from 'react-icons/fi';
 import { signIn, useSession } from 'next-auth/react';
+import { useAlert } from '@/app/context/AlertModalContext';
 
 interface AuthModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onLoginSuccess: (username: string) => void;
   initialTab?: 'login' | 'register';
 }
 
-export default function AuthModal({ isOpen, onClose, onLoginSuccess, initialTab = 'login' }: AuthModalProps) {
+export default function AuthModal({ isOpen, onClose, initialTab = 'login' }: AuthModalProps) {
 
   const session = useSession();
+  const { showAlert } = useAlert();
 
   const [activeTab, setActiveTab] = useState<'login' | 'register'>(initialTab);
 
@@ -58,49 +59,47 @@ export default function AuthModal({ isOpen, onClose, onLoginSuccess, initialTab 
 
   const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Login Submitted:', loginFormData);
-
-    console.log(session, session.data)
-
-    const result = await signIn('credentials',{
-      redirect: false,
-      username:'admin',
-      password:'adminpassword',
-    })
-    session.update()
-    console.log(result, session.data?.user.accessLevel)
-    // const res = await fetch('/api/testApi',{
-    //   method: 'GET'
-    // })
-    // console.log(res)
+    
     if (!loginFormData.email || !loginFormData.password) {
-      
-      alert('กรุณากรอกอีเมลและรหัสผ่าน');
+      showAlert("กรุณากรอกบัญชีผู้ใช้และรหัสผ่าน!", 'warning');
       return;
     }
 
+    const result = await signIn('credentials', {
+      redirect: false,
+      username: loginFormData.email,
+      password: loginFormData.password,
+    });
+    
+    session.update();
 
-    setTimeout(() => {
-      alert('เข้าสู่ระบบสำเร็จ!');
-      onLoginSuccess('ผู้ใช้ทดสอบ');
-      onClose();
-    }, 500);
+    switch (result?.status)
+    {
+      case 200:
+        setTimeout(() => {
+          showAlert("เข้าสู่ระบบสำเร็จ!", 'success');
+          onClose();
+        }, 500);
+        break;
+      
+      default: showAlert(`${result?.error}`, 'error'); return;
+    }
   };
 
   const handleRegisterSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!registerFormData.name || !registerFormData.email || !registerFormData.password || !registerFormData.confirmPassword) {
-      alert('กรุณากรอกข้อมูลที่จำเป็นให้ครบถ้วน');
+      showAlert("กรุณากรอกข้อมูลที่จำเป็นให้ครบถ้วน!", 'warning');
       return;
     }
     if (registerFormData.password !== registerFormData.confirmPassword) {
-      alert('รหัสผ่านและยืนยันรหัสผ่านไม่ตรงกัน!');
+      showAlert("รหัสผ่านและยืนยันรหัสผ่านไม่ตรงกัน!", 'warning');
       return;
     }
     console.log('Register Submitted:', registerFormData);
 
     setTimeout(() => {
-      alert('ลงทะเบียนสำเร็จ! กรุณาเข้าสู่ระบบ');
+      showAlert("ลงทะเบียนสำเร็จ! กรุณาเข้าสู่ระบบ", 'success');
       setActiveTab('login');
     }, 500);
   };
