@@ -29,8 +29,8 @@ const getAccessLevelLabel = (level: AccessLevel): string => {
 export default function UserManagement() {
   const { showAlert } = useAlert()
 
-  const [users, setUsers] = useState<User[]>();
-  const [filteredUsers, setFilteredUsers] = useState<User[]>();
+  const [users, setUsers] = useState<User[]>([]);
+  const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [accessLevelFilter, setAccessLevelFilter] = useState<AccessLevel | 'all'>('all');
 
