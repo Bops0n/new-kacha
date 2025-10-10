@@ -3,28 +3,34 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { FiMail, FiLock, FiUser, FiCheckCircle } from 'react-icons/fi'; // Icons for inputs
-import { useSession } from 'next-auth/react';
+import { signIn, useSession } from 'next-auth/react';
 import { redirect } from 'next/navigation';
-// import { redirect } from 'next/dist/server/api-utils';
+import { useAlert } from '@/app/context/AlertModalContext';
+import { useSearchParams, useRouter } from "next/navigation";
 
 export default function AuthPage() {
 
-  const session = useSession()
+  const session = useSession();
+  const { showAlert } = useAlert();
+
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const callbackUrl = searchParams.get("callbackUrl") ?? "/app";
   
-  useEffect(()=>{
-    if (session.status === 'authenticated')
-      redirect('/')
-  },[session.status])
+  // useEffect(()=>{
+  //   if (session.status === 'authenticated')
+  //     redirect('/')
+  // },[session.status])
   const [activeTab, setActiveTab] = useState<'login' | 'register'>('login'); // State to control active tab
 
   const [loginFormData, setLoginFormData] = useState({
-    email: '',
+    usernameOremail: '',
     password: '',
     rememberMe: false,
   });
 
   const [registerFormData, setRegisterFormData] = useState({
-    name: '',
+    username: '',
     email: '',
     password: '',
     confirmPassword: '',
@@ -46,29 +52,81 @@ export default function AuthPage() {
     }));
   };
 
-  const handleLoginSubmit = (e: React.FormEvent) => {
+  const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Simulate login API call
-    console.log('Login Submitted:', loginFormData);
-    // In a real app, you would send this data to your backend authentication endpoint
-    alert('Login attempted! (Check console for data)'); // Replace with proper feedback UI
-  };
-
-  const handleRegisterSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (registerFormData.password !== registerFormData.confirmPassword) {
-      alert('รหัสผ่านและการยืนยันรหัสผ่านไม่ตรงกัน!');
+        
+    if (!loginFormData.usernameOremail || !loginFormData.password) {
+      showAlert("กรุณากรอกบัญชีผู้ใช้และรหัสผ่าน!", 'warning');
       return;
     }
-    // Simulate register API call
-    console.log('Register Submitted:', registerFormData);
-    // In a real app, you would send this data to your backend registration endpoint
-    alert('Register attempted! (Check console for data)'); // Replace with proper feedback UI
+
+    const result = await signIn('credentials', {
+      redirect: false,
+      username: loginFormData.usernameOremail,
+      password: loginFormData.password,
+      rememberMe: loginFormData.rememberMe,
+      callbackUrl: callbackUrl
+    });
+
+    if (result?.ok) router.push(callbackUrl);
+    
+    session.update();
+
+    switch (result?.status)
+    {
+      case 200:
+        setTimeout(() => {
+          showAlert("เข้าสู่ระบบสำเร็จ!", 'success');
+        }, 500);
+        break;
+      
+      default: showAlert(`${result?.error}`, 'error'); return;
+    }
+  };
+
+  const handleRegisterSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!registerFormData.username || !registerFormData.email || !registerFormData.password || !registerFormData.confirmPassword) {
+      showAlert("กรุณากรอกข้อมูลที่จำเป็นให้ครบถ้วน!", 'warning');
+      return;
+    }
+    if (registerFormData.password !== registerFormData.confirmPassword) {
+      showAlert("รหัสผ่านและยืนยันรหัสผ่านไม่ตรงกัน!", 'warning');
+      return;
+    }
+    
+    const result = await fetch("/api/auth/register", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(registerFormData),
+    });
+    
+    const data = await result.json();
+    
+    switch (result.status)
+    {
+      case 200:
+        setRegisterFormData({
+          username: '',
+          email: '',
+          password: '',
+          confirmPassword: ''
+        });
+        
+        setTimeout(() => {
+          showAlert("ลงทะเบียนสำเร็จ! กรุณาเข้าสู่ระบบ", 'success');
+          setActiveTab('login');
+        }, 500);
+        break;
+      
+      default: showAlert(`${data.message}`, 'error'); return;
+    }
   };
 
     if(session.status === 'loading')
     return (
-      <>loading</>)
+      <>กำลังโหลด...</>)
 
   return (
     <div className="min-h-screen bg-base-200 flex items-center justify-center p-4 pt-60">
@@ -106,10 +164,10 @@ export default function AuthPage() {
                   <FiMail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-base-content/60" />
                   <input
                     type="text"
-                    name="email"
+                    name="usernameOremail"
                     placeholder="your.email@example.com"
                     className="input input-bordered w-full pl-10 pr-4"
-                    value={loginFormData.email}
+                    value={loginFormData.usernameOremail}
                     onChange={handleLoginChange}
                     required
                   />
@@ -157,19 +215,18 @@ export default function AuthPage() {
                 เข้าสู่ระบบ
               </button>
 
-              <div className="divider text-base-content/70">หรือ</div>
+              {/* <div className="divider text-base-content/70">หรือ</div>
 
-              {/* Social Logins (Optional) */}
               <div className="flex flex-col gap-2">
                 <button type="button" className="btn btn-outline w-full border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white">
-                  {/* <FaFacebook className="w-5 h-5 mr-2" /> */}
+                  <FaFacebook className="w-5 h-5 mr-2" />
                   เข้าสู่ระบบด้วย Facebook
                 </button>
                 <button type="button" className="btn btn-outline w-full border-gray-400 text-gray-700 hover:bg-gray-700 hover:text-white">
-                  {/* <FaGoogle className="w-5 h-5 mr-2" /> */}
+                  <FaGoogle className="w-5 h-5 mr-2" />
                   เข้าสู่ระบบด้วย Google
                 </button>
-              </div>
+              </div> */}
             </form>
           )}
 
@@ -186,10 +243,10 @@ export default function AuthPage() {
                   <FiUser className="absolute left-3 top-1/2 transform -translate-y-1/2 text-base-content/60" />
                   <input
                     type="text"
-                    name="name"
+                    name="username"
                     placeholder="ชื่อของคุณ"
                     className="input input-bordered w-full pl-10 pr-4"
-                    value={registerFormData.name}
+                    value={registerFormData.username}
                     onChange={handleRegisterChange}
                     required
                   />
