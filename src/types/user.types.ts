@@ -8,7 +8,7 @@ export interface UserSchema {
   Full_Name: string;
   Email: string | null;
   Phone: string | null;
-  Access_Level: '0' | '1' | '9'; // Access levels
+  Access_Level: number;
   Token?: string | null;
   Addresses?: AddressSchema[];
 }
@@ -20,7 +20,7 @@ export interface UserAccount {
     Full_Name: string;
     Email: string;
     Phone: string | null;
-    Access_Level: string | null; // Defaults to '0' in DB, but can be provided
+    Access_Level: number;
     Token: string | null;
 }
 
@@ -60,10 +60,7 @@ export interface UserEditForm {
   Full_Name: string;
   Email: string | null;
   Phone: string | null;
-  Access_Level: '0' | '1' | '9';
+  Access_Level: number;
   Token: string | null;
   Addresses: AddressSchema[];
 }
-
-// Access level type
-export type AccessLevel = '0' | '1' | '9';

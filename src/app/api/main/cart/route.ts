@@ -30,7 +30,6 @@ interface CartItem {
 export async function GET(request: Request) {
     // 1. Get the session of the authenticated user
     const session = await getServerSession(authOptions);
-    console.log(session?.user)
 
     // 2. Check if the user is authenticated and get their ID
     if (!session || !session.user || !session.user.id) {

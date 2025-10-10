@@ -10,7 +10,7 @@ declare module "next-auth" {
   interface Session {
     user: {
       id?: string;         // เพิ่ม 'id' (อาจเป็น string หรือ number ขึ้นอยู่กับ ID ผู้ใช้จริง)
-      accessLevel?: string; // เพิ่ม 'accessLevel' (เช่น '0', '1', 'admin')
+      accessLevel?: number; // เพิ่ม 'accessLevel' (เช่น '0', '1', 'admin')
     } & DefaultSession["user"]; // รวม properties เดิมของ DefaultSession.user (name, email, image)
   }
 }
@@ -20,6 +20,6 @@ declare module "next-auth" {
 declare module "next-auth/jwt" {
   interface JWT extends DefaultJWT {
     id?: string;          // เพิ่ม 'id' ลงใน JWT token
-    accessLevel?: string; // เพิ่ม 'accessLevel' ลงใน JWT token
+    accessLevel?: number; // เพิ่ม 'accessLevel' ลงใน JWT token
   }
 }

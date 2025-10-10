@@ -4,7 +4,7 @@ import { getServerSession } from 'next-auth';
 // Adjust path to your NextAuth route if different
 import { authOptions } from './[...nextauth]/route';
 // Adjust path to your types.ts if different
-import { AccessLevel } from '../../../types/types';
+import { z } from "zod";
 
 /**
  * Authenticates the request by checking the user's session.
@@ -18,7 +18,7 @@ export async function authenticateRequest() {
             authenticated: false,
             response: NextResponse.json({ message: 'ไม่ได้รับอนุญาต', error: true }, { status: 401 }),
             userId: null,
-            accessLevel: null as AccessLevel | null,
+            accessLevel: -1,
         };
     }
 
@@ -29,20 +29,26 @@ export async function authenticateRequest() {
             authenticated: false,
             response: NextResponse.json({ message: 'User ID จาก session ไม่ถูกต้อง', error: true }, { status: 500 }),
             userId: null,
-            accessLevel: null as AccessLevel | null,
+            accessLevel: -1,
         };
     }
 
-    const accessLevel = (session.user as any).accessLevel as AccessLevel; // Cast to AccessLevel type
-    if (!accessLevel) {
+    const accessLevel = session.user.accessLevel ?? -1;
+    if (accessLevel < 0) {
         console.error('Access level not found in session:', session.user);
         return {
             authenticated: false,
             response: NextResponse.json({ message: 'ข้อมูลสิทธิ์การเข้าถึงไม่สมบูรณ์', error: true }, { status: 500 }),
             userId: null,
-            accessLevel: null,
+            accessLevel: -1,
         };
     }
 
     return { authenticated: true, userId: authenticatedUserId, accessLevel, response: null };
 }
+
+export const RegisterSchema = z.object({
+    username: z.string().min(3).max(32).regex(/^[a-zA-Z0-9_\.]+$/),
+    email: z.string().email(),
+    password: z.string().min(6).max(128)
+});

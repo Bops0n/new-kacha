@@ -12,7 +12,7 @@ export default function AdminNavbar() {
     
     
     const session = useSession()
-    if (session?.data?.user?.accessLevel == '9')
+    if (session?.data?.user?.accessLevel == 9)
     return (
         <div className="w-full" data-theme="dark">
             {/* Top Bar */}
@@ -135,7 +135,7 @@ export default function AdminNavbar() {
                              <Link href="#" className="px-6 py-4  hover:text-yellow-600 hover:bg-gray-300 transition-colors">
                                 รายงาน
                             </Link>
-                             <Link href="#" className="px-6 py-4  hover:text-yellow-600 hover:bg-gray-300 transition-colors">
+                             <Link href="/admin/sysadmin" className="px-6 py-4  hover:text-yellow-600 hover:bg-gray-300 transition-colors">
                                 ตั้งค่า
                             </Link>
                         </div>
@@ -171,7 +171,7 @@ export default function AdminNavbar() {
                              <Link href="#" className="block px-4 py-3  hover:bg-gray-300 rounded transition-colors">
                                 รายงาน
                             </Link>
-                             <Link href="#" className="block px-4 py-3  hover:bg-gray-300 rounded transition-colors">
+                             <Link href="/admin/sysadmin" className="block px-4 py-3  hover:bg-gray-300 rounded transition-colors">
                                 ตั้งค่า
                             </Link>
                         </div>
