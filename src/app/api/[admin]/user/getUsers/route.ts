@@ -4,29 +4,12 @@ import { authOptions } from '../../../auth/[...nextauth]/route'; // For session 
 import { UserSchema } from '@/types'; // Assuming you have a 'User' type defined
 import { poolQuery } from '../../../lib/db'; // Assuming your poolQuery works correctly
 import { authenticateRequest } from '@/app/api/auth/utils';
-
-const requireAdmin = (auth) => {
-    if (!auth.authenticated) {
-        return auth.response;
-    }
-    if (auth.accessLevel !== '9') {
-        return NextResponse.json({ message: 'Forbidden' }, { status: 403 });
-    }
-    return null;
-};
+import { requireAdmin } from '@/app/utils/client';
 
 export async function GET(req: NextRequest) {
-    // --- Optional: Session Check (Uncomment if you need authentication) ---
-    // const session = await getServerSession(authOptions);
-    // if (!session) {
-    //     // If no session, return unauthorized status
-    //     return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
-    // }
-    // console.log("User session:", session);
-
     const auth = await authenticateRequest();
-    const adminCheck = requireAdmin(auth);
-    if (adminCheck) return adminCheck;
+    const checkAdmin = requireAdmin(auth);
+    if (checkAdmin) return checkAdmin;
     
     // --- Database Query ---
     let usersFromDb: UserSchema[] = []; // Initialize an empty array to hold user data

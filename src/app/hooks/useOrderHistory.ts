@@ -19,14 +19,14 @@ export function useOrderHistory() {
 
   const fetchOrders = useCallback(async () => {
     // Wait until session is loaded
-    if (status === 'loading') {
-      return;
-    }
-    // Redirect if unauthenticated
-    if (status === 'unauthenticated') {
-      router.push('/login');
-      return;
-    }
+    // if (status === 'loading') {
+    //   return;
+    // }
+    // // Redirect if unauthenticated
+    // if (status === 'unauthenticated') {
+    //   router.push('/login');
+    //   return;
+    // }
 
     setLoading(true);
     setError(null);

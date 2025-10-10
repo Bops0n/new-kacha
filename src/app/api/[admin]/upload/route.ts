@@ -1,22 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { authenticateRequest } from '@/app/api/auth/utils';
 import path from 'path';
 import { writeFile, mkdir } from 'fs/promises';
 import { v4 as uuidv4 } from 'uuid';
-
-// Helper function to check for admin access from auth utils
-const requireAdmin = (auth) => {
-    if (!auth.authenticated || auth.accessLevel !== '9') {
-        return NextResponse.json({ message: 'Forbidden' }, { status: 403 });
-    }
-    return null;
-};
+import { requireAdmin } from '@/app/utils/client';
+import { authenticateRequest } from '../../auth/utils';
 
 export async function POST(req: NextRequest) {
-    // 1. ตรวจสอบสิทธิ์ผู้ใช้
     const auth = await authenticateRequest();
-    const adminCheck = requireAdmin(auth);
-    if (adminCheck) return adminCheck;
+    const checkAdmin = requireAdmin(auth);
+    if (checkAdmin) return checkAdmin;
 
     try {
         const formData = await req.formData();

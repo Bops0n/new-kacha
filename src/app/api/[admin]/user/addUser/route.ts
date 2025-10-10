@@ -2,16 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { poolQuery } from '../../../lib/db'; // Your database utility from 'pool-query-function' Canvas
 import { UserAccount } from '@/types';
 import { authenticateRequest } from '@/app/api/auth/utils';
-
-const requireAdmin = (auth) => {
-    if (!auth.authenticated) {
-        return auth.response;
-    }
-    if (auth.accessLevel !== '9') {
-        return NextResponse.json({ message: 'Forbidden' }, { status: 403 });
-    }
-    return null;
-};
+import { requireAdmin } from '@/app/utils/client';
 
 // POST API route to add a new user
 export async function POST(req: NextRequest) {
@@ -19,9 +10,9 @@ export async function POST(req: NextRequest) {
     // Uncomment this section if you want to restrict who can add new user data.
     // For example, only an admin or an authorized system can create new users.
     const auth = await authenticateRequest();
-    const adminCheck = requireAdmin(auth);
-    if (adminCheck) return adminCheck;
-
+    const checkAdmin = requireAdmin(auth);
+    if (checkAdmin) return checkAdmin;
+    
     let newUserData: Omit<UserAccount, 'User_ID' | 'Token'>; // Omit User_ID (auto-generated) and Token (managed internally)
     try {
         newUserData = await req.json();

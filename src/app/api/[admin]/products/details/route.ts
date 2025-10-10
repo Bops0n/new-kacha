@@ -2,13 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { authenticateRequest } from '@/app/api/auth/utils';
 import { poolQuery } from '@/app/api/lib/db';
 import { SimpleProductDetail } from '@/types';
-
-const requireAdmin = (auth) => {
-    if (!auth.authenticated || auth.accessLevel !== '9') {
-        return NextResponse.json({ message: 'Forbidden' }, { status: 403 });
-    }
-    return null;
-};
+import { requireAdmin } from '@/app/utils/client';
 
 /**
  * POST /api/admin/products/details
@@ -16,8 +10,8 @@ const requireAdmin = (auth) => {
  */
 export async function POST(req: NextRequest) {
     const auth = await authenticateRequest();
-    const adminCheck = requireAdmin(auth);
-    if (adminCheck) return adminCheck;
+    const checkAdmin = requireAdmin(auth);
+    if (checkAdmin) return checkAdmin;
 
     try {
         const { productIds } = await req.json();

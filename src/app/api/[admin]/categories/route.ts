@@ -6,6 +6,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { poolQuery } from '../../lib/db'; // Adjust path if needed
 import { authenticateRequest } from '@/app/api/auth/utils';
 import * as categoryService from '@/app/api/services/admin/categoryService';
+import { requireAdmin } from '@/app/utils/client';
 
 // Define interface for Category, matching your assumed database schema for Category
 interface Category {
@@ -13,20 +14,11 @@ interface Category {
     Name: string;
 }
 
-// Helper: ตรวจสอบสิทธิ์ Admin
-const requireAdmin = (auth : { authenticated: boolean; accessLevel: string; }) => {
-    if (!auth.authenticated || auth.accessLevel !== '9') {
-        return NextResponse.json({ message: 'Forbidden' }, { status: 403 });
-    }
-    return null;
-};
 // --- GET All Categories or by ID ---
 export async function GET(req: NextRequest) {
-    // Optional: Authorization check
-    // const session = await getServerSession(authOptions);
-    // if (!session) {
-        //     return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
-        // }
+    const auth = await authenticateRequest();
+    const checkAdmin = requireAdmin(auth);
+    if (checkAdmin) return checkAdmin;
         
     const categoryId = req.nextUrl.searchParams.get('id');
     
@@ -64,8 +56,8 @@ export async function GET(req: NextRequest) {
  */
 export async function POST(req: NextRequest) {
     const auth = await authenticateRequest();
-    const adminCheck = requireAdmin(auth);
-    if (adminCheck) return adminCheck;
+    const checkAdmin = requireAdmin(auth);
+    if (checkAdmin) return checkAdmin;
 
     try {
         const { type, payload } = await req.json();
@@ -82,8 +74,8 @@ export async function POST(req: NextRequest) {
  */
 export async function PATCH(req: NextRequest) {
     const auth = await authenticateRequest();
-    const adminCheck = requireAdmin(auth);
-    if (adminCheck) return adminCheck;
+    const checkAdmin = requireAdmin(auth);
+    if (checkAdmin) return checkAdmin;
 
     try {
         const { type, payload } = await req.json();
@@ -100,8 +92,8 @@ export async function PATCH(req: NextRequest) {
  */
 export async function DELETE(req: NextRequest) {
     const auth = await authenticateRequest();
-    const adminCheck = requireAdmin(auth);
-    if (adminCheck) return adminCheck;
+    const checkAdmin = requireAdmin(auth);
+    if (checkAdmin) return checkAdmin;
 
     try {
         const { searchParams } = new URL(req.url);

@@ -1,21 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth'; // For session handling (optional)
-import { authOptions } from '../../../auth/[...nextauth]/route'; // Updated path
 import { pool, poolQuery } from '../../../lib/db'; // Updated path
 import { AddressSchema } from '@/types';
-import { addNewAddress, deleteAddress } from '@/app/api/services/userServices';
+import { addNewAddress } from '@/app/api/services/userServices';
+import { authenticateRequest } from '@/app/api/auth/utils';
+import { requireAdmin } from '@/app/utils/client';
 
 // POST API route to add a new address
 export async function POST(req: NextRequest) {
-    // --- Optional: Session Check for Authorization ---
-    // Uncomment this section if you want to restrict who can add address data.
-    // For example, only authenticated users can add addresses.
-    // const session = await getServerSession(authOptions);
-    // if (!session) {
-    //     return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
-    // }
-    // console.log("User session:", session);
-
+    const auth = await authenticateRequest();
+    const checkAdmin = requireAdmin(auth);
+    if (checkAdmin) return checkAdmin;
+    
     let newAddressData: Omit<AddressSchema, 'Address_ID'>; // Omit Address_ID as it's auto-generated
     try {
         newAddressData = await req.json();

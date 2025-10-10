@@ -2,16 +2,7 @@ import { poolQuery, pool } from '@/app/api/lib/db';
 import { Order, OrderStatus } from '@/types';
 import { NextResponse } from 'next/server';
 import { authenticateRequest } from '../../auth/utils';
-
-const requireAdmin = (auth) => {
-    if (!auth.authenticated) {
-        return auth.response;
-    }
-    if (auth.accessLevel !== '9') {
-        return NextResponse.json({ message: 'Forbidden' }, { status: 403 });
-    }
-    return null;
-};
+import { requireAdmin } from '@/app/utils/client';
 
 // Helper: แปลงข้อมูลจาก Database Row เป็น Order Object ที่ Frontend ต้องการ
 const mapDbRowsToUiOrder = (dbRows: any[]): Order[] => {
@@ -105,9 +96,9 @@ export async function getOrders(orderId: number | null): Promise<Order[]> {
  */
 export async function updateOrder(payload: Partial<Order>): Promise<Order> {
     const auth = await authenticateRequest();
-    const adminCheck = requireAdmin(auth);
-    if (adminCheck) return adminCheck;
-    
+    const checkAdmin = requireAdmin(auth);
+    if (checkAdmin) return checkAdmin;
+
     const { Order_ID, Status, ...otherFields } = payload;
 
     if (!Order_ID) {

@@ -1,17 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { authenticateRequest } from '@/app/api/auth/utils';
 import * as productService from '@/app/api/services/admin/productsService';
-
-// Helper function to check for admin access
-const requireAdmin = (auth) => {
-    if (!auth.authenticated) {
-        return auth.response;
-    }
-    if (auth.accessLevel !== '9') {
-        return NextResponse.json({ message: 'Forbidden' }, { status: 403 });
-    }
-    return null;
-};
+import { requireAdmin } from '@/app/utils/client';
 
 /**
  * GET /api/admin/products
@@ -19,9 +9,9 @@ const requireAdmin = (auth) => {
  */
 export async function GET(req: NextRequest) {
     const auth = await authenticateRequest();
-    const adminCheck = requireAdmin(auth);
-    if (adminCheck) return adminCheck;
-
+    const checkAdmin = requireAdmin(auth);
+    if (checkAdmin) return checkAdmin;
+    
     try {
         const products = await productService.getAllAdminProducts();
         return NextResponse.json({ products });
@@ -36,9 +26,9 @@ export async function GET(req: NextRequest) {
  */
 export async function POST(req: NextRequest) {
     const auth = await authenticateRequest();
-    const adminCheck = requireAdmin(auth);
-    if (adminCheck) return adminCheck;
-
+    const checkAdmin = requireAdmin(auth);
+    if (checkAdmin) return checkAdmin;
+    
     try {
         const body = await req.json();
         // Basic validation
@@ -58,8 +48,8 @@ export async function POST(req: NextRequest) {
  */
 export async function PATCH(req: NextRequest) {
     const auth = await authenticateRequest();
-    const adminCheck = requireAdmin(auth);
-    if (adminCheck) return adminCheck;
+    const checkAdmin = requireAdmin(auth);
+    if (checkAdmin) return checkAdmin;
 
     try {
         const body = await req.json();
@@ -85,8 +75,8 @@ export async function PATCH(req: NextRequest) {
  */
 export async function DELETE(req: NextRequest) {
     const auth = await authenticateRequest();
-    const adminCheck = requireAdmin(auth);
-    if (adminCheck) return adminCheck;
+    const checkAdmin = requireAdmin(auth);
+    if (checkAdmin) return checkAdmin;
 
     const productId = req.nextUrl.searchParams.get('id');
     if (!productId) {

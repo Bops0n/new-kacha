@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { pool } from '@/app/api/lib/db';
 import { authenticateRequest } from '@/app/api/auth/utils';
+import { requireAdmin } from '@/app/utils/client';
 
 interface AddStockRequestBody {
   productId: number;
@@ -8,12 +9,10 @@ interface AddStockRequestBody {
 }
 
 export async function PATCH(req: NextRequest) {
-    // Optional: Add admin authentication check
-    // const auth = await authenticateRequest();
-    // if (!auth.authenticated || auth.accessLevel !== '1') {
-    //     return NextResponse.json({ message: 'Forbidden' }, { status: 403 });
-    // }
-
+    const auth = await authenticateRequest();
+    const checkAdmin = requireAdmin(auth);
+    if (checkAdmin) return checkAdmin;
+    
     try {
         const { productId, amountToAdd }: AddStockRequestBody = await req.json();
 
