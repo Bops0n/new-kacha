@@ -4,12 +4,12 @@ import { authOptions } from '../../../auth/[...nextauth]/route'; // For session 
 import { UserSchema } from '@/types'; // Assuming you have a 'User' type defined
 import { poolQuery } from '../../../lib/db'; // Assuming your poolQuery works correctly
 import { authenticateRequest } from '@/app/api/auth/utils';
-import { requireAdmin } from '@/app/utils/client';
+import { checkRequire } from '@/app/utils/client';
 
 export async function GET(req: NextRequest) {
     const auth = await authenticateRequest();
-    const checkAdmin = requireAdmin(auth);
-    if (checkAdmin) return checkAdmin;
+    const isCheck = checkRequire(auth);
+    if (isCheck) return isCheck;
     
     // --- Database Query ---
     let usersFromDb: UserSchema[] = []; // Initialize an empty array to hold user data

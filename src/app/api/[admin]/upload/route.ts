@@ -2,13 +2,13 @@ import { NextRequest, NextResponse } from 'next/server';
 import path from 'path';
 import { writeFile, mkdir } from 'fs/promises';
 import { v4 as uuidv4 } from 'uuid';
-import { requireAdmin } from '@/app/utils/client';
+import { checkRequire } from '@/app/utils/client';
 import { authenticateRequest } from '../../auth/utils';
 
 export async function POST(req: NextRequest) {
     const auth = await authenticateRequest();
-    const checkAdmin = requireAdmin(auth);
-    if (checkAdmin) return checkAdmin;
+    const isCheck = checkRequire(auth);
+    if (isCheck) return isCheck;
 
     try {
         const formData = await req.formData();

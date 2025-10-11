@@ -3,13 +3,13 @@ import { pool, poolQuery } from '../../../lib/db'; // Updated path
 import { AddressSchema } from '@/types';
 import { addNewAddress } from '@/app/api/services/userServices';
 import { authenticateRequest } from '@/app/api/auth/utils';
-import { requireAdmin } from '@/app/utils/client';
+import { checkRequire } from '@/app/utils/client';
 
 // POST API route to add a new address
 export async function POST(req: NextRequest) {
     const auth = await authenticateRequest();
-    const checkAdmin = requireAdmin(auth);
-    if (checkAdmin) return checkAdmin;
+    const isCheck = checkRequire(auth);
+    if (isCheck) return isCheck;
     
     let newAddressData: Omit<AddressSchema, 'Address_ID'>; // Omit Address_ID as it's auto-generated
     try {

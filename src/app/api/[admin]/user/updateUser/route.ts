@@ -2,14 +2,14 @@ import { NextRequest, NextResponse } from 'next/server';
 import { poolQuery } from '../../../lib/db';
 import { UserAccount } from '@/types';
 import { authenticateRequest } from '@/app/api/auth/utils';
-import { requireAdmin } from '@/app/utils/client';
+import { checkRequire } from '@/app/utils/client';
 
 export async function PATCH(req: NextRequest) {
     const auth = await authenticateRequest();
-    const checkAdmin = requireAdmin(auth);
-    if (checkAdmin) return checkAdmin;
+    const isCheck = checkRequire(auth);
+    if (isCheck) return isCheck;
     
-    let updatedUserData: Partial<UserSchema>;
+    let updatedUserData: Partial<UserAccount>;
     try {
         updatedUserData = await req.json();
     } catch (error) {

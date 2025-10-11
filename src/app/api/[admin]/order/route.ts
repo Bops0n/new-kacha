@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { authenticateRequest } from '@/app/api/auth/utils';
 import * as orderService from '@/app/api/services/admin/orderService';
 import { Order } from '@/types';
-import { requireAdmin } from '@/app/utils/client';
+import { checkRequire } from '@/app/utils/client';
 
 /**
  * GET: ดึงข้อมูลคำสั่งซื้อทั้งหมด (สำหรับ Admin)
@@ -10,8 +10,8 @@ import { requireAdmin } from '@/app/utils/client';
  */
 export async function GET(req: NextRequest) {
     const auth = await authenticateRequest();
-    const checkAdmin = requireAdmin(auth);
-    if (checkAdmin) return checkAdmin;
+    const isCheck = checkRequire(auth);
+    if (isCheck) return isCheck;
 
     try {
         const orderId = req.nextUrl.searchParams.get('id');
@@ -29,8 +29,8 @@ export async function GET(req: NextRequest) {
  */
 export async function PATCH(req: NextRequest) {
     const auth = await authenticateRequest();
-    const checkAdmin = requireAdmin(auth);
-    if (checkAdmin) return checkAdmin;
+    const isCheck = checkRequire(auth);
+    if (isCheck) return isCheck;
 
     try {
         const payload: Partial<Order> = await req.json();
@@ -48,8 +48,8 @@ export async function PATCH(req: NextRequest) {
  */
 export async function DELETE(req: NextRequest) {
     const auth = await authenticateRequest();
-    const checkAdmin = requireAdmin(auth);
-    if (checkAdmin) return checkAdmin;
+    const isCheck = checkRequire(auth);
+    if (isCheck) return isCheck;
     
     try {
         const orderId = req.nextUrl.searchParams.get('id');

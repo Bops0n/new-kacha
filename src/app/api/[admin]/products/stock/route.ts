@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { pool } from '@/app/api/lib/db';
+import { pool, poolQuery } from '@/app/api/lib/db';
 import { authenticateRequest } from '@/app/api/auth/utils';
-import { requireAdmin } from '@/app/utils/client';
+import { checkRequire } from '@/app/utils/client';
 
 interface AddStockRequestBody {
   productId: number;
@@ -10,8 +10,8 @@ interface AddStockRequestBody {
 
 export async function PATCH(req: NextRequest) {
     const auth = await authenticateRequest();
-    const checkAdmin = requireAdmin(auth);
-    if (checkAdmin) return checkAdmin;
+    const isCheck = checkRequire(auth);
+    if (isCheck) return isCheck;
     
     try {
         const { productId, amountToAdd }: AddStockRequestBody = await req.json();

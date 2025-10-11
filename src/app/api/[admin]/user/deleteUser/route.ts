@@ -3,7 +3,7 @@ import { getServerSession } from 'next-auth'; // For session handling (optional)
 import { authOptions } from '../../../auth/[...nextauth]/route'; // Adjust path based on your project structure
 import { poolQuery } from '../../../lib/db'; // Your database utility
 import { authenticateRequest } from '@/app/api/auth/utils';
-import { requireAdmin } from '@/app/utils/client';
+import { checkRequire } from '@/app/utils/client';
 
 // DELETE API route to delete an existing user by User_ID
 export async function DELETE(req: NextRequest) {
@@ -18,8 +18,8 @@ export async function DELETE(req: NextRequest) {
     // console.log("User session:", session);
 
     const auth = await authenticateRequest();
-    const checkAdmin = requireAdmin(auth);
-    if (checkAdmin) return checkAdmin;
+    const isCheck = checkRequire(auth);
+    if (isCheck) return isCheck;
 
     // --- Get User_ID from query parameters ---
     // Example: /api/user?id=123

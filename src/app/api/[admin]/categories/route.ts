@@ -6,7 +6,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { poolQuery } from '../../lib/db'; // Adjust path if needed
 import { authenticateRequest } from '@/app/api/auth/utils';
 import * as categoryService from '@/app/api/services/admin/categoryService';
-import { requireAdmin } from '@/app/utils/client';
+import { checkRequire } from '@/app/utils/client';
 
 // Define interface for Category, matching your assumed database schema for Category
 interface Category {
@@ -17,8 +17,8 @@ interface Category {
 // --- GET All Categories or by ID ---
 export async function GET(req: NextRequest) {
     const auth = await authenticateRequest();
-    const checkAdmin = requireAdmin(auth);
-    if (checkAdmin) return checkAdmin;
+    const isCheck = checkRequire(auth);
+    if (isCheck) return isCheck;
         
     const categoryId = req.nextUrl.searchParams.get('id');
     
@@ -56,8 +56,8 @@ export async function GET(req: NextRequest) {
  */
 export async function POST(req: NextRequest) {
     const auth = await authenticateRequest();
-    const checkAdmin = requireAdmin(auth);
-    if (checkAdmin) return checkAdmin;
+    const isCheck = checkRequire(auth);
+    if (isCheck) return isCheck;
 
     try {
         const { type, payload } = await req.json();
@@ -74,8 +74,8 @@ export async function POST(req: NextRequest) {
  */
 export async function PATCH(req: NextRequest) {
     const auth = await authenticateRequest();
-    const checkAdmin = requireAdmin(auth);
-    if (checkAdmin) return checkAdmin;
+    const isCheck = checkRequire(auth);
+    if (isCheck) return isCheck;
 
     try {
         const { type, payload } = await req.json();
@@ -92,8 +92,8 @@ export async function PATCH(req: NextRequest) {
  */
 export async function DELETE(req: NextRequest) {
     const auth = await authenticateRequest();
-    const checkAdmin = requireAdmin(auth);
-    if (checkAdmin) return checkAdmin;
+    const isCheck = checkRequire(auth);
+    if (isCheck) return isCheck;
 
     try {
         const { searchParams } = new URL(req.url);

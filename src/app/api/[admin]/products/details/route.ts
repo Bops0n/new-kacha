@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { authenticateRequest } from '@/app/api/auth/utils';
 import { poolQuery } from '@/app/api/lib/db';
 import { SimpleProductDetail } from '@/types';
-import { requireAdmin } from '@/app/utils/client';
+import { checkRequire } from '@/app/utils/client';
 
 /**
  * POST /api/admin/products/details
@@ -10,8 +10,8 @@ import { requireAdmin } from '@/app/utils/client';
  */
 export async function POST(req: NextRequest) {
     const auth = await authenticateRequest();
-    const checkAdmin = requireAdmin(auth);
-    if (checkAdmin) return checkAdmin;
+    const isCheck = checkRequire(auth);
+    if (isCheck) return isCheck;
 
     try {
         const { productIds } = await req.json();
