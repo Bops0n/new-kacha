@@ -16,8 +16,8 @@ const CategoryRow: React.FC<{ item: CategoryDisplayItem; openModal: (item: Categ
         <td>{item.type === 'main' ? 'หมวดหมู่หลัก' : item.type === 'sub' ? 'หมวดหมู่รอง' : 'หมวดหมู่ย่อย'}</td>
         <td>{item.parentName || '-'}</td>
         <td>
-            <button onClick={() => openModal(item, 'edit')} className="btn btn-ghost btn-xs" title="แก้ไข"><FiEdit/></button>
-            <button onClick={() => deleteCategory(item)} className="btn btn-ghost btn-xs text-error" title="ลบ"><FiTrash2/></button>
+            <button onClick={() => openModal(item, 'edit')} className="btn btn-ghost btn-xs" title="แก้ไข"><FiEdit className="w-4 h-4"/></button>
+            <button onClick={() => deleteCategory(item)} className="btn btn-ghost btn-xs text-error" title="ลบ"><FiTrash2 className="w-4 h-4"/></button>
         </td>
     </tr>
 );
@@ -29,8 +29,8 @@ const CategoryCard: React.FC<{ item: CategoryDisplayItem; openModal: (item: Cate
             <p className="text-sm">ID: {item.id} | ระดับ: {item.type === 'main' ? 'หลัก' : item.type === 'sub' ? 'รอง' : 'ย่อย'}</p>
             <p className="text-sm text-base-content/70">อยู่ภายใต้: {item.parentName || '-'}</p>
             <div className="card-actions justify-end">
-                <button onClick={() => openModal(item, 'edit')} className="btn btn-ghost btn-xs"><FiEdit/> แก้ไข</button>
-                <button onClick={() => deleteCategory(item)} className="btn btn-ghost btn-xs text-error"><FiTrash2/> ลบ</button>
+                <button onClick={() => openModal(item, 'edit')} className="btn btn-ghost btn-xs"><FiEdit className="w-4 h-4"/> แก้ไข</button>
+                <button onClick={() => deleteCategory(item)} className="btn btn-ghost btn-xs text-error"><FiTrash2 className="w-4 h-4"/> ลบ</button>
             </div>
         </div>
     </div>
