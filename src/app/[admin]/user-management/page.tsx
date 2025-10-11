@@ -13,25 +13,31 @@ import UserModal from './modal/UserModal'; // <-- นำเข้า UserModal
 import AddressModal from './modal/AddressModal'; // <-- นำเข้า AddressModal
 import { useAlert } from '@/app/context/AlertModalContext';
 import Pagination from '@/app/components/Pagination';
+import { Role } from '@/types/role.types';
 import { AddressSchema, NewAddressForm, UserAccount, UserEditForm, UserSchema } from '@/types';
 import LoadingSpinner from '@/app/components/LoadingSpinner';
 
 // Helper function to map access level char to readable string
-const getAccessLevelLabel = (level: AccessLevel): string => {
-  switch (level) {
-    case '9': return 'Admin';
-    case '1': return 'User';
-    case '0': return 'Guest';
-    default: return 'Unknown';
+
+const getAccessLevel = (roles: Role[], level: number): Role | undefined => {
+  return roles.find(x => x.Role == level);
+};
+
+const getAccessLevelLabel = (roles: Role[], level: number): string => {
+  const role = getAccessLevel(roles, level);
+  if (role) {
+    return role.Name;
+  } else {
+    return "ไม่ระบุ";
   }
 };
 
 export default function UserManagement() {
   const { showAlert } = useAlert()
 
-  const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [users, setUsers] = useState<UserAccount[]>([]);
+  const [roles, setRoles] = useState<Role[]>([]);
   const [filteredUsers, setFilteredUsers] = useState<UserAccount[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [accessLevelFilter, setAccessLevelFilter] = useState<number | 'all'>('all');
@@ -86,7 +92,16 @@ export default function UserManagement() {
             setLoading(false);
         }
     }
-    callData()
+
+    async function apiGetRoles() {
+      const result = await fetch("/api/master/role", { 
+          cache: "no-store" 
+      });
+      const response = await result.json();
+      setRoles(response.roles);
+    }
+
+    apiGetRoles();
     apiGetUsers();
   },[])
 
@@ -191,7 +206,7 @@ export default function UserManagement() {
       // showAlert('กรุณากำหนดรหัสผ่านสำหรับผู้ใช้ใหม่');
       return;
     }
-
+    
     let newID : number = 0;
     if (selectedUser) {
       try {
@@ -464,9 +479,9 @@ export default function UserManagement() {
                 onChange={(e) => setAccessLevelFilter(e.target.value as number | 'all')}
               >
                 <option value="all">ระดับการเข้าถึงทั้งหมด</option>
-                <option value="9">Admin</option>
-                <option value="1">User</option>
-                <option value="0">Guest</option>
+                {roles.map((r : Role) => (
+                  <option key={r.Role} value={r.Role}>{r.Name}</option>
+                ))}
               </select>
             </div>
             <div className="md:w-40">
@@ -505,9 +520,9 @@ export default function UserManagement() {
                   <UserRow
                     key={user.User_ID}
                     user={user}
-                    getAccessLevelLabel={getAccessLevelLabel}
                     openUserModal={openUserModal}
                     deleteUser={deleteUser}
+                    role={getAccessLevel(roles, user.Access_Level)}
                   />
                 ))}
               </tbody>
@@ -523,7 +538,7 @@ export default function UserManagement() {
                 <UserCard
                   key={user.User_ID}
                   user={user}
-                  getAccessLevelLabel={getAccessLevelLabel}
+                  role={getAccessLevel(roles, user.Access_Level)}
                   openUserModal={openUserModal}
                 />
               ))}
@@ -598,6 +613,7 @@ export default function UserManagement() {
           handleEditAddressClick={handleEditAddressClick}
           deleteAddress={deleteAddress}
           setShowAddAddressModal={setShowAddAddressModal}
+          roles={roles}
         />
 
         {/* Render AddressModal */}

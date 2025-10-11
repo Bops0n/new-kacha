@@ -14,6 +14,7 @@ import {
   FiSave,
   FiPlus
 } from 'react-icons/fi';
+import { Role } from '@/types/role.types';
 import { AddressSchema, UserEditForm, UserSchema } from '@/types';
 
 // กำหนด Props สำหรับ UserModal
@@ -33,6 +34,7 @@ interface UserModalProps {
   deleteAddress: (addressId: number, userId: number) => void;
   // Props ที่เกี่ยวข้องกับ AddressModal ที่ถูกเปิดจาก UserModal
   setShowAddAddressModal: (show: boolean) => void;
+  roles: Role[];
 }
 
 const UserModal: React.FC<UserModalProps> = ({
@@ -50,6 +52,7 @@ const UserModal: React.FC<UserModalProps> = ({
   handleEditAddressClick,
   deleteAddress,
   setShowAddAddressModal,
+  roles
 }) => {
   if (!showModal) return null;
 
@@ -113,9 +116,9 @@ const UserModal: React.FC<UserModalProps> = ({
                   <div className="form-control mb-2">
                     <label className="label"><span className="label-text">ระดับการเข้าถึง</span></label>
                     <select name="Access_Level" className="select select-bordered w-full" value={editFormData.Access_Level} onChange={handleUserFormChange}>
-                      <option value="0">Guest</option>
-                      <option value="1">User</option>
-                      <option value="9">Admin</option>
+                      {roles.map((r : Role) => (
+                        <option key={r.Role} value={r.Role}>{r.Name}</option>
+                      ))}
                     </select>
                   </div>
                 </>
@@ -127,7 +130,7 @@ const UserModal: React.FC<UserModalProps> = ({
                     <p><strong>ชื่อเต็ม:</strong> {selectedUser.Full_Name}</p><br/>
                     <p><strong>อีเมล:</strong> {selectedUser.Email || '-'}</p><br/>
                     <p><strong>เบอร์โทร:</strong> {selectedUser.Phone || '-'}</p><br/>
-                    <p><strong>ระดับการเข้าถึง:</strong> {getAccessLevelLabel(selectedUser.Access_Level)}</p>
+                    <p><strong>ระดับการเข้าถึง:</strong> {getAccessLevelLabel(roles, selectedUser.Access_Level)}</p>
                   </>
                 )
               )}

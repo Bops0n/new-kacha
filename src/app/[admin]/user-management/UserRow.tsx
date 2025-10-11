@@ -1,17 +1,18 @@
 import React from 'react';
 import { FiEdit, FiTrash2 } from 'react-icons/fi'; // Removed FiEye
+import { Role } from '@/types/role.types';
 import { UserAccount } from '@/types';
 
 interface UserRowProps {
-  getAccessLevelLabel: (level: AccessLevel) => string;
   user: UserAccount;
+  role: Role | undefined;
   openUserModal: (user: UserAccount) => void; // Changed from viewUserDetails
   deleteUser: (userId: number) => void;
 }
 
 const UserRow: React.FC<UserRowProps> = ({
   user,
-  getAccessLevelLabel,
+  role,
   openUserModal, // Renamed prop
   deleteUser,
 }) => {
@@ -24,8 +25,19 @@ const UserRow: React.FC<UserRowProps> = ({
       <td>{user.Email || '-'}</td>
       <td>{user.Phone || '-'}</td>
       <td>
-        <span className={`badge ${user.Access_Level === '9' ? 'badge-info' : user.Access_Level === '1' ? 'badge-primary' : 'badge-neutral'}`}>
-          {getAccessLevelLabel(user.Access_Level)}
+        <span className={`badge ${(
+          !role ? 'badge-error' : 
+          role.Sys_Admin ? 'badge-primary' : 
+          role.User_Mgr ? 'badge-secondary' : 
+          role.Stock_Mgr ? 'badge-accent' : 
+          role.Order_Mgr ? 'badge-info' : 
+          role.Report ? 'badge-success' : 
+          role.Dashboard ? 'badge-warning' : 
+          'badge-neutral'
+          )}`}>
+          {(
+            !role ? 'ไม่ระบุ' : role.Name
+            )}
         </span>
       </td>
       <td>

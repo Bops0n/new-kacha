@@ -1,16 +1,17 @@
 import React from 'react';
 import { FiUser, FiMail, FiPhone, FiKey, FiEdit } from 'react-icons/fi'; // Removed FiEye, added FiEdit
+import { Role } from '@/types/role.types';
 import { UserAccount } from '@/types';
 
 interface UserCardProps {
-  getAccessLevelLabel: (level: AccessLevel) => string;
   user: UserAccount;
+  role: Role | undefined;
   openUserModal: (user: UserAccount) => void; // Changed from viewUserDetails
 }
 
 const UserCard: React.FC<UserCardProps> = ({
   user,
-  getAccessLevelLabel,
+  role,
   openUserModal, // Renamed prop
 }) => {
   return (
@@ -31,8 +32,19 @@ const UserCard: React.FC<UserCardProps> = ({
         </p>
         <p className="text-sm flex items-center gap-1">
           <FiKey className="w-3 h-3" /> <strong>ระดับ:</strong>{' '}
-          <span className={`badge ${user.Access_Level === '9' ? 'badge-info' : user.Access_Level === '1' ? 'badge-primary' : 'badge-neutral'} ml-1`}>
-            {getAccessLevelLabel(user.Access_Level)}
+          <span className={`badge ${(
+            !role ? 'badge-error' : 
+            role.Sys_Admin ? 'badge-primary' : 
+            role.User_Mgr ? 'badge-secondary' : 
+            role.Stock_Mgr ? 'badge-accent' : 
+            role.Order_Mgr ? 'badge-info' : 
+            role.Report ? 'badge-success' : 
+            role.Dashboard ? 'badge-warning' : 
+            'badge-neutral'
+            )} ml-1`}>
+            {(
+            !role ? 'ไม่ระบุ' : role.Name
+            )}
           </span>
         </p>
         <div className="card-actions justify-end mt-4">
