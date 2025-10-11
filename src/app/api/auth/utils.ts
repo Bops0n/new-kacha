@@ -16,7 +16,7 @@ export async function authenticateRequest() {
     if (!session || !session.user || !session.user.id) {
         return {
             authenticated: false,
-            response: NextResponse.json({ message: 'ไม่ได้รับอนุญาต', error: true }, { status: 401 }),
+            response: NextResponse.json({ message: 'การเข้าถึงถูกปฏิเสธ!', error: true }, { status: 401 }),
             userId: null,
             accessLevel: -1,
         };
@@ -27,7 +27,7 @@ export async function authenticateRequest() {
         console.error('Session user ID is not a valid number:', session.user.id);
         return {
             authenticated: false,
-            response: NextResponse.json({ message: 'User ID จาก session ไม่ถูกต้อง', error: true }, { status: 500 }),
+            response: NextResponse.json({ message: 'ข้อมูลบัญชีผู้ใช้ไม่ถูกต้อง!', error: true }, { status: 500 }),
             userId: null,
             accessLevel: -1,
         };
@@ -38,7 +38,7 @@ export async function authenticateRequest() {
         console.error('Access level not found in session:', session.user);
         return {
             authenticated: false,
-            response: NextResponse.json({ message: 'ข้อมูลสิทธิ์การเข้าถึงไม่สมบูรณ์', error: true }, { status: 500 }),
+            response: NextResponse.json({ message: 'ข้อมูลสิทธิ์การเข้าถึงไม่ถูกต้อง!', error: true }, { status: 500 }),
             userId: null,
             accessLevel: -1,
         };
