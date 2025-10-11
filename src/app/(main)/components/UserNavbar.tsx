@@ -60,6 +60,7 @@ const CategoryMenuItems = ({ categories, subCategories, childSubCategories, clos
 
 export default function UserNavbar() {
     const { data: session, status } = useSession();
+
     const router = useRouter();
     const { count: cartItemCount, setCounter } = useCounter();
     // << 2. เรียกใช้ useCategoryData แทน useNavigation
@@ -90,7 +91,7 @@ export default function UserNavbar() {
     }, [status, setCounter]);
 
     const handleLogout = () => {
-      signOut({ callbackUrl: '/' });
+      signOut({ callbackUrl: "/" });
     };
 
     const handleSearch = (e: React.FormEvent) => {
@@ -165,7 +166,7 @@ export default function UserNavbar() {
                             <li><Link href="#">โปรโมชั่น</Link></li>
                             <li><Link href="#">ข่าวสาร</Link></li>
                         </ul>
-                        {session?.user?.accessLevel === 9 && (<div className="hidden lg:block ml-auto px-4"><Link href="/admin/dashboard" className="btn btn-warning btn-sm">จัดการระบบ</Link></div>)}
+                        {(session?.user?.accessLevel !== 0 && session?.user.accessLevel !== undefined) && (<div className="hidden lg:block ml-auto px-4"><Link href="/admin/dashboard" className="btn btn-warning btn-sm">จัดการระบบ</Link></div>)}
                         
                         {/* Mobile Menu */}
                         <ul className="menu lg:hidden px-4 py-2">
@@ -174,7 +175,7 @@ export default function UserNavbar() {
                             <li><Link href="/products?discount=true" onClick={closeMobileMenu}>สินค้าลดราคา</Link></li>
                             <li><Link href="#" onClick={closeMobileMenu}>โปรโมชั่น</Link></li>
                             <li><Link href="#" onClick={closeMobileMenu}>ข่าวสาร</Link></li>
-                            {session?.user?.accessLevel === 9 && <li className="mt-2"><Link href="/dashboard" className="btn btn-warning btn-sm w-full" onClick={closeMobileMenu}>จัดการระบบ</Link></li>}
+                            {(session?.user?.accessLevel !== 0 && session?.user.accessLevel !== undefined) && <li className="mt-2"><Link href="/admin/dashboard" className="btn btn-warning btn-sm w-full" onClick={closeMobileMenu}>จัดการระบบ</Link></li>}
                         </ul>
                     </div>
                 </nav>
