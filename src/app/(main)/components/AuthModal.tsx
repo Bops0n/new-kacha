@@ -20,7 +20,7 @@ export default function AuthModal({ isOpen, onClose, initialTab = 'login' }: Aut
 
     const searchParams = useSearchParams();
     const router = useRouter();
-    const callbackUrl = searchParams.get("callbackUrl") ?? "/app";
+    const callbackUrl = searchParams.get("callbackUrl") ?? "";
 
   const [activeTab, setActiveTab] = useState<'login' | 'register'>(initialTab);
 

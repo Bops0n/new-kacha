@@ -15,7 +15,7 @@ export default function AuthPage() {
 
   const searchParams = useSearchParams();
   const router = useRouter();
-  const callbackUrl = searchParams.get("callbackUrl") ?? "/app";
+  const callbackUrl = searchParams.get("callbackUrl") ?? "";
   
   // useEffect(()=>{
   //   if (session.status === 'authenticated')
