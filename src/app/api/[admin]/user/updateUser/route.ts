@@ -3,6 +3,7 @@ import { poolQuery } from '../../../lib/db';
 import { UserAccount } from '@/types';
 import { authenticateRequest } from '@/app/api/auth/utils';
 import { checkRequire } from '@/app/utils/client';
+import { hmacMd5Hex } from '@/app/utils/cryptor';
 
 export async function PATCH(req: NextRequest) {
     const auth = await authenticateRequest();
@@ -28,6 +29,10 @@ export async function PATCH(req: NextRequest) {
     }
 
     const userIdToUpdate = updatedUserData.User_ID;
+
+    if (updatedUserData.Password) {
+        updatedUserData.Password = hmacMd5Hex(updatedUserData.Password, process.env.SALT_SECRET);
+    }
 
     try {
         delete updatedUserData.Addresses;

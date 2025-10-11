@@ -13,8 +13,8 @@ export function md5Salt(password: string, salt: string, order: "pre" | "post" = 
   return createHash("md5").update(data).digest("hex");
 }
 
-export function hmacMd5Hex(message: string | Buffer, key: string | Buffer): string {
-  return createHmac("md5", key).update(message).digest("hex");
+export function hmacMd5Hex(message: string | Buffer, key: string | Buffer | undefined): string {
+  return createHmac("md5", key ? key : '').update(message).digest("hex");
 }
 
 export function createSaltedMd5(password: string) {
