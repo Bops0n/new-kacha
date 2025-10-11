@@ -23,24 +23,19 @@ export async function PATCH(req: NextRequest) {
             return NextResponse.json({ message: 'Amount to add must be a positive number.' }, { status: 400 });
         }
 
-        const client = await pool.connect();
-        try {
-            const result = await client.query(
-                'UPDATE "Product" SET "Quantity" = "Quantity" + $1 WHERE "Product_ID" = $2 RETURNING "Product_ID", "Name", "Quantity"',
-                [amountToAdd, productId]
-            );
+        const { rows, rowCount } = await poolQuery(
+            'UPDATE "Product" SET "Quantity" = "Quantity" + $1 WHERE "Product_ID" = $2 RETURNING "Product_ID", "Name", "Quantity"',
+            [amountToAdd, productId]
+        );
 
-            if (result.rowCount === 0) {
-                return NextResponse.json({ message: `Product with ID ${productId} not found.` }, { status: 404 });
-            }
-
-            return NextResponse.json({ 
-                message: `Successfully added ${amountToAdd} to stock for product ${result.rows[0].Name}.`,
-                product: result.rows[0] 
-            });
-        } finally {
-            client.release();
+        if (rowCount === 0) {
+            return NextResponse.json({ message: `Product with ID ${productId} not found.` }, { status: 404 });
         }
+
+        return NextResponse.json({ 
+            message: `Successfully added ${amountToAdd} to stock for product ${rows[0].Name}.`,
+            product: rows[0] 
+        });
     } catch (error) {
         console.error('API Error adding stock:', error);
         const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred.';

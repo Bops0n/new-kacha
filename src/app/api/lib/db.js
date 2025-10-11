@@ -23,8 +23,15 @@ module.exports = {
     poolQuery : async (queryString, params) => {
         const client = await pool.connect();
         try {
+            await client.query('BEGIN');
+
             const res = await client.query(queryString, params);
+
+            await client.query('COMMIT');
+
             return res;
+        } catch {
+            await client.query('ROLLBACK');
         } finally {
             client.release();
         }

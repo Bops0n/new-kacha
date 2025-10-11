@@ -38,36 +38,16 @@ export async function PATCH(req: NextRequest) {
     const addressIdToUpdate = updatedAddressData.Address_ID;
     const userIdToUpdate = updatedAddressData.User_ID;
 
-    // Start a database transaction for atomicity
-    const client = await pool.connect(); // Get a client directly from the pool
-    try {
-        await client.query('BEGIN'); // Start transaction
+    const result = await updateAddress(addressIdToUpdate, Number(userIdToUpdate), updatedAddressData);
 
-        const result = await updateAddress(addressIdToUpdate, Number(userIdToUpdate), updatedAddressData);
-
-        if (!result) {
-            await client.query('ROLLBACK'); // Rollback if the main update affects no rows
-            return NextResponse.json(
-                { message: `Address with ID ${addressIdToUpdate} update failed.` },
-                { status: 500 }
-            );
-        }
-
-        await client.query('COMMIT'); // Commit transaction if all operations are successful
-
+    if (!result) {
         return NextResponse.json(
-            { message: `Address ID ${addressIdToUpdate} updated successfully.`, status: 200 }
-        );
-
-    } catch (dbError: any) {
-        await client.query('ROLLBACK'); // Rollback transaction on any error
-        console.error("Error updating address in database:", dbError);
-        // You might add more specific error handling here, e.g., foreign key violations
-        return NextResponse.json(
-            { message: "Failed to update address.", error: dbError.message },
+            { message: `Address with ID ${addressIdToUpdate} update failed.` },
             { status: 500 }
         );
-    } finally {
-        client.release(); // Release the client back to the pool
     }
+    
+    return NextResponse.json(
+        { message: `Address ID ${addressIdToUpdate} updated successfully.`, status: 200 }
+    );
 }

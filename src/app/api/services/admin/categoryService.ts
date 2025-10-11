@@ -7,29 +7,24 @@ import { pool, poolQuery } from '@/app/api/lib/db'; // Import pool for transacti
  * @returns ข้อมูลหมวดหมู่ที่ถูกสร้างขึ้นใหม่
  */
 export async function addCategory(type: 'main' | 'sub' | 'child', payload: { name: string; parentId?: number }) {
-    const client = await pool.connect();
-    try {
-        let result;
+    let result;
         switch (type) {
             case 'main':
                 if (!payload.name) throw new Error('Category name is required.');
-                result = await client.query('INSERT INTO "Category" ("Name") VALUES ($1) RETURNING *', [payload.name]);
+                result = await poolQuery('INSERT INTO "Category" ("Name") VALUES ($1) RETURNING *', [payload.name]);
                 break;
             case 'sub':
                 if (!payload.name || !payload.parentId) throw new Error('Name and parentId are required for sub-category.');
-                result = await client.query('INSERT INTO "Sub_Category" ("Name", "Category_ID") VALUES ($1, $2) RETURNING *', [payload.name, payload.parentId]);
+                result = await poolQuery('INSERT INTO "Sub_Category" ("Name", "Category_ID") VALUES ($1, $2) RETURNING *', [payload.name, payload.parentId]);
                 break;
             case 'child':
                 if (!payload.name || !payload.parentId) throw new Error('Name and parentId are required for child-category.');
-                result = await client.query('INSERT INTO "Child_Sub_Category" ("Name", "Sub_Category_ID") VALUES ($1, $2) RETURNING *', [payload.name, payload.parentId]);
+                result = await poolQuery('INSERT INTO "Child_Sub_Category" ("Name", "Sub_Category_ID") VALUES ($1, $2) RETURNING *', [payload.name, payload.parentId]);
                 break;
             default:
                 throw new Error('Invalid category type for ADD action.');
         }
         return result.rows[0];
-    } finally {
-        client.release();
-    }
 }
 
 /**
@@ -39,29 +34,24 @@ export async function addCategory(type: 'main' | 'sub' | 'child', payload: { nam
  * @returns ข้อมูลหมวดหมู่ที่ถูกอัปเดต
  */
 export async function updateCategory(type: 'main' | 'sub' | 'child', payload: { id: number; name: string }) {
-    const client = await pool.connect();
-    try {
-        let result;
+    let result;
         if (!payload.id || !payload.name) throw new Error('ID and name are required for update.');
 
         switch (type) {
             case 'main':
-                result = await client.query('UPDATE "Category" SET "Name" = $1 WHERE "Category_ID" = $2 RETURNING *', [payload.name, payload.id]);
+                result = await poolQuery('UPDATE "Category" SET "Name" = $1 WHERE "Category_ID" = $2 RETURNING *', [payload.name, payload.id]);
                 break;
             case 'sub':
-                result = await client.query('UPDATE "Sub_Category" SET "Name" = $1 WHERE "Sub_Category_ID" = $2 RETURNING *', [payload.name, payload.id]);
+                result = await poolQuery('UPDATE "Sub_Category" SET "Name" = $1 WHERE "Sub_Category_ID" = $2 RETURNING *', [payload.name, payload.id]);
                 break;
             case 'child':
-                result = await client.query('UPDATE "Child_Sub_Category" SET "Name" = $1 WHERE "Child_ID" = $2 RETURNING *', [payload.name, payload.id]);
+                result = await poolQuery('UPDATE "Child_Sub_Category" SET "Name" = $1 WHERE "Child_ID" = $2 RETURNING *', [payload.name, payload.id]);
                 break;
             default:
                 throw new Error('Invalid category type for UPDATE action.');
         }
         if (result.rowCount === 0) throw new Error('Category not found for update.');
         return result.rows[0];
-    } finally {
-        client.release();
-    }
 }
 
 /**

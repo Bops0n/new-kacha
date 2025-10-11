@@ -33,32 +33,14 @@ export async function POST(req: NextRequest) {
 
     const { username, email, password } : any = parsed.data;
 
-    const client = await pool.connect();
+    const { rows } = await poolQuery(`SELECT * FROM "SP_AUTH_REGISTER"($1, $2, $3)`, 
+        [username, email, hmacMd5Hex(password, process.env.SALT_SECRET)]);
 
-    try {
-        await client.query('BEGIN');
+    const row = rows[0];
+    if (!row) throw new Error("No response from authentication function");
 
-        const { rows } = await poolQuery(`SELECT * FROM "SP_AUTH_REGISTER"($1, $2, $3)`, [
-            username, email, hmacMd5Hex(password, process.env.SALT_SECRET)
-        ]);
-
-        await client.query('COMMIT');
-
-        const row = rows[0];
-        if (!row) throw new Error("No response from authentication function");
-
-        return NextResponse.json(
-            { status: row.Status_Code, message: `${row.Message}` },
-            { status: row.Status_Code }
-        );
-    } catch (dbError: any) {
-        await client.query('ROLLBACK');
-        console.error("Register error:", dbError);
-        return NextResponse.json(
-            { status: 500, message: dbError.message || "Internal Server Error" },
-            { status: 500 }
-        )
-    } finally {
-        client.release();
-    }
+    return NextResponse.json(
+        { status: row.Status_Code, message: `${row.Message}` },
+        { status: row.Status_Code }
+    );
 }

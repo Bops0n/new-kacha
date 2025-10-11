@@ -1,37 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
-import { poolQuery, pool } from '@/app/api/lib/db';
 import { AddressSchema } from '@/types'; // Corrected import path and type name
-import { deleteAddress, getAddressesByAddressId, updateAddress } from '@/app/api/services/userServices';
-
-/**
- * Helper function to authenticate the request and get the user ID.
- * All API handlers will use this.
- */
-async function authenticateRequest() {
-  const session = await getServerSession(authOptions);
-
-  if (!session || !session.user || !session.user.id) {
-    return {
-      authenticated: false,
-      response: NextResponse.json({ message: 'ไม่ได้รับอนุญาต', error: true }, { status: 401 }),
-      userId: null,
-    };
-  }
-
-  const authenticatedUserId = parseInt(session.user.id as string);
-  if (isNaN(authenticatedUserId)) {
-    console.error('Session user ID is not a valid number:', session.user.id);
-    return {
-      authenticated: false,
-      response: NextResponse.json({ message: 'User ID จาก session ไม่ถูกต้อง', error: true }, { status: 500 }),
-      userId: null,
-    };
-  }
-
-  return { authenticated: true, userId: authenticatedUserId, response: null };
-}
+import { deleteAddress, updateAddress } from '@/app/api/services/userServices';
+import { authenticateRequest } from '@/app/api/auth/utils';
 
 /**
  * PUT /api/address/[addressId]
@@ -67,29 +37,13 @@ export async function PUT(request: NextRequest, context: { params: { addressId: 
     );
   }
 
-  const client = await pool.connect();
-  try {
-    await client.query('BEGIN');
+  const result = await updateAddress(parseId, userId, updatedAddressData);
 
-    const result = await updateAddress(parseId, userId, updatedAddressData);
-
-    if (!result) {
-      await client.query('ROLLBACK');
-      return NextResponse.json(
-        { message: 'Address not found or does not belong to the authenticated user', error: true },
-        { status: 404 }
-      );
-    }
-
-    await client.query('COMMIT');
-    return NextResponse.json({ message: 'Address updated successfully', error: false }, { status: 200 });
-
-  } catch (error: any) {
-    await client.query('ROLLBACK');
-    console.error('Error updating address:', error);
-    return NextResponse.json({ message: 'Failed to update address', error: true }, { status: 500 });
-  } finally {
-    client.release();
+  if (!result) {
+    return NextResponse.json(
+      { message: 'Address not found or does not belong to the authenticated user', error: true },
+      { status: 404 }
+    );
   }
 }
 
@@ -159,29 +113,12 @@ export async function PATCH(request: NextRequest, context: { params: { addressId
     );
   }
 
-  const client = await pool.connect();
-  try {
-    await client.query('BEGIN');
+  const result = await updateAddress(parseId, userId, updatedAddressData);
 
-    // Update the specific address
-    const result = await updateAddress(parseId, userId, updatedAddressData);
-
-    if (!result) {
-      await client.query('ROLLBACK');
-      return NextResponse.json(
-        { message: 'Address not found or does not belong to the authenticated user', error: true },
-        { status: 404 }
-      );
-    }
-
-    await client.query('COMMIT');
-    return NextResponse.json({ message: 'Address partially updated successfully', error: false }, { status: 200 });
-
-  } catch (error: any) {
-    await client.query('ROLLBACK');
-    console.error('Error partially updating address:', error);
-    return NextResponse.json({ message: 'Failed to partially update address', error: true }, { status: 500 });
-  } finally {
-    client.release();
+  if (!result) {
+    return NextResponse.json(
+      { message: 'Address not found or does not belong to the authenticated user', error: true },
+      { status: 404 }
+    );
   }
 }

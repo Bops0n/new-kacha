@@ -2,7 +2,7 @@ import { poolQuery, pool } from '@/app/api/lib/db';
 import { Order, OrderStatus } from '@/types';
 import { NextResponse } from 'next/server';
 import { authenticateRequest } from '../../auth/utils';
-import { requireAdmin } from '@/app/utils/client';
+import { checkRequire } from '@/app/utils/client';
 
 // Helper: แปลงข้อมูลจาก Database Row เป็น Order Object ที่ Frontend ต้องการ
 const mapDbRowsToUiOrder = (dbRows: any[]): Order[] => {
@@ -96,8 +96,8 @@ export async function getOrders(orderId: number | null): Promise<Order[]> {
  */
 export async function updateOrder(payload: Partial<Order>): Promise<Order> {
     const auth = await authenticateRequest();
-    const checkAdmin = requireAdmin(auth);
-    if (checkAdmin) return checkAdmin;
+    const isCheck = checkRequire(auth);
+    if (isCheck) return isCheck;
 
     const { Order_ID, Status, ...otherFields } = payload;
 
@@ -105,36 +105,18 @@ export async function updateOrder(payload: Partial<Order>): Promise<Order> {
         throw new Error("Order_ID is required for an update.");
     }
 
-    const client = await pool.connect();
-    try {
-        await client.query('BEGIN');
+    const fieldsToUpdate: { [key: string]: any } = {};
+    if (Status) fieldsToUpdate.Status = Status;
+    Object.assign(fieldsToUpdate, otherFields);
 
-        // We create a new object to avoid mutating the original payload
-        const fieldsToUpdate: { [key: string]: any } = {};
-        if (Status) fieldsToUpdate.Status = Status;
-        Object.assign(fieldsToUpdate, otherFields);
+    const orderUpdateResult = await poolQuery(`SELECT * FROM "SP_ADMIN_ORDER_UPD"($1, $2, $3)`, 
+        [Order_ID, JSON.stringify(fieldsToUpdate), auth.userId]);
 
-        const orderUpdateResult = await client.query(`SELECT * FROM "SP_ADMIN_ORDER_UPD"($1, $2, $3)`, 
-            [Order_ID, JSON.stringify(fieldsToUpdate), auth.userId]);
-
-        if (orderUpdateResult.rowCount === 0) {
-            throw new Error(`Order with ID ${Order_ID} not found.`);
-        }
-
-        await client.query('COMMIT');
-        return orderUpdateResult.rows[0];
-
-    } catch (error) {
-        await client.query('ROLLBACK');
-        console.error(`Failed to update order ${Order_ID}:`, error);
-        // Re-throw a more specific error to be caught by the API route
-        if (error instanceof Error) {
-            throw new Error(`Database error while updating order: ${error.message}`);
-        }
-        throw new Error('An unknown error occurred during order update.');
-    } finally {
-        client.release();
+    if (orderUpdateResult.rowCount === 0) {
+        throw new Error(`Order with ID ${Order_ID} not found.`);
     }
+    
+    return orderUpdateResult.rows[0];
 }
 
 
@@ -143,27 +125,9 @@ export async function updateOrder(payload: Partial<Order>): Promise<Order> {
  * @param orderId ID ของคำสั่งซื้อที่ต้องการลบ
  */
 export async function deleteOrder(orderId: number, UserID: number): Promise<void> {
-    const client = await pool.connect();
-    try {
-        await client.query('BEGIN');
-
-        const result = await client.query(`SELECT * FROM "SP_ADMIN_ORDER_DEL"($1, $2)`, orderId, UserID);
+    const result = await poolQuery(`SELECT * FROM "SP_ADMIN_ORDER_DEL"($1, $2)`, [orderId, UserID]);
         
-        if (result.rowCount === 0) {
-            throw new Error(`Order with ID ${orderId} not found.`);
-        }
-        
-        await client.query('COMMIT');
-
-    } catch (error) {
-        await client.query('ROLLBACK');
-        // Log and re-throw the error to be handled by the calling API route
-        console.error(`Failed to delete order ${orderId}:`, error);
-        if (error instanceof Error) {
-            throw new Error(`Database error while deleting order: ${error.message}`);
-        }
-        throw new Error('An unknown error occurred during order deletion.');
-    } finally {
-        client.release();
+    if (result.rowCount === 0) {
+        throw new Error(`Order with ID ${orderId} not found.`);
     }
 }
