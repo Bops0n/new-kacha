@@ -1,21 +1,32 @@
+'use server'
 import { getServerSession } from "next-auth";
-import AdminNavbar from "./components/AdminNavbar";
 import { authOptions } from "../api/auth/[...nextauth]/route";
+import AdminNavbar from "./components/AdminNavbar";
 import { redirect } from "next/navigation";
 
-export default async function RootLayout({
+export default async function AdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   const session = await getServerSession(authOptions);
+
+  if (!session) {
+    redirect("/api/auth/signin");
+  }
+
+  if (session.user.accessLevel === 0) {
+    redirect("/403");
+  }
   
-  if (session?.user.accessLevel == 9) {
+  if (session?.user?.accessLevel != 0 && session?.user.accessLevel !== undefined) {
     return (
-        <>
-        <AdminNavbar/>
-        {children}
-        </>
+      <>
+        <div className="w-full min-h-screen bg-base-200" data-theme="dark">
+          <AdminNavbar/>
+          {children}
+        </div>
+      </>
     )
   }
 }

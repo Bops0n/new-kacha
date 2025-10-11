@@ -12,7 +12,7 @@ export default function RootLayout({
         <CartCountProvider>
         <UserNavbar/>
           {/* <AlertModalProvider> */}
-        <div className="45">
+        <div>
         {children}
         </div>
           {/* </AlertModalProvider> */}
