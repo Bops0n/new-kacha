@@ -9,19 +9,18 @@ export interface UserSchema {
   Email: string | null;
   Phone: string | null;
   Access_Level: number;
-  Token?: string | null;
   Addresses?: AddressSchema[];
 }
 
 export interface UserAccount {
     User_ID: number;
     Username: string;
-    Password: string; // This should be a hashed password
+    Password?: string; // This should be a hashed password
     Full_Name: string;
     Email: string;
     Phone: string | null;
     Access_Level: number;
-    Token: string | null;
+    Addresses: AddressSchema[];
 }
 
 // Address schema
@@ -58,9 +57,8 @@ export interface UserEditForm {
   Username: string;
   Password?: string;
   Full_Name: string;
-  Email: string | null;
+  Email: string;
   Phone: string | null;
   Access_Level: number;
-  Token: string | null;
   Addresses: AddressSchema[];
 }

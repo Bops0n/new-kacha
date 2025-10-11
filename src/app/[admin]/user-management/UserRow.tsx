@@ -1,11 +1,11 @@
 import React from 'react';
 import { FiEdit, FiTrash2 } from 'react-icons/fi'; // Removed FiEye
-import { User, AccessLevel } from '../../../types/types'; // Correct path to types
+import { UserAccount } from '@/types';
 
 interface UserRowProps {
-  user: User;
   getAccessLevelLabel: (level: AccessLevel) => string;
-  openUserModal: (user: User) => void; // Changed from viewUserDetails
+  user: UserAccount;
+  openUserModal: (user: UserAccount) => void; // Changed from viewUserDetails
   deleteUser: (userId: number) => void;
 }
 

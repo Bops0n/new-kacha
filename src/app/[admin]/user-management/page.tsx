@@ -1,13 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, use } from 'react';
 import {
   FiSearch,
   FiPlus,
   FiUser,
 } from 'react-icons/fi';
-
-import { User, Address, UserEditForm, AccessLevel, NewAddressForm } from '../../../types/types'; // Correct path to types
 
 import UserRow from './UserRow'; // Correct path to components
 import UserCard from './UserCard'; // Correct path to components
@@ -15,6 +13,8 @@ import UserModal from './modal/UserModal'; // <-- นำเข้า UserModal
 import AddressModal from './modal/AddressModal'; // <-- นำเข้า AddressModal
 import { useAlert } from '@/app/context/AlertModalContext';
 import Pagination from '@/app/components/Pagination';
+import { AddressSchema, NewAddressForm, UserAccount, UserEditForm, UserSchema } from '@/types';
+import LoadingSpinner from '@/app/components/LoadingSpinner';
 
 // Helper function to map access level char to readable string
 const getAccessLevelLabel = (level: AccessLevel): string => {
@@ -29,15 +29,16 @@ const getAccessLevelLabel = (level: AccessLevel): string => {
 export default function UserManagement() {
   const { showAlert } = useAlert()
 
-  const [users, setUsers] = useState<User[]>([]);
   const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [users, setUsers] = useState<UserAccount[]>([]);
+  const [filteredUsers, setFilteredUsers] = useState<UserAccount[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>('');
-  const [accessLevelFilter, setAccessLevelFilter] = useState<AccessLevel | 'all'>('all');
+  const [accessLevelFilter, setAccessLevelFilter] = useState<number | 'all'>('all');
 
-  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [selectedUser, setSelectedUser] = useState<UserAccount | null>(null);
   const [showUserModal, setShowUserModal] = useState<boolean>(false);
   const [isEditing, setIsEditing] = useState<boolean>(false); // True for edit mode, false for add new
-
 
   const [editFormData, setEditFormData] = useState<UserEditForm>({
     User_ID: null,
@@ -46,8 +47,7 @@ export default function UserManagement() {
     Full_Name: '',
     Email: '',
     Phone: '',
-    Access_Level: '0', // Default to Guest
-    Token: '',
+    Access_Level: 0,
     Addresses: [],
   });
 
@@ -65,27 +65,34 @@ export default function UserManagement() {
   });
 
   const [showAddAddressModal, setShowAddAddressModal] = useState<boolean>(false);
-  const [addressToEdit, setAddressToEdit] = useState<Address | null>(null);
+  const [addressToEdit, setAddressToEdit] = useState<AddressSchema | null>(null);
 
   // Pagination states
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [itemsPerPage, setItemsPerPage] = useState<number>(10);
-  const [paginatedUsers, setPaginatedUsers] = useState<User[]>([]);
+  const [paginatedUsers, setPaginatedUsers] = useState<UserAccount[]>([]);
   const [totalPages, setTotalPages] = useState<number>(1);
 
   // --- call data from api ---
   useEffect(() => {
-    async function callData(){
-      const data = await fetch('../api/admin/user/getUsers')
-      const response = await data.json()
-      setUsers(response.users)
+    async function apiGetUsers() {
+      try {
+            setLoading(true); 
+            const data = await fetch('../api/admin/user/getUsers')
+            const response = await data.json()
+
+            setUsers(response.users);
+        } finally {
+            setLoading(false);
+        }
     }
     callData()
+    apiGetUsers();
   },[])
 
   // --- Filtering Logic ---
   useEffect(() => {
-    let filtered: User[] = users;
+    let filtered: UserAccount[] = users;
 
     if (searchTerm) {
       filtered = filtered.filter(user =>
@@ -98,7 +105,7 @@ export default function UserManagement() {
     }
 
     if (accessLevelFilter !== 'all') {
-      filtered = filtered.filter(user => user.Access_Level === accessLevelFilter);
+      filtered = filtered.filter(user => user.Access_Level == accessLevelFilter);
     }
 
     setFilteredUsers(filtered);
@@ -109,7 +116,7 @@ export default function UserManagement() {
   useEffect(() => {
     const startIndex: number = (currentPage - 1) * itemsPerPage;
     const endIndex: number = startIndex + itemsPerPage;
-    const paginated: User[] = filteredUsers.slice(startIndex, endIndex);
+    const paginated: UserAccount[] = filteredUsers.slice(startIndex, endIndex);
 
     setPaginatedUsers(paginated);
     setTotalPages(Math.ceil(filteredUsers.length / itemsPerPage));
@@ -126,7 +133,7 @@ export default function UserManagement() {
 
   // --- User Actions ---
   // Opens modal in VIEW mode
-  const openUserModal = async(user: User) => {
+  const openUserModal = async(user: UserAccount) => {
     setSelectedUser(user);
 
     const response = await fetch(`../api/admin/user/getAddress?UserId=${user.User_ID}`)
@@ -141,7 +148,6 @@ export default function UserManagement() {
       Email: user.Email || '',
       Phone: user.Phone || '',
       Access_Level: user.Access_Level,
-      Token: user.Token,
       Addresses: data.addresses || [],
     });
     setIsEditing(false); // Set to view mode
@@ -162,8 +168,7 @@ export default function UserManagement() {
       Full_Name: '',
       Email: '',
       Phone: '',
-      Access_Level: '0',
-      Token: '',
+      Access_Level: 0,
       Addresses: [],
     });
     setSelectedUser(null); // No user selected for new user
@@ -173,7 +178,7 @@ export default function UserManagement() {
 
   const saveUserDetails = async() => {
 
-    if (!editFormData.Username || !editFormData.Full_Name) {
+    if (!editFormData.Username) {
       // alert('กรุณากรอก Username และ Full Name'); // Replace with custom modal
       // Using a placeholder for custom alert
       // showAlert('กรุณากรอก Username และ Full Name');
@@ -232,21 +237,20 @@ export default function UserManagement() {
         }
     }
 
-    const newOrUpdatedUser: User = {
+    const newOrUpdatedUser: UserAccount = {
       User_ID: editFormData.User_ID !== null? editFormData.User_ID : newID, // Generate new ID for mock
       Username: editFormData.Username,
       Password: editFormData.Password, // Caution: In real app, never handle passwords like this
       Full_Name: editFormData.Full_Name,
-      Email: editFormData.Email || null,
+      Email: editFormData.Email,
       Phone: editFormData.Phone || null,
       Access_Level: editFormData.Access_Level,
-      Token: editFormData.Token || `mock_token_${Date.now()}`, // Generate new token for mock
       Addresses: editFormData.Addresses,
     };
 
     if (isEditing && editFormData.User_ID !== null) {
       setUsers(prev => prev.map(u =>
-        u.User_ID === newOrUpdatedUser.User_ID ? newOrUpdatedUser : u
+        u.User_ID == newOrUpdatedUser.User_ID ? newOrUpdatedUser : u
       ));
     } else {
       setUsers(prev => [...prev, newOrUpdatedUser]);
@@ -288,7 +292,7 @@ export default function UserManagement() {
     }
   };
 
-  const handleEditAddressClick = (address: Address) => {
+  const handleEditAddressClick = (address: AddressSchema) => {
     setNewAddressForm({
       Address_ID: address.Address_ID,
       User_ID: address.User_ID,
@@ -299,7 +303,7 @@ export default function UserManagement() {
       Zip_Code: address.Zip_Code,
       Is_Default: address.Is_Default,
       Sub_District: address.Sub_District,
-      Phone: address.Phone,
+      Phone: address.Phone || '',
     });
     setAddressToEdit(address); // Set the address being edited
     setShowAddAddressModal(true);
@@ -315,7 +319,7 @@ export default function UserManagement() {
 
     if (selectedUser) {
       const updatedAddresses = [...editFormData.Addresses];
-      const newOrUpdatedAddress: Address = {
+      const newOrUpdatedAddress: AddressSchema = {
         ...newAddressForm,
         Address_ID: newAddressForm.Address_ID || Date.now(),
         User_ID: selectedUser.User_ID,
@@ -334,7 +338,7 @@ export default function UserManagement() {
           throw new Error(body.message || `HTTP Error ${response.status}`);
         }
 
-        const index = updatedAddresses.findIndex(addr => addr.Address_ID === addressToEdit.Address_ID && addr.User_ID === addressToEdit.User_ID);
+        const index = updatedAddresses.findIndex(addr => addr.Address_ID == addressToEdit.Address_ID && addr.User_ID == addressToEdit.User_ID);
         if (index !== -1) {
           updatedAddresses[index] = newOrUpdatedAddress;
         }
@@ -389,7 +393,7 @@ export default function UserManagement() {
           method:'DELETE'
         })
 
-        const updatedAddresses = editFormData.Addresses.filter(addr => !(addr.Address_ID === addressId && addr.User_ID === userId));
+        const updatedAddresses = editFormData.Addresses.filter(addr => !(addr.Address_ID == addressId && addr.User_ID == userId));
 
         if (updatedAddresses.length > 0 && !updatedAddresses.some(addr => addr.Is_Default)) {
           updatedAddresses[0].Is_Default = true;
@@ -402,7 +406,7 @@ export default function UserManagement() {
 
   // --- Form Change Handlers ---
   const handleUserFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value, type, checked } = e.target;
+    const { name, value, type, checked } : any = e.target;
     setEditFormData(prev => ({
       ...prev,
       [name]: type === 'checkbox' ? checked : value
@@ -410,13 +414,14 @@ export default function UserManagement() {
   };
 
   const handleAddressFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value, type, checked } = e.target;
+    const { name, value, type, checked } :any = e.target;
     setNewAddressForm(prev => ({
       ...prev,
       [name]: type === 'checkbox' ? checked : value
     }));
   };
 
+  if (loading) return <LoadingSpinner />;
 
   return (
     <div className="min-h-screen bg-base-200 p-4">
@@ -456,7 +461,7 @@ export default function UserManagement() {
               <select
                 className="select select-bordered w-full"
                 value={accessLevelFilter}
-                onChange={(e) => setAccessLevelFilter(e.target.value as AccessLevel | 'all')}
+                onChange={(e) => setAccessLevelFilter(e.target.value as number | 'all')}
               >
                 <option value="all">ระดับการเข้าถึงทั้งหมด</option>
                 <option value="9">Admin</option>
@@ -496,7 +501,7 @@ export default function UserManagement() {
                 </tr>
               </thead>
               <tbody>
-                {paginatedUsers.map((user: User) => (
+                {paginatedUsers.map((user: UserAccount) => (
                   <UserRow
                     key={user.User_ID}
                     user={user}
@@ -514,7 +519,7 @@ export default function UserManagement() {
         <div className="block md:hidden bg-base-100 rounded-lg shadow-sm p-4">
           {paginatedUsers.length > 0 ? (
             <div className="grid grid-cols-1 gap-4">
-              {paginatedUsers.map((user: User) => (
+              {paginatedUsers.map((user: UserAccount) => (
                 <UserCard
                   key={user.User_ID}
                   user={user}
@@ -532,7 +537,7 @@ export default function UserManagement() {
         </div>
 
         {/* No users found message */}
-        {paginatedUsers.length === 0 && filteredUsers.length === 0 && (
+        {paginatedUsers.length == 0 && filteredUsers.length == 0 && (
           <div className="text-center py-12">
             <FiUser className="w-12 h-12 text-base-content/30 mx-auto mb-4" />
             <p className="text-base-content/70">ไม่พบผู้ใช้ที่ตรงกับเงื่อนไขการค้นหา</p>
@@ -549,9 +554,9 @@ export default function UserManagement() {
 
             <div className="flex flex-wrap justify-center sm:justify-start gap-1">
               <button
-                className={`btn btn-sm ${currentPage === 1 ? 'btn-disabled' : ''}`}
+                className={`btn btn-sm ${currentPage == 1 ? 'btn-disabled' : ''}`}
                 onClick={() => handlePageChange(currentPage - 1)}
-                disabled={currentPage === 1}
+                disabled={currentPage == 1}
               >
                 ก่อนหน้า
               </button>
@@ -567,9 +572,9 @@ export default function UserManagement() {
               </div>
 
               <button
-                className={`btn btn-sm ${currentPage === totalPages ? 'btn-disabled' : ''}`}
+                className={`btn btn-sm ${currentPage == totalPages ? 'btn-disabled' : ''}`}
                 onClick={() => handlePageChange(currentPage + 1)}
-                disabled={currentPage === totalPages}
+                disabled={currentPage == totalPages}
               >
                 ถัดไป
               </button>

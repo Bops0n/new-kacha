@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { poolQuery } from '../../../lib/db';
-import { UserSchema } from '@/types';
+import { UserAccount } from '@/types';
 import { authenticateRequest } from '@/app/api/auth/utils';
 import { requireAdmin } from '@/app/utils/client';
 

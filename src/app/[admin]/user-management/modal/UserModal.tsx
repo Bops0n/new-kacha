@@ -14,22 +14,22 @@ import {
   FiSave,
   FiPlus
 } from 'react-icons/fi';
-import { User, Address, UserEditForm, AccessLevel, NewAddressForm } from '../../../types'; // ต้องปรับ Path ให้ถูกต้องตามโครงสร้างโปรเจกต์ของคุณ
+import { AddressSchema, UserEditForm, UserSchema } from '@/types';
 
 // กำหนด Props สำหรับ UserModal
 interface UserModalProps {
   showModal: boolean;
   onClose: () => void;
-  selectedUser: User | null;
+  selectedUser: UserSchema | null;
   isEditing: boolean;
   toggleEditMode: () => void;
   editFormData: UserEditForm;
   handleUserFormChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
   saveUserDetails: () => void;
   deleteUser: (userId: number) => void;
-  getAccessLevelLabel: (level: AccessLevel) => string;
+  getAccessLevelLabel: (roles: Role[], level: number) => string;
   handleAddAddressClick: () => void;
-  handleEditAddressClick: (address: Address) => void;
+  handleEditAddressClick: (address: AddressSchema) => void;
   deleteAddress: (addressId: number, userId: number) => void;
   // Props ที่เกี่ยวข้องกับ AddressModal ที่ถูกเปิดจาก UserModal
   setShowAddAddressModal: (show: boolean) => void;

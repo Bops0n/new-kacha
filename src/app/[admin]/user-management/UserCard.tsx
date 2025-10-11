@@ -1,11 +1,11 @@
 import React from 'react';
 import { FiUser, FiMail, FiPhone, FiKey, FiEdit } from 'react-icons/fi'; // Removed FiEye, added FiEdit
-import { User, AccessLevel } from '../../../types/types'; // Correct path to types
+import { UserAccount } from '@/types';
 
 interface UserCardProps {
-  user: User;
   getAccessLevelLabel: (level: AccessLevel) => string;
-  openUserModal: (user: User) => void; // Changed from viewUserDetails
+  user: UserAccount;
+  openUserModal: (user: UserAccount) => void; // Changed from viewUserDetails
 }
 
 const UserCard: React.FC<UserCardProps> = ({
