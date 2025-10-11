@@ -1,183 +1,235 @@
 'use client'
-import { FaSearch, FaLine, FaFacebookSquare } from "react-icons/fa";
-import { GoTriangleDown } from "react-icons/go";
-import { HiMenu, HiX } from "react-icons/hi";
-import { useState } from "react";
-import Link from "next/link";
+import { FaFacebookSquare, FaLine, FaSearch, FaBox, FaWarehouse } from "react-icons/fa";
 import { signOut, useSession } from "next-auth/react";
-import { redirect } from "next/navigation";
+import LoadingSpinner from "@/app/components/LoadingSpinner";
+import { GoTriangleDown } from "react-icons/go";
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import { Role } from "@/types/role.types";
+import { FiChevronDown, FiChevronRight, FiChevronUp, FiMenu, FiSettings, FiShield, FiUser, FiX } from "react-icons/fi";
+import { MdCategory, MdDashboard } from "react-icons/md";
+import { TbReport } from "react-icons/tb";
 
 export default function AdminNavbar() {
+    const {data: session, status} = useSession();
+    const [treeOpen, setTreeOpen] = useState(false);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
-    
-    
-    const session = useSession()
-    if (session?.data?.user?.accessLevel == 9)
-    return (
-        <div className="w-full" data-theme="dark">
-            {/* Top Bar */}
-            <div className="bg-gray-200 border-b border-gray-300">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center py-2 text-sm">
-                        <p className="text-center lg:text-left  font-medium mb-2 lg:mb-0">
-                            ห้องน้ำต้อง คชาโฮม ถูก ครบ จบที่เดียว
-                        </p>
-                        
-                        <div className="flex justify-center lg:justify-start gap-4 mb-2 lg:mb-0">
-                            <div className="flex items-center gap-2   transition-colors cursor-pointer">
-                                <FaLine className="text-green-700 text-3xl"/> 
-                                <span>kacha982</span>
-                            </div>
-                            <div className="flex items-center gap-2   transition-colors cursor-pointer">
-                                <FaFacebookSquare className="text-blue-700 text-3xl"/> 
-                                <span className="hidden sm:block">บริษัท คชาโฮม จำกัด</span>
-                                <span className="sm:hidden">คชาโฮม</span>
-                            </div>
-                        </div>
-                        
-                        <div className="text-center lg:text-right">
-                            <button className=" hover:text-yellow-600 transition-colors">
-                                ติดต่อเรา
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
 
-            {/* Main Header */}
-            <div className="bg-gray-300 shadow-lg">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex items-center justify-between py-4">
-                        {/* Logo */}
-                        <div className="flex-shrink-0">
-                            <div className="w-16 h-16 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-xl flex items-center justify-center shadow-lg">
-                                <span className=" font-bold text-xl">K</span>
-                            </div>
-                        </div>
+    const [roles, setRoles] = useState<Role[]>([]);
+    const [chkSysAdmin, setCheckSysAdmin] = useState<boolean>(false);
+    const [chkUserMgr, setCheckUserMgr] = useState<boolean>(false);
+    const [chkStockMgr, setCheckStockMgr] = useState<boolean>(false);
+    const [chkOrderMgr, setCheckOrderMgr] = useState<boolean>(false);
+    const [chkReport, setCheckReport] = useState<boolean>(false);
+    const [chkDashboard, setCheckDashboard] = useState<boolean>(false);
 
-                        {/* Search Bar */}
-                        <div className="flex-1 max-w-2xl mx-8">
-                            <div className="relative flex items-center">
-                                <div className="absolute left-3 z-10 hidden md:inline sm:none">
-                                    <FaSearch className=""/>
+    useEffect(() => {
+        async function apiGetRoles() {
+            const result = await fetch("/api/master/role", { 
+                cache: "no-store" 
+            });
+            const response = await result.json();
+            setRoles(response.roles);
+        }
+
+        apiGetRoles();
+    }, []);
+    
+    useEffect(() => {
+        if (!session || roles.length === 0) return;
+
+        const role = roles.find(x => x.Role === session?.user?.accessLevel);
+        if (role) {
+            setCheckSysAdmin(role.Sys_Admin);
+            setCheckUserMgr(role.User_Mgr);
+            setCheckStockMgr(role.Stock_Mgr);
+            setCheckOrderMgr(role.Order_Mgr);
+            setCheckReport(role.Report);
+            setCheckDashboard(role.Dashboard);
+        }
+    }, [session, roles]);
+
+    if (status == 'loading') {
+        return <LoadingSpinner />;
+    }
+
+    if (session?.user?.accessLevel !== 0 && session?.user.accessLevel !== undefined)  {
+        return (
+            <>
+                {/* Top Bar */}
+                <div className="bg-gray-200 border-b border-gray-300">
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                        <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center py-2 text-sm">
+                            <p className="text-center lg:text-left  font-medium mb-2 lg:mb-0">
+                                ห้องน้ำต้อง คชาโฮม ถูก ครบ จบที่เดียว
+                            </p>
+                            
+                            <div className="flex justify-center lg:justify-start gap-4 mb-2 lg:mb-0">
+                                <div className="flex items-center gap-2   transition-colors cursor-pointer">
+                                    <FaLine className="text-green-700 text-3xl"/> 
+                                    <span>kacha982</span>
                                 </div>
-                                <input 
-                                    type="text" 
-                                    placeholder="ค้นหาสินค้า..." 
-                                    className="w-full bg-gray-200  placeholder-gray-400 pl-10 pr-4 py-3 rounded-l-lg border border-gray-500 focus:outline-none focus:border-yellow-400 focus:ring-1 focus:ring-yellow-400"
-                                />
-                                <button className="bg-yellow-500 hover:bg-yellow-600  px-6 py-3 rounded-r-lg border border-yellow-500 transition-colors">
-                                    ค้นหา
+                                <div className="flex items-center gap-2   transition-colors cursor-pointer">
+                                    <FaFacebookSquare className="text-blue-700 text-3xl"/> 
+                                    <span className="hidden sm:block">บริษัท คชาโฮม จำกัด</span>
+                                    <span className="sm:hidden">คชาโฮม</span>
+                                </div>
+                            </div>
+                            
+                            <div className="text-center lg:text-right">
+                                <button className=" hover:text-yellow-600 transition-colors">
+                                    ติดต่อเรา
                                 </button>
                             </div>
                         </div>
+                    </div>
+                </div>
 
-                        {/* Login Section & Mobile Menu */}
-                        <div className="flex items-center gap-4">
-                            {/* Login Dropdown */}
+                {/* Main Header */}
+                <div className="bg-gray-300 shadow-lg">
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                        <div className="flex items-center justify-between py-4">
+                            {/* Logo */}
+                            <div className="flex-shrink-0">
+                                <div className="w-16 h-16 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-xl flex items-center justify-center shadow-lg">
+                                    <span className=" font-bold text-xl">K</span>
+                                </div>
+                            </div>
+
+                            {/* Search Bar */}
+                            <div className="flex-1 max-w-2xl mx-8">
+                                <div className="relative flex items-center">
+                                    <div className="absolute left-3 z-10 hidden md:inline sm:none">
+                                        <FaSearch className=""/>
+                                    </div>
+                                    <input 
+                                        type="text" 
+                                        placeholder="ค้นหาสินค้า..." 
+                                        className="w-full bg-gray-200  placeholder-gray-400 pl-10 pr-4 py-3 rounded-l-lg border border-gray-500 focus:outline-none focus:border-yellow-400 focus:ring-1 focus:ring-yellow-400"
+                                    />
+                                    <button className="bg-yellow-500 hover:bg-yellow-600  px-6 py-3 rounded-r-lg border border-yellow-500 transition-colors">
+                                        ค้นหา
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* Login Section & Mobile Menu */}
+                            <div className="flex items-center gap-4">
+                                {/* Login Dropdown */}
                                 <div className="dropdown dropdown-end">
                                     <label tabIndex={0} className="btn btn-ghost gap-2 hover:bg-gray-200 text-gray-800 rounded-lg">
-                                        <span className="hidden sm:block">{session?.data?.user?.name}</span>
-                                        <span className="sm:hidden text-sm">{ session?.data?.user?.name?.split(' ')[0] }</span>
+                                        <span className="hidden sm:block">{session?.user?.name}</span>
+                                        <span className="sm:hidden text-sm">{ session?.user?.name?.split(' ')[0] }</span>
                                         <GoTriangleDown className="w-4 h-4" />
                                     </label>
                                     <ul tabIndex={0} className="dropdown-content menu p-2 shadow-lg bg-white rounded-box w-52 border border-gray-300 mt-0 text-gray-800">
                                         <li> <Link href={"/profile"} className="hover:bg-gray-200 rounded">โปรไฟล์ของฉัน</Link></li>
                                         <li> <Link href={"/orders-history"} className="hover:bg-gray-200 rounded">ประวัติคำสั่งซื้อ</Link></li>
                                         <li> <Link href={"/favorites"} className="hover:bg-gray-200 rounded">รายการโปรด</Link></li>
-                                        <li> <a onClick={()=> signOut()} className="hover:bg-gray-200 rounded">ออกจากระบบ</a></li>
+                                        <li> <a onClick={()=> signOut({ callbackUrl: "/" })} className="hover:bg-gray-200 rounded">ออกจากระบบ</a></li>
                                     </ul>
                                 </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-                            {/* Mobile Menu Button */}
-                            <div className="lg:hidden">
-                                <button 
-                                    className="btn btn-square btn-ghost  hover:bg-gray-400"
-                                    onClick={() => setIsMenuOpen(!isMenuOpen)}
+                <header className="sticky top-0 z-50 bg-base-100 shadow-lg border-b border-base-300">
+                    <div className="max-w-7xl mx-auto flex items-center justify-between px-4 py-3">
+
+                        <h1 className="text-lg font-semibold text-warning md:hidden">
+                            จัดการระบบ
+                        </h1>
+                        
+                        <button className="btn btn-ghost md:hidden" onClick={() => setIsMenuOpen((o) => !o)} aria-label="Toggle Menu">
+                            {isMenuOpen ? <FiX size={22} /> : <FiMenu size={22} />}
+                        </button>
+                        
+                        {/* Desktop Menu */}
+                        <nav  className="hidden md:flex justify-center items-center gap-x-6 mx-auto max-w-fit">
+                            {chkDashboard && <MenuButton icon={<MdDashboard/>} label="แดชบอร์ด" url="/admin/dashboard"/>}
+                            {chkUserMgr && <MenuButton icon={<FiUser/>} label="จัดการสมาชิก" url="/admin/user-management"/>}
+                            {chkStockMgr && <MenuButton icon={<FaWarehouse/>} label="จัดการคลังสินค้า" url="/admin/product-management"/>}
+                            {chkStockMgr && <MenuButton icon={<MdCategory/>} label="จัดการหมวดหมู่สินค้า" url="/admin/category-management"/>}
+                            {chkOrderMgr && <MenuButton icon={<FaBox/>} label="จัดการคำสั่งซื้อ" url="/admin/order-management"/>}
+                            {chkReport && <MenuButton icon={<TbReport/>} label="รายงาน" url="/admin/report"/>}
+                            {chkSysAdmin && 
+                            <div className="relative">
+                                <button
+                                    className="btn btn-ghost justify-between"
+                                    onClick={() => setTreeOpen((o) => !o)}
                                 >
-                                    {isMenuOpen ? <HiX className="w-5 h-5" /> : <HiMenu className="w-5 h-5" />}
+                                    <FiSettings /> ตั้งค่าระบบ
+                                    {treeOpen ? <FiChevronUp/> : <FiChevronDown/>}
                                 </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            {/* Navigation Menu */}
-            <div className="bg-gray-200 border-t border-gray-500">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    {/* Desktop Menu */}
-                    <div className="hidden lg:flex">
-                        <div className="flex">
-                            <div className="dropdown dropdown-hover">
-                                <label tabIndex={0} className="flex items-center px-6 py-4  hover:text-yellow-600 hover:bg-gray-300 transition-colors cursor-pointer gap-1">
-                                    หน้าหลัก
-                                    <GoTriangleDown className="w-3 h-3"/>
-                                </label>
-                                <ul tabIndex={0} className="dropdown-content menu p-2 shadow-lg bg-gray-300 rounded-box w-48 border border-gray-400 mt-0">
-                                    <li> <Link href={"#"} className=" hover:bg-gray-400">Dashboard</Link></li>
-                                    <li> <Link href={"#"} className=" hover:bg-gray-400">Analytics</Link></li>
-                                    <li> <Link href={"#"} className=" hover:bg-gray-400">Reports</Link></li>
-                                </ul>
-                            </div>
-                             <Link href="/admin/user-management" className="px-6 py-4  hover:text-yellow-600 hover:bg-gray-300 transition-colors">
-                                จัดการสมาชิก
-                            </Link>
-                             <Link href="/admin/product-management" className="px-6 py-4  hover:text-yellow-600 hover:bg-gray-300 transition-colors">
-                                จัดการคลังสินค้า
-                            </Link>
-                             <Link href="/admin/category-management" className="px-6 py-4  hover:text-yellow-600 hover:bg-gray-300 transition-colors">
-                                จัดการหมวดหมู่สินค้า
-                            </Link>
-                             <Link href="/admin/order-management" className="px-6 py-4  hover:text-yellow-600 hover:bg-gray-300 transition-colors">
-                                จัดการคำสั่งซื้อ
-                            </Link>
-                             <Link href="#" className="px-6 py-4  hover:text-yellow-600 hover:bg-gray-300 transition-colors">
-                                รายงาน
-                            </Link>
-                             <Link href="/admin/sysadmin" className="px-6 py-4  hover:text-yellow-600 hover:bg-gray-300 transition-colors">
-                                ตั้งค่า
-                            </Link>
-                        </div>
+                                {treeOpen && (
+                                    <ul className="absolute bg-base-200 rounded-xl mt-2 p-2 shadow-xl w-48 z-50">
+                                        <li className="px-2 py-1">
+                                            <Link href={'/admin/role-management'} 
+                                                className="btn btn-ghost w-full justify-start gap-2 px-3 py-2 hover:bg-base-300 rounded-lg" 
+                                                onClick={() => {
+                                                    setTreeOpen(false);
+                                                }}>
+                                                <span className="flex items-center gap-2"><FiShield/> จัดการบทบาท</span>
+                                            </Link>
+                                        </li>
+                                    </ul>
+                                )}
+                            </div>}
+                        </nav>
                     </div>
 
-                    {/* Mobile Menu */}
-                    <div className={`lg:hidden ${isMenuOpen ? 'block' : 'hidden'}`}>
-                        <div className="py-4 space-y-2">
-                            <div className="space-y-1">
-                                <div className="collapse collapse-arrow">
-                                    <input type="checkbox" /> 
-                                    <div className="collapse-title  font-medium px-4 py-2 hover:bg-gray-300">
-                                        หน้าหลัก
-                                    </div>
-                                    <div className="collapse-content bg-gray-300"> 
-                                        <div className="space-y-1 pt-2">
-                                             <Link href="#" className="block px-6 py-2 text-gray-300 hover: hover:bg-gray-400 rounded">Dashboard</Link>
-                                             <Link href="#" className="block px-6 py-2 text-gray-300 hover: hover:bg-gray-400 rounded">Analytics</Link>
-                                             <Link href="#" className="block px-6 py-2 text-gray-300 hover: hover:bg-gray-400 rounded">Reports</Link>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                             <Link href="/admin/user-management"className="block px-5 py-3  hover:bg-gray-300 rounded transition-colors">
-                                จัดการสมาชิก
-                            </Link>
-                             <Link href="/admin/product-management/" className="block px-4 py-3  hover:bg-gray-300 rounded transition-colors">
-                                จัดการคลังสินค้า
-                            </Link>
-                             <Link href="/admin/order-management/" className="block px-4 py-3  hover:bg-gray-300 rounded transition-colors">
-                                จัดการคำสั่งซื้อ
-                            </Link>
-                             <Link href="#" className="block px-4 py-3  hover:bg-gray-300 rounded transition-colors">
-                                รายงาน
-                            </Link>
-                             <Link href="/admin/sysadmin" className="block px-4 py-3  hover:bg-gray-300 rounded transition-colors">
-                                ตั้งค่า
-                            </Link>
+                    {/* ======= Mobile Menu ======= */}
+                    {isMenuOpen && (
+                    <div className="md:hidden bg-base-100 border-t border-base-300">
+                        <div className="flex flex-col p-3 gap-2">
+                            {chkDashboard && <MobileMenuItem icon={<MdDashboard/>} label="แดชบอร์ด" url="/admin/dashboard"/>}
+                            {chkUserMgr && <MobileMenuItem icon={<FiUser/>} label="จัดการสมาชิก" url="/admin/user-management"/>}
+                            {chkStockMgr && <MobileMenuItem icon={<FaWarehouse/>} label="จัดการคลังสินค้า" url="/admin/product-management"/>}
+                            {chkStockMgr && <MobileMenuItem icon={<MdCategory/>} label="จัดการหมวดหมู่สินค้า" url="/admin/category-management"/>}
+                            {chkOrderMgr && <MobileMenuItem icon={<FaBox/>} label="จัดการคำสั่งซื้อ" url="/admin/order-management"/>}
+                            {chkReport && <MobileMenuItem icon={<TbReport/>} label="รายงาน" url="/admin/report"/>}
+                            {chkSysAdmin && 
+                                <button className="flex items-center gap-2 px-2 py-2 rounded-md text-left" onClick={() => setTreeOpen((o) => !o)}>
+                                <span className="flex items-center gap-2">
+                                    <FiSettings /> ตั้งค่าระบบ
+                                </span>
+                                {treeOpen ? <FiChevronDown /> : <FiChevronRight />}
+                                </button>
+                            }
+                            {treeOpen && (
+                            <ul className="pl-8 pb-2">
+                                <li>
+                                    <Link href={'/admin/role-management'} className="flex items-center gap-2 py-2" onClick={() => {
+                                        setTreeOpen(false);
+                                        setIsMenuOpen(false);
+                                    }}>
+                                    <FiShield /> จัดการบทบาท
+                                    </Link>
+                                </li>
+                            </ul>
+                            )}
                         </div>
                     </div>
-                </div>
-            </div>
-        </div>
-    );
+                    )}
+                </header>
+            </>
+        );
+    }
+}
+
+function MenuButton({ icon, label, url }: any) {
+    return (
+        <Link href={url} className="btn btn-ghost flex items-center gap-2">
+            {icon} {label}
+        </Link>
+    )
+}
+
+function MobileMenuItem({ icon, label, url }: any) {
+    return (
+        <Link href={url} className="flex items-center gap-2 px-2 py-2 rounded-md text-left">
+            {icon} {label}
+        </Link>
+    )
 }
