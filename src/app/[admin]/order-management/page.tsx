@@ -10,6 +10,8 @@ import Pagination from '@/app/components/Pagination';
 import OrderDetailModal from './OrderDetailModal';
 import OrderRow from './OrderRow';
 import OrderCard from './OrderCard';
+import { useSession } from 'next-auth/react';
+import AccessDeniedPage from '@/app/components/AccessDenied';
 // --- START: อัปเดต statusConfig ให้ครบทุกสถานะ ---
 const statusConfig: StatusConfig = {
   pending: { label: 'รอดำเนินการ', color: 'badge-warning', icon: FiClock, bgColor: 'bg-warning/10' },
@@ -23,18 +25,19 @@ const statusConfig: StatusConfig = {
 // --- END: อัปเดต statusConfig ---
 
 export default function OrderManagementPage() {
+  const { data: session, status } = useSession();
   const { 
     loading, error, orders, filteredOrders, filters, setFilters, 
     actions, modalState, modalActions 
   } = useOrderManagement();
-  
+
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
 
   const paginatedOrders = useMemo(() => {
     return filteredOrders.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
   }, [filteredOrders, currentPage, itemsPerPage]);
-  
+
   const totalPages = Math.ceil(filteredOrders.length / itemsPerPage);
 
   // --- START: อัปเดต stats ให้นับสถานะใหม่ ---
@@ -54,9 +57,11 @@ export default function OrderManagementPage() {
     setFilters(prev => ({ ...prev, searchTerm: '', statusFilter: status }));
     setCurrentPage(1);
   };
-  
+
   if (loading) return <LoadingSpinner />;
   if (error) return <div className="text-center p-8 text-error"><h3>เกิดข้อผิดพลาด:</h3><p>{error}</p></div>;
+
+  if (!session || !session.user.Order_Mgr) return <AccessDeniedPage />;
 
   return (
     <div className="min-h-screen bg-base-200 p-4">

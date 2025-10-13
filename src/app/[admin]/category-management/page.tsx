@@ -6,6 +6,8 @@ import { useCategoryManagement } from '@/app/hooks/admin/useCategoryManagement';
 import { CategoryDisplayItem, CategoryFormData, Category, SubCategory, ModalMode } from '@/types';
 import LoadingSpinner from '@/app/components/LoadingSpinner';
 import Pagination from '@/app/components/Pagination';
+import { useSession } from 'next-auth/react';
+import AccessDeniedPage from '@/app/components/AccessDenied';
 
 // --- Reusable UI Components ---
 
@@ -147,77 +149,80 @@ const CategoryModal: React.FC<{
 
 // --- Main Page Component ---
 export default function CategoryManagementPage() {
-  const { loading, error, data, filteredItems, filters, setFilters, actions, modalState, modalActions } = useCategoryManagement();
-  
-  const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(10);
-  const paginatedItems = useMemo(() => filteredItems.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage), [filteredItems, currentPage, itemsPerPage]);
-  const totalPages = Math.ceil(filteredItems.length / itemsPerPage);
-  
-  const stats = useMemo(() => ({
+    const { data: session, status } = useSession();
+    const { loading, error, data, filteredItems, filters, setFilters, actions, modalState, modalActions } = useCategoryManagement();
+
+    const [currentPage, setCurrentPage] = useState(1);
+    const [itemsPerPage, setItemsPerPage] = useState(10);
+    const paginatedItems = useMemo(() => filteredItems.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage), [filteredItems, currentPage, itemsPerPage]);
+    const totalPages = Math.ceil(filteredItems.length / itemsPerPage);
+
+    const stats = useMemo(() => ({
     total: data.main.length + data.sub.length + data.child.length,
     main: data.main.length,
     sub: data.sub.length,
     child: data.child.length,
-  }), [data]);
-  
-  if (loading) return <LoadingSpinner />;
-  if (error) return <div className="text-center p-8 text-error"><h3>เกิดข้อผิดพลาด:</h3><p>{error}</p></div>;
+    }), [data]);
 
-  return (
-    <div className="min-h-screen bg-base-200 p-4">
-      <div className="max-w-7xl mx-auto">
-        <div className="bg-base-100 rounded-lg shadow-sm p-6 mb-6 flex justify-between items-center flex-wrap gap-4">
-            <div>
-                <h1 className="text-3xl font-bold">จัดการหมวดหมู่สินค้า</h1>
-                <p className="text-base-content/70 mt-1">จัดการหมวดหมู่ (หลัก, รอง, ย่อย)</p>
+    if (loading) return <LoadingSpinner />;
+    if (error) return <div className="text-center p-8 text-error"><h3>เกิดข้อผิดพลาด:</h3><p>{error}</p></div>;
+
+    if (!session || !session.user.Stock_Mgr) return <AccessDeniedPage />;
+
+    return (
+        <div className="min-h-screen bg-base-200 p-4">
+        <div className="max-w-7xl mx-auto">
+            <div className="bg-base-100 rounded-lg shadow-sm p-6 mb-6 flex justify-between items-center flex-wrap gap-4">
+                <div>
+                    <h1 className="text-3xl font-bold">จัดการหมวดหมู่สินค้า</h1>
+                    <p className="text-base-content/70 mt-1">จัดการหมวดหมู่ (หลัก, รอง, ย่อย)</p>
+                </div>
+                <button className="btn btn-primary" onClick={() => modalActions.open(null, 'add')}>
+                    <FiPlus /> เพิ่มหมวดหมู่ใหม่
+                </button>
             </div>
-            <button className="btn btn-primary" onClick={() => modalActions.open(null, 'add')}>
-                <FiPlus /> เพิ่มหมวดหมู่ใหม่
-            </button>
-        </div>
-        
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-            <div className="card bg-base-100 shadow-sm p-4"><div className="flex items-center gap-3"><FiTag className="w-5 h-5 text-neutral"/><div><p className="text-sm">หมวดหมู่ทั้งหมด</p><p className="font-bold text-xl">{stats.total}</p></div></div></div>
-            <div className="card bg-base-100 shadow-sm p-4"><div className="flex items-center gap-3"><FiTag className="w-5 h-5 text-primary"/><div><p className="text-sm">หมวดหมู่หลัก</p><p className="font-bold text-xl">{stats.main}</p></div></div></div>
-            <div className="card bg-base-100 shadow-sm p-4"><div className="flex items-center gap-3"><FiTag className="w-5 h-5 text-info"/><div><p className="text-sm">หมวดหมู่รอง</p><p className="font-bold text-xl">{stats.sub}</p></div></div></div>
-            <div className="card bg-base-100 shadow-sm p-4"><div className="flex items-center gap-3"><FiTag className="w-5 h-5 text-success"/><div><p className="text-sm">หมวดหมู่ย่อย</p><p className="font-bold text-xl">{stats.child}</p></div></div></div>
-        </div>
-        
-        <div className="bg-base-100 rounded-lg shadow-sm p-6 mb-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <input type="text" placeholder="ค้นหาด้วยชื่อหรือ ID..." value={filters.searchTerm} onChange={e => setFilters({...filters, searchTerm: e.target.value})} className="input input-bordered w-full" />
-              <select value={filters.typeFilter} onChange={e => setFilters({...filters, typeFilter: e.target.value as any})} className="select select-bordered w-full">
-                <option value="all">ทุกระดับ</option>
-                <option value="main">หมวดหมู่หลัก</option>
-                <option value="sub">หมวดหมู่รอง</option>
-                <option value="child">หมวดหมู่ย่อย</option>
-              </select>
-               <select value={itemsPerPage} onChange={e => setItemsPerPage(Number(e.target.value))} className="select select-bordered w-full">
-                <option value={10}>10 รายการ/หน้า</option>
-                <option value={20}>20 รายการ/หน้า</option>
-                <option value={50}>50 รายการ/หน้า</option>
-              </select>
-          </div>
-        </div>
-        
-        <div className="hidden md:block overflow-x-auto bg-base-100 rounded-lg shadow-sm">
-          <table className="table w-full">
-            <thead><tr><th>ID</th><th>ชื่อ</th><th>ระดับ</th><th>หมวดหมู่</th><th>จัดการ</th></tr></thead>
-            <tbody>
-              {paginatedItems.map(item => <CategoryRow key={`${item.type}-${item.id}`} item={item} openModal={modalActions.open} deleteCategory={actions.deleteCategory} />)}
-            </tbody>
-          </table>
-        </div>
+            
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                <div className="card bg-base-100 shadow-sm p-4"><div className="flex items-center gap-3"><FiTag className="w-5 h-5 text-neutral"/><div><p className="text-sm">หมวดหมู่ทั้งหมด</p><p className="font-bold text-xl">{stats.total}</p></div></div></div>
+                <div className="card bg-base-100 shadow-sm p-4"><div className="flex items-center gap-3"><FiTag className="w-5 h-5 text-primary"/><div><p className="text-sm">หมวดหมู่หลัก</p><p className="font-bold text-xl">{stats.main}</p></div></div></div>
+                <div className="card bg-base-100 shadow-sm p-4"><div className="flex items-center gap-3"><FiTag className="w-5 h-5 text-info"/><div><p className="text-sm">หมวดหมู่รอง</p><p className="font-bold text-xl">{stats.sub}</p></div></div></div>
+                <div className="card bg-base-100 shadow-sm p-4"><div className="flex items-center gap-3"><FiTag className="w-5 h-5 text-success"/><div><p className="text-sm">หมวดหมู่ย่อย</p><p className="font-bold text-xl">{stats.child}</p></div></div></div>
+            </div>
+            
+            <div className="bg-base-100 rounded-lg shadow-sm p-6 mb-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <input type="text" placeholder="ค้นหาด้วยชื่อหรือ ID..." value={filters.searchTerm} onChange={e => setFilters({...filters, searchTerm: e.target.value})} className="input input-bordered w-full" />
+                <select value={filters.typeFilter} onChange={e => setFilters({...filters, typeFilter: e.target.value as any})} className="select select-bordered w-full">
+                    <option value="all">ทุกระดับ</option>
+                    <option value="main">หมวดหมู่หลัก</option>
+                    <option value="sub">หมวดหมู่รอง</option>
+                    <option value="child">หมวดหมู่ย่อย</option>
+                </select>
+                <select value={itemsPerPage} onChange={e => setItemsPerPage(Number(e.target.value))} className="select select-bordered w-full">
+                    <option value={10}>10 รายการ/หน้า</option>
+                    <option value={20}>20 รายการ/หน้า</option>
+                    <option value={50}>50 รายการ/หน้า</option>
+                </select>
+            </div>
+            </div>
+            
+            <div className="hidden md:block overflow-x-auto bg-base-100 rounded-lg shadow-sm">
+            <table className="table w-full">
+                <thead><tr><th>ID</th><th>ชื่อ</th><th>ระดับ</th><th>หมวดหมู่</th><th>จัดการ</th></tr></thead>
+                <tbody>
+                {paginatedItems.map(item => <CategoryRow key={`${item.type}-${item.id}`} item={item} openModal={modalActions.open} deleteCategory={actions.deleteCategory} />)}
+                </tbody>
+            </table>
+            </div>
 
-        <div className="grid md:hidden grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
-            {paginatedItems.map(item => <CategoryCard key={`${item.type}-${item.id}`} item={item} openModal={modalActions.open} deleteCategory={actions.deleteCategory} />)}
-        </div>
+            <div className="grid md:hidden grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+                {paginatedItems.map(item => <CategoryCard key={`${item.type}-${item.id}`} item={item} openModal={modalActions.open} deleteCategory={actions.deleteCategory} />)}
+            </div>
 
-        <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} totalItemsCount={filteredItems.length} itemsPerPage={itemsPerPage} />
-        
-        <CategoryModal isOpen={modalState.isOpen} mode={modalState.mode} item={modalState.item} actions={{ save: actions.saveCategory, close: modalActions.close }} data={data} />
-      </div>
-    </div>
-  );
+            <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} totalItemsCount={filteredItems.length} itemsPerPage={itemsPerPage} />
+            
+            <CategoryModal isOpen={modalState.isOpen} mode={modalState.mode} item={modalState.item} actions={{ save: actions.saveCategory, close: modalActions.close }} data={data} />
+        </div>
+        </div>
+    );
 }

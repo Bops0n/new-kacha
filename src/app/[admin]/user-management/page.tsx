@@ -16,6 +16,8 @@ import Pagination from '@/app/components/Pagination';
 import { Role } from '@/types/role.types';
 import { AddressSchema, NewAddressForm, UserAccount, UserEditForm, UserSchema } from '@/types';
 import LoadingSpinner from '@/app/components/LoadingSpinner';
+import { useSession } from 'next-auth/react';
+import AccessDeniedPage from '@/app/components/AccessDenied';
 
 // Helper function to map access level char to readable string
 
@@ -33,7 +35,8 @@ const getAccessLevelLabel = (roles: Role[], level: number): string => {
 };
 
 export default function UserManagement() {
-  const { showAlert } = useAlert()
+  const { showAlert } = useAlert();
+  const { data: session, update } = useSession();
 
   const [loading, setLoading] = useState(true);
   const [users, setUsers] = useState<UserAccount[]>([]);
@@ -437,6 +440,7 @@ export default function UserManagement() {
   };
 
   if (loading) return <LoadingSpinner />;
+  if (!session || !session.user.User_Mgr) return <AccessDeniedPage />;
 
   return (
     <div className="min-h-screen bg-base-200 p-4">

@@ -14,10 +14,6 @@ export default async function AdminLayout({
   if (!session) {
     redirect("/api/auth/signin");
   }
-
-  if (session.user.accessLevel === 0) {
-    redirect("/403");
-  }
   
   if (session?.user?.accessLevel != 0 && session?.user.accessLevel !== undefined) {
     return (

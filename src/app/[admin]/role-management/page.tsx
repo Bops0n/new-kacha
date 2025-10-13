@@ -1,8 +1,8 @@
 'use client'
+import AccessDenied from "@/app/components/AccessDenied";
 import LoadingSpinner from "@/app/components/LoadingSpinner";
 import { Role } from "@/types/role.types";
 import { useSession } from "next-auth/react";
-import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
 import { FaBox, FaCheck, FaWarehouse } from "react-icons/fa";
 import { FaX } from "react-icons/fa6";
@@ -160,7 +160,7 @@ function RoleModal({ isOpen, onClose, isEditing, onSaved, form, handleRoleFormCh
 }
 
 export default function RoleManagementPage() {
-    const { data: session, status } = useSession();
+    const { data: session, status, update } = useSession();
     const [roles, setRoles] = useState<Role[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -257,6 +257,7 @@ export default function RoleManagementPage() {
     }
 
     if (loading) return <LoadingSpinner />;
+    if (!session || !session.user.Sys_Admin) return <AccessDenied />;
 
     return (
     <div className="min-h-screen bg-base-200 p-4">

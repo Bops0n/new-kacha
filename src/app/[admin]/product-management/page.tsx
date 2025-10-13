@@ -15,6 +15,8 @@ import { calculateAvailableStock } from '@/app/utils/calculations'; // <-- IMPOR
 import ProductRow from './ProductRow';
 import ProductCard from './ProductCard';
 import Pagination from '@/app/components/Pagination';
+import AccessDeniedPage from '@/app/components/AccessDenied';
+import { useSession } from 'next-auth/react';
 
 // --- Presentational Modal Component ---
 const ProductModal = ({ 
@@ -198,41 +200,43 @@ const ProductModal = ({
 
 // --- Main Page Component ---
 export default function ProductManagementPage() {
-  const { loading, error, data, filteredProducts, allCategoriesMap, filters, setFilters, actions } = useProductManagement();
-  const { openModal, modalProps } = useProductModal({ onSave: actions.saveProduct });
+    const { data: session, status, update } = useSession();
+    const { loading, error, data, filteredProducts, allCategoriesMap, filters, setFilters, actions } = useProductManagement();
+    const { openModal, modalProps } = useProductModal({ onSave: actions.saveProduct });
 
-  const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(10);
-  
-  const paginatedProducts = useMemo(() => filteredProducts.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage), [filteredProducts, currentPage, itemsPerPage]);
-  const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [itemsPerPage, setItemsPerPage] = useState(10);
 
-  const handleFilterChange = (filterName: string, value: string | number) => {
-    setFilters(prev => {
-        const newFilters = { ...prev, [filterName]: value };
-        if (filterName === 'categoryFilter') { newFilters.subCategoryFilter = 'all'; newFilters.childCategoryFilter = 'all'; }
-        if (filterName === 'subCategoryFilter') { newFilters.childCategoryFilter = 'all'; }
-        return newFilters;
-    });
-    setCurrentPage(1);
-  };
+    const paginatedProducts = useMemo(() => filteredProducts.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage), [filteredProducts, currentPage, itemsPerPage]);
+    const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
+
+    const handleFilterChange = (filterName: string, value: string | number) => {
+        setFilters(prev => {
+            const newFilters = { ...prev, [filterName]: value };
+            if (filterName === 'categoryFilter') { newFilters.subCategoryFilter = 'all'; newFilters.childCategoryFilter = 'all'; }
+            if (filterName === 'subCategoryFilter') { newFilters.childCategoryFilter = 'all'; }
+            return newFilters;
+        });
+        setCurrentPage(1);
+    };
+
+    const getFullCategoryName = (childId: number | null) => allCategoriesMap.get(childId as number) 
+        ? `${allCategoriesMap.get(childId as number)?.Category_Name} > ${allCategoriesMap.get(childId as number)?.Sub_Category_Name} > ${allCategoriesMap.get(childId as number)?.Child_Name}` 
+        : 'N/A';
+
+    const stats = useMemo(() => ({
+        total: data.products.length,
+        inStock: data.products.filter(p => actions.getProductStockStatus(p) === 'in_stock').length,
+        lowStock: data.products.filter(p => actions.getProductStockStatus(p) === 'low_stock').length,
+        outOfStock: data.products.filter(p => actions.getProductStockStatus(p) === 'out_of_stock').length,
+        visible: data.products.filter(p => p.Visibility).length
+    }), [data.products, actions.getProductStockStatus]);
+
+    if (loading) return <LoadingSpinner />;
+    if (error) return <div className="text-center p-8 text-error">Error: {error}</div>;
+    if (!session || !session.user.Stock_Mgr) return <AccessDeniedPage />;
   
-  const getFullCategoryName = (childId: number | null) => allCategoriesMap.get(childId as number) 
-    ? `${allCategoriesMap.get(childId as number)?.Category_Name} > ${allCategoriesMap.get(childId as number)?.Sub_Category_Name} > ${allCategoriesMap.get(childId as number)?.Child_Name}` 
-    : 'N/A';
-  
-  const stats = useMemo(() => ({
-    total: data.products.length,
-    inStock: data.products.filter(p => actions.getProductStockStatus(p) === 'in_stock').length,
-    lowStock: data.products.filter(p => actions.getProductStockStatus(p) === 'low_stock').length,
-    outOfStock: data.products.filter(p => actions.getProductStockStatus(p) === 'out_of_stock').length,
-    visible: data.products.filter(p => p.Visibility).length
-  }), [data.products, actions.getProductStockStatus]);
-  
-  if (loading) return <LoadingSpinner />;
-  if (error) return <div className="text-center p-8 text-error">Error: {error}</div>;
-  
-  return (
+    return (
     <div className="min-h-screen bg-base-200 p-4">
         <div className="max-w-7xl mx-auto">
             <div className="bg-base-100 rounded-lg shadow-sm p-6 mb-6 flex justify-between items-center flex-wrap gap-4">
