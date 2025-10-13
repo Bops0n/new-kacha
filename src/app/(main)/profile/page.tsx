@@ -5,6 +5,7 @@ import { FiEdit, FiSave, FiX, FiUser, FiMail, FiPhone, FiMapPin, FiHash, FiHome,
 import { useProfilePage } from '@/app/hooks/useProfilePage'; // << 1. Import Hook
 import { UserSchema, AddressSchema, NewAddressForm } from '@/types';
 import LoadingSpinner from '@/app/components/LoadingSpinner';
+import { useSession } from 'next-auth/react';
 
 // --- Address Form Modal Component ---
 interface AddressModalProps {
@@ -19,7 +20,7 @@ const AddressModal: React.FC<AddressModalProps> = ({ isOpen, onClose, onSave, in
     useEffect(() => { setFormData(initialData); }, [initialData]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-        const { name, value, type, checked } = e.target;
+        const { name, value, type, checked } : any = e.target;
         setFormData(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
     };
 
@@ -87,6 +88,8 @@ export default function ProfilePage() {
   // 2. เรียกใช้ Hook เพื่อดึง State และฟังก์ชันทั้งหมด
   const { loading, userProfile, userAddresses, updateUserProfile, saveAddress, deleteAddress, setDefaultAddress } = useProfilePage();
 
+  const { data: session, update } = useSession();
+
   // State สำหรับจัดการ UI ภายในหน้านี้เท่านั้น
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [profileFormData, setProfileFormData] = useState<Partial<UserSchema>>({});
@@ -103,7 +106,15 @@ export default function ProfilePage() {
   // --- Handlers for UI events ---
   const handleProfileSave = async () => {
     const success = await updateUserProfile(profileFormData);
-    if (success) setIsEditingProfile(false);
+    if (success && session) {
+      await update({
+        user: {
+          ...session.user,
+          name: profileFormData.Full_Name
+        },
+      });
+      setIsEditingProfile(false);
+    }
   };
   
   const openNewAddressModal = () => {
