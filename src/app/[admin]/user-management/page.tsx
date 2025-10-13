@@ -225,6 +225,16 @@ export default function UserManagement() {
 
         const data = await response.json();
 
+        if (session && editFormData.User_ID === Number(session.user.id)) {
+          await update({
+            user: {
+              ...session.user,
+              name: editFormData.Full_Name,
+              accessLevel: editFormData.Access_Level as number
+            },
+          });
+        }
+
         showAlert(data.message, 'success');
       }
       catch (error : any) {
