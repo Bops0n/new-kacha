@@ -15,45 +15,11 @@ export default function AdminNavbar() {
     const [treeOpen, setTreeOpen] = useState(false);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-    const [roles, setRoles] = useState<Role[]>([]);
-    const [chkSysAdmin, setCheckSysAdmin] = useState<boolean>(false);
-    const [chkUserMgr, setCheckUserMgr] = useState<boolean>(false);
-    const [chkStockMgr, setCheckStockMgr] = useState<boolean>(false);
-    const [chkOrderMgr, setCheckOrderMgr] = useState<boolean>(false);
-    const [chkReport, setCheckReport] = useState<boolean>(false);
-    const [chkDashboard, setCheckDashboard] = useState<boolean>(false);
-
-    useEffect(() => {
-        async function apiGetRoles() {
-            const result = await fetch("/api/master/role", { 
-                cache: "no-store" 
-            });
-            const response = await result.json();
-            setRoles(response.roles);
-        }
-
-        apiGetRoles();
-    }, []);
-    
-    useEffect(() => {
-        if (!session || roles.length === 0) return;
-
-        const role = roles.find(x => x.Role === session?.user?.accessLevel);
-        if (role) {
-            setCheckSysAdmin(role.Sys_Admin);
-            setCheckUserMgr(role.User_Mgr);
-            setCheckStockMgr(role.Stock_Mgr);
-            setCheckOrderMgr(role.Order_Mgr);
-            setCheckReport(role.Report);
-            setCheckDashboard(role.Dashboard);
-        }
-    }, [session, roles]);
-
     if (status == 'loading') {
         return <LoadingSpinner />;
     }
 
-    if (session?.user?.accessLevel !== 0 && session?.user.accessLevel !== undefined)  {
+    if (session?.user?.accessLevel != 0 && session?.user.accessLevel !== undefined)  {
         return (
             <>
                 {/* Top Bar */}
@@ -147,13 +113,13 @@ export default function AdminNavbar() {
                         
                         {/* Desktop Menu */}
                         <nav  className="hidden md:flex justify-center items-center gap-x-6 mx-auto max-w-fit">
-                            {chkDashboard && <MenuButton icon={<MdDashboard/>} label="แดชบอร์ด" url="/admin/dashboard"/>}
-                            {chkUserMgr && <MenuButton icon={<FiUser/>} label="จัดการสมาชิก" url="/admin/user-management"/>}
-                            {chkStockMgr && <MenuButton icon={<FaWarehouse/>} label="จัดการคลังสินค้า" url="/admin/product-management"/>}
-                            {chkStockMgr && <MenuButton icon={<MdCategory/>} label="จัดการหมวดหมู่สินค้า" url="/admin/category-management"/>}
-                            {chkOrderMgr && <MenuButton icon={<FaBox/>} label="จัดการคำสั่งซื้อ" url="/admin/order-management"/>}
-                            {chkReport && <MenuButton icon={<TbReport/>} label="รายงาน" url="/admin/report"/>}
-                            {chkSysAdmin && 
+                            {session.user.Dashboard && <MenuButton icon={<MdDashboard/>} label="แดชบอร์ด" url="/admin/dashboard"/>}
+                            {session.user.User_Mgr && <MenuButton icon={<FiUser/>} label="จัดการสมาชิก" url="/admin/user-management"/>}
+                            {session.user.Stock_Mgr && <MenuButton icon={<FaWarehouse/>} label="จัดการคลังสินค้า" url="/admin/product-management"/>}
+                            {session.user.Stock_Mgr && <MenuButton icon={<MdCategory/>} label="จัดการหมวดหมู่สินค้า" url="/admin/category-management"/>}
+                            {session.user.Order_Mgr && <MenuButton icon={<FaBox/>} label="จัดการคำสั่งซื้อ" url="/admin/order-management"/>}
+                            {session.user.Report && <MenuButton icon={<TbReport/>} label="รายงาน" url="/admin/report"/>}
+                            {session.user.Sys_Admin && 
                             <div className="relative">
                                 <button
                                     className="btn btn-ghost justify-between"
@@ -183,13 +149,13 @@ export default function AdminNavbar() {
                     {isMenuOpen && (
                     <div className="md:hidden bg-base-100 border-t border-base-300">
                         <div className="flex flex-col p-3 gap-2">
-                            {chkDashboard && <MobileMenuItem icon={<MdDashboard/>} label="แดชบอร์ด" url="/admin/dashboard"/>}
-                            {chkUserMgr && <MobileMenuItem icon={<FiUser/>} label="จัดการสมาชิก" url="/admin/user-management"/>}
-                            {chkStockMgr && <MobileMenuItem icon={<FaWarehouse/>} label="จัดการคลังสินค้า" url="/admin/product-management"/>}
-                            {chkStockMgr && <MobileMenuItem icon={<MdCategory/>} label="จัดการหมวดหมู่สินค้า" url="/admin/category-management"/>}
-                            {chkOrderMgr && <MobileMenuItem icon={<FaBox/>} label="จัดการคำสั่งซื้อ" url="/admin/order-management"/>}
-                            {chkReport && <MobileMenuItem icon={<TbReport/>} label="รายงาน" url="/admin/report"/>}
-                            {chkSysAdmin && 
+                            {session.user.Dashboard && <MobileMenuItem icon={<MdDashboard/>} label="แดชบอร์ด" url="/admin/dashboard"/>}
+                            {session.user.User_Mgr && <MobileMenuItem icon={<FiUser/>} label="จัดการสมาชิก" url="/admin/user-management"/>}
+                            {session.user.Stock_Mgr && <MobileMenuItem icon={<FaWarehouse/>} label="จัดการคลังสินค้า" url="/admin/product-management"/>}
+                            {session.user.Stock_Mgr && <MobileMenuItem icon={<MdCategory/>} label="จัดการหมวดหมู่สินค้า" url="/admin/category-management"/>}
+                            {session.user.Order_Mgr && <MobileMenuItem icon={<FaBox/>} label="จัดการคำสั่งซื้อ" url="/admin/order-management"/>}
+                            {session.user.Report && <MobileMenuItem icon={<TbReport/>} label="รายงาน" url="/admin/report"/>}
+                            {session.user.Sys_Admin && 
                                 <button className="flex items-center gap-2 px-2 py-2 rounded-md text-left" onClick={() => setTreeOpen((o) => !o)}>
                                 <span className="flex items-center gap-2">
                                     <FiSettings /> ตั้งค่าระบบ
