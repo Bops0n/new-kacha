@@ -248,6 +248,14 @@ export default function RoleManagementPage() {
     };
     
     function onSaved(saved: Role) {
+        if (session && saved.Role == session.user.accessLevel) {
+            update({
+                user: {
+                    ...session.user,
+                    accessLevel: saved.Role
+                },
+            });
+        }
         setRoles(prev => {
             const idx = prev.findIndex(p => p.Role === saved.Role);
             if (idx === -1) return [saved, ...prev];
