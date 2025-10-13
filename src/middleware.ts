@@ -1,3 +1,4 @@
+'use server'
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { getToken } from "next-auth/jwt";
@@ -34,7 +35,6 @@ export const requireRole =
   async (req: NextRequest) => {
     const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
     const role = token?.accessLevel as number;
-
     const path = new URL(req.url).pathname;
     for (const [prefix, allowed] of Object.entries(policy)) {
       if (path.startsWith(prefix)) {
@@ -61,8 +61,11 @@ export const requireMethods =
 
 const guards: Guard[] = [
   requireAuth({ allow: ["/", "/login", "/api/main", "/api/main/cart/"] }),
-  requireRole({ "/admin": [9], }),
-  requireMethods({ "/api/admin": ["GET", "POST"] }),
+  requireRole({ "/admin": [1, 2, 3, 4, 999] }),
+  requireMethods({ 
+    "/api/admin": ["GET", "POST", "PATCH", "PUT", "DELETE"], 
+    "/api/master": ["GET", "POST", "PATCH", "PUT", "DELETE"]
+  }),
 ];
 
 export async function middleware(req: NextRequest) {
@@ -74,14 +77,5 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: [
-    "/app/:path*", 
-    "/cart/:path*", 
-    "/profile/:path*",
-    "/orders-history/:path*",
-    "/admin/:path*", 
-    "/api/admin/:path*",
-    "/api/master/:path*",
-    "/api/main/cart/:path*",
-  ],
+  matcher: ["/((?!_next|api|static|favicon.ico|products|uploads).*)"]
 }
