@@ -7,10 +7,11 @@ import { signIn, useSession } from 'next-auth/react';
 import { redirect } from 'next/navigation';
 import { useAlert } from '@/app/context/AlertModalContext';
 import { useSearchParams, useRouter } from "next/navigation";
+import LoadingSpinner from '@/app/components/LoadingSpinner';
 
 export default function AuthPage() {
 
-  const session = useSession();
+  const { data: session, status, update } = useSession();
   const { showAlert } = useAlert();
 
   const searchParams = useSearchParams();
@@ -70,7 +71,7 @@ export default function AuthPage() {
 
     if (result?.ok) router.push(callbackUrl);
     
-    session.update();
+    update();
 
     switch (result?.status)
     {
@@ -124,9 +125,7 @@ export default function AuthPage() {
     }
   };
 
-    if(session.status === 'loading')
-    return (
-      <>กำลังโหลด...</>)
+  if(status === 'loading') return (<LoadingSpinner/>)
 
   return (
     <div className="min-h-screen bg-base-200 flex items-center justify-center p-4 pt-60">

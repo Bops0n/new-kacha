@@ -15,7 +15,7 @@ interface AuthModalProps {
 
 export default function AuthModal({ isOpen, onClose, initialTab = 'login' }: AuthModalProps) {
 
-  const session = useSession();
+  const { data: session, status, update } = useSession();
   const { showAlert } = useAlert();
 
     const searchParams = useSearchParams();
@@ -80,7 +80,7 @@ export default function AuthModal({ isOpen, onClose, initialTab = 'login' }: Aut
 
     if (result?.ok) router.push(callbackUrl);
     
-    session.update();
+    update();
 
     switch (result?.status)
     {
