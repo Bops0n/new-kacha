@@ -1,24 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { AddressSchema } from '@/types'; // Corrected import path and type name
+import { AddressSchema } from '@/types';
 import { deleteAddress, updateAddress } from '@/app/api/services/userServices';
 import { authenticateRequest } from '@/app/api/auth/utils';
+import { checkRequire } from '@/app/utils/client';
 
-/**
- * PUT /api/address/[addressId]
- * Updates an existing address for the authenticated user.
- * The addressId is taken from the URL parameter.
- * This handler now allows partial updates (behaves like a PATCH) to support specific operations like "set default".
- * If updating a full address, ensure all necessary fields are sent from the client.
- */
 export async function PUT(request: NextRequest, context: { params: { addressId: string } }) {
   const auth = await authenticateRequest();
-  if (!auth.authenticated) {
-    return auth.response;
-  }
-  const userId = auth.userId as number;
+  const isCheck = checkRequire(auth);
+  if (isCheck) return isCheck;
 
-  // Get addressId from URL params
-  //const addressId = parseInt(context.params.addressId);
   const { addressId } = await context.params;
   const parseId = parseInt(addressId);
 
@@ -37,7 +27,7 @@ export async function PUT(request: NextRequest, context: { params: { addressId: 
     );
   }
 
-  const result = await updateAddress(parseId, userId, updatedAddressData);
+  const result = await updateAddress(parseId, Number(auth.userId), updatedAddressData);
 
   if (!result) {
     return NextResponse.json(
@@ -54,10 +44,8 @@ export async function PUT(request: NextRequest, context: { params: { addressId: 
  */
 export async function DELETE(request: NextRequest, context: { params: { addressId: string } }) {
   const auth = await authenticateRequest();
-  if (!auth.authenticated) {
-    return auth.response;
-  }
-  const userId = auth.userId as number;
+  const isCheck = checkRequire(auth);
+  if (isCheck) return isCheck;
 
   // Get addressId from URL params
   const { addressId } = await context.params;
@@ -90,10 +78,8 @@ export async function DELETE(request: NextRequest, context: { params: { addressI
  */
 export async function PATCH(request: NextRequest, context: { params: { addressId: string } }) {
   const auth = await authenticateRequest();
-  if (!auth.authenticated) {
-    return auth.response;
-  }
-  const userId = auth.userId as number;
+  const isCheck = checkRequire(auth);
+  if (isCheck) return isCheck;
 
   const { addressId } = await context.params;
   const parseId = parseInt(addressId);
@@ -113,7 +99,7 @@ export async function PATCH(request: NextRequest, context: { params: { addressId
     );
   }
 
-  const result = await updateAddress(parseId, userId, updatedAddressData);
+  const result = await updateAddress(parseId, Number(auth.userId), updatedAddressData);
 
   if (!result) {
     return NextResponse.json(

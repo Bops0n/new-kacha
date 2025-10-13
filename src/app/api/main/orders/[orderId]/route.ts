@@ -5,6 +5,7 @@ import { poolQuery } from '@/app/api/lib/db';
 import { v4 as uuidv4 } from 'uuid';
 import path from 'path';
 import fs from 'fs/promises';
+import { checkRequire } from '@/app/utils/client';
 
 /**
  * GET /api/main/orders/[orderId]
@@ -15,9 +16,8 @@ export async function GET(
     { params }: { params: { orderId: string } }
 ) {
     const auth = await authenticateRequest();
-    if (!auth.authenticated || !auth.userId) {
-        return auth.response || NextResponse.json({ message: 'Authentication failed' }, { status: 401 });
-    }
+    const isCheck = checkRequire(auth);
+    if (isCheck) return isCheck;
 
     const { orderId } = await params;
     
@@ -54,10 +54,9 @@ export async function PATCH(
     { params }: { params: { orderId: string } }
 ) {
     const auth = await authenticateRequest();
-    if (!auth.authenticated || !auth.userId) {
-        return auth.response!;
-    }
-    const userId = auth.userId;
+    const isCheck = checkRequire(auth);
+    if (isCheck) return isCheck;
+    
     const orderId = parseInt(await params.orderId, 10);
     if (isNaN(orderId)) {
         return NextResponse.json({ message: 'Order ID ไม่ถูกต้อง' }, { status: 400 });
@@ -88,7 +87,7 @@ export async function PATCH(
         const imageUrl = `/uploads/slips/${filename}`;
 
         await fs.writeFile(filePath, buffer);
-        await poolQuery(`UPDATE "Order" SET "Transfer_Slip_Image_URL" = $1 WHERE "Order_ID" = $2 AND "User_ID" = $3`, [imageUrl, orderId, userId]);
+        await poolQuery(`UPDATE "Order" SET "Transfer_Slip_Image_URL" = $1 WHERE "Order_ID" = $2 AND "User_ID" = $3`, [imageUrl, orderId, auth.userId]);
 
         return NextResponse.json({ message: 'อัปโหลดสลิปสำเร็จ', imageUrl });
 

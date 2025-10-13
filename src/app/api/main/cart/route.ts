@@ -1,24 +1,11 @@
-// src/app/api/cart/route.ts
 import { NextResponse } from 'next/server';
-import { poolQuery } from '../../lib/db'; // Adjust this path if your db.js is elsewhere
-import { ProductInventory } from '@/types'; // Import ProductInventory from types.ts
-import { getServerSession } from 'next-auth'; // Import getServerSession
-import { authOptions } from '../../auth/[...nextauth]/route'; // Import your NextAuth config (adjust path as needed)
+import { poolQuery } from '../../lib/db';
+import { ProductInventory } from '@/types';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '../../auth/[...nextauth]/route';
 import { CartDetailSchema } from '@/types';
-
-// Define Type for CartItem to be sent to the Frontend
-// This combines data from ProductInventory and Cart_Detail
-interface CartItem {
-    Product_ID: number;
-    Name: string;
-    Brand: string;
-    Unit: string;
-    Sale_Price: number;
-    Discount_Price: number | null; // Added Discount_Price
-    Image_URL: string | null;
-    Quantity: number; // Quantity in cart
-    AvailableStock: number; // Available stock (from ProductInventory.Quantity)
-}
+import { authenticateRequest } from '../../auth/utils';
+import { checkRequire } from '@/app/utils/client';
 
 /**
  * GET /api/cart
@@ -28,29 +15,9 @@ interface CartItem {
  * Authorization: Only allows a user to retrieve their own cart items.
  */
 export async function GET(request: Request) {
-    // 1. Get the session of the authenticated user
-    const session = await getServerSession(authOptions);
-
-    // 2. Check if the user is authenticated and get their ID
-    if (!session || !session.user || !session.user.id) {
-        // If no session or user ID is found, deny access
-        return NextResponse.json({ message: 'ไม่ได้รับอนุญาต', error: true }, { status: 401 });
-    }
-
-    // Use the authenticated user's ID for all cart operations
-    const authenticatedUserId = parseInt(session.user.id as string);
-
-    // Remove parsing userId from query params as it's no longer used for auth
-    // Also remove the `await request.json()` line as GET requests don't typically have a body
-    // const { searchParams } = new URL(request.url);
-    // const userId = parseInt(searchParams.get('userId') || '');
-    // const k = await request.json() // This line is incorrect for a GET request
-    // console.log(k)
-
-    if (isNaN(authenticatedUserId)) {
-        // This case should ideally not happen if session.user.id is always a valid number string
-        return NextResponse.json({ message: 'User ID จาก session ไม่ถูกต้อง', error: true }, { status: 500 });
-    }
+    const auth = await authenticateRequest();
+    const isCheck = checkRequire(auth);
+    if (isCheck) return isCheck;
 
     try {
         const result = await poolQuery(
@@ -72,7 +39,7 @@ export async function GET(request: Request) {
                 "Product" p ON cd."Product_ID" = p."Product_ID"
             WHERE
                 cd."User_ID" = $1`,
-            [authenticatedUserId]
+            [auth.userId]
         );
 
         // Map ผลลัพธ์ให้ตรงกับ CartDetailSchema ใหม่
@@ -105,19 +72,13 @@ export async function GET(request: Request) {
  * Authorization: Ensures cart operation is for the authenticated user.
  */
 export async function POST(request: Request) {
-    // Get the session of the authenticated user
-    const session = await getServerSession(authOptions);
-    console.log(session,'d')
-
-    // Check if the user is authenticated and get their ID
-    if (!session || !session.user || !session.user.id) {
-        return NextResponse.json({ message: 'ไม่ได้รับอนุญาต', error: true }, { status: 401 });
-    }
-    const authenticatedUserId = parseInt(session.user.id as string);
+    const auth = await authenticateRequest();
+    const isCheck = checkRequire(auth);
+    if (isCheck) return isCheck;
 
     const { productId, quantity } = await request.json(); // userId is now taken from session
 
-    if (isNaN(authenticatedUserId) || isNaN(productId) || isNaN(quantity) || quantity <= 0) {
+    if (isNaN(productId) || isNaN(quantity) || quantity <= 0) {
         return NextResponse.json({ message: 'ข้อมูลนำเข้าไม่ถูกต้อง', error: true }, { status: 400 });
     }
 
@@ -136,7 +97,7 @@ export async function POST(request: Request) {
         // 2. Check current quantity in cart for the authenticated user
         const cartItemResult = await poolQuery(
             'SELECT "Quantity" FROM "Cart_Detail" WHERE "User_ID" = $1 AND "Product_ID" = $2',
-            [authenticatedUserId, productId]
+            [auth.userId, productId]
         );
         const existingCartItem = cartItemResult.rows[0];
 
@@ -154,9 +115,9 @@ export async function POST(request: Request) {
 
             await poolQuery(
                 'UPDATE "Cart_Detail" SET "Quantity" = $3 WHERE "User_ID" = $1 AND "Product_ID" = $2',
-                [authenticatedUserId, productId, newTotalQuantity]
+                [auth.userId, productId, newTotalQuantity]
             );
-            console.log(`Updated quantity for User ${authenticatedUserId}, Product ${productId} to ${newTotalQuantity}`);
+            console.log(`Updated quantity for User ${auth.userId}, Product ${productId} to ${newTotalQuantity}`);
         } else {
             // Item does not exist, insert new item
             if (quantity > product.Quantity) {
@@ -168,9 +129,9 @@ export async function POST(request: Request) {
 
             await poolQuery(
                 'INSERT INTO "Cart_Detail" ("User_ID", "Product_ID", "Quantity") VALUES ($1, $2, $3)',
-                [authenticatedUserId, productId, quantity]
+                [auth.userId, productId, quantity]
             );
-            console.log(`Added new item for User ${authenticatedUserId}, Product ${productId} with quantity ${quantity}`);
+            console.log(`Added new item for User ${auth.userId}, Product ${productId} with quantity ${quantity}`);
         }
 
         return NextResponse.json({ message: 'อัปเดตตะกร้าสินค้าสำเร็จ', error: false }, { status: 200 });
@@ -188,32 +149,26 @@ export async function POST(request: Request) {
  * Authorization: Ensures cart operation is for the authenticated user.
  */
 export async function DELETE(request: Request) {
-    // Get the session of the authenticated user
-    const session = await getServerSession(authOptions);
-    console.log('delete')
-
-    // Check if the user is authenticated and get their ID
-    if (!session || !session.user || !session.user.id) {
-        return NextResponse.json({ message: 'ไม่ได้รับอนุญาต', error: true }, { status: 401 });
-    }
-    const authenticatedUserId = parseInt(session.user.id as string);
+    const auth = await authenticateRequest();
+    const isCheck = checkRequire(auth);
+    if (isCheck) return isCheck;
 
     const { productId } = await request.json(); // userId is now taken from session
 
-    if (isNaN(authenticatedUserId) || isNaN(productId)) {
+    if (isNaN(productId)) {
         return NextResponse.json({ message: 'ข้อมูลนำเข้าไม่ถูกต้อง', error: true }, { status: 400 });
     }
 
     try {
         const deleteResult = await poolQuery(
             'DELETE FROM "Cart_Detail" WHERE "User_ID" = $1 AND "Product_ID" = $2 RETURNING "Product_ID"', // RETURNING to check if any row was deleted
-            [authenticatedUserId, productId]
+            [auth.userId, productId]
         );
 
         if (deleteResult.rowCount === 0) {
             return NextResponse.json({ message: 'ไม่พบสินค้าในตะกร้า', error: true }, { status: 404 });
         }
-        console.log(`Removed item for User ${authenticatedUserId}, Product ${productId}`);
+        console.log(`Removed item for User ${auth.userId}, Product ${productId}`);
 
         return NextResponse.json({ message: 'นำสินค้าออกจากตะกร้าสำเร็จ', error: false }, { status: 200 });
     } catch (error) {
@@ -230,18 +185,13 @@ export async function DELETE(request: Request) {
  * Authorization: Ensures cart operation is for the authenticated user.
  */
 export async function PATCH(request: Request) {
-    // Get the session of the authenticated user
-    const session = await getServerSession(authOptions);
-
-    // Check if the user is authenticated and get their ID
-    if (!session || !session.user || !session.user.id) {
-        return NextResponse.json({ message: 'ไม่ได้รับอนุญาต', error: true }, { status: 401 });
-    }
-    const authenticatedUserId = parseInt(session.user.id as string);
+    const auth = await authenticateRequest();
+    const isCheck = checkRequire(auth);
+    if (isCheck) return isCheck;
 
     const { productId, newQuantity } = await request.json(); // userId is now taken from session
 
-    if (isNaN(authenticatedUserId) || isNaN(productId) || isNaN(newQuantity) || newQuantity <= 0) {
+    if (isNaN(productId) || isNaN(newQuantity) || newQuantity <= 0) {
         return NextResponse.json({ message: 'ข้อมูลนำเข้าไม่ถูกต้อง', error: true }, { status: 400 });
     }
 
@@ -267,13 +217,13 @@ export async function PATCH(request: Request) {
         // 2. Update quantity in Cart_Detail for the authenticated user
         const updateResult = await poolQuery(
             'UPDATE "Cart_Detail" SET "Quantity" = $3 WHERE "User_ID" = $1 AND "Product_ID" = $2 RETURNING "Product_ID"',
-            [authenticatedUserId, productId, newQuantity]
+            [auth.userId, productId, newQuantity]
         );
 
         if (updateResult.rowCount === 0) {
             return NextResponse.json({ message: 'ไม่พบสินค้าในตะกร้าที่จะอัปเดต', error: true }, { status: 404 });
         }
-        console.log(`Set quantity for User ${authenticatedUserId}, Product ${productId} to ${newQuantity}`);
+        console.log(`Set quantity for User ${auth.userId}, Product ${productId} to ${newQuantity}`);
 
         return NextResponse.json({ message: 'อัปเดตจำนวนสินค้าในตะกร้าสำเร็จ', error: false }, { status: 200 });
     } catch (error) {

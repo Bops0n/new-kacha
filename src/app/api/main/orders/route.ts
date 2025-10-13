@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { pool, poolQuery } from '@/app/api/lib/db';
 import { authenticateRequest } from '@/app/api/auth/utils';
 import { AddressSchema, Order } from '@/types';
+import { checkRequire } from '@/app/utils/client';
 
 // Type for product items received in the order request body
 interface OrderProductRequestBody {
@@ -91,14 +92,12 @@ const mapDbRowsToUiOrder = (dbRows: any[]): Order[] => {
  */
 export async function GET(request: NextRequest) {
     const auth = await authenticateRequest();
-    if (!auth.authenticated || !auth.userId) {
-        return auth.response!;
-    }
-    const userId = auth.userId;
+    const isCheck = checkRequire(auth);
+    if (isCheck) return isCheck;
 
     try {
 
-        const result = await poolQuery(`SELECT * FROM "SP_USER_ORDER_UID_GET"($1)`, [userId]);
+        const result = await poolQuery(`SELECT * FROM "SP_USER_ORDER_UID_GET"($1)`, [auth.userId]);
         const orders: Order[] = mapDbRowsToUiOrder(result.rows);
 
         return NextResponse.json({ orders });
@@ -120,10 +119,8 @@ export async function GET(request: NextRequest) {
  */
 export async function POST(request: NextRequest) {
     const auth = await authenticateRequest();
-    if (!auth.authenticated || !auth.userId) {
-        return auth.response!;
-    }
-    const userId = auth.userId;
+    const isCheck = checkRequire(auth);
+    if (isCheck) return isCheck;
 
     const { addressId, paymentMethod, cartItems, totalPrice }: PlaceOrderRequestBody = await request.json();
 
@@ -131,7 +128,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ message: 'ข้อมูลคำสั่งซื้อไม่ครบถ้วน', error: true }, { status: 400 });
     }
     
-    const addressResult = await poolQuery('SELECT * FROM "Address" WHERE "Address_ID" = $1 AND "User_ID" = $2', [addressId, userId]);
+    const addressResult = await poolQuery('SELECT * FROM "Address" WHERE "Address_ID" = $1 AND "User_ID" = $2', [addressId, auth.userId]);
     if (addressResult.rowCount === 0) {
         return NextResponse.json({ message: 'ที่อยู่จัดส่งไม่ถูกต้อง', error: true }, { status: 400 });
     }
@@ -144,7 +141,7 @@ export async function POST(request: NextRequest) {
             "User_ID", "Order_Date", "Status", "Payment_Type", "Address_ID", 
             "Address", "Phone", "Total_Amount"
         ) VALUES ($1, NOW(), 'pending', $2, $3, $4, $5, $6) RETURNING "Order_ID"`,
-        [userId, paymentMethod, addressId, shippingAddressString, shippingPhone, totalPrice]
+        [auth.userId, paymentMethod, addressId, shippingAddressString, shippingPhone, totalPrice]
     );
     const orderId: number = orderInsertResult.rows[0].Order_ID;
 
@@ -182,7 +179,7 @@ export async function POST(request: NextRequest) {
         );
     }
 
-    await poolQuery(`DELETE FROM "Cart_Detail" WHERE "User_ID" = $1`, [userId]);
+    await poolQuery(`DELETE FROM "Cart_Detail" WHERE "User_ID" = $1`, [auth.userId]);
     
     return NextResponse.json({ message: 'สร้างคำสั่งซื้อสำเร็จ', orderId }, { status: 201 });
 }

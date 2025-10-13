@@ -3,7 +3,6 @@ import { poolQuery } from '@/app/api/lib/db';
 
 export async function GET() {
   try {
-    // ใช้ Promise.all เพื่อดึงข้อมูลทั้ง 3 ตารางพร้อมกัน
     const allCategories = await poolQuery(`SELECT * FROM "SP_ALL_CATEGORIES_GET"()`);
     const { categories, subCategories, childSubCategories } = allCategories.rows[0];
     
