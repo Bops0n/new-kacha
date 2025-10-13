@@ -1,13 +1,13 @@
 import { checkRequire } from "@/app/utils/client";
 import { NextRequest, NextResponse } from "next/server";
-import { authenticateRequest } from "../../auth/utils";
-import { pool, poolQuery } from "../../lib/db";
+import { checkSystemAdminRequire } from "../../auth/utils";
+import { poolQuery } from "../../lib/db";
 import { Role } from "@/types/role.types";
 
 export async function GET(req: NextRequest) {
-    const auth = await authenticateRequest();
-    const isCheck = checkRequire(auth);
-    if (isCheck) return isCheck;
+    // const auth = await checkSystemAdminRequire();
+    // const isCheck = checkRequire(auth);
+    // if (isCheck) return isCheck;
     
     const { rows } = await poolQuery(`SELECT * FROM master."SP_MASTER_ACCESS_LEVEL_GET"()`);
 
@@ -19,7 +19,7 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-    const auth = await authenticateRequest();
+    const auth = await checkSystemAdminRequire();
     const isCheck = checkRequire(auth);
     if (isCheck) return isCheck;
     
@@ -35,7 +35,7 @@ export async function POST(req: NextRequest) {
 }
 
 export async function PUT(req: NextRequest) {
-    const auth = await authenticateRequest();
+    const auth = await checkSystemAdminRequire();
     const isCheck = checkRequire(auth);
     if (isCheck) return isCheck;
 
@@ -75,7 +75,7 @@ export async function PUT(req: NextRequest) {
 }
 
 export async function DELETE(req: NextRequest) {
-    const auth = await authenticateRequest();
+    const auth = await checkSystemAdminRequire();
     const isCheck = checkRequire(auth);
     if (isCheck) return isCheck;
 

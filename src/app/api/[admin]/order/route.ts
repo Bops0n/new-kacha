@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { authenticateRequest } from '@/app/api/auth/utils';
+import { checkOrderMgrRequire } from '@/app/api/auth/utils';
 import * as orderService from '@/app/api/services/admin/orderService';
 import { Order } from '@/types';
 import { checkRequire } from '@/app/utils/client';
@@ -9,7 +9,7 @@ import { checkRequire } from '@/app/utils/client';
  * สามารถกรองด้วย ID ผ่าน query parameter ได้ (e.g., ?id=123)
  */
 export async function GET(req: NextRequest) {
-    const auth = await authenticateRequest();
+    const auth = await checkOrderMgrRequire();
     const isCheck = checkRequire(auth);
     if (isCheck) return isCheck;
 
@@ -28,7 +28,7 @@ export async function GET(req: NextRequest) {
  * รับข้อมูลที่ต้องการอัปเดตผ่าน body
  */
 export async function PATCH(req: NextRequest) {
-    const auth = await authenticateRequest();
+    const auth = await checkOrderMgrRequire();
     const isCheck = checkRequire(auth);
     if (isCheck) return isCheck;
 
@@ -47,7 +47,7 @@ export async function PATCH(req: NextRequest) {
  * รับ ID ที่ต้องการลบผ่าน query parameter (e.g., ?id=123)
  */
 export async function DELETE(req: NextRequest) {
-    const auth = await authenticateRequest();
+    const auth = await checkOrderMgrRequire();
     const isCheck = checkRequire(auth);
     if (isCheck) return isCheck;
     

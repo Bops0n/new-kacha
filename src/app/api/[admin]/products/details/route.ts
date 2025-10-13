@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { authenticateRequest } from '@/app/api/auth/utils';
+import { checkStockMgrRequire } from '@/app/api/auth/utils';
 import { poolQuery } from '@/app/api/lib/db';
 import { SimpleProductDetail } from '@/types';
 import { checkRequire } from '@/app/utils/client';
@@ -9,7 +9,7 @@ import { checkRequire } from '@/app/utils/client';
  * รับ Product IDs (array) และ trả về ข้อมูลสินค้าที่เกี่ยวข้องทั้งหมด
  */
 export async function POST(req: NextRequest) {
-    const auth = await authenticateRequest();
+    const auth = await checkStockMgrRequire();
     const isCheck = checkRequire(auth);
     if (isCheck) return isCheck;
 

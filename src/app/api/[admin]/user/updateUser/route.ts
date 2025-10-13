@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { poolQuery } from '../../../lib/db';
 import { UserAccount } from '@/types';
-import { authenticateRequest } from '@/app/api/auth/utils';
+import { checkUserMgrRequire } from '@/app/api/auth/utils';
 import { checkRequire } from '@/app/utils/client';
 import { hmacMd5Hex } from '@/app/utils/cryptor';
 
 export async function PATCH(req: NextRequest) {
-    const auth = await authenticateRequest();
+    const auth = await checkUserMgrRequire();
     const isCheck = checkRequire(auth);
     if (isCheck) return isCheck;
     

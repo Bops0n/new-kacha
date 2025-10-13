@@ -3,10 +3,10 @@ import path from 'path';
 import { writeFile, mkdir } from 'fs/promises';
 import { v4 as uuidv4 } from 'uuid';
 import { checkRequire } from '@/app/utils/client';
-import { authenticateRequest } from '../../auth/utils';
+import { checkStockMgrRequire } from '../../auth/utils';
 
 export async function POST(req: NextRequest) {
-    const auth = await authenticateRequest();
+    const auth = await checkStockMgrRequire();
     const isCheck = checkRequire(auth);
     if (isCheck) return isCheck;
 

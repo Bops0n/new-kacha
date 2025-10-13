@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { authenticateRequest } from '@/app/api/auth/utils';
+import { checkStockMgrRequire } from '@/app/api/auth/utils';
 import * as productService from '@/app/api/services/admin/productsService';
 import { checkRequire } from '@/app/utils/client';
 
@@ -8,7 +8,7 @@ import { checkRequire } from '@/app/utils/client';
  * ดึงข้อมูลสินค้าทั้งหมดสำหรับ Admin
  */
 export async function GET(req: NextRequest) {
-    const auth = await authenticateRequest();
+    const auth = await checkStockMgrRequire();
     const isCheck = checkRequire(auth);
     if (isCheck) return isCheck;
     
@@ -25,7 +25,7 @@ export async function GET(req: NextRequest) {
  * เพิ่มสินค้าใหม่
  */
 export async function POST(req: NextRequest) {
-    const auth = await authenticateRequest();
+    const auth = await checkStockMgrRequire();
     const isCheck = checkRequire(auth);
     if (isCheck) return isCheck;
     
@@ -47,7 +47,7 @@ export async function POST(req: NextRequest) {
  * อัปเดตข้อมูลสินค้า
  */
 export async function PATCH(req: NextRequest) {
-    const auth = await authenticateRequest();
+    const auth = await checkStockMgrRequire();
     const isCheck = checkRequire(auth);
     if (isCheck) return isCheck;
 
@@ -74,7 +74,7 @@ export async function PATCH(req: NextRequest) {
  * ลบสินค้า
  */
 export async function DELETE(req: NextRequest) {
-    const auth = await authenticateRequest();
+    const auth = await checkStockMgrRequire();
     const isCheck = checkRequire(auth);
     if (isCheck) return isCheck;
 

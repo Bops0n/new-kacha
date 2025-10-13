@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { pool, poolQuery } from '@/app/api/lib/db';
-import { authenticateRequest } from '@/app/api/auth/utils';
+import { poolQuery } from '@/app/api/lib/db';
+import { checkStockMgrRequire } from '@/app/api/auth/utils';
 import { checkRequire } from '@/app/utils/client';
 
 interface AddStockRequestBody {
@@ -9,7 +9,7 @@ interface AddStockRequestBody {
 }
 
 export async function PATCH(req: NextRequest) {
-    const auth = await authenticateRequest();
+    const auth = await checkStockMgrRequire();
     const isCheck = checkRequire(auth);
     if (isCheck) return isCheck;
     

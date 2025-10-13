@@ -33,7 +33,7 @@ export async function authenticateRequest() {
         };
     }
 
-    const accessLevel = session.user.accessLevel ?? -1;
+    const accessLevel : number = session.user.accessLevel ?? -1;
     if (accessLevel < 0) {
         console.error('Access level not found in session:', session.user);
         return {
@@ -45,6 +45,162 @@ export async function authenticateRequest() {
     }
 
     return { authenticated: true, userId: authenticatedUserId, accessLevel, response: null };
+}
+
+export async function checkSystemAdminRequire() {
+    const { authenticated, userId, accessLevel, response } = await authenticateRequest();
+    
+    if (!authenticated || !userId || accessLevel < 0) {
+        return {
+            authenticated: false,
+            response: response,
+            userId: null,
+            accessLevel: -1
+        }
+    }
+
+    const session = await getServerSession(authOptions);
+
+    if (!session?.user.Sys_Admin) {
+        return { 
+            authenticated: false, 
+            response: NextResponse.json({ message: 'ข้อมูลสิทธิ์การเข้าถึงไม่ถูกต้อง!', error: true }, { status: 500 }),
+            userId: null,
+            accessLevel: -1
+        };
+    }
+
+    return { authenticated, userId, accessLevel, response };
+}
+
+export async function checkUserMgrRequire() {
+    const { authenticated, userId, accessLevel, response } = await authenticateRequest();
+    
+    if (!authenticated || !userId || accessLevel < 0) {
+        return {
+            authenticated: false,
+            response: response,
+            userId: null,
+            accessLevel: -1
+        }
+    }
+
+    const session = await getServerSession(authOptions);
+
+    if (!session?.user.User_Mgr) {
+        return { 
+            authenticated: false, 
+            response: NextResponse.json({ message: 'ข้อมูลสิทธิ์การเข้าถึงไม่ถูกต้อง!', error: true }, { status: 500 }),
+            userId: null,
+            accessLevel: -1
+        };
+    }
+
+    return { authenticated, userId, accessLevel, response };
+}
+
+export async function checkStockMgrRequire() {
+    const { authenticated, userId, accessLevel, response } = await authenticateRequest();
+    
+    if (!authenticated || !userId || accessLevel < 0) {
+        return {
+            authenticated: false,
+            response: response,
+            userId: null,
+            accessLevel: -1
+        }
+    }
+
+    const session = await getServerSession(authOptions);
+
+    if (!session?.user.Stock_Mgr) {
+        return { 
+            authenticated: false, 
+            response: NextResponse.json({ message: 'ข้อมูลสิทธิ์การเข้าถึงไม่ถูกต้อง!', error: true }, { status: 500 }),
+            userId: null,
+            accessLevel: -1
+        };
+    }
+
+    return { authenticated, userId, accessLevel, response };
+}
+
+export async function checkOrderMgrRequire() {
+    const { authenticated, userId, accessLevel, response } = await authenticateRequest();
+    
+    if (!authenticated || !userId || accessLevel < 0) {
+        return {
+            authenticated: false,
+            response: response,
+            userId: null,
+            accessLevel: -1
+        }
+    }
+
+    const session = await getServerSession(authOptions);
+
+    if (!session?.user.Order_Mgr) {
+        return { 
+            authenticated: false, 
+            response: NextResponse.json({ message: 'ข้อมูลสิทธิ์การเข้าถึงไม่ถูกต้อง!', error: true }, { status: 500 }),
+            userId: null,
+            accessLevel: -1
+        };
+    }
+
+    return { authenticated, userId, accessLevel, response };
+}
+
+export async function checkReportRequire() {
+    const { authenticated, userId, accessLevel, response } = await authenticateRequest();
+    
+    if (!authenticated || !userId || accessLevel < 0) {
+        return {
+            authenticated: false,
+            response: response,
+            userId: null,
+            accessLevel: -1
+        }
+    }
+
+    const session = await getServerSession(authOptions);
+
+    if (!session?.user.Report) {
+        return { 
+            authenticated: false, 
+            response: NextResponse.json({ message: 'ข้อมูลสิทธิ์การเข้าถึงไม่ถูกต้อง!', error: true }, { status: 500 }),
+            userId: null,
+            accessLevel: -1
+        };
+    }
+
+    return { authenticated, userId, accessLevel, response };
+}
+
+export async function checkDashboardRequire() {
+    const { authenticated, userId, accessLevel, response } = await authenticateRequest();
+    
+    if (!authenticated || !userId || accessLevel < 0) {
+        return {
+            authenticated: false,
+            response: response,
+            userId: null,
+            accessLevel: -1
+        }
+    }
+
+    const session = await getServerSession(authOptions);
+
+    if (!session?.user.Dashboard) {
+        return { 
+            authenticated: false, 
+            response: NextResponse.json({ message: 'ข้อมูลสิทธิ์การเข้าถึงไม่ถูกต้อง!', error: true }, { status: 500 }),
+            userId: null,
+            accessLevel: -1
+        };
+    }
+
+    return { authenticated, userId, accessLevel, response };
 }
 
 export const RegisterSchema = z.object({

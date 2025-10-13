@@ -1,17 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { pool, poolQuery } from '../../../lib/db'; // Updated path
 import { AddressSchema } from '@/types';
 import { addNewAddress } from '@/app/api/services/userServices';
-import { authenticateRequest } from '@/app/api/auth/utils';
+import { checkUserMgrRequire } from '@/app/api/auth/utils';
 import { checkRequire } from '@/app/utils/client';
 
-// POST API route to add a new address
 export async function POST(req: NextRequest) {
-    const auth = await authenticateRequest();
+    const auth = await checkUserMgrRequire();
     const isCheck = checkRequire(auth);
     if (isCheck) return isCheck;
     
-    let newAddressData: Omit<AddressSchema, 'Address_ID'>; // Omit Address_ID as it's auto-generated
+    let newAddressData: Omit<AddressSchema, 'Address_ID'>;
     try {
         newAddressData = await req.json();
     } catch (error) {
@@ -22,7 +20,6 @@ export async function POST(req: NextRequest) {
         );
     }
 
-    // --- Validate Required Input Fields ---
     const requiredFields = ['User_ID', 'Address_1', 'Sub_District', 'District', 'Province', 'Zip_Code'];
     for (const field of requiredFields) {
         if (!newAddressData[field as keyof typeof newAddressData]) {

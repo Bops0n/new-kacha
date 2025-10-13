@@ -1,21 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth'; // For session handling (optional)
-import { authOptions } from '../../../auth/[...nextauth]/route'; // For session handling (optional)
-import { poolQuery, pool } from '../../../lib/db'; // Your database utility from 'pool-query-function' Canvas
 import { AddressSchema } from '@/types';
 import { updateAddress } from '@/app/api/services/userServices';
+import { checkUserMgrRequire } from '@/app/api/auth/utils';
+import { checkRequire } from '@/app/utils/client';
 
 export async function PATCH(req: NextRequest) {
-    // --- Optional: Session Check for Authorization ---
-    // Uncomment this section if you want to restrict who can update address data.
-    // For example, only the owner of the address or an admin can update it.
-    // const session = await getServerSession(authOptions);
-    // if (!session) {
-    //     return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
-    // }
-    // console.log("User session:", session);
+    const auth = await checkUserMgrRequire();
+    const isCheck = checkRequire(auth);
+    if (isCheck) return isCheck;
 
-    let updatedAddressData: Partial<AddressSchema>; // Use Partial<Address> to allow only some fields
+    let updatedAddressData: Partial<AddressSchema>;
     try {
         updatedAddressData = await req.json();
     } catch (error) {
@@ -26,8 +20,6 @@ export async function PATCH(req: NextRequest) {
         );
     }
 
-    // --- Validate Input ---
-    // Ensure Address_ID is provided in the request body for the update operation
     if (typeof updatedAddressData.Address_ID === 'undefined' || updatedAddressData.Address_ID === null) {
         return NextResponse.json(
             { message: "Address_ID is required in the request body for updating an address." },

@@ -1,19 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { poolQuery } from '../../../lib/db'; // Your database utility from 'pool-query-function' Canvas
+import { poolQuery } from '../../../lib/db';
 import { UserAccount } from '@/types';
-import { authenticateRequest } from '@/app/api/auth/utils';
+import { checkUserMgrRequire } from '@/app/api/auth/utils';
 import { checkRequire } from '@/app/utils/client';
 
-// POST API route to add a new user
 export async function POST(req: NextRequest) {
-    // --- Optional: Session Check for Authorization ---
-    // Uncomment this section if you want to restrict who can add new user data.
-    // For example, only an admin or an authorized system can create new users.
-    const auth = await authenticateRequest();
+    const auth = await checkUserMgrRequire();
     const isCheck = checkRequire(auth);
     if (isCheck) return isCheck;
     
-    let newUserData: Omit<UserAccount, 'User_ID' | 'Token'>; // Omit User_ID (auto-generated) and Token (managed internally)
+    let newUserData: Omit<UserAccount, 'User_ID' | 'Token'>;
     try {
         newUserData = await req.json();
     } catch (error) {
@@ -24,10 +20,6 @@ export async function POST(req: NextRequest) {
         );
     }
 
-    // --- Validate Required Input Fields ---
-    // Password should ideally be hashed on the backend before insertion.
-    // For simplicity here, we assume it's sent as plain text or already hashed.
-    // In a real application, you would hash it here (e.g., using bcrypt).
     const requiredFields = ['Username', 'Password', 'Full_Name', 'Email'];
     for (const field of requiredFields) {
         if (!newUserData[field as keyof typeof newUserData]) {
@@ -39,12 +31,12 @@ export async function POST(req: NextRequest) {
     }
 
     try {
-        const result = await poolQuery(`SELECT * FROM "SP_ADMIN_USER_INS"($1, $2)`, [JSON.stringify(newUserData), auth.userId]);
-        const UserID = result.rows[0].Result;
+        const { rows } = await poolQuery(`SELECT * FROM "SP_ADMIN_USER_INS"($1, $2)`, [JSON.stringify(newUserData), auth.userId]);
+        const UserID = rows[0].Result;
 
         return NextResponse.json(
             { message: "User added successfully.", User_ID: UserID, status: 200 },
-            { status: 200 } // 201 Created status
+            { status: 200 }
         );
 
     } catch (dbError: any) {

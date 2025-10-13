@@ -1,22 +1,19 @@
-// app/api/categories/route.ts
-
 import { NextRequest, NextResponse } from 'next/server';
-// import { getServerSession } from 'next-auth'; // Optional: for authorization
-// import { authOptions } from '../../auth/[...nextauth]/route'; // Optional: for authorization
-import { poolQuery } from '../../lib/db'; // Adjust path if needed
-import { authenticateRequest } from '@/app/api/auth/utils';
+import { poolQuery } from '../../lib/db';
+import { checkStockMgrRequire } from '@/app/api/auth/utils';
 import * as categoryService from '@/app/api/services/admin/categoryService';
 import { checkRequire } from '@/app/utils/client';
 
-// Define interface for Category, matching your assumed database schema for Category
 interface Category {
     Category_ID: number;
     Name: string;
 }
 
-// --- GET All Categories or by ID ---
+/**
+ * GET: สำหรับดึงข้อมูล Category ทั้งหมด
+ */
 export async function GET(req: NextRequest) {
-    const auth = await authenticateRequest();
+    const auth = await checkStockMgrRequire();
     const isCheck = checkRequire(auth);
     if (isCheck) return isCheck;
         
@@ -48,14 +45,12 @@ export async function GET(req: NextRequest) {
     }
 }
 
-
-
 /**
  * POST: สำหรับสร้างหมวดหมู่ใหม่ (main, sub, child)
  * Body: { type: 'main' | 'sub' | 'child', payload: { name, parentId? } }
  */
 export async function POST(req: NextRequest) {
-    const auth = await authenticateRequest();
+    const auth = await checkStockMgrRequire();
     const isCheck = checkRequire(auth);
     if (isCheck) return isCheck;
 
@@ -73,7 +68,7 @@ export async function POST(req: NextRequest) {
  * Body: { type: 'main' | 'sub' | 'child', payload: { id, name } }
  */
 export async function PATCH(req: NextRequest) {
-    const auth = await authenticateRequest();
+    const auth = await checkStockMgrRequire();
     const isCheck = checkRequire(auth);
     if (isCheck) return isCheck;
 
@@ -91,7 +86,7 @@ export async function PATCH(req: NextRequest) {
  * Query Params: ?type=main&id=123
  */
 export async function DELETE(req: NextRequest) {
-    const auth = await authenticateRequest();
+    const auth = await checkStockMgrRequire();
     const isCheck = checkRequire(auth);
     if (isCheck) return isCheck;
 
