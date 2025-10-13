@@ -16,13 +16,12 @@ export async function getUserProfileById(userId: number): Promise<UserSchema | n
  */
 export async function updateUserProfile(userId: number, data: Partial<UserSchema>): Promise<boolean> {
   
-  delete data.Token;
   delete data.Addresses;
   delete data.Access_Level;
   delete data.User_ID;
   
-  const result = await poolQuery(`SELECT * FROM "SP_USER_ACCOUNT_UPD"($1, $2, $3)`, [userId, JSON.stringify(data)]);
-  return result.rowCount > 0;
+  const { rowCount } = await poolQuery(`SELECT * FROM "SP_USER_ACCOUNT_UPD"($1, $2)`, [userId, JSON.stringify(data)]);
+  return rowCount > 0;
 }
 
 
@@ -32,8 +31,8 @@ export async function updateUserProfile(userId: number, data: Partial<UserSchema
  * ดึงที่อยู่ทั้งหมดของผู้ใช้
  */
 export async function getAddressesByUserId(userId: number): Promise<AddressSchema[]> {
-  const result = await poolQuery(`SELECT * FROM "SP_USER_ADDRESS_UID_GET"($1)`, [userId]);
-  return result.rows;
+  const { rows } = await poolQuery(`SELECT * FROM "SP_USER_ADDRESS_UID_GET"($1)`, [userId]);
+  return rows;
 }
 
 export async function getAddressesByAddressId(addressId: number): Promise<AddressSchema[]> {
