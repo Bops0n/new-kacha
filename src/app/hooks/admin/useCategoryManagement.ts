@@ -34,16 +34,16 @@ export function useCategoryManagement() {
   useEffect(() => {
     const allItems: CategoryDisplayItem[] = [
       ...categories.map(c => ({ 
-          id: c.Category_ID, name: c.Name, type: 'main' as const, 
-          parentId: null, parentName: '-' 
+          ID: c.Category_ID, Name: c.Name, Type: 'main' as const, 
+          ParentId: null, ParentName: '-' 
       })),
       ...subCategories.map(c => ({ 
-          id: c.Sub_Category_ID, name: c.Name, type: 'sub' as const, 
-          parentId: c.Category_ID, parentName: categories.find(m => m.Category_ID === c.Category_ID)?.Name || 'N/A' 
+          ID: c.Sub_Category_ID, Name: c.Name, Type: 'sub' as const, 
+          ParentId: c.Category_ID, ParentName: categories.find(m => m.Category_ID === c.Category_ID)?.Name || 'N/A' 
       })),
       ...childSubCategories.map(c => ({ 
-          id: c.Child_ID, name: c.Name, type: 'child' as const, 
-          parentId: c.Sub_Category_ID, parentName: subCategories.find(s => s.Sub_Category_ID === c.Sub_Category_ID)?.Name || 'N/A' 
+          ID: c.Child_ID, Name: c.Name, Type: 'child' as const, 
+          ParentId: c.Sub_Category_ID, ParentName: subCategories.find(s => s.Sub_Category_ID === c.Sub_Category_ID)?.Name || 'N/A' 
       })),
     ];
     setCombinedList(allItems);
@@ -53,8 +53,8 @@ export function useCategoryManagement() {
   const filteredItems = useMemo(() => {
     return combinedList.filter(item => {
         const { searchTerm, typeFilter } = filters;
-        if (typeFilter !== 'all' && item.type !== typeFilter) return false;
-        if (searchTerm && !item.name.toLowerCase().includes(searchTerm.toLowerCase()) && !item.id.toString().includes(searchTerm)) return false;
+        if (typeFilter !== 'all' && item.Type !== typeFilter) return false;
+        if (searchTerm && !item.Name.toLowerCase().includes(searchTerm.toLowerCase()) && !item.ID.toString().includes(searchTerm)) return false;
         return true;
     });
   }, [combinedList, filters]);
@@ -69,26 +69,16 @@ export function useCategoryManagement() {
   const closeModal = useCallback(() => setIsModalOpen(false), []);
 
   const saveCategory = useCallback(async (formData: CategoryFormData) => {
-    const isEditing = !!formData.id;
+    const isEditing = !!formData.ID;
     const method = isEditing ? 'PATCH' : 'POST';
-    
-    const { id, name, type, selectedMainCategory, selectedSubCategory } = formData;
-    let parentId = null;
-    if (type === 'sub') parentId = selectedMainCategory;
-    if (type === 'child') parentId = selectedSubCategory;
 
-    if (type !== 'main' && !parentId) {
-        showAlert('กรุณาเลือกหมวดหมู่แม่', 'warning');
-        return;
-    }
-
-    const payload = isEditing ? { id, name } : { name, parentId };
+    console.log(formData);
 
     try {
         const response = await fetch('/api/admin/categories', {
             method: method,
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ type, payload }),
+            body: JSON.stringify(formData)
         });
         const result = await response.json();
         if (!response.ok) throw new Error(result.message || 'เกิดข้อผิดพลาดในการบันทึก');
@@ -102,9 +92,9 @@ export function useCategoryManagement() {
   }, [showAlert, closeModal, refetch]);
 
   const deleteCategory = useCallback((item: CategoryDisplayItem) => {
-    showAlert(`คุณแน่ใจหรือไม่ที่จะลบหมวดหมู่ \n"${item.name}"?\nหมวกลบหมวดหมู่นี้ \n-หมวดหมู่ที่เกี่ยวข้องทั้งหมดจะถูกลบ\n-สินค้าที่เกี่ยวข้องจะไม่มีหมวดหมู่`, 'warning', `ยืนยันการลบ`, async () => {
+    showAlert(`คุณแน่ใจหรือไม่ที่จะลบหมวดหมู่ \n"${item.Name}" ?\nหากลบหมวดหมู่นี้ \n* หมวดหมู่ที่เกี่ยวข้องทั้งหมดจะถูกลบ\n* สินค้าที่เกี่ยวข้องจะไม่มีหมวดหมู่`, 'warning', `ยืนยันการลบ`, async () => {
         try {
-            const response = await fetch(`/api/admin/categories?type=${item.type}&id=${item.id}`, {
+            const response = await fetch(`/api/admin/categories?type=${item.Type}&id=${item.ID}`, {
                 method: 'DELETE',
             });
             const result = await response.json();
