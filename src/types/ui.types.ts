@@ -35,12 +35,3 @@ export interface StatusConfig {
     bgColor: string;
   };
 }
-
-export interface CategoryFormData {
-  id: number | null;
-  name: string;
-  type: 'main' | 'sub' | 'child';
-  // State สำหรับจัดการ Dropdown
-  selectedMainCategory: number | null;
-  selectedSubCategory: number | null;
-}

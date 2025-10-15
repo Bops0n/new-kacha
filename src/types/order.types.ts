@@ -61,3 +61,18 @@ export interface EditOrderFormData {
   transferSlipImageUrl: string;
   cancellationReason: string;
 }
+
+
+// Type for product items received in the order request body
+export interface OrderProductRequestBody {
+    Product_ID: number;
+    CartQuantity: number; // This is the quantity the user wants to order
+}
+
+// Type for the full request body when placing an order
+export interface PlaceOrderRequestBody {
+    addressId: number;
+    paymentMethod: 'COD' | 'Bank Transfer';
+    cartItems: OrderProductRequestBody[];
+    totalPrice: number;
+}

@@ -1,5 +1,7 @@
 // types/product.types.ts
 
+import { Category, ChildSubCategory, SubCategory } from "./category.types";
+
 // Product Inventory Type
 export interface ProductInventory {
   Product_ID: number;
@@ -20,35 +22,6 @@ export interface ProductInventory {
   Image_URL: string | null;
   Dimensions: string | null;
   Material: string | null;
-}
-
-// Category types
-export interface Category {
-  Category_ID: number;
-  Name: string;
-}
-
-export interface SubCategory {
-  Category_ID: number;
-  Sub_Category_ID: number;
-  Name: string;
-}
-
-export interface ChildSubCategory {
-  Category_ID: number;
-  Sub_Category_ID: number;
-  Child_ID: number;
-  Name: string;
-}
-
-// Full category path for display
-export interface FullCategoryPath {
-  Category_ID: number;
-  Category_Name: string;
-  Sub_Category_ID: number;
-  Sub_Category_Name: string;
-  Child_ID: number;
-  Child_Name: string;
 }
 
 export interface SimpleProductDetail {
@@ -72,13 +45,9 @@ export type ProductFormData = Partial<ProductInventory> & {
   Selected_Sub_Category_ID?: number | null;
 };
 
-export interface CategoryDisplayItem {
-  id: number;
-  name: string;
-  type: 'main' | 'sub' | 'child';
-  parentId: number | null;
-  parentName?: string;
-  fullPathName?: string;
-}
-
 export type StockStatus = 'in_stock' | 'low_stock' | 'out_of_stock';
+
+export interface AddStockRequestBody {
+  productId: number;
+  amountToAdd: number;
+}
