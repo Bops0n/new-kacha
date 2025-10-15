@@ -19,7 +19,6 @@ const pool = new Pool(config);
 
 
 module.exports = {
-    pool,
     poolQuery : async (queryString, params) => {
         const client = await pool.connect();
         try {
@@ -30,11 +29,12 @@ module.exports = {
             await client.query('COMMIT');
 
             return res;
-        } catch {
+        } catch (dbError) {
             await client.query('ROLLBACK');
+            
+            throw dbError;
         } finally {
             client.release();
         }
     }
 }
-// console.log(poolQuery('SELECT ()'));
