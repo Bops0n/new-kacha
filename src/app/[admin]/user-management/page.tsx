@@ -13,7 +13,7 @@ import UserModal from './modal/UserModal'; // <-- นำเข้า UserModal
 import AddressModal from './modal/AddressModal'; // <-- นำเข้า AddressModal
 import { useAlert } from '@/app/context/AlertModalContext';
 import Pagination from '@/app/components/Pagination';
-import { Role } from '@/types/role.types';
+import { Role } from '@/types/';
 import { AddressSchema, NewAddressForm, UserAccount, UserEditForm, UserSchema } from '@/types';
 import LoadingSpinner from '@/app/components/LoadingSpinner';
 import { useSession } from 'next-auth/react';

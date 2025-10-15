@@ -14,8 +14,7 @@ import {
   FiSave,
   FiPlus
 } from 'react-icons/fi';
-import { Role } from '@/types/role.types';
-import { AddressSchema, UserEditForm, UserSchema } from '@/types';
+import { AddressSchema, Role, UserEditForm, UserSchema } from '@/types';
 
 // กำหนด Props สำหรับ UserModal
 interface UserModalProps {

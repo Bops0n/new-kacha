@@ -1,7 +1,6 @@
 import React from 'react';
 import { FiEdit, FiTrash2 } from 'react-icons/fi'; // Removed FiEye
-import { Role } from '@/types/role.types';
-import { UserAccount } from '@/types';
+import { Role, UserAccount } from '@/types';
 
 interface UserRowProps {
   user: UserAccount;

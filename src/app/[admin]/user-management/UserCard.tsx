@@ -1,7 +1,6 @@
 import React from 'react';
 import { FiUser, FiMail, FiPhone, FiKey, FiEdit } from 'react-icons/fi'; // Removed FiEye, added FiEdit
-import { Role } from '@/types/role.types';
-import { UserAccount } from '@/types';
+import { Role, UserAccount } from '@/types';
 
 interface UserCardProps {
   user: UserAccount;
