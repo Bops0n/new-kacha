@@ -13,10 +13,10 @@ import AccessDeniedPage from '@/app/components/AccessDenied';
 
 const CategoryRow: React.FC<{ item: CategoryDisplayItem; openModal: (item: CategoryDisplayItem, mode: ModalMode) => void; deleteCategory: (item: CategoryDisplayItem) => void; }> = ({ item, openModal, deleteCategory }) => (
     <tr className="hover">
-        <td className="font-bold text-primary">{item.id}</td>
-        <td>{item.name}</td>
-        <td>{item.type === 'main' ? 'หมวดหมู่หลัก' : item.type === 'sub' ? 'หมวดหมู่รอง' : 'หมวดหมู่ย่อย'}</td>
-        <td>{item.parentName || '-'}</td>
+        <td className="font-bold text-primary">{item.ID}</td>
+        <td>{item.Name}</td>
+        <td>{item.Type === 'main' ? 'หมวดหมู่หลัก' : item.Type === 'sub' ? 'หมวดหมู่รอง' : 'หมวดหมู่ย่อย'}</td>
+        <td>{item.ParentName || '-'}</td>
         <td>
             <button onClick={() => openModal(item, 'edit')} className="btn btn-ghost btn-xs" title="แก้ไข"><FiEdit className="w-4 h-4"/></button>
             <button onClick={() => deleteCategory(item)} className="btn btn-ghost btn-xs text-error" title="ลบ"><FiTrash2 className="w-4 h-4"/></button>
@@ -27,9 +27,9 @@ const CategoryRow: React.FC<{ item: CategoryDisplayItem; openModal: (item: Categ
 const CategoryCard: React.FC<{ item: CategoryDisplayItem; openModal: (item: CategoryDisplayItem, mode: ModalMode) => void; deleteCategory: (item: CategoryDisplayItem) => void; }> = ({ item, openModal, deleteCategory }) => (
     <div className="card bg-base-100 shadow-sm">
         <div className="card-body p-4">
-            <h2 className="card-title text-base">{item.name}</h2>
-            <p className="text-sm">ID: {item.id} | ระดับ: {item.type === 'main' ? 'หลัก' : item.type === 'sub' ? 'รอง' : 'ย่อย'}</p>
-            <p className="text-sm text-base-content/70">อยู่ภายใต้: {item.parentName || '-'}</p>
+            <h2 className="card-title text-base">{item.Name}</h2>
+            <p className="text-sm">ID: {item.ID} | ระดับ: {item.Type === 'main' ? 'หลัก' : item.Type === 'sub' ? 'รอง' : 'ย่อย'}</p>
+            <p className="text-sm text-base-content/70">อยู่ภายใต้: {item.ParentName || '-'}</p>
             <div className="card-actions justify-end">
                 <button onClick={() => openModal(item, 'edit')} className="btn btn-ghost btn-xs"><FiEdit className="w-4 h-4"/> แก้ไข</button>
                 <button onClick={() => deleteCategory(item)} className="btn btn-ghost btn-xs text-error"><FiTrash2 className="w-4 h-4"/> ลบ</button>
@@ -45,31 +45,37 @@ const CategoryModal: React.FC<{
     actions: { save: (formData: CategoryFormData) => void; close: () => void; };
     data: { main: Category[]; sub: SubCategory[]; };
 }> = ({ isOpen, mode, item, actions, data }) => {
-    const [formData, setFormData] = useState<CategoryFormData>({ id: null, name: '', type: 'main', selectedMainCategory: null, selectedSubCategory: null });
+    const [formData, setFormData] = useState<CategoryFormData>({ 
+        ID: null, 
+        Name: '', 
+        Type: 'main', 
+        Category_ID: null, 
+        Sub_Category_ID: null 
+    });
 
     useEffect(() => {
         if (isOpen) {
             if (item && mode === 'edit') {
                 let mainParentId = null;
                 let subParentId = null;
-                if (item.type === 'sub') {
-                    mainParentId = item.parentId;
-                } else if (item.type === 'child') {
-                    const subParent = data.sub.find(s => s.Sub_Category_ID === item.parentId);
+                if (item.Type === 'sub') {
+                    mainParentId = item.ParentId;
+                } else if (item.Type === 'child') {
+                    const subParent = data.sub.find(s => s.Sub_Category_ID === item.ParentId);
                     if (subParent) {
                         mainParentId = subParent.Category_ID;
                         subParentId = subParent.Sub_Category_ID;
                     }
                 }
                 setFormData({
-                    id: item.id,
-                    name: item.name,
-                    type: item.type,
-                    selectedMainCategory: mainParentId,
-                    selectedSubCategory: subParentId,
+                    ID: item.ID,
+                    Name: item.Name,
+                    Type: item.Type,
+                    Category_ID: mainParentId,
+                    Sub_Category_ID: subParentId,
                 });
             } else {
-                setFormData({ id: null, name: '', type: 'main', selectedMainCategory: null, selectedSubCategory: null });
+                setFormData({ ID: null, Name: '', Type: 'main', Category_ID: null, Sub_Category_ID: null });
             }
         }
     }, [isOpen, mode, item, data]);
@@ -78,12 +84,12 @@ const CategoryModal: React.FC<{
         const { name, value } = e.target;
         setFormData(prev => {
             const newState: CategoryFormData = { ...prev, [name]: value };
-            if (name === 'type') {
-                newState.selectedMainCategory = null;
-                newState.selectedSubCategory = null;
+            if (name === 'Type') {
+                newState.Category_ID = null;
+                newState.Sub_Category_ID = null;
             }
-            if (name === 'selectedMainCategory') {
-                newState.selectedSubCategory = null;
+            if (name === 'Category_ID') {
+                newState.Sub_Category_ID = null;
             }
             return newState;
         });
@@ -95,46 +101,46 @@ const CategoryModal: React.FC<{
         <dialog className="modal modal-open">
             <div className="modal-box">
                 <button className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2" onClick={actions.close}>✕</button>
-                <h3 className="font-bold text-lg">{mode === 'add' ? 'เพิ่มหมวดหมู่ใหม่' : `แก้ไขหมวดหมู่ #${item?.id}`}</h3>
+                <h3 className="font-bold text-lg">{mode === 'add' ? 'เพิ่มหมวดหมู่ใหม่' : `แก้ไขหมวดหมู่ #${item?.ID}`}</h3>
                 <form id="category-form" onSubmit={(e) => { e.preventDefault(); actions.save(formData); }} className="space-y-4 py-4">
                     <div>
                         <label className="label"><span className="label-text">ระดับหมวดหมู่</span></label>
-                        <select name="type" disabled={mode === 'edit'} value={formData.type} onChange={handleFormChange} className="select select-bordered w-full">
+                        <select name="Type" disabled={mode === 'edit'} value={formData.Type} onChange={handleFormChange} className="select select-bordered w-full">
                             <option value="main">หมวดหมู่หลัก</option>
                             <option value="sub">หมวดหมู่รอง</option>
                             <option value="child">หมวดหมู่ย่อย</option>
                         </select>
                     </div>
-                    {formData.type === 'sub' && (
+                    {formData.Type === 'sub' && (
                         <div>
-                            <label className="label"><span className="label-text">เลือกหมวดหมู่หลัก (แม่)</span></label>
-                            <select name="selectedMainCategory" value={formData.selectedMainCategory || ''} onChange={handleFormChange} className="select select-bordered w-full" required>
+                            <label className="label"><span className="label-text">เลือกหมวดหมู่หลัก</span></label>
+                            <select name="Category_ID" value={formData.Category_ID || ''} onChange={handleFormChange} className="select select-bordered w-full" required>
                                 <option disabled value="">-- เลือก --</option>
                                 {data.main.map(c => <option key={c.Category_ID} value={c.Category_ID}>{c.Name}</option>)}
                             </select>
                         </div>
                     )}
-                    {formData.type === 'child' && (
+                    {formData.Type === 'child' && (
                          <>
                             <div>
-                                <label className="label"><span className="label-text">เลือกหมวดหมู่หลัก (แม่)</span></label>
-                                <select name="selectedMainCategory" value={formData.selectedMainCategory || ''} onChange={handleFormChange} className="select select-bordered w-full" required>
+                                <label className="label"><span className="label-text">เลือกหมวดหมู่หลัก</span></label>
+                                <select name="Category_ID" value={formData.Category_ID || ''} onChange={handleFormChange} className="select select-bordered w-full" required>
                                     <option disabled value="">-- เลือก --</option>
                                     {data.main.map(c => <option key={c.Category_ID} value={c.Category_ID}>{c.Name}</option>)}
                                 </select>
                             </div>
                             <div>
-                                <label className="label"><span className="label-text">เลือกหมวดหมู่รอง (แม่)</span></label>
-                                <select name="selectedSubCategory" value={formData.selectedSubCategory || ''} onChange={handleFormChange} className="select select-bordered w-full" disabled={!formData.selectedMainCategory} required>
+                                <label className="label"><span className="label-text">เลือกหมวดหมู่รอง</span></label>
+                                <select name="Sub_Category_ID" value={formData.Sub_Category_ID || ''} onChange={handleFormChange} className="select select-bordered w-full" disabled={!formData.Category_ID} required>
                                     <option disabled value="">-- เลือก --</option>
-                                    {data.sub.filter(s => s.Category_ID === Number(formData.selectedMainCategory)).map(s => <option key={s.Sub_Category_ID} value={s.Sub_Category_ID}>{s.Name}</option>)}
+                                    {data.sub.filter(s => s.Category_ID === Number(formData.Category_ID)).map(s => <option key={s.Sub_Category_ID} value={s.Sub_Category_ID}>{s.Name}</option>)}
                                 </select>
                             </div>
                          </>
                     )}
                      <div>
                         <label className="label"><span className="label-text">ชื่อหมวดหมู่</span></label>
-                        <input type="text" name="name" value={formData.name} onChange={handleFormChange} className="input input-bordered w-full" required />
+                        <input type="text" name="Name" value={formData.Name} onChange={handleFormChange} className="input input-bordered w-full" required />
                     </div>
                 </form>
                 <div className="modal-action">
@@ -210,13 +216,13 @@ export default function CategoryManagementPage() {
             <table className="table w-full">
                 <thead><tr><th>ID</th><th>ชื่อ</th><th>ระดับ</th><th>หมวดหมู่</th><th>จัดการ</th></tr></thead>
                 <tbody>
-                {paginatedItems.map(item => <CategoryRow key={`${item.type}-${item.id}`} item={item} openModal={modalActions.open} deleteCategory={actions.deleteCategory} />)}
+                {paginatedItems.map(item => <CategoryRow key={`${item.Type}-${item.ID}`} item={item} openModal={modalActions.open} deleteCategory={actions.deleteCategory} />)}
                 </tbody>
             </table>
             </div>
 
             <div className="grid md:hidden grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
-                {paginatedItems.map(item => <CategoryCard key={`${item.type}-${item.id}`} item={item} openModal={modalActions.open} deleteCategory={actions.deleteCategory} />)}
+                {paginatedItems.map(item => <CategoryCard key={`${item.Type}-${item.ID}`} item={item} openModal={modalActions.open} deleteCategory={actions.deleteCategory} />)}
             </div>
 
             <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} totalItemsCount={filteredItems.length} itemsPerPage={itemsPerPage} />
