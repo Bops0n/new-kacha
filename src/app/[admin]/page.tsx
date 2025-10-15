@@ -10,31 +10,28 @@ export default function AdminPage() {
         return <LoadingSpinner />;
     }
 
+    
     if (!session) {
         redirect("/");
     }
 
+    let URL = "/";
+
     if (session.user.Dashboard) {
-        redirect("/admin/dashboard");
+        URL = "/admin/dashboard";
+    }
+    else if (session.user.User_Mgr) {
+        URL = "/admin/user-management";
+    } 
+    else if (session.user.Stock_Mgr) {
+        URL = "/admin/product-management";
+    }
+    else if (session.user.Order_Mgr) {
+        URL = "/admin/order-management";
+    }
+    else if (session.user.Report) {
+        URL = "/admin/report";
     }
 
-    // if (session.user.Sys_Admin) {
-    //     redirect("/admin/dashboard");
-    // }
-
-    if (session.user.User_Mgr) {
-        redirect("/admin/user-management");
-    }
-
-    if (session.user.Stock_Mgr) {
-        redirect("/admin/product-management");
-    }
-
-    if (session.user.Order_Mgr) {
-        redirect("/admin/order-management");
-    }
-
-    if (session.user.Report) {
-        redirect("/admin/report");
-    }
+    redirect(URL);
 }
