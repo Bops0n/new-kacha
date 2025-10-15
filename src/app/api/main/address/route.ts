@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { authenticateRequest } from '../../auth/utils';
-import { getAddressesByUserId, addNewAddress } from '@/app/api/services/userServices'; // << Import service
+import { getAddressesByUserId, addNewAddress } from '@/app/api/services/user/userServices'; // << Import service
 import { checkRequire } from '@/app/utils/client';
 
 export async function GET(request: NextRequest) {

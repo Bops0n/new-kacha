@@ -1,11 +1,11 @@
 import { NextResponse, NextRequest } from 'next/server';
 import { authenticateRequest } from '@/app/api/auth/utils';
-import { getOrderById } from '@/app/api/services/orderService'; // Service ที่แก้ไขแล้ว
-import { poolQuery } from '@/app/api/lib/db';
+import { getOrderById } from '@/app/api/services/user/orderService'; // Service ที่แก้ไขแล้ว
 import { v4 as uuidv4 } from 'uuid';
 import path from 'path';
 import fs from 'fs/promises';
 import { checkRequire } from '@/app/utils/client';
+import { uploadTransactionSlip } from '@/app/api/services/user/userServices';
 
 /**
  * GET /api/main/orders/[orderId]
@@ -87,7 +87,12 @@ export async function PATCH(
         const imageUrl = `/uploads/slips/${filename}`;
 
         await fs.writeFile(filePath, buffer);
-        await poolQuery(`UPDATE "Order" SET "Transfer_Slip_Image_URL" = $1 WHERE "Order_ID" = $2 AND "User_ID" = $3`, [imageUrl, orderId, auth.userId]);
+
+        const result = await uploadTransactionSlip(imageUrl, orderId, Number(auth.userId));
+
+        if (!result) {
+            return NextResponse.json({ message: 'อัปโหลดสลิปล้มเหลว!' }, { status: 500 });
+        }
 
         return NextResponse.json({ message: 'อัปโหลดสลิปสำเร็จ', imageUrl });
 

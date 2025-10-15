@@ -1,20 +1,20 @@
 import { checkRequire } from "@/app/utils/client";
 import { NextRequest, NextResponse } from "next/server";
 import { checkSystemAdminRequire } from "../../auth/utils";
-import { poolQuery } from "../../lib/db";
-import { Role } from "@/types/role.types";
+import { addRole, deleteRole, getRoles, updateRule } from "../../services/admin/roleMgrService";
+import { Role } from "@/types";
 
 export async function GET(req: NextRequest) {
     // const auth = await checkSystemAdminRequire();
     // const isCheck = checkRequire(auth);
     // if (isCheck) return isCheck;
     
-    const { rows } = await poolQuery(`SELECT * FROM master."SP_MASTER_ACCESS_LEVEL_GET"()`);
+    const result = await getRoles();
 
     return NextResponse.json({
         message: "All roles fetched successfully",
         status: 200,
-        roles: rows 
+        roles: result 
     });
 }
 
@@ -25,11 +25,10 @@ export async function POST(req: NextRequest) {
     
     let newRole: Role = await req.json();
     
-    const { rows } = await poolQuery(`SELECT * FROM master."SP_MASTER_ACCESS_LEVEL_INS"($1, $2)`, 
-        [JSON.stringify(newRole), auth.userId]);
+    const result = await addRole(newRole, Number(auth.userId));
 
     return NextResponse.json(
-        { message: "Role added successfully.", role: rows[0], status: 200 },
+        { message: "Role added successfully.", role: result, status: 200 },
         { status: 200 }
     );
 }
@@ -59,10 +58,9 @@ export async function PUT(req: NextRequest) {
 
     const roleToUpdate = data.Role;
 
-    const { rows } = await poolQuery(`SELECT * FROM master."SP_MASTER_ACCESS_LEVEL_UPD"($1, $2, $3)`, 
-        [roleToUpdate, JSON.stringify(data), auth.userId]);
+    const result = await updateRule(roleToUpdate, data, Number(auth.userId));
 
-    if (!rows) {
+    if (!result) {
         return NextResponse.json(
             { message: `Role ${roleToUpdate} update failed.` },
             { status: 500 }
@@ -70,7 +68,7 @@ export async function PUT(req: NextRequest) {
     }
 
     return NextResponse.json(
-        { message: `Role ${roleToUpdate} updated successfully.`, role: rows[0], status: 200 }
+        { message: `Role ${roleToUpdate} updated successfully.`, role: result, status: 200 }
     );
 }
 
@@ -89,9 +87,9 @@ export async function DELETE(req: NextRequest) {
     }
 
     try {
-        const { rowCount } = await poolQuery(`SELECT * FROM master."SP_MASTER_ACCESS_LEVEL_DEL"($1, $2)`, [data, auth.userId]);
+        const result = await deleteRole(data, Number(auth.userId));
 
-        if (rowCount === 0) {
+        if (!result) {
             return NextResponse.json(
                 { message: `Role ${data} not found.`, status: 404 },
                 { status: 404 }

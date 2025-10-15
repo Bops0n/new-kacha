@@ -1,5 +1,5 @@
 import { poolQuery } from '@/app/api/lib/db';
-import { mapDbRowsToOrders } from '@/app/utils/client';
+import { mapDbRowsToOrders } from '@/app/utils/server';
 import { Order } from '@/types';
 
 export async function getOrderById(orderId: number): Promise<Order | null> {    

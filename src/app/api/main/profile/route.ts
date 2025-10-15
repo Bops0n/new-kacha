@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { authenticateRequest } from '../../auth/utils';
-import { getUserProfileById, updateUserProfile } from '../../services/userServices'; // << Import service
+import { getUserProfileById, updateUserProfile } from '../../services/user/userServices'; // << Import service
 import { checkRequire } from '@/app/utils/client';
 
 export async function GET(req: NextRequest) {

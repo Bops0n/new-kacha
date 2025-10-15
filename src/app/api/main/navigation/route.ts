@@ -1,10 +1,9 @@
 import { NextResponse } from 'next/server';
-import { poolQuery } from '@/app/api/lib/db';
+import { getAllCategories } from '../../services/user/userServices';
 
 export async function GET() {
   try {
-    const allCategories = await poolQuery(`SELECT * FROM "SP_ALL_CATEGORIES_GET"()`);
-    const { categories, subCategories, childSubCategories } = allCategories.rows[0];
+    const { categories, subCategories, childSubCategories } = await getAllCategories();
     
     return NextResponse.json({
       categories: categories,

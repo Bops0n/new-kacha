@@ -1,90 +1,11 @@
 // src/app/api/orders/route.ts
 import { NextRequest, NextResponse } from 'next/server';
-import { pool, poolQuery } from '@/app/api/lib/db';
+import { poolQuery } from '@/app/api/lib/db';
 import { authenticateRequest } from '@/app/api/auth/utils';
-import { AddressSchema, Order } from '@/types';
+import { AddressSchema, Order, PlaceOrderRequestBody } from '@/types';
 import { checkRequire } from '@/app/utils/client';
-
-// Type for product items received in the order request body
-interface OrderProductRequestBody {
-    Product_ID: number;
-    CartQuantity: number; // This is the quantity the user wants to order
-}
-
-// Type for the full request body when placing an order
-interface PlaceOrderRequestBody {
-    addressId: number;
-    paymentMethod: 'COD' | 'Bank Transfer';
-    cartItems: OrderProductRequestBody[];
-    totalPrice: number;
-}
-
-
-// Helper function to map database rows to the Order UI model
-const mapDbRowsToUiOrder = (dbRows: any[]): Order[] => {
-    const ordersMap = new Map<number, Order>();
-
-    dbRows.forEach(row => {
-        const orderId = row.Order_ID;
-        if (!ordersMap.has(orderId)) {
-            ordersMap.set(orderId, {
-                // Map fields from 'Order' table
-                Order_ID: row.Order_ID,
-                User_ID: row.User_ID,
-                Order_Date: row.Order_Date,
-                Status: row.Status,
-                Payment_Type: row.Payment_Type,
-                Invoice_ID: row.Invoice_ID,
-                Shipping_Address_ID: row.Address_ID,
-                DeliveryDate: row.DeliveryDate,
-                Tracking_ID: row.Tracking_ID,
-                Shipping_Carrier: row.Shipping_Carrier,
-                Transfer_Slip_Image_URL: row.Transfer_Slip_Image_URL,
-                Cancellation_Reason: row.Cancellation_Reason,
-                Address: row.Address,
-                Phone: row.Phone,
-                Total_Amount: parseFloat(row.Total_Amount),
-
-                // Mapped from JOIN
-                Customer_Name: row.User_FullName || 'N/A', // Customer name for their own orders
-                Email: row.User_Email || null,
-                Products: [],
-                Action: {
-                    Order_ID: -1,
-                    Status: 'pending',
-                    Update_By: -1,
-                    Update_Name: 'N/A',
-                    Update_Date: 'N/A',
-                }
-            });
-        }
-
-        const currentOrder = ordersMap.get(orderId)!;
-
-        if (row.Product_ID) {
-            const salePrice = parseFloat(row.Product_Sale_Price);
-            const discountPrice = row.Product_Discount_Price ? parseFloat(row.Product_Discount_Price) : null;
-            const quantity = parseInt(row.Quantity, 10);
-            const pricePaidPerItem = discountPrice ?? salePrice;
-
-            currentOrder.Products.push({
-                Product_ID: row.Product_ID,
-                Quantity: quantity,
-                Product_Sale_Cost: parseFloat(row.Product_Sale_Cost),
-                Product_Sale_Price: salePrice,
-                Product_Name: row.Product_Name,
-                Product_Brand: row.Product_Brand,
-                Product_Unit: row.Product_Unit,
-                Product_Image_URL: row.Product_Image_URL,
-                Product_Discount_Price: discountPrice,
-                Price_Paid_Per_Item: pricePaidPerItem,
-                Subtotal: pricePaidPerItem * quantity,
-            });
-        }
-    });
-    return Array.from(ordersMap.values()).sort((a, b) => b.Order_ID - a.Order_ID);
-};
-
+import { getOrderByUID } from '../../services/user/userServices';
+import { mapDbRowsToOrders } from '@/app/utils/server';
 
 /**
  * GET /api/main/orders
@@ -97,8 +18,8 @@ export async function GET(request: NextRequest) {
 
     try {
 
-        const result = await poolQuery(`SELECT * FROM "SP_USER_ORDER_UID_GET"($1)`, [auth.userId]);
-        const orders: Order[] = mapDbRowsToUiOrder(result.rows);
+        const result = await getOrderByUID(Number(auth.userId));
+        const orders: Order[] = mapDbRowsToOrders(result);
 
         return NextResponse.json({ orders });
 
