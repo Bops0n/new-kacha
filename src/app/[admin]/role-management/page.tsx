@@ -1,7 +1,7 @@
 'use client'
 import AccessDenied from "@/app/components/AccessDenied";
 import LoadingSpinner from "@/app/components/LoadingSpinner";
-import { Role } from "@/types/role.types";
+import { Role } from "@/types";
 import { useSession } from "next-auth/react";
 import React, { useEffect, useState } from "react";
 import { FaBox, FaCheck, FaWarehouse } from "react-icons/fa";
@@ -118,7 +118,7 @@ function RoleModal({ isOpen, onClose, isEditing, onSaved, form, handleRoleFormCh
             {!isEditing &&
                 <div>
                     <label className="label"><span className="label-text">ระดับ</span></label>
-                    <input className="input input-bordered w-full" type="number" name="Role" value={form.Role ?? ""} onChange={handleRoleFormChange} required/>
+                    <input className="input input-bordered w-full" type="number" name="Role" value={form.Role ?? ""} onChange={handleRoleFormChange} min="0" required/>
                 </div>
             }
 
@@ -243,7 +243,7 @@ export default function RoleManagementPage() {
         const { name, value, type, checked } : any = e.target;
         setForm(prev => ({
         ...prev,
-        [name]: type === 'checkbox' ? checked : type === 'number' && value < 0 ? 0 : value
+        [name]: type === 'checkbox' ? checked : value
         }));
     };
     
