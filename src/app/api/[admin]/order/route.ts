@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { checkOrderMgrRequire } from '@/app/api/auth/utils';
-import * as orderService from '@/app/api/services/admin/orderService';
 import { Order } from '@/types';
 import { checkRequire } from '@/app/utils/client';
+import { deleteOrder, getOrders, updateOrder } from '../../services/admin/orderMgrService';
 
 /**
  * GET: ดึงข้อมูลคำสั่งซื้อทั้งหมด (สำหรับ Admin)
@@ -15,7 +15,7 @@ export async function GET(req: NextRequest) {
 
     try {
         const orderId = req.nextUrl.searchParams.get('id');
-        const orders = await orderService.getOrders(orderId ? Number(orderId) : null);
+        const orders = await getOrders(orderId ? Number(orderId) : null);
         return NextResponse.json({ orders });
     } catch (error: any) {
         console.error("API GET Error:", error.message);
@@ -34,7 +34,7 @@ export async function PATCH(req: NextRequest) {
 
     try {
         const payload: Partial<Order> = await req.json();
-        const updatedOrder = await orderService.updateOrder(payload);
+        const updatedOrder = await updateOrder(payload);
         return NextResponse.json({ message: `Order ID ${updatedOrder.Order_ID} updated successfully.`, data: updatedOrder });
     } catch (error: any) {
         console.error("API PATCH Error:", error.message);
@@ -58,7 +58,11 @@ export async function DELETE(req: NextRequest) {
             return NextResponse.json({ message: "Order ID is required as a query parameter." }, { status: 400 });
         }
 
-        await orderService.deleteOrder(Number(orderId), Number(auth.userId));
+        const result = await deleteOrder(Number(orderId), Number(auth.userId));
+
+        if (!result) {
+            return NextResponse.json({ message: `Order with ID ${orderId} not found.` }, { status: 400 });
+        }
 
         return NextResponse.json({ message: `Order ID ${orderId} and its details deleted successfully.` });
     } catch (error: any) {

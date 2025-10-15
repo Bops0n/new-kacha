@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { poolQuery } from '../../../lib/db';
 import { checkUserMgrRequire } from '@/app/api/auth/utils';
 import { checkRequire } from '@/app/utils/client';
+import { deleteUser } from '@/app/api/services/admin/userMgrService';
 
 export async function DELETE(req: NextRequest) {
     const auth = await checkUserMgrRequire();
@@ -26,9 +26,9 @@ export async function DELETE(req: NextRequest) {
     }
 
     try {
-        const { rowCount } = await poolQuery(`SELECT * FROM "SP_ADMIN_USER_DEL"($1, $2)`, [parsedUserId, auth.userId]);
+        const result = await deleteUser(parsedUserId, Number(auth.userId));
 
-        if (rowCount === 0) {
+        if (!result) {
             return NextResponse.json(
                 { message: `User with ID ${parsedUserId} not found.`, status: 404 },
                 { status: 404 }

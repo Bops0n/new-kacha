@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { checkStockMgrRequire } from '@/app/api/auth/utils';
-import * as productService from '@/app/api/services/admin/productsService';
+import * as productService from '@/app/api/services/admin/productMgrService';
 import { checkRequire } from '@/app/utils/client';
 
 /**

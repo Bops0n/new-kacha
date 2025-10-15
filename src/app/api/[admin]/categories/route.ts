@@ -1,49 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { poolQuery } from '../../lib/db';
 import { checkStockMgrRequire } from '@/app/api/auth/utils';
-import * as categoryService from '@/app/api/services/admin/categoryService';
 import { checkRequire } from '@/app/utils/client';
-
-interface Category {
-    Category_ID: number;
-    Name: string;
-}
-
-/**
- * GET: สำหรับดึงข้อมูล Category ทั้งหมด
- */
-export async function GET(req: NextRequest) {
-    const auth = await checkStockMgrRequire();
-    const isCheck = checkRequire(auth);
-    if (isCheck) return isCheck;
-        
-    const categoryId = req.nextUrl.searchParams.get('id');
-    
-    let categories: Category[] = [];
-    let sql: string;
-    let queryParams: (string | number)[] = [];
-
-    const selectColumns = `"Category_ID", "Name"`;
-
-    if (categoryId) {
-        sql = `SELECT ${selectColumns} FROM public."Category" WHERE "Category_ID" = $1`;
-        queryParams.push(parseInt(categoryId, 10));
-    } else {
-        sql = `SELECT ${selectColumns} FROM public."Category" ORDER BY "Category_ID" ASC`;
-    }
-
-    try {
-        const result = await poolQuery(sql, queryParams);
-        categories = result.rows;
-        if (categoryId && categories.length === 0) {
-            return NextResponse.json({ message: 'Category not found' }, { status: 404 });
-        }
-        return NextResponse.json({ categories }, { status: 200 });
-    } catch (dbError: any) {
-        console.error("Error fetching categories:", dbError);
-        return NextResponse.json({ message: "Failed to fetch categories", error: dbError.message }, { status: 500 });
-    }
-}
+import { addCategory, deleteCategory, updateCategory } from '../../services/admin/categoryMgrService';
+import { CategoryFormData } from '@/types';
 
 /**
  * POST: สำหรับสร้างหมวดหมู่ใหม่ (main, sub, child)
@@ -55,8 +14,11 @@ export async function POST(req: NextRequest) {
     if (isCheck) return isCheck;
 
     try {
-        const { type, payload } = await req.json();
-        const newData = await categoryService.addCategory(type, payload);
+        const data: CategoryFormData = await req.json();
+        const newData = await addCategory(data.Type, data);
+        if (!newData) {
+            return NextResponse.json({ message: 'เพิ่มหมวดหมู่ล้มเหลว!' }, { status: 500 });
+        }
         return NextResponse.json({ message: 'เพิ่มหมวดหมู่สำเร็จ', data: newData }, { status: 201 });
     } catch (error: any) {
         return NextResponse.json({ message: error.message || 'API Error' }, { status: 500 });
@@ -73,8 +35,11 @@ export async function PATCH(req: NextRequest) {
     if (isCheck) return isCheck;
 
     try {
-        const { type, payload } = await req.json();
-        const updatedData = await categoryService.updateCategory(type, payload);
+        const data: CategoryFormData = await req.json();
+        const updatedData = await updateCategory(data.Type, Number(data.ID), data);
+        if (!updatedData) {
+            return NextResponse.json({ message: 'อัปเดตหมวดหมู่ล้มเหลว!' }, { status: 500 });
+        }
         return NextResponse.json({ message: 'อัปเดตหมวดหมู่สำเร็จ', data: updatedData });
     } catch (error: any) {
         return NextResponse.json({ message: error.message || 'API Error' }, { status: 500 });
@@ -99,7 +64,12 @@ export async function DELETE(req: NextRequest) {
             return NextResponse.json({ message: 'Missing type or id query parameter' }, { status: 400 });
         }
         
-        await categoryService.deleteCategory(type, { id });
+        const result = await deleteCategory(type, { id });
+
+        if (!result) {
+            return NextResponse.json({ message: `ไม่พบ Category ID: ${id}` }, { status: 404 });
+        }
+
         return NextResponse.json({ message: 'ลบหมวดหมู่สำเร็จ' });
     } catch (error: any) {
         return NextResponse.json({ message: error.message || 'API Error' }, { status: 500 });

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { AddressSchema } from '@/types';
-import { addNewAddress } from '@/app/api/services/userServices';
+import { addNewAddress } from '@/app/api/services/user/userServices';
 import { checkUserMgrRequire } from '@/app/api/auth/utils';
 import { checkRequire } from '@/app/utils/client';
 

@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { poolQuery } from '../../../lib/db';
 import { UserAccount } from '@/types';
 import { checkUserMgrRequire } from '@/app/api/auth/utils';
 import { checkRequire } from '@/app/utils/client';
 import { hmacMd5Hex } from '@/app/utils/cryptor';
+import { updateUser } from '@/app/api/services/admin/userMgrService';
 
 export async function PATCH(req: NextRequest) {
     const auth = await checkUserMgrRequire();
@@ -37,10 +37,9 @@ export async function PATCH(req: NextRequest) {
     try {
         delete updatedUserData.Addresses;
 
-        const success = await poolQuery(`SELECT * FROM "SP_ADMIN_USER_UPD"($1, $2, $3)`, 
-            [updatedUserData.User_ID, JSON.stringify(updatedUserData), Number(auth.userId)]);
+        const result = await updateUser(updatedUserData.User_ID, updatedUserData, Number(auth.userId));
 
-        if (!success)
+        if (!result)
         {
             return NextResponse.json(
                 { message: `User with ID ${userIdToUpdate} updated failed.` },

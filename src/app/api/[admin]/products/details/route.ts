@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { checkStockMgrRequire } from '@/app/api/auth/utils';
-import { poolQuery } from '@/app/api/lib/db';
 import { SimpleProductDetail } from '@/types';
 import { checkRequire } from '@/app/utils/client';
+import { getProductDetailByID } from '@/app/api/services/admin/productMgrService';
 
 /**
  * POST /api/admin/products/details
@@ -20,15 +20,10 @@ export async function POST(req: NextRequest) {
         }
 
         // --- START: แก้ไข SQL Query ---
-        const result = await poolQuery(
-            `SELECT "Product_ID", "Name", "Image_URL", "Quantity", "Total_Sales", "Cancellation_Count"
-             FROM "Product" 
-             WHERE "Product_ID" = ANY($1::int[])`,
-            [productIds]
-        );
+        const result = await getProductDetailByID(productIds);
         // --- END: แก้ไข SQL Query ---
 
-        const productDetails: SimpleProductDetail[] = result.rows;
+        const productDetails: SimpleProductDetail[] = result;
         return NextResponse.json(productDetails);
 
     } catch (error) {

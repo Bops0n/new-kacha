@@ -1,15 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { poolQuery } from '../../../lib/db';
 import { UserAccount } from '@/types';
 import { checkUserMgrRequire } from '@/app/api/auth/utils';
 import { checkRequire } from '@/app/utils/client';
+import { addUser } from '@/app/api/services/admin/userMgrService';
+import { hmacMd5Hex } from '@/app/utils/cryptor';
 
 export async function POST(req: NextRequest) {
     const auth = await checkUserMgrRequire();
     const isCheck = checkRequire(auth);
     if (isCheck) return isCheck;
     
-    let newUserData: Omit<UserAccount, 'User_ID' | 'Token'>;
+    let newUserData: Omit<UserAccount, 'User_ID'>;
     try {
         newUserData = await req.json();
     } catch (error) {
@@ -30,12 +31,15 @@ export async function POST(req: NextRequest) {
         }
     }
 
+    if (newUserData.Password) {
+        newUserData.Password = hmacMd5Hex(newUserData.Password, process.env.SALT_SECRET);
+    }
+
     try {
-        const { rows } = await poolQuery(`SELECT * FROM "SP_ADMIN_USER_INS"($1, $2)`, [JSON.stringify(newUserData), auth.userId]);
-        const UserID = rows[0].Result;
+        const { Result } = await addUser(newUserData, Number(auth.userId));
 
         return NextResponse.json(
-            { message: "User added successfully.", User_ID: UserID, status: 200 },
+            { message: "User added successfully.", User_ID: Result, status: 200 },
             { status: 200 }
         );
 

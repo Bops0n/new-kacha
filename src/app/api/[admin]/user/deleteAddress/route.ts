@@ -1,5 +1,5 @@
 import { checkUserMgrRequire } from "@/app/api/auth/utils";
-import { deleteAddress } from "@/app/api/services/userServices";
+import { deleteAddress } from "@/app/api/services/user/userServices";
 import { checkRequire } from "@/app/utils/client";
 import { NextRequest, NextResponse } from "next/server";
 

@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { UserSchema } from '@/types';
-import { poolQuery } from '../../../lib/db';
 import { checkUserMgrRequire } from '@/app/api/auth/utils';
 import { checkRequire } from '@/app/utils/client';
+import { getUsers } from '@/app/api/services/admin/userMgrService';
 
 export async function GET(req: NextRequest) {
     const auth = await checkUserMgrRequire();
@@ -11,8 +11,8 @@ export async function GET(req: NextRequest) {
 
     let usersFromDb: UserSchema[] = [];
     try {
-        const { rows } = await poolQuery(`SELECT * FROM "SP_ADMIN_USER_GET"()`);
-        usersFromDb = rows; 
+        const users = await getUsers();
+        usersFromDb = users; 
     } catch (dbError: any) {
         console.error("Error fetching users from database:", dbError);
         return NextResponse.json(
