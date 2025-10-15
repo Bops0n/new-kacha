@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { pool, poolQuery } from "../../lib/db";
 import { RegisterSchema } from "../utils";
-import { hmacMd5Hex } from "@/app/utils/cryptor";
+import { signUp } from "../../services/auth/authService";
 
 export async function POST(req: NextRequest) {
     const json = await req.json().catch(() => null);
@@ -33,14 +32,12 @@ export async function POST(req: NextRequest) {
 
     const { username, email, password } : any = parsed.data;
 
-    const { rows } = await poolQuery(`SELECT * FROM "SP_AUTH_REGISTER"($1, $2, $3)`, 
-        [username, email, hmacMd5Hex(password, process.env.SALT_SECRET)]);
-
-    const row = rows[0];
-    if (!row) throw new Error("No response from authentication function");
+    const result = await signUp(username, email, password);
+    
+    if (!result) throw new Error("No response from authentication function");
 
     return NextResponse.json(
-        { status: row.Status_Code, message: `${row.Message}` },
-        { status: row.Status_Code }
+        { status: result.Status_Code, message: `${result.Message}` },
+        { status: result.Status_Code }
     );
 }

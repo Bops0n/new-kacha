@@ -1,7 +1,7 @@
 import NextAuth, { AuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-import { pool } from "../../lib/db";
-import { hmacMd5Hex } from "@/app/utils/cryptor";
+import { getRoleByLevel } from "../../services/admin/roleMgrService";
+import { signIn } from "../../services/auth/authService";
 
 const SHORT = 24 * 60 * 60;
 const LONG  = 30 * 24 * 60 * 60;
@@ -26,25 +26,21 @@ export const authOptions : AuthOptions = {
         }
         
         try {
-          const { rows } = await pool.query(`SELECT * FROM public."SP_AUTH_LOGIN"($1, $2);`, [
-            credentials.username,
-            hmacMd5Hex(credentials.password, process.env.SALT_SECRET),
-          ]);
+          const result = await signIn(credentials.username, credentials.password);
 
-          const row = rows[0];
-          if (!row) throw new Error("No response from authentication function");
+          if (!result) throw new Error("No response from authentication function");
 
-          switch (row.Status_Code) {
+          console.log(result);
+
+          switch (result.Status_Code) {
             case 200:
-
-              const { rows } = await pool.query(`SELECT * FROM master."SP_MASTER_ACCESS_LEVEL_ROLE_GET"($1);`, [row.Access_Level]);
-              const role = rows[0];
+              const role = await getRoleByLevel(result.Access_Level);
 
               return {
-                id: row.User_ID,
-                name: row.Full_Name,
-                email: row.Email,
-                accessLevel: row.Access_Level as number,
+                id: result.User_ID,
+                name: result.Full_Name,
+                email: result.Email,
+                accessLevel: result.Access_Level as number,
 
                 Sys_Admin: role ? role.Sys_Admin : false,
                 User_Mgr: role ? role.User_Mgr : false,
@@ -54,9 +50,9 @@ export const authOptions : AuthOptions = {
                 Dashboard: role ? role.Dashboard : false,
 
                 rememberMe: credentials.rememberMe === "true",
-                message: row.Message,
+                message: result.Message,
               };
-            default: throw new Error(row.Message);
+            default: throw new Error(result.Message);
           }
         } catch (error : any) {
           console.error("Auth error:", error);
@@ -80,16 +76,15 @@ export const authOptions : AuthOptions = {
         if (user.accessLevel !== undefined) {
           token.accessLevel = user.accessLevel as number;
 
-          const { rows } = await pool.query(`SELECT * FROM master."SP_MASTER_ACCESS_LEVEL_ROLE_GET"($1);`, [token.accessLevel]);
-          const row = rows[0];
+          const role = await getRoleByLevel(token.accessLevel);
 
-          if (row) {
-            token.Sys_Admin = row.Sys_Admin;
-            token.User_Mgr = row.User_Mgr;
-            token.Stock_Mgr = row.Stock_Mgr;
-            token.Order_Mgr = row.Order_Mgr;
-            token.Report = row.Report;
-            token.Dashboard = row.Dashboard;
+          if (role) {
+            token.Sys_Admin = role.Sys_Admin;
+            token.User_Mgr = role.User_Mgr;
+            token.Stock_Mgr = role.Stock_Mgr;
+            token.Order_Mgr = role.Order_Mgr;
+            token.Report = role.Report;
+            token.Dashboard = role.Dashboard;
           }
         }
       }
@@ -103,16 +98,15 @@ export const authOptions : AuthOptions = {
         const accessLevel = session.user.accessLevel;
         token.accessLevel = typeof accessLevel === "string" ? parseInt(session.user.accessLevel, 10) : accessLevel;
 
-        const { rows } = await pool.query(`SELECT * FROM master."SP_MASTER_ACCESS_LEVEL_ROLE_GET"($1);`, [token.accessLevel]);
-        const row = rows[0];
+        const role = await getRoleByLevel(token.accessLevel);
 
-        if (row) {
-          token.Sys_Admin = row.Sys_Admin;
-          token.User_Mgr = row.User_Mgr;
-          token.Stock_Mgr = row.Stock_Mgr;
-          token.Order_Mgr = row.Order_Mgr;
-          token.Report = row.Report;
-          token.Dashboard = row.Dashboard;
+        if (role) {
+          token.Sys_Admin = role.Sys_Admin;
+          token.User_Mgr = role.User_Mgr;
+          token.Stock_Mgr = role.Stock_Mgr;
+          token.Order_Mgr = role.Order_Mgr;
+          token.Report = role.Report;
+          token.Dashboard = role.Dashboard;
         }
 
         token.name = session.user.name;
