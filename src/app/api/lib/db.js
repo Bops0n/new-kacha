@@ -8,6 +8,7 @@ const config = {
     password: process.env.DB_PASS,
     database: process.env.DB_NAME,
     idleTimeoutMillis: 30000,
+    connectionTimeoutMillis: 5000
     // database: process.env.DB_NAME,
     // ssl: {
     //     rejectUnauthorized: true,
@@ -31,7 +32,7 @@ module.exports = {
             return res;
         } catch (dbError) {
             await client.query('ROLLBACK');
-            
+            console.error('Database Error:', dbError.message, '\nQuery:', queryString);
             throw dbError;
         } finally {
             client.release();
