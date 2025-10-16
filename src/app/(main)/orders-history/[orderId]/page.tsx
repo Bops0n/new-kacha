@@ -10,6 +10,8 @@ import { Order, OrderStatus, StatusConfig } from '@/types';
 import { useAlert } from '@/app/context/AlertModalContext';
 import { formatPrice, formatDate } from '@/app/utils/formatters';
 import LoadingSpinner from '@/app/components/LoadingSpinner';
+import { useSession } from 'next-auth/react';
+import AccessDeniedPage from '@/app/components/AccessDenied';
 
 // --- UI Configuration ---
 // (สามารถย้ายไปรวมไว้ที่ไฟล์กลาง /types/ui.types.ts ได้)
@@ -24,6 +26,7 @@ const statusConfig: StatusConfig = {
 
 // --- Main Page Component ---
 export default function OrderDetailsPage() {
+  const { data: session } = useSession();
   const router = useRouter();
   const params = useParams();
   const { showAlert } = useAlert();
@@ -127,6 +130,7 @@ export default function OrderDetailsPage() {
       </div>
   );
   if (!order) return <div className="text-center p-8">ไม่พบข้อมูลคำสั่งซื้อ</div>;
+  if (order.User_ID !== Number(session?.user.id)) return <AccessDeniedPage url="/"/>
 
   const statusInfo = statusConfig[order.Status as OrderStatus];
   const canUploadSlip = order.Payment_Type === 'bank_transfer' && order.Status === 'pending';

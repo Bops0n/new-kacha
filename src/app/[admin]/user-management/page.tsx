@@ -450,7 +450,7 @@ export default function UserManagement() {
   };
 
   if (loading) return <LoadingSpinner />;
-  if (!session || !session.user.User_Mgr) return <AccessDeniedPage />;
+  if (!session || !session.user.User_Mgr) return <AccessDeniedPage url="/admin"/>;
 
   return (
     <div className="min-h-screen bg-base-200 p-4">

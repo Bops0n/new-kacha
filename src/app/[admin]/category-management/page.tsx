@@ -173,7 +173,7 @@ export default function CategoryManagementPage() {
     if (loading) return <LoadingSpinner />;
     if (error) return <div className="text-center p-8 text-error"><h3>เกิดข้อผิดพลาด:</h3><p>{error}</p></div>;
 
-    if (!session || !session.user.Stock_Mgr) return <AccessDeniedPage />;
+    if (!session || !session.user.Stock_Mgr) return <AccessDeniedPage url="/admin"/>;
 
     return (
         <div className="min-h-screen bg-base-200 p-4">

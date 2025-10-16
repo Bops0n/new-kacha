@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { LuArrowLeft, LuShieldAlert } from "react-icons/lu";
 
-export default function AccessDeniedPage() {
+export default function AccessDeniedPage({ url } : { url: string }) {
   return (
     <main className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-gray-50 to-gray-100 text-center px-6">
       <div className="bg-white rounded-2xl shadow-xl p-10 max-w-md w-full border border-gray-200">
@@ -26,7 +26,7 @@ export default function AccessDeniedPage() {
 
           {/* 🔸 Button */}
           <Link
-            href="/admin"
+            href={url}
             className="mt-6 inline-flex items-center gap-2 px-5 py-2.5 bg-orange-500 text-white rounded-xl 
                        hover:bg-orange-600 active:bg-orange-700 transition-all duration-200 shadow-sm"
           >

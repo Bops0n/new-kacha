@@ -7,7 +7,7 @@ export default function DashboardPage() {
     const { data: session, status } = useSession();
 
     if (status == "loading") return <LoadingSpinner />;
-    if (!session || !session.user.Dashboard) return <AccessDeniedPage />;
+    if (!session || !session.user.Dashboard) return <AccessDeniedPage url="/admin"/>;
 
     return (
         <div className="min-h-screen bg-base-200 p-4">
