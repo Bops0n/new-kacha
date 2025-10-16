@@ -3,7 +3,7 @@
 import React from 'react';
 import { FiPackage, FiDollarSign, FiCalendar, FiEye } from 'react-icons/fi';
 import { Order, StatusConfig } from '@/types';
-import { formatPrice, formatDate } from '@/app/utils/formatters';
+import { formatPrice } from '@/app/utils/formatters';
 
 interface OrderCardProps {
   order: Order;
@@ -36,7 +36,7 @@ const OrderCard: React.FC<OrderCardProps> = ({ order, statusConfig, viewOrderDet
         <div className="space-y-2 text-sm">
             <p className="flex items-center gap-2"><FiPackage className="w-4 h-4 text-base-content/70" /> <span>{order.Products.length} รายการ</span></p>
             <p className="flex items-center gap-2"><FiDollarSign className="w-4 h-4 text-base-content/70" /> <span className="font-bold">{formatPrice(order.Total_Amount)}</span></p>
-            <p className="flex items-center gap-2"><FiCalendar className="w-4 h-4 text-base-content/70" /> <span>สั่งเมื่อ: {formatDate(order.Order_Date)}</span></p>
+            <p className="flex items-center gap-2"><FiCalendar className="w-4 h-4 text-base-content/70" /> <span>สั่งเมื่อ: {order.Order_Date}</span></p>
         </div>
 
         <div className="card-actions justify-end mt-4">

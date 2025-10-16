@@ -9,7 +9,7 @@ import {
 } from 'react-icons/fi';
 import { Order, OrderStatus, StatusConfig } from '@/types';
 import { useAlert } from '@/app/context/AlertModalContext';
-import { formatPrice, formatDate } from '@/app/utils/formatters';
+import { formatPrice } from '@/app/utils/formatters';
 import LoadingSpinner from '@/app/components/LoadingSpinner';
 import { useSession } from 'next-auth/react';
 import AccessDeniedPage from '@/app/components/AccessDenied';
@@ -46,7 +46,7 @@ export default function OrderDetailsPage() {
   // --- Logic การดึงข้อมูล ---
   const fetchOrderDetails = useCallback(async () => {
     if (isNaN(orderId)) {
-      setError('Order ID ไม่ถูกต้อง');
+      setError('รหัสคำสั่งซื้อไม่ถูกต้อง');
       setLoading(false);
       return;
     }
@@ -153,9 +153,9 @@ export default function OrderDetailsPage() {
           <h1 className="text-xl md:text-2xl font-bold text-base-content text-right">รายละเอียดคำสั่งซื้อ #{order.Order_ID}</h1>
         </div>
 
-        <div className="bg-primary/5 text-primary-content p-4 rounded-lg flex flex-wrap items-center justify-around gap-y-2 mb-6 shadow-sm text-sm sm:text-base">
-            <p><strong>วันที่สั่ง:</strong> {formatDate(order.Order_Date)}</p>
-            <span className={`badge ${statusInfo?.bgColor.replace('bg-', 'badge-')} badge-lg gap-2`}>
+        <div className="bg-primary/5 text-base-content p-4 rounded-lg flex flex-wrap items-center justify-around gap-y-2 mb-6 shadow-sm text-sm sm:text-base">
+            <p><strong>วันที่สั่ง:</strong> {order.Order_Date}</p>
+            <span className={`badge ${statusInfo?.color.replace('bg-', 'badge-')} badge-lg gap-2`}>
               {statusInfo?.icon && React.createElement(statusInfo.icon)}
               {statusInfo?.label || order.Status}
             </span>
@@ -176,7 +176,7 @@ export default function OrderDetailsPage() {
                     <p><strong>ประเภทชำระเงิน:</strong> {order.Payment_Type}</p>
                     <p><strong>บริษัทขนส่ง:</strong> {order.Shipping_Carrier || '-'}</p>
                     <p><strong>Tracking ID:</strong> {order.Tracking_ID || '-'}</p>
-                    <p><strong>วันที่จัดส่ง (คาดการณ์):</strong> {order.DeliveryDate ? formatDate(order.DeliveryDate) : '-'}</p>
+                    <p><strong>วันที่จัดส่ง (คาดการณ์):</strong> {order.DeliveryDate ? order.DeliveryDate : '-'}</p>
                 </div>
             </div>
         </div>

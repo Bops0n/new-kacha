@@ -3,7 +3,7 @@
 import React from 'react';
 import { FiEye, FiTrash2 } from 'react-icons/fi';
 import { Order, StatusConfig } from '@/types';
-import { formatPrice, formatDate } from '@/app/utils/formatters';
+import { formatPrice } from '@/app/utils/formatters';
 
 interface OrderRowProps {
   order: Order;
@@ -40,7 +40,7 @@ const OrderRow: React.FC<OrderRowProps> = ({ order, statusConfig, viewOrderDetai
           </span>
         )}
       </td>
-      <td>{formatDate(order.Order_Date)}</td>
+      <td>{order.Order_Date}</td>
       <td>{order.Tracking_ID || '-'}</td>
       <td>
         <div className="flex gap-1">

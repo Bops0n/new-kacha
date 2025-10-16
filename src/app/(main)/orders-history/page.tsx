@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { FiEye, FiClock, FiPackage, FiTruck, FiCheckCircle, FiXCircle, FiInfo, FiRefreshCw } from 'react-icons/fi';
 import { useOrderHistory } from '../../hooks/useOrderHistory'; // << 1. Import hook
 import { OrderStatus } from '../../../types';
-import { formatPrice, formatDate } from '../../utils/formatters'; // << Import formatters
+import { formatPrice } from '../../utils/formatters'; // << Import formatters
 import LoadingSpinner from '../../components/LoadingSpinner';
 
 // StatusConfig can be moved to a shared utils/config file if used elsewhere
@@ -69,7 +69,7 @@ export default function OrderHistoryPage() {
                                     <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4">
                                         <div>
                                             <h2 className="text-xl font-bold text-primary">คำสั่งซื้อ #{order.Order_ID}</h2>
-                                            <p className="text-sm text-base-content/70 mt-1">สั่งเมื่อ: {formatDate(order.Order_Date)}</p>
+                                            <p className="text-sm text-base-content/70 mt-1">สั่งเมื่อ: {order.Order_Date}</p>
                                         </div>
                                         <div className={`mt-2 md:mt-0 badge ${statusInfo?.bgColor} ${statusInfo?.color} badge-lg`}>
                                             {statusInfo?.icon && React.createElement(statusInfo.icon, { className: 'mr-2' })}
@@ -88,7 +88,7 @@ export default function OrderHistoryPage() {
                                         </div>
                                         <div className="col-span-2 sm:col-span-1">
                                             <p className="font-semibold">วันที่จัดส่ง (คาดการณ์):</p>
-                                            <p>{order.DeliveryDate ? formatDate(order.DeliveryDate) : 'ยังไม่ระบุ'}</p>
+                                            <p>{order.DeliveryDate ? order.DeliveryDate : 'ยังไม่ระบุ'}</p>
                                         </div>
                                     </div>
 

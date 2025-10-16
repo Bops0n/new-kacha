@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { FiSave, FiX, FiEdit, FiImage, FiShoppingBag, FiArchive, FiAlertTriangle, FiCheckCircle } from 'react-icons/fi';
 import { Order, EditOrderFormData, OrderStatus, StatusConfig, SimpleProductDetail, OrderProductDetail } from '@/types';
 import { useAlert } from '@/app/context/AlertModalContext';
-import { formatPrice, formatDate } from '@/app/utils/formatters';
+import { formatPrice } from '@/app/utils/formatters';
 import { calculateAvailableStock } from '@/app/utils/calculations';
 
 // --- Sub-Component: OrderItemDetail ---
@@ -136,7 +136,7 @@ const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
                   <>
                   <p><strong>Tracking ID:</strong> {order.Tracking_ID || '-'}</p>
                   <p><strong>บริษัทขนส่ง:</strong> {order.Shipping_Carrier || '-'}</p>
-                  <p><strong>วันที่ส่ง:</strong> {formatDate(order.DeliveryDate)}</p>
+                  <p><strong>วันที่ส่ง:</strong> {order.DeliveryDate}</p>
                   <p><strong>สถานะ:</strong> <span className={`badge ${statusConfig[order.Status]?.color}`}>{statusConfig[order.Status]?.label}</span></p>
                   <p><strong>จัดการโดย:</strong> {order.Action.Update_Name}</p>
                   <p><strong>เมื่อเวลา:</strong> {order.Action.Update_Date}</p>
