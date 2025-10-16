@@ -63,6 +63,14 @@ export const mapDbRowsToOrders = (dbRows: any[]): Order[] => {
                 Subtotal: pricePaidPerItem * quantity,
             });
         }
+
+        if (row.OA_Order_ID) {
+            currentOrder.Action.Order_ID = row.OA_Order_ID;
+            currentOrder.Action.Status = row.OA_Status;
+            currentOrder.Action.Update_By = row.OA_Update_By;
+            currentOrder.Action.Update_Name = row.OA_Update_Name;
+            currentOrder.Action.Update_Date = row.OA_Update_Date;
+        }
     });
     return Array.from(ordersMap.values()).sort((a, b) => b.Order_ID - a.Order_ID);
 };

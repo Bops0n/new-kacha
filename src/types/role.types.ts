@@ -7,8 +7,4 @@ export type Role = {
     Order_Mgr: boolean;
     Report: boolean;
     Dashboard: boolean;
-    Create_By: string;
-    Create_Date: string;
-    Update_By: string;
-    Update_Date: string;
 };
