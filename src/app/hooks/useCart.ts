@@ -155,7 +155,7 @@ export function useCart() {
             setCartItems([]);
             setCounter(0);
             showAlert('สั่งซื้อสำเร็จ!', 'success', 'สำเร็จ', () => {
-                router.push(`/orders-history/${result.orderId}`);
+                router.push(`/orders-history/${result.Out_Order_ID}`);
             });
         } catch (err: any) {
             showAlert(err.message, 'error');

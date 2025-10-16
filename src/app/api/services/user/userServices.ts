@@ -1,5 +1,5 @@
 import { poolQuery } from '@/app/api/lib/db';
-import { UserSchema, AddressSchema } from '@/types';
+import { UserSchema, AddressSchema, PlaceOrderRequestBody } from '@/types';
 
 // --- Profile Functions ---
 
@@ -105,4 +105,14 @@ export async function getProductDetail(productId: number) {
   const { rows } = await poolQuery(`SELECT * FROM "SP_USER_PRODUCT_DETAIL_GET"($1)`, [productId]);
   return rows[0];
 }
+
+export async function addOrderTransaction(userId: number, payload: PlaceOrderRequestBody) {
+  const { rows } = await poolQuery(`SELECT * FROM "SP_USER_ORDER_INS"($1, $2, $3, $4, $5)`, [
+    userId, 
+    payload.addressId, 
+    payload.paymentMethod, 
+    payload.totalPrice, 
+    JSON.stringify(payload.cartItems)
+  ]);
+  return rows[0];
 }
