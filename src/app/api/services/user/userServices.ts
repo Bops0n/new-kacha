@@ -100,3 +100,9 @@ export async function uploadTransactionSlip(imageURL: string, orderId: number, u
   const { rowCount } = await poolQuery(`SELECT * FROM "SP_USER_ORDER_TRANS_SLIP_UPD"($1, $2, $3)`, [imageURL, orderId, userId]);
   return rowCount > 0;
 }
+
+export async function getProductDetail(productId: number) {
+  const { rows } = await poolQuery(`SELECT * FROM "SP_USER_PRODUCT_DETAIL_GET"($1)`, [productId]);
+  return rows[0];
+}
+}

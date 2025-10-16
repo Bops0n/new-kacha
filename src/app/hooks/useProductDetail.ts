@@ -25,9 +25,9 @@ export function useProductDetail(productId: string) {
         throw new Error(errorData.message || 'ไม่สามารถโหลดข้อมูลสินค้าได้');
       }
       const data = await response.json();
-      setProduct(data.product);
-      setRelatedProducts(data.relatedProducts || []);
-      setCategoryPath(data.categoryPath || null);
+      setProduct(data.Product);
+      setRelatedProducts(data.Related_Products || []);
+      setCategoryPath(data.Category_Path || null);
     } catch (err: any) {
       setError(err.message);
     } finally {
