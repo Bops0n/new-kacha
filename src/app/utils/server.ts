@@ -7,7 +7,6 @@ export const mapDbRowsToOrders = (dbRows: any[]): Order[] => {
         const orderId = row.Order_ID;
         if (!ordersMap.has(orderId)) {
             ordersMap.set(orderId, {
-                // Map fields from 'Order' table
                 Order_ID: row.Order_ID,
                 User_ID: row.User_ID,
                 Order_Date: row.Order_Date,
@@ -20,12 +19,16 @@ export const mapDbRowsToOrders = (dbRows: any[]): Order[] => {
                 Shipping_Carrier: row.Shipping_Carrier,
                 Transfer_Slip_Image_URL: row.Transfer_Slip_Image_URL,
                 Cancellation_Reason: row.Cancellation_Reason,
-                Address: row.Address,
+                Address_1: row.Address_1,
+                Address_2: row.Address_2,
+                Sub_District: row.Sub_District,
+                District: row.District,
+                Province: row.Province,
+                Zip_Code: row.Zip_Code,
                 Phone: row.Phone,
                 Total_Amount: parseFloat(row.Total_Amount),
 
-                // Mapped from JOIN
-                Customer_Name: row.User_FullName || 'N/A', // Customer name for their own orders
+                Customer_Name: row.User_FullName || 'N/A',
                 Email: row.User_Email || null,
                 Products: [],
                 Action: {

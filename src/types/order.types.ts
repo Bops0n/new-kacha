@@ -46,7 +46,12 @@ export type Order = {
   Transfer_Slip_Image_URL: string | null;
   DeliveryDate: string | null;
   Invoice_ID: string | null;
-  Address: string;
+  Address_1: string;
+  Address_2: string | null;
+  Sub_District: string;
+  District: string;
+  Province: string;
+  Zip_Code: string;
   Phone: string;
   Products: OrderProductDetail[];
   Action: OrderAction;
@@ -66,7 +71,7 @@ export interface EditOrderFormData {
 // Type for product items received in the order request body
 export interface OrderProductRequestBody {
     Product_ID: number;
-    CartQuantity: number; // This is the quantity the user wants to order
+    Cart_Quantity: number; // This is the quantity the user wants to order
 }
 
 // Type for the full request body when placing an order

@@ -166,7 +166,7 @@ export default function OrderDetailsPage() {
             <div className="card bg-base-200 p-6">
                 <h2 className="card-title text-xl mb-4"><FiMapPin className="mr-2"/>ที่อยู่จัดส่ง</h2>
                 <div className="space-y-1 text-base-content/90">
-                    <p>{order.Address}</p>
+                    <p>{order.Address_1} {order.Address_2} {order.Sub_District} {order.District} {order.Province} {order.Zip_Code}</p>
                     <p><strong>โทร:</strong> {order.Phone}</p>
                 </div>
             </div>

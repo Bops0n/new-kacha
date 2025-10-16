@@ -123,7 +123,7 @@ const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
           <h3 className="font-bold text-lg mb-4">{isEditing ? `แก้ไขคำสั่งซื้อ #${order.Order_ID}` : `รายละเอียดคำสั่งซื้อ #${order.Order_ID}`}</h3>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div><h4 className="font-semibold mb-2">ข้อมูลลูกค้า</h4><div className="bg-base-200 rounded-lg p-4 space-y-1 text-sm"><p><strong>ชื่อ:</strong> {order.Customer_Name}</p><p><strong>อีเมล:</strong> {order.Email || '-'}</p><p><strong>ที่อยู่:</strong> {order.Address}</p></div></div>
+            <div><h4 className="font-semibold mb-2">ข้อมูลลูกค้า</h4><div className="bg-base-200 rounded-lg p-4 space-y-1 text-sm"><p><strong>ชื่อ:</strong> {order.Customer_Name}</p><p><strong>อีเมล:</strong> {order.Email || '-'}</p><p><strong>ที่อยู่:</strong> {order.Address_1} {order.Address_2} {order.Sub_District} {order.District} {order.Province} {order.Zip_Code}</p></div></div>
             <div><h4 className="font-semibold mb-2">ข้อมูลคำสั่งซื้อ</h4><div className="bg-base-200 rounded-lg p-4 space-y-2 text-sm">
                 {isEditing ? (
                   <>

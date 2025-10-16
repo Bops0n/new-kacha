@@ -1,8 +1,8 @@
 'use client';
 
  import React, { useState } from 'react';
- import { OrderAPIResponse, OrderStatus } from '../../../types/types'; // Adjust path as needed
  import { FiX, FiClock, FiPackage, FiTruck, FiCheckCircle, FiXCircle, FiRefreshCw } from 'react-icons/fi';
+import { Order, OrderStatus } from '@/types';
 
  // Define StatusConfig here for local use within the modal, or import from a shared utility if preferred.
  // It's important that this matches the definition in your orders/page.tsx
@@ -19,7 +19,7 @@
  interface OrderDetailsModalProps {
    isOpen: boolean;
    onClose: () => void;
-   order: OrderAPIResponse | null;
+   order: Order | null;
    onUpdateTransferSlip: (orderId: number, file: File) => Promise<boolean>;
    updatingSlip: boolean;
    updateSlipError: string | null;
@@ -72,7 +72,7 @@
          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
            <div>
              <h3 className="text-lg font-semibold text-gray-700 mb-2">รายละเอียดการจัดส่ง</h3>
-             <p className="text-gray-600"><strong>ที่อยู่:</strong> {order.Address}</p>
+             <p className="text-gray-600"><strong>ที่อยู่:</strong> {order.Address_1} {order.Address_2} {order.Sub_District} {order.District} {order.Province} {order.Zip_Code}</p>
              <p className="text-gray-600"><strong>เบอร์โทรศัพท์:</strong> {order.Phone}</p>
              <p className="text-gray-600"><strong>วิธีการชำระเงิน:</strong> {order.Payment_Type}</p>
              {order.DeliveryDate && <p className="text-gray-600"><strong>วันที่จัดส่ง:</strong> {new Date(order.DeliveryDate).toLocaleDateString()}</p>}
