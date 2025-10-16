@@ -68,6 +68,7 @@ const AlertModal: React.FC<AlertModalProps> = ({ isOpen, message, onClose, type 
           <button
             onClick={() => {
               onConfirm();
+              onClose();
             }}
             className={`btn ${buttonClass} w-full max-w-[150px] py-3 rounded-lg text-white font-semibold shadow-md transition-all duration-300 hover:opacity-80 focus:outline-none focus:ring-2 focus:ring-opacity-75`}
             aria-label="ปิดการแจ้งเตือน"
