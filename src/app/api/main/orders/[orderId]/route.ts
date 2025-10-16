@@ -41,7 +41,7 @@ export async function GET(
             return NextResponse.json({ message: 'คุณไม่มีสิทธิ์เข้าถึงคำสั่งซื้อนี้' }, { status: 403 });
         }
         console.error('Error fetching order details:', error);
-        return NextResponse.json({ message: 'Internal server error' }, { status: 500 });
+        return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 });
     }
 }
 
@@ -59,7 +59,7 @@ export async function PATCH(
     
     const orderId = parseInt(await params.orderId, 10);
     if (isNaN(orderId)) {
-        return NextResponse.json({ message: 'Order ID ไม่ถูกต้อง' }, { status: 400 });
+        return NextResponse.json({ message: 'รหัสคำสั่งซื้อไม่ถูกต้อง' }, { status: 400 });
     }
 
     try {

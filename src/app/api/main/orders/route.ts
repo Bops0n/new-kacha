@@ -54,13 +54,11 @@ export async function POST(request: NextRequest) {
 
         const { Status_Code, Message, Out_Order_ID } = await addOrderTransaction(Number(auth.userId), data);
 
-        console.log(Status_Code, Message, Out_Order_ID);
-
-        if (Status_Code != 200) {
+        if (Status_Code != 201) {
             return NextResponse.json({ message: Message }, { status: Status_Code });  
         }
         
-        return NextResponse.json({ message: Message, Out_Order_ID }, { status: Status_Code });
+        return NextResponse.json({ message: Message, orderId: Out_Order_ID }, { status: Status_Code });
 
     } catch (error) {
         console.error('API Error fetching product:', error);

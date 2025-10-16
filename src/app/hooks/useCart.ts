@@ -149,13 +149,13 @@ export function useCart() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload),
             });
-            const result = await response.json();
-            if (!response.ok) throw new Error(result.message || 'ไม่สามารถสร้างคำสั่งซื้อได้');
-
+            const { message, orderId } = await response.json();
+            if (!response.ok) throw new Error(message || 'ไม่สามารถสร้างคำสั่งซื้อได้');
+            
             setCartItems([]);
             setCounter(0);
             showAlert('สั่งซื้อสำเร็จ!', 'success', 'สำเร็จ', () => {
-                router.push(`/orders-history/${result.Out_Order_ID}`);
+                router.push(`/orders-history/${orderId}`);
             });
         } catch (err: any) {
             showAlert(err.message, 'error');
