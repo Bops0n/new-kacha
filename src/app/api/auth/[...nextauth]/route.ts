@@ -30,8 +30,6 @@ export const authOptions : AuthOptions = {
 
           if (!result) throw new Error("No response from authentication function");
 
-          console.log(result);
-
           switch (result.Status_Code) {
             case 200:
               const role = await getRoleByLevel(result.Access_Level);
