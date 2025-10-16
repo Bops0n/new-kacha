@@ -4,7 +4,8 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { 
   FiClock, FiPackage, FiTruck, FiCheckCircle, FiXCircle, 
-  FiArrowLeft, FiMapPin, FiShoppingCart, FiUploadCloud, FiDollarSign 
+  FiArrowLeft, FiMapPin, FiShoppingCart, FiUploadCloud, FiDollarSign, 
+  FiRefreshCw
 } from 'react-icons/fi';
 import { Order, OrderStatus, StatusConfig } from '@/types';
 import { useAlert } from '@/app/context/AlertModalContext';
@@ -15,12 +16,14 @@ import AccessDeniedPage from '@/app/components/AccessDenied';
 
 // --- UI Configuration ---
 // (สามารถย้ายไปรวมไว้ที่ไฟล์กลาง /types/ui.types.ts ได้)
-const statusConfig: StatusConfig = {
-  pending: { label: 'รอดำเนินการ', color: 'text-yellow-600', icon: FiClock, bgColor: 'bg-yellow-100' },
-  processing: { label: 'กำลังจัดเตรียม', color: 'text-blue-600', icon: FiPackage, bgColor: 'bg-blue-100' },
-  shipped: { label: 'จัดส่งแล้ว', color: 'text-indigo-600', icon: FiTruck, bgColor: 'bg-indigo-100' },
-  delivered: { label: 'จัดส่งสำเร็จ', color: 'text-green-600', icon: FiCheckCircle, bgColor: 'bg-green-100' },
-  cancelled: { label: 'ยกเลิก', color: 'text-red-600', icon: FiXCircle, bgColor: 'bg-red-100' },
+const statusConfig: { [key in OrderStatus]: { label: string; color: string; icon: React.ElementType; bgColor: string; } } = {
+  pending: { label: 'รอดำเนินการ', color: 'badge-warning', icon: FiClock, bgColor: 'bg-warning/10' },
+  processing: { label: 'กำลังเตรียม', color: 'badge-info', icon: FiPackage, bgColor: 'bg-info/10' },
+  shipped: { label: 'จัดส่งแล้ว', color: 'badge-primary', icon: FiTruck, bgColor: 'bg-primary/10' },
+  delivered: { label: 'ส่งเรียบร้อย', color: 'badge-success', icon: FiCheckCircle, bgColor: 'bg-success/10' },
+  refunding: { label: 'ยกเลิก: กำลังรอคืนเงิน', color: 'badge-accent', icon: FiRefreshCw, bgColor: 'bg-accent/10' },
+  refunded: { label: 'ยกเลิก: คืนเงินสำเร็จ', color: 'badge-neutral', icon: FiCheckCircle, bgColor: 'bg-neutral/10' },
+  cancelled: { label: 'ยกเลิก', color: 'badge-error', icon: FiXCircle, bgColor: 'bg-error/10' },
 };
 
 
