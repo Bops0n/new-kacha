@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { FiSearch, FiPackage, FiTruck, FiCheckCircle, FiXCircle, FiClock, FiRefreshCw } from 'react-icons/fi';
 
 import { useOrderManagement } from '@/app/hooks/admin/useOrderManagement';
@@ -30,6 +30,16 @@ export default function OrderManagementPage() {
     loading, error, orders, filteredOrders, filters, setFilters, 
     actions, modalState, modalActions 
   } = useOrderManagement();
+
+  useEffect(() => {
+    const onVisible = () => {
+      if (document.visibilityState === "visible") {
+        window.location.reload();
+      }
+    };
+    document.addEventListener("visibilitychange", onVisible);
+    return () => document.removeEventListener("visibilitychange", onVisible);
+  }, []);
 
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
