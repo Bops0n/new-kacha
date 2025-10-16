@@ -37,23 +37,23 @@ const CartItem: React.FC<CartItemProps> = ({ item, onUpdateQuantity, onRemove })
                     <div className="flex items-center gap-2 mb-2 md:mb-0">
                         <button
                             className="btn btn-sm btn-circle btn-outline"
-                            onClick={() => onUpdateQuantity(item.Product_ID, item.CartQuantity - 1)}
-                            disabled={item.CartQuantity <= 1}
+                            onClick={() => onUpdateQuantity(item.Product_ID, item.Cart_Quantity - 1)}
+                            disabled={item.Cart_Quantity <= 1}
                         >
                             <FiMinusCircle />
                         </button>
-                        <span className="font-bold text-xl min-w-[30px] text-center">{item.CartQuantity}</span>
+                        <span className="font-bold text-xl min-w-[30px] text-center">{item.Cart_Quantity}</span>
                         <button
                             className="btn btn-sm btn-circle btn-outline"
-                            onClick={() => onUpdateQuantity(item.Product_ID, item.CartQuantity + 1)}
-                            disabled={item.CartQuantity >= calculateAvailableStock(item)}
+                            onClick={() => onUpdateQuantity(item.Product_ID, item.Cart_Quantity + 1)}
+                            disabled={item.Cart_Quantity >= calculateAvailableStock(item)}
                         >
                             <FiPlusCircle />
                         </button>
                         <span className="text-sm text-base-content/60 ml-2">(คงเหลือ: {calculateAvailableStock(item as any)})</span>
                     </div>
                     <div className="font-bold text-xl text-primary text-right md:text-left">
-                        {formatPrice(item.Sale_Price * item.CartQuantity)}
+                        {formatPrice(item.Sale_Price * item.Cart_Quantity)}
                     </div>
                 </div>
             </div>

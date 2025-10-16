@@ -22,5 +22,5 @@ export interface CartDetailSchema {
   Cancellation_Count: number;
 
   // Field สำหรับจำนวนในตะกร้า
-  CartQuantity: number;
+  Cart_Quantity: number;
 }

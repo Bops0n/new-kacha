@@ -30,7 +30,7 @@ export async function GET(request: Request) {
             Quantity: row.Quantity,
             Total_Sales: row.Total_Sales,
             Cancellation_Count: row.Cancellation_Count,
-            CartQuantity: row.CartQuantity,
+            Cart_Quantity: row.Cart_Quantity,
         }));
 
         return NextResponse.json({ cartItems, error: false }, { status: 200 });

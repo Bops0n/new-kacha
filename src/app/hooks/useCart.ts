@@ -73,7 +73,7 @@ export function useCart() {
       const priceToUse = (item.Discount_Price !== null && item.Discount_Price < item.Sale_Price)
         ? item.Discount_Price
         : item.Sale_Price;
-      return sum + (item.CartQuantity * priceToUse);
+      return sum + (item.Cart_Quantity * priceToUse);
     }, 0);
   }, [cartItems]);
     const removeItem = useCallback((productId: number, productName: string) => {
@@ -118,7 +118,7 @@ export function useCart() {
         });
         if (!response.ok) throw new Error('ไม่สามารถอัปเดตจำนวนสินค้าได้');
         
-        setCartItems(prevItems => prevItems.map(i => i.Product_ID === productId ? { ...i, CartQuantity: newQuantity } : i));
+        setCartItems(prevItems => prevItems.map(i => i.Product_ID === productId ? { ...i, Cart_Quantity: newQuantity } : i));
     } catch (err: any) {
         showAlert(err.message, 'error');
     }
@@ -139,7 +139,7 @@ export function useCart() {
         const payload = {
             addressId: selectedAddress.Address_ID,
             paymentMethod: paymentMethod,
-            cartItems: cartItems.map(item => ({ Product_ID: item.Product_ID, CartQuantity: item.CartQuantity })),
+            cartItems: cartItems.map(item => ({ Product_ID: item.Product_ID, Cart_Quantity: item.Cart_Quantity })),
             totalPrice: totalPrice,
         };
 
