@@ -72,8 +72,6 @@ export function useCategoryManagement() {
     const isEditing = !!formData.ID;
     const method = isEditing ? 'PATCH' : 'POST';
 
-    console.log(formData);
-
     try {
         const response = await fetch('/api/admin/categories', {
             method: method,

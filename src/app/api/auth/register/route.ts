@@ -10,7 +10,6 @@ export async function POST(req: NextRequest) {
         let path = "ไม่ระบุ";
 
         const issue = parsed.error.issues[0];
-        console.log(issue);
         switch (`${issue.path}`) {
             case 'email': path = "อีเมล"; break;
             case 'username': path = "ชื่อผู้ใช้"; break;

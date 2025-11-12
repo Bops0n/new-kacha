@@ -26,14 +26,11 @@ export function useProductModal({ onSave }: UseProductModalProps) {
         Selected_Sub_Category_ID : selectedProduct?.Child_ID ? childSubCategories.find(sub => sub.Child_ID === selectedProduct.Child_ID)?.Sub_Category_ID : null,
       });
       setImageFile(null);
-      console.log(initialFormState)
-      console.log(selectedProduct)
     }
   }, [selectedProduct, isModalOpen]);
 
 
   const openModal = useCallback((product: ProductFormData | null, mode: ModalMode) => {
-    console.log(childSubCategories.find(sub => sub.Child_ID === product?.Child_ID)?.Category_ID)
     setSelectedProduct({
         ...product,
         Selected_Category_ID : product?.Child_ID ? childSubCategories.find(sub => sub.Child_ID === product.Child_ID)?.Category_ID : null,
@@ -86,7 +83,6 @@ export function useProductModal({ onSave }: UseProductModalProps) {
         if (!response.ok) throw new Error(result.message || 'Image upload failed');
         finalFormData.Image_URL = result.imageUrl;
       } catch (error) {
-        console.error(error);
         alert('เกิดข้อผิดพลาดในการอัปโหลดรูปภาพ');
         setIsUploading(false);
         return;

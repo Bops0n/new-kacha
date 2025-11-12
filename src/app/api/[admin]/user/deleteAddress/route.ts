@@ -1,6 +1,7 @@
 import { checkUserMgrRequire } from "@/app/api/auth/utils";
 import { deleteAddress } from "@/app/api/services/user/userServices";
 import { checkRequire } from "@/app/utils/client";
+import { logger } from "@/server/logger";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function DELETE(req: NextRequest) {
@@ -34,15 +35,13 @@ export async function DELETE(req: NextRequest) {
                 { status: 404 }
             );
         }
-
-        console.log(`Address ID ${parsedAddressId} deleted successfully.`);
         return NextResponse.json(
             { message: `Address ID ${parsedAddressId} deleted successfully.`, status: 200 },
             { status: 200 }
         );
 
     } catch (dbError: any) {
-        console.error("Error deleting address from database:", dbError);
+        logger.error("Error deleting address from database:", { error: dbError });
         return NextResponse.json(
             { message: "Failed to delete address.", error: dbError.message },
             { status: 500 }

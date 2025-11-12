@@ -1,4 +1,5 @@
 import { poolQuery } from '@/app/api/lib/db'; // Import pool for transaction capabilities
+import { logger } from '@/server/logger';
 import { CategoryFormData, CategoryType } from '@/types';
 
 /**
@@ -12,7 +13,7 @@ export async function addCategory(type: CategoryType, payload: CategoryFormData)
         const { rows } = await poolQuery(`SELECT public."SP_ADMIN_CATEGORY_INS"($1, $2)`, [type, JSON.stringify(payload)]);
         return rows[0];
     } catch (error) {
-        console.error("Call to category add failed:", error);
+        logger.error("Call to category add failed:", error);
         throw error;
     }
 }
@@ -28,7 +29,7 @@ export async function updateCategory(type: CategoryType, categoryId: number, pay
         const { rows } = await poolQuery(`SELECT public."SP_ADMIN_CATEGORY_UPD"($1, $2, $3)`, [type, categoryId, JSON.stringify(payload)]);
         return rows[0];
     } catch (error) {
-        console.error("Call to category update failed:", error);
+        logger.error("Call to category update failed:", error);
         throw error;
     }
 }
@@ -47,7 +48,7 @@ export async function deleteCategory(type: CategoryType, payload: { id: number }
         const { rowCount } = await poolQuery(`SELECT public."SP_ADMIN_CATEGORY_DEL"($1, $2)`, [type, payload.id]);
         return rowCount > 0;
     } catch (error) {
-        console.error("Call to category delete failed:", error);
+        logger.error("Call to category delete failed:", error);
         throw error;
     }
 }

@@ -3,6 +3,7 @@ import { AddressSchema } from '@/types';
 import { addNewAddress } from '@/app/api/services/user/userServices';
 import { checkUserMgrRequire } from '@/app/api/auth/utils';
 import { checkRequire } from '@/app/utils/client';
+import { logger } from '@/server/logger';
 
 export async function POST(req: NextRequest) {
     const auth = await checkUserMgrRequire();
@@ -13,7 +14,7 @@ export async function POST(req: NextRequest) {
     try {
         newAddressData = await req.json();
     } catch (error) {
-        console.error("Invalid JSON in request body:", error);
+        logger.error("Invalid JSON in request body:", error);
         return NextResponse.json(
             { message: "Invalid request body. Expected JSON." },
             { status: 400 }

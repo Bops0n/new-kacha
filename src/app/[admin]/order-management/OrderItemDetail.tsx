@@ -18,9 +18,6 @@ const OrderItemDetail: React.FC<OrderItemDetailProps> = ({ orderProduct, livePro
 
   const isStockInsufficient = typeof availableStock !== 'undefined' && availableStock < orderProduct.Quantity;
   
-  useEffect(()=>{
-    console.log(orderProduct.Product_Sale_Cost, orderProduct.Product_Sale_Price, orderProduct.Product_Discount_Price)
-  },[])
   // --- Logic การแสดงราคา ---
   const hasDiscount = orderProduct.Product_Discount_Price !== null && orderProduct.Product_Discount_Price < orderProduct.Product_Sale_Price;
 

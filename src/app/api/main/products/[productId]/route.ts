@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getProductDetail } from '@/app/api/services/user/userServices';
+import { logger } from '@/server/logger';
 
 export async function GET(
   request: NextRequest,
@@ -21,7 +22,7 @@ export async function GET(
     return NextResponse.json({ Product, Related_Products, Category_Path, message: Message }, { status: Status_Code });
 
   } catch (error) {
-    console.error('API Error fetching product:', error);
+    logger.error('API Error fetching product:', error);
     return NextResponse.json({ message: 'เกิดข้อผิดพลาดภายในเซิร์ฟเวอร์' }, { status: 500 });
   }
 }

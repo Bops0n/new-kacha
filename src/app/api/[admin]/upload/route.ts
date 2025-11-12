@@ -4,6 +4,7 @@ import { writeFile, mkdir } from 'fs/promises';
 import { v4 as uuidv4 } from 'uuid';
 import { checkRequire } from '@/app/utils/client';
 import { checkStockMgrRequire } from '../../auth/utils';
+import { logger } from '@/server/logger';
 
 export async function POST(req: NextRequest) {
     const auth = await checkStockMgrRequire();
@@ -40,7 +41,7 @@ export async function POST(req: NextRequest) {
         }, { status: 201 });
 
     } catch (error) {
-        console.error('File upload error:', error);
+        logger.error('File upload error:', error);
         return NextResponse.json({ message: "Server Error during file upload." }, { status: 500 });
     }
 }

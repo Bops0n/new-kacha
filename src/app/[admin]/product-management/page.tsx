@@ -47,9 +47,6 @@ const ProductModal = ({
     
     const [amountToAdd, setAmountToAdd] = useState<number>(0);
 
-    useEffect(()=>{
-    console.log(formData)
-    },[formData])
     if (!isOpen) return null;
     
     const stockStatus = product ? getProductStockStatus(product) : 'in_stock';
@@ -66,7 +63,6 @@ const ProductModal = ({
             }
         }
     };
-    // console.log(formData)
 
     return (
         <dialog className="modal modal-open">

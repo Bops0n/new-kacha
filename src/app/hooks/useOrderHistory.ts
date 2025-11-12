@@ -42,7 +42,6 @@ export function useOrderHistory() {
       const data = await response.json();
       setOrders(data.orders || []);
     } catch (err: any) {
-      console.error('Error fetching order history:', err);
       setError(err.message);
       showAlert(err.message, 'error');
     } finally {

@@ -375,8 +375,6 @@ export default function UserManagement() {
 
         showAlert(data.message, 'success');
       } else {
-        console.log('add new address')
-
         const response = await fetch('../api/admin/user/addAddress',{
           method: 'POST',
           body : JSON.stringify(newOrUpdatedAddress)

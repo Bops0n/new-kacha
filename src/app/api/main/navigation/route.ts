@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getAllCategories } from '../../services/user/userServices';
+import { logger } from '@/server/logger';
 
 export async function GET() {
   try {
@@ -12,7 +13,7 @@ export async function GET() {
     });
 
   } catch (error) {
-    console.error('API Error fetching navigation data:', error);
+    logger.error('API Error fetching navigation data:', error);
     return NextResponse.json(
       { message: 'เกิดข้อผิดพลาดในการดึงข้อมูลหมวดหมู่' },
       { status: 500 }

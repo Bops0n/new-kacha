@@ -1,3 +1,4 @@
+const { logger } = require('@/server/logger');
 const { Pool } = require('pg');
 require("dotenv").config();
 
@@ -8,8 +9,7 @@ const config = {
     password: process.env.DB_PASS,
     database: process.env.DB_NAME,
     idleTimeoutMillis: 30000,
-    connectionTimeoutMillis: 5000
-    // database: process.env.DB_NAME,
+    connectionTimeoutMillis: 5000,
     // ssl: {
     //     rejectUnauthorized: true,
     //     ca: process.env.DB_CACERT,
@@ -32,7 +32,7 @@ module.exports = {
             return res;
         } catch (dbError) {
             await client.query('ROLLBACK');
-            console.error('Database Error:', dbError.message, '\nQuery:', queryString);
+            logger.error('Database Error:', dbError.message, '\nQuery:', queryString);
             throw dbError;
         } finally {
             client.release();

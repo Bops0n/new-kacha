@@ -3,6 +3,7 @@ import { checkStockMgrRequire } from '@/app/api/auth/utils';
 import { checkRequire } from '@/app/utils/client';
 import { addCategory, deleteCategory, updateCategory } from '../../services/admin/categoryMgrService';
 import { CategoryFormData } from '@/types';
+import { logger } from '@/server/logger';
 
 /**
  * POST: สำหรับสร้างหมวดหมู่ใหม่ (main, sub, child)
@@ -21,6 +22,7 @@ export async function POST(req: NextRequest) {
         }
         return NextResponse.json({ message: 'เพิ่มหมวดหมู่สำเร็จ', data: newData }, { status: 201 });
     } catch (error: any) {
+        logger.error("API POST Error:", error.message);
         return NextResponse.json({ message: error.message || 'API Error' }, { status: 500 });
     }
 }
@@ -42,6 +44,7 @@ export async function PATCH(req: NextRequest) {
         }
         return NextResponse.json({ message: 'อัปเดตหมวดหมู่สำเร็จ', data: updatedData });
     } catch (error: any) {
+        logger.error("API PATCH Error:", error.message);
         return NextResponse.json({ message: error.message || 'API Error' }, { status: 500 });
     }
 }
@@ -72,6 +75,7 @@ export async function DELETE(req: NextRequest) {
 
         return NextResponse.json({ message: 'ลบหมวดหมู่สำเร็จ' });
     } catch (error: any) {
+        logger.error("API DELETE Error:", error.message);
         return NextResponse.json({ message: error.message || 'API Error' }, { status: 500 });
     }
 }

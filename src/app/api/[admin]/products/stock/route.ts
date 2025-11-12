@@ -3,6 +3,7 @@ import { checkStockMgrRequire } from '@/app/api/auth/utils';
 import { checkRequire } from '@/app/utils/client';
 import { increaseProductQtyInStock } from '@/app/api/services/admin/productMgrService';
 import { AddStockRequestBody } from '@/types';
+import { logger } from '@/server/logger';
 
 export async function PATCH(req: NextRequest) {
     const auth = await checkStockMgrRequire();
@@ -30,7 +31,7 @@ export async function PATCH(req: NextRequest) {
             product: data
         });
     } catch (error) {
-        console.error('API Error adding stock:', error);
+        logger.error('API Error adding stock:', error);
         const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred.';
         return NextResponse.json({ message: 'Failed to add stock.', error: errorMessage }, { status: 500 });
     }

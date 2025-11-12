@@ -4,6 +4,7 @@ import { Order, PlaceOrderRequestBody } from '@/types';
 import { checkRequire } from '@/app/utils/client';
 import { addOrderTransaction, getOrderByUID } from '../../services/user/userServices';
 import { mapDbRowsToOrders } from '@/app/utils/server';
+import { logger } from '@/server/logger';
 
 /**
  * GET /api/main/orders
@@ -22,7 +23,7 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ orders });
 
     } catch (error) {
-        console.error('Error fetching user orders:', error);
+        logger.error('Error fetching user orders:', error);
         return NextResponse.json({ message: 'เกิดข้อผิดพลาดในการดึงข้อมูลคำสั่งซื้อ', error: true }, { status: 500 });
     }
 }
@@ -61,7 +62,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ message: Message, orderId: Out_Order_ID }, { status: Status_Code });
 
     } catch (error) {
-        console.error('API Error fetching product:', error);
+        logger.error('API Error fetching product:', error);
         return NextResponse.json({ message: 'เกิดข้อผิดพลาดภายในเซิร์ฟเวอร์' }, { status: 500 });
     }
 }

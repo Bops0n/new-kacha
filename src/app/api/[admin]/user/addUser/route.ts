@@ -3,7 +3,8 @@ import { UserAccount } from '@/types';
 import { checkUserMgrRequire } from '@/app/api/auth/utils';
 import { checkRequire } from '@/app/utils/client';
 import { addUser } from '@/app/api/services/admin/userMgrService';
-import { hmacMd5Hex } from '@/app/utils/cryptor';
+import { hmacMd5Hex } from '@/server/cryptor';
+import { logger } from '@/server/logger';
 
 export async function POST(req: NextRequest) {
     const auth = await checkUserMgrRequire();
@@ -14,7 +15,7 @@ export async function POST(req: NextRequest) {
     try {
         newUserData = await req.json();
     } catch (error) {
-        console.error("Invalid JSON in request body:", error);
+        logger.error("Invalid JSON in request body:", error);
         return NextResponse.json(
             { message: "Invalid request body. Expected JSON." },
             { status: 400 }
@@ -44,6 +45,7 @@ export async function POST(req: NextRequest) {
         );
 
     } catch (dbError: any) {
+        logger.error("User add failed", { error: dbError.message });
         return NextResponse.json(
             { message: dbError.message },
             { status: 500 }

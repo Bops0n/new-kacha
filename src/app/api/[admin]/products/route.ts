@@ -64,7 +64,6 @@ export async function PATCH(req: NextRequest) {
         }
         return NextResponse.json({ message: 'อัปเดตสินค้าสำเร็จ', product: updatedProduct });
     } catch (error) {
-        console.log(error)
         return NextResponse.json({ message: "Server Error", error: (error as Error).message }, { status: 500 });
     }
 }

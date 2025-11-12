@@ -6,6 +6,7 @@ import path from 'path';
 import fs from 'fs/promises';
 import { checkRequire } from '@/app/utils/client';
 import { uploadTransactionSlip } from '@/app/api/services/user/userServices';
+import { logger } from '@/server/logger';
 
 /**
  * GET /api/main/orders/[orderId]
@@ -40,7 +41,7 @@ export async function GET(
         if (error.message === 'Access denied') {
             return NextResponse.json({ message: 'คุณไม่มีสิทธิ์เข้าถึงคำสั่งซื้อนี้' }, { status: 403 });
         }
-        console.error('Error fetching order details:', error);
+        logger.error('Error fetching order details:', error);
         return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 });
     }
 }
@@ -97,7 +98,7 @@ export async function PATCH(
         return NextResponse.json({ message: 'อัปโหลดสลิปสำเร็จ', imageUrl });
 
     } catch (error) {
-        console.error('Error uploading transfer slip:', error);
+        logger.error('Error uploading transfer slip:', error);
         return NextResponse.json({ message: 'เกิดข้อผิดพลาดในการอัปโหลดสลิป' }, { status: 500 });
     }
 }

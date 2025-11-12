@@ -17,14 +17,6 @@ const CategorySidebar = ({ pageData } : { pageData: ProductsPageData }) => {
   const activeSubCategoryId = searchParams.get('subCategoryId');
   const activeChildCategoryId = searchParams.get('childCategoryId');
 
-  useEffect(() => {
-    console.log('activeCategoryId:', activeCategoryId);
-    console.log('activeSubCategoryId:', activeSubCategoryId);
-    console.log('activeChildCategoryId:', activeChildCategoryId);
-  
-
-  },[activeCategoryId, activeSubCategoryId, activeChildCategoryId])
-
   return (
     <aside className="w-full lg:w-72 bg-base-100 rounded-lg shadow-md p-6 sticky top-4 self-start">
       <h2 className="text-2xl font-bold mb-6 text-base-content ">หมวดหมู่สินค้า</h2>

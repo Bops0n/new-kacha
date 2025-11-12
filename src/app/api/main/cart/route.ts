@@ -3,6 +3,7 @@ import { CartDetailSchema } from '@/types';
 import { authenticateRequest } from '../../auth/utils';
 import { checkRequire } from '@/app/utils/client';
 import { addCartProduct, deleteCartProduct, getCartByUID, updateCartProduct } from '../../services/user/userServices';
+import { logger } from '@/server/logger';
 
 /**
  * GET /api/cart
@@ -35,7 +36,7 @@ export async function GET(request: Request) {
 
         return NextResponse.json({ cartItems, error: false }, { status: 200 });
     } catch (error) {
-        console.error('Error fetching cart with JOIN:', error);
+        logger.error('Error fetching cart with JOIN:', error);
         return NextResponse.json({ message: 'เกิดข้อผิดพลาดภายในเซิร์ฟเวอร์ขณะดึงข้อมูลตะกร้าสินค้า', error: true }, { status: 500 });
     }
 }
@@ -66,7 +67,7 @@ export async function POST(request: Request) {
 
         return NextResponse.json({ message: 'อัปเดตตะกร้าสินค้าสำเร็จ', error: false }, { status: 200 });
     } catch (error) {
-        console.error('Error adding/updating cart item:', error);
+        logger.error('Error adding/updating cart item:', error);
         return NextResponse.json({ message: 'เกิดข้อผิดพลาดภายในเซิร์ฟเวอร์', error: true }, { status: 500 });
     }
 }
@@ -95,11 +96,9 @@ export async function DELETE(request: Request) {
         if (!result) {
             return NextResponse.json({ message: 'ไม่พบสินค้าในตะกร้า', error: true }, { status: 404 });
         }
-        console.log(`Removed item for User ${auth.userId}, Product ${productId}`);
-
         return NextResponse.json({ message: 'นำสินค้าออกจากตะกร้าสำเร็จ', error: false }, { status: 200 });
     } catch (error) {
-        console.error('Error removing cart item:', error);
+        logger.error('Error removing cart item:', error);
         return NextResponse.json({ message: 'เกิดข้อผิดพลาดภายในเซิร์ฟเวอร์', error: true }, { status: 500 });
     }
 }
@@ -128,11 +127,9 @@ export async function PATCH(request: Request) {
         if (!result) {
             return NextResponse.json({ message: 'ไม่พบสินค้าในตะกร้าที่จะอัปเดต', error: true }, { status: 404 });
         }
-        console.log(`Set quantity for User ${auth.userId}, Product ${productId} to ${newQuantity}`);
-
         return NextResponse.json({ message: 'อัปเดตจำนวนสินค้าในตะกร้าสำเร็จ', error: false }, { status: 200 });
     } catch (error) {
-        console.error('Error patching cart item quantity:', error);
+        logger.error('Error patching cart item quantity:', error);
         return NextResponse.json({ message: 'เกิดข้อผิดพลาดภายในเซิร์ฟเวอร์', error: true }, { status: 500 });
     }
 }

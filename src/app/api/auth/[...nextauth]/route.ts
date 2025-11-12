@@ -2,6 +2,7 @@ import NextAuth, { AuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { getRoleByLevel } from "../../services/admin/roleMgrService";
 import { signIn } from "../../services/auth/authService";
+import { logger } from "@/server/logger";
 
 const SHORT = 24 * 60 * 60;
 const LONG  = 30 * 24 * 60 * 60;
@@ -53,7 +54,7 @@ export const authOptions : AuthOptions = {
             default: throw new Error(result.Message);
           }
         } catch (error : any) {
-          console.error("Auth error:", error);
+          logger.error("Auth error:", error);
           throw new Error(error.message || "Internal Server Error");
         }
       },

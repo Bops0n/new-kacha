@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getAddressesByUserId } from '@/app/api/services/user/userServices';
 import { checkUserMgrRequire } from '@/app/api/auth/utils';
 import { checkRequire } from '@/app/utils/client';
+import { logger } from '@/server/logger';
 
 export async function GET(req: NextRequest) {
     const auth = await checkUserMgrRequire();
@@ -19,7 +20,7 @@ export async function GET(req: NextRequest) {
         });
 
     } catch (dbError: any) {
-        console.error("Error fetching addresses from database:", dbError);
+        logger.error("Error fetching addresses from database:", { error: dbError });
         return NextResponse.json(
             { message: "Failed to fetch addresses from database", error: dbError.message },
             { status: 500 }

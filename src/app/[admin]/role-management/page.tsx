@@ -1,5 +1,5 @@
 'use client'
-import AccessDenied from "@/app/components/AccessDenied";
+import AccessDeniedPage from "@/app/components/AccessDenied";
 import LoadingSpinner from "@/app/components/LoadingSpinner";
 import { Role } from "@/types";
 import { useSession } from "next-auth/react";
@@ -265,7 +265,7 @@ export default function RoleManagementPage() {
     }
 
     if (loading) return <LoadingSpinner />;
-    if (!session || !session.user.Sys_Admin) return <AccessDenied />;
+    if (!session || !session.user.Sys_Admin) return <AccessDeniedPage url="/admin"/>;
 
     return (
     <div className="min-h-screen bg-base-200 p-4">

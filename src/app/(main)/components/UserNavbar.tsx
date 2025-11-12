@@ -12,6 +12,7 @@ import { useCounter } from '@/app/context/CartCount';
 import { useCategoryData } from '@/app/hooks/useCategoryData'; // << 1. เปลี่ยน hook ที่ import
 import AuthModal from '@/app/(main)/components/AuthModal';
 import { Category, SubCategory, ChildSubCategory } from '@/types';
+import { logger } from '@/server/logger';
 
 // ... (CategoryMenuItems component ไม่มีการเปลี่ยนแปลง) ...
 
@@ -75,14 +76,13 @@ export default function UserNavbar() {
     useEffect(() => {
         const fetchCartCount = async () => {
             if (status === 'authenticated') {
-                try {
-                    const res = await fetch('/api/main/cart');
-                    if (!res.ok) return;
-                    const data = await res.json();
-                    setCounter(data.cartItems?.length || 0);
-                } catch (error) {
-                    console.error("Failed to fetch cart count:", error);
+                const res = await fetch('/api/main/cart');
+                if (!res.ok) {
+                  setCounter(0);
+                  return;
                 }
+                const data = await res.json();
+                setCounter(data.cartItems?.length || 0);
             } else {
                 setCounter(0);
             }

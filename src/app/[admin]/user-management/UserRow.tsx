@@ -45,18 +45,8 @@ const UserRow: React.FC<UserRowProps> = ({
           <button
             className="btn btn-sm btn-ghost btn-square"
             onClick={(e) => {
-              e.stopPropagation(); // Prevent row click from also triggering
-            //   console.log(openUserModal)
-              openUserModal(user); // Open modal
-              // We need a way to set isEditing to true from here,
-              // but direct state manipulation is not possible from child.
-              // For simplicity, for now, clicking the row opens view, then click 'Edit' inside.
-              // If direct edit is required, the openUserModal would need to accept a mode.
-              // For this request, clicking the row always opens view, then you click "แก้ไข" in modal.
-              // The original request 'นำปุ่ม ดูออก เหลือแค่ปุ่มแก้ไข แล้วปรับให้มีการเปิดปิดการแก้ไขแทน'
-              // implies the external button will toggle.
-              // Let's make this button toggle, and row click is still view.
-              // To achieve this, openUserModal needs a second param `isEditMode`.
+              e.stopPropagation();
+              openUserModal(user);
             }}
             title="แก้ไขผู้ใช้"
           >
@@ -65,7 +55,7 @@ const UserRow: React.FC<UserRowProps> = ({
           <button
             className="btn btn-sm btn-ghost btn-square text-error"
             onClick={(e) => {
-              e.stopPropagation(); // Prevent row click from also triggering
+              e.stopPropagation();
               deleteUser(user.User_ID);
             }}
             title="ลบ"

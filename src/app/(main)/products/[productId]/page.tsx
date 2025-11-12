@@ -56,7 +56,6 @@ export default function ProductDetailPage() {
 
   const hasDiscount = product.Discount_Price !== null && product.Discount_Price < product.Sale_Price;
   const displayPrice = hasDiscount ? product.Discount_Price : product.Sale_Price;
-  console.log(product)
   return (
     <div className="min-h-screen bg-base-200 p-4 lg:p-8">
       <div className="max-w-7xl mx-auto">

@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { checkSystemAdminRequire } from "../../auth/utils";
 import { addRole, deleteRole, getRoles, updateRule } from "../../services/admin/roleMgrService";
 import { Role } from "@/types";
+import { logger } from "@/server/logger";
 
 export async function GET(req: NextRequest) {
     // const auth = await checkSystemAdminRequire();
@@ -42,7 +43,7 @@ export async function PUT(req: NextRequest) {
     try {
         data = await req.json();
     } catch (error) {
-        console.error("Invalid JSON in request body:", error);
+        logger.error("Invalid JSON in request body:", { error: error });
         return NextResponse.json(
             { message: "Invalid request body. Expected JSON." },
             { status: 400 }
@@ -95,15 +96,13 @@ export async function DELETE(req: NextRequest) {
                 { status: 404 }
             );
         }
-
-        console.log(`Role ${data} deleted successfully.`);
         return NextResponse.json(
             { message: `Role ${data} deleted successfully.`, status: 200 },
             { status: 200 }
         );
 
     } catch (dbError: any) {
-        console.error("Error deleting role from database:", dbError);
+        logger.error("Error deleting role from database:", { error: dbError } );
         return NextResponse.json(
             { message: "Failed to delete role.", error: dbError.message },
             { status: 500 }

@@ -3,6 +3,7 @@ import { AddressSchema } from '@/types';
 import { deleteAddress, updateAddress } from '@/app/api/services/user/userServices';
 import { authenticateRequest } from '@/app/api/auth/utils';
 import { checkRequire } from '@/app/utils/client';
+import { logger } from '@/server/logger';
 
 export async function PUT(request: NextRequest, context: { params: { addressId: string } }) {
   const auth = await authenticateRequest();
@@ -20,7 +21,7 @@ export async function PUT(request: NextRequest, context: { params: { addressId: 
   try {
     updatedAddressData = await request.json();
   } catch (error) {
-    console.error('Invalid JSON in request body:', error);
+    logger.error('Invalid JSON in request body:', error);
     return NextResponse.json(
       { message: 'Invalid request body. Expected JSON.', error: true },
       { status: 400 }
@@ -66,7 +67,7 @@ export async function DELETE(request: NextRequest, context: { params: { addressI
     return NextResponse.json({ message: 'Address deleted successfully', error: false }, { status: 200 });
 
   } catch (error) {
-    console.error('Error deleting address:', error);
+    logger.error('Error deleting address:', error);
     return NextResponse.json({ message: 'Failed to delete address', error: true }, { status: 500 });
   }
 }
@@ -92,7 +93,7 @@ export async function PATCH(request: NextRequest, context: { params: { addressId
   try {
     updatedAddressData = await request.json();
   } catch (error) {
-    console.error('Invalid JSON in request body:', error);
+    logger.error('Invalid JSON in request body:', error);
     return NextResponse.json(
       { message: 'Invalid request body. Expected JSON.', error: true },
       { status: 400 }

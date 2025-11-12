@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { checkUserMgrRequire } from '@/app/api/auth/utils';
 import { checkRequire } from '@/app/utils/client';
 import { deleteUser } from '@/app/api/services/admin/userMgrService';
+import { logger } from '@/server/logger';
 
 export async function DELETE(req: NextRequest) {
     const auth = await checkUserMgrRequire();
@@ -34,15 +35,13 @@ export async function DELETE(req: NextRequest) {
                 { status: 404 }
             );
         }
-
-        console.log(`User ID ${parsedUserId} deleted successfully.`);
         return NextResponse.json(
             { message: `User ID ${parsedUserId} deleted successfully.`, status: 200 },
             { status: 200 }
         );
 
     } catch (dbError: any) {
-        console.error("Error deleting user from database:", dbError);
+        logger.error("Error deleting user from database:", { error: dbError });
         return NextResponse.json(
             { message: "Failed to delete user.", error: dbError.message },
             { status: 500 }

@@ -62,7 +62,6 @@ export function useOrderManagement() {
       await fetchOrders();
       return true;
     } catch (err: any) {
-      console.log('cheese')
       showAlert(err.message, 'error');
       return false;
     }
