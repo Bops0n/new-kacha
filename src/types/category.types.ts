@@ -43,3 +43,9 @@ export interface CategoryFormData {
   Category_ID: number | null;
   Sub_Category_ID: number | null;
 }
+
+export interface CategoryTopSelling {
+  Name: string;
+  Image: string;
+  Category_Path: string;
+}
