@@ -72,7 +72,7 @@ export function SalesChart() {
               <Legend />
               <Line
                 type="monotone"
-                dataKey="Sales"
+                dataKey="Total_Sales"
                 name="ยอดขายรวม"
                 stroke="#2563eb"
                 strokeWidth={3}
