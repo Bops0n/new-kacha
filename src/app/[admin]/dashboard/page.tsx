@@ -1,4 +1,4 @@
-'use client'
+'use client';
 import AccessDeniedPage from "@/app/components/AccessDenied";
 import LoadingSpinner from "@/app/components/LoadingSpinner";
 import { useSession } from "next-auth/react";
@@ -6,82 +6,94 @@ import { CardBoard, CardContent } from "../components/dashboard/CardBoard";
 import { RecentOrders } from "../components/dashboard/RecentOrders";
 import { TopProducts } from "../components/dashboard/TopProducts";
 import { SalesChart } from "../components/dashboard/SalesChart";
+import { LowStockProducts } from "../components/dashboard/LowStockProducts";
 import { useEffect, useState } from "react";
-import { FiBarChart2, FiPackage, FiShoppingCart, FiUsers } from "react-icons/fi";
+import { FiBarChart2, FiShoppingCart, FiUsers } from "react-icons/fi";
 
 export default function DashboardPage() {
-    const { data: session, status } = useSession();
-    const [loading, setLoading] = useState(true);
-    
-    const [stats, setStats] = useState([
-        { title: 'ยอดขายวันนี้', value: '฿0', icon: <FiBarChart2 />, color: 'bg-primary' },
-        { title: 'คำสั่งซื้อใหม่', value: '0', icon: <FiShoppingCart />, color: 'bg-secondary' },
-        { title: 'สินค้าคงเหลือ', value: '0', icon: <FiPackage />, color: 'bg-accent' },
-        { title: 'ลูกค้าทั้งหมด', value: '0', icon: <FiUsers />, color: 'bg-info' },
-    ]);
-    
-    useEffect(() => {
-        async function fetchDashboardData() {
-            try {
-                setLoading(true);
-                const result = await fetch('/api/admin/dashboard', { cache: "no-store" });
-                const { Sales_Today, New_Orders, Total_Stock, Total_Customers } = await result.json();
-                setStats([
-                    { title: 'ยอดขายวันนี้', value: `฿${Sales_Today.toLocaleString()}`, icon: <FiBarChart2 />, color: 'bg-primary' },
-                    { title: 'คำสั่งซื้อใหม่', value: New_Orders.toString(), icon: <FiShoppingCart />, color: 'bg-secondary' },
-                    { title: 'สินค้าคงเหลือ', value: Total_Stock.toString(), icon: <FiPackage />, color: 'bg-accent' },
-                    { title: 'ลูกค้าทั้งหมด', value: Total_Customers.toString(), icon: <FiUsers />, color: 'bg-info' },
-                ]);
+  const { data: session } = useSession();
+  const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState([
+    { title: "ยอดขายวันนี้", value: "฿0", icon: <FiBarChart2 />, color: "bg-blue-500" },
+    { title: "ยอดขายเดือนนี้", value: "0", icon: <FiBarChart2 />, color: "bg-orange-500" },
+    { title: "คำสั่งซื้อใหม่", value: "0", icon: <FiShoppingCart />, color: "bg-purple-500" },
+    { title: "ลูกค้าทั้งหมด", value: "0", icon: <FiUsers />, color: "bg-emerald-500" },
+  ]);
 
-            } catch {
-                // handle error
-            } finally {
-                setLoading(false);
-            }
-        }
-        fetchDashboardData();
-    }, []);
+  useEffect(() => {
+    async function fetchDashboardData() {
+      try {
+        setLoading(true);
+        const result = await fetch("/api/admin/dashboard", { cache: "no-store" });
+        const { Sales_Today, Sales_Monthly, New_Orders, Total_Customers } = await result.json();
+        setStats([
+          { title: "ยอดขายวันนี้", value: `฿${Sales_Today.toLocaleString()}`, icon: <FiBarChart2 />, color: "bg-blue-500" },
+          { title: "ยอดขายเดือนนี้", value: `฿${Sales_Monthly.toLocaleString()}`, icon: <FiBarChart2 />, color: "bg-orange-500" },
+          { title: "คำสั่งซื้อใหม่", value: New_Orders.toString(), icon: <FiShoppingCart />, color: "bg-purple-500" },
+          { title: "ลูกค้าทั้งหมด", value: Total_Customers.toString(), icon: <FiUsers />, color: "bg-emerald-500" },
+        ]);
+      } catch {
+      } finally {
+        setLoading(false);
+      }
+    }
 
-    if (loading) return <LoadingSpinner />;
-    if (!session || !session.user.Dashboard) return <AccessDeniedPage url="/admin"/>;
+    fetchDashboardData();
+  }, []);
 
-    return (
-    <div className="min-h-screen bg-base-200 p-4">
-      <div className="max-w-7xl mx-auto">
-        {/* Header Section */}
-        <div className="bg-base-100 rounded-lg shadow-sm p-6 mb-6">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            <div>
-              <h1 className="text-3xl font-bold text-base-content">แดชบอร์ดภาพรวม</h1>
-              <p className="text-base-content/70 mt-1">ภาพรวมสถิติร้านค้าขายวัสดุก่อสร้าง — ยอดขาย คำสั่งซื้อ และลูกค้า</p>
-            </div>
+  if (loading) return <LoadingSpinner />;
+  if (!session || !session.user.Dashboard) return <AccessDeniedPage url="/admin" />;
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 p-4 sm:p-6">
+      <div className="max-w-7xl mx-auto space-y-10 animate-fadeIn">
+        {/* Header */}
+        <div className="bg-white border border-gray-100 rounded-2xl shadow-sm p-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-800 tracking-tight">แดชบอร์ดภาพรวม</h1>
+            <p className="text-gray-500 mt-1 text-sm">
+              ภาพรวมสถิติร้านค้าขายวัสดุก่อสร้าง — ยอดขาย คำสั่งซื้อ สินค้า และลูกค้า
+            </p>
           </div>
         </div>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
+        {/* Stat Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {stats.map((s) => (
-            <CardBoard key={s.title}>
-              <CardContent className="flex justify-between items-center p-6">
+            <CardBoard
+              key={s.title}
+              className="shadow-sm border border-gray-100 hover:shadow-md transition-all rounded-2xl bg-gradient-to-br from-white to-gray-50"
+            >
+              <CardContent className="flex items-center justify-between p-6">
                 <div>
-                  <p className="text-sm text-gray-400">{s.title}</p>
-                  <h2 className="text-2xl font-bold">{s.value}</h2>
+                  <p className="text-gray-500 text-sm font-medium">{s.title}</p>
+                  <h2 className="text-3xl font-bold text-gray-900 mt-1">{s.value}</h2>
                 </div>
-                <div className={`${s.color} text-white p-3 rounded-full`}>{s.icon}</div>
+                <div
+                  className={`${s.color} text-white w-12 h-12 flex items-center justify-center rounded-full shadow-inner`}
+                >
+                  {s.icon}
+                </div>
               </CardContent>
             </CardBoard>
           ))}
         </div>
 
-        {/* Sales Chart Section */}
-        <div className="bg-base-100 rounded-lg shadow-sm p-6 mb-6">
-          <SalesChart />
+        {/* Charts & Top Products */}
+        <div className="grid grid-cols-1 xl:grid-cols-8 gap-6 items-stretch">
+          <div className="xl:col-span-5">
+            <SalesChart />
+          </div>
+          <div className="xl:col-span-3">
+            <TopProducts />
+          </div>
         </div>
 
-        {/* Bottom Section: Top Products & Recent Orders */}
+
+        {/* Orders & Low Stock */}
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-          <TopProducts />
           <RecentOrders />
+          <LowStockProducts />
         </div>
       </div>
     </div>

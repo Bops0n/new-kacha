@@ -13,15 +13,7 @@ export async function GET() {
 
     const { rows } = await poolQuery(`SELECT * FROM public."SP_ADMIN_DASHBOARD_RECENT_ORDERS_GET"();`);
 
-    const Orders = rows.map((row: RecentOrder) => ({
-      Order_ID: row.Order_ID,
-      Customer_Name: row.Customer_Name,
-      Order_Date: row.Order_Date,
-      Total_Amount: Number(row.Total_Amount),
-      Status: row.Status,
-    }));
-
-    return NextResponse.json({ Orders });
+    return NextResponse.json({ Orders: rows });
   } catch (error: any) {
     logger.error("Error fetching recent orders:", { error: error });
     return NextResponse.json({ message: error.message }, { status: 500 });

@@ -1,24 +1,36 @@
 "use client";
 import { useEffect, useState } from "react";
-import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend } from "recharts";
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  Legend,
+  CartesianGrid,
+} from "recharts";
 import { CardBoard, CardHeader, CardContent } from "./CardBoard";
-import LoadingSpinner from "@/app/components/LoadingSpinner";
 import { SalesData } from "@/types/dashboard";
+import { FiBarChart2 } from "react-icons/fi";
+import { motion, AnimatePresence } from "framer-motion";
 
 export function SalesChart() {
   const [data, setData] = useState<SalesData[]>([]);
-  const [period, setPeriod] = useState<"daily" | "weekly" | "monthly" | "quarterly" | "yearly">("weekly");
-  const [loading, setLoading] = useState(true);
+  const [period, setPeriod] = useState<
+    "daily" | "weekly" | "monthly" | "quarterly" | "yearly"
+  >("weekly");
 
   useEffect(() => {
     async function fetchData() {
       try {
-        setLoading(true);
-        const res = await fetch(`/api/admin/dashboard/getSales?mode=${period}`, { cache: "no-store" });
+        const res = await fetch(`/api/admin/dashboard/getSales?mode=${period}`, {
+          cache: "no-store",
+        });
         const { Data } = await res.json();
         setData(Data || []);
-      } finally {
-        setLoading(false);
+      } catch {
+        // ignore
       }
     }
     fetchData();
@@ -32,51 +44,99 @@ export function SalesChart() {
     yearly: "รายปี",
   };
 
-  const getColor = (dev: number) => (dev >= 0 ? "#22c55e" : "#ef4444");
+  const periods = [
+    { key: "daily", label: "รายวัน" },
+    { key: "weekly", label: "รายสัปดาห์" },
+    { key: "monthly", label: "รายเดือน" },
+    { key: "quarterly", label: "รายไตรมาส" },
+    { key: "yearly", label: "รายปี" },
+  ];
 
   return (
-    <CardBoard>
-      <CardHeader className="flex items-center justify-between">
-        <span>ยอดขาย {labelMap[period]}</span>
-        <select
-          className="select select-bordered select-sm"
-          value={period}
-          onChange={(e) => setPeriod(e.target.value as any)}
-        >
-          <option value="daily">รายวัน</option>
-          <option value="weekly">รายสัปดาห์</option>
-          <option value="monthly">รายเดือน</option>
-          <option value="quarterly">รายไตรมาส</option>
-          <option value="yearly">รายปี</option>
-        </select>
+    <CardBoard className="h-full flex flex-col shadow-md border border-gray-100 bg-white rounded-2xl">
+      <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-3">
+        <div className="flex items-center gap-2 text-gray-800">
+          <FiBarChart2 className="text-blue-600 text-lg" />
+          <h3 className="text-lg font-semibold tracking-wide">
+            สรุปยอดขาย {labelMap[period]}
+          </h3>
+        </div>
+
+        {/* Filter Buttons */}
+        <div className="flex items-center gap-2 bg-gray-50 rounded-full p-1 border border-gray-200 shadow-inner overflow-x-auto">
+          {periods.map((p) => (
+            <motion.button
+              key={p.key}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setPeriod(p.key as any)}
+              className={`relative flex-shrink-0 px-4 py-1.5 rounded-full text-sm font-medium transition-all ${
+                p.key === period
+                  ? "text-white"
+                  : "text-gray-700 hover:text-gray-900"
+              }`}
+            >
+              {/* Highlight Background */}
+              <AnimatePresence>
+                {p.key === period && (
+                  <motion.span
+                    layoutId="pill"
+                    className="absolute inset-0 bg-blue-600 rounded-full shadow-sm"
+                    transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                  />
+                )}
+              </AnimatePresence>
+
+              <span className="relative z-10">{p.label}</span>
+            </motion.button>
+          ))}
+        </div>
       </CardHeader>
 
-      <CardContent>
-        {loading ? (
-          <LoadingSpinner />
+      <CardContent className="pt-4 pb-6">
+        {data.length === 0 ? (
+          <div className="text-center text-gray-500 py-12 text-sm">
+            ไม่มีข้อมูลยอดขายในช่วงนี้
+          </div>
         ) : (
-          <ResponsiveContainer width="100%" height={320}>
-            <LineChart data={data}>
-              <XAxis dataKey="Label" />
-              <YAxis />
+          <ResponsiveContainer width="100%" height={350}>
+            <LineChart
+              data={data}
+              margin={{ top: 10, right: 20, left: 0, bottom: 5 }}
+            >
+              <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" />
+              <XAxis
+                dataKey="Label"
+                tick={{ fill: "#6b7280", fontSize: 12 }}
+                tickLine={false}
+              />
+              <YAxis
+                tick={{ fill: "#6b7280", fontSize: 12 }}
+                tickLine={false}
+              />
               <Tooltip
-                formatter={(value: any, name: any, props: any) => {
-                  console.log(name);
+                contentStyle={{
+                  backgroundColor: "#fff",
+                  border: "1px solid #e5e7eb",
+                  borderRadius: "0.75rem",
+                }}
+                formatter={(value: any, name: any) => {
                   if (name === "ค่าเบี่ยงเบน") {
                     const sign = value >= 0 ? "+" : "";
-                    return `${sign}${value}% จากค่าเฉลี่ย`;
+                    return [`${sign}${value}%`, "เบี่ยงเบนจากเฉลี่ย"];
                   }
-                  return `฿${value.toLocaleString()}`;
+                  return [`฿${value.toLocaleString()}`, name];
                 }}
               />
-              <Legend />
+              <Legend wrapperStyle={{ paddingTop: "10px", fontSize: "13px" }} />
+
               <Line
                 type="monotone"
                 dataKey="Total_Sales"
                 name="ยอดขายรวม"
                 stroke="#2563eb"
                 strokeWidth={3}
-                dot={{ stroke: "#2563eb", strokeWidth: 2, r: 4 }}
+                dot={{ r: 4, fill: "#2563eb", strokeWidth: 2 }}
+                activeDot={{ r: 6, stroke: "#1d4ed8", strokeWidth: 2 }}
               />
               <Line
                 type="monotone"
@@ -90,19 +150,10 @@ export function SalesChart() {
                 type="monotone"
                 dataKey="Deviation"
                 name="ค่าเบี่ยงเบน"
-                strokeOpacity={0.9}
-                strokeWidth={2}
                 stroke="#22c55e"
-                dot={(props: any) => (
-                  <circle
-                    cx={props.cx}
-                    cy={props.cy}
-                    r={4}
-                    fill={getColor(props.payload.deviation)}
-                    stroke="white"
-                    strokeWidth={1.5}
-                  />
-                )}
+                strokeWidth={2}
+                strokeOpacity={0.9}
+                dot={{ r: 4, fill: "#22c55e" }}
               />
             </LineChart>
           </ResponsiveContainer>

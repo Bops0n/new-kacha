@@ -1,7 +1,8 @@
 export interface TopProduct {
   Product_ID: number;
   Product_Name: string;
-  Total_Sold: number;
+  Total_Sales: number;
+  Quantity: number;
   Revenue: number;
 };
 
@@ -11,6 +12,7 @@ export interface RecentOrder {
   Order_Date: string;
   Total_Amount: number;
   Status: string;
+  Update_Date: string;
 }
 
 export interface SalesData {
@@ -18,4 +20,14 @@ export interface SalesData {
   TotalSales: number;
   AvgSales: number; 
   DeviationPercent: number
+}
+
+export interface LowStock {
+  Product_ID: number;
+  Product_Name: string;
+  Category_Name: string;
+  Quantity: number;
+  Reorder_Point: number;
+  Image_URL: string;
+  Stock_Percent: number;
 }
