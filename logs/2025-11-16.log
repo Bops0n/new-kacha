@@ -1,0 +1,80 @@
+[2025-11-16T10:26:09.887Z] [ERROR] Error fetching top selling: | meta: {"error":{"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"kacha-local"}}
+[2025-11-16T10:26:09.917Z] [ERROR] API Error fetching navigation data: | meta: {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"kacha-local"}
+[2025-11-16T10:26:12.170Z] [ERROR] Error fetching cart with JOIN: | meta: {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"kacha-local"}
+[2025-11-16T10:27:59.039Z] [ERROR] Error fetching cart with JOIN: | meta: {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"kacha-local"}
+[2025-11-16T10:28:04.048Z] [ERROR] API Error fetching navigation data: | meta: {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"kacha-local"}
+[2025-11-16T10:28:04.266Z] [ERROR] Error fetching top selling: | meta: {"error":{"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"kacha-local"}}
+[2025-11-16T10:28:06.317Z] [ERROR] Error fetching cart with JOIN: | meta: {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"kacha-local"}
+[2025-11-16T10:28:14.083Z] [ERROR] Error fetching cart with JOIN: | meta: {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"kacha-local"}
+[2025-11-16T10:28:21.267Z] [ERROR] Error fetching top selling: | meta: {"error":{"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"kacha-local"}}
+[2025-11-16T10:28:21.345Z] [ERROR] API Error fetching navigation data: | meta: {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"kacha-local"}
+[2025-11-16T10:28:23.546Z] [ERROR] Error fetching cart with JOIN: | meta: {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"kacha-local"}
+[2025-11-16T10:28:57.533Z] [ERROR] Error fetching cart with JOIN: | meta: {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"kacha-local"}
+[2025-11-16T10:29:55.679Z] [ERROR] Error fetching cart with JOIN: | meta: {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"kacha-local"}
+[2025-11-16T10:30:25.808Z] [ERROR] Database Error: | meta: "function SP_USER_CART_GET(unknown) does not exist"
+[2025-11-16T10:30:25.810Z] [ERROR] Error fetching cart with JOIN: | meta: {"length":218,"name":"error","severity":"ERROR","code":"42883","hint":"No function matches the given name and argument types. You might need to add explicit type casts.","position":"15","file":"parse_func.c","line":"636","routine":"ParseFuncOrColumn"}
+[2025-11-16T10:37:03.937Z] [DEBUG] UID: 32 Role Value (Dashboard) = true
+[2025-11-16T10:37:03.939Z] [DEBUG] UID: 32 Role Value (Dashboard) = true
+[2025-11-16T10:37:08.746Z] [DEBUG] UID: 32 Role Value (Dashboard) = true
+[2025-11-16T10:37:08.748Z] [DEBUG] UID: 32 Role Value (Dashboard) = true
+[2025-11-16T10:37:08.939Z] [DEBUG] UID: 32 Role Value (Dashboard) = true
+[2025-11-16T10:37:08.947Z] [DEBUG] UID: 32 Role Value (Dashboard) = true
+[2025-11-16T10:37:09.080Z] [DEBUG] UID: 32 Role Value (Dashboard) = true
+[2025-11-16T10:37:09.083Z] [DEBUG] UID: 32 Role Value (Dashboard) = true
+[2025-11-16T10:37:55.498Z] [DEBUG] UID: 32 Role Value (Dashboard) = true
+[2025-11-16T10:37:55.509Z] [DEBUG] UID: 32 Role Value (Dashboard) = true
+[2025-11-16T10:37:56.039Z] [DEBUG] UID: 32 Role Value (Dashboard) = true
+[2025-11-16T10:37:56.149Z] [DEBUG] UID: 32 Role Value (Dashboard) = true
+[2025-11-16T10:37:56.158Z] [DEBUG] UID: 32 Role Value (Dashboard) = true
+[2025-11-16T10:37:56.162Z] [DEBUG] UID: 32 Role Value (Dashboard) = true
+[2025-11-16T10:37:56.247Z] [DEBUG] UID: 32 Role Value (Dashboard) = true
+[2025-11-16T10:37:56.720Z] [DEBUG] UID: 32 Role Value (Dashboard) = true
+[2025-11-16T10:41:55.334Z] [DEBUG] UID: 32 Role Value (Dashboard) = true
+[2025-11-16T10:41:55.347Z] [DEBUG] UID: 32 Role Value (Dashboard) = true
+[2025-11-16T10:41:56.080Z] [DEBUG] UID: 32 Role Value (Dashboard) = true
+[2025-11-16T10:41:56.103Z] [DEBUG] UID: 32 Role Value (Dashboard) = true
+[2025-11-16T10:41:56.127Z] [DEBUG] UID: 32 Role Value (Dashboard) = true
+[2025-11-16T10:41:56.287Z] [DEBUG] UID: 32 Role Value (Dashboard) = true
+[2025-11-16T10:41:56.290Z] [DEBUG] UID: 32 Role Value (Dashboard) = true
+[2025-11-16T10:41:56.711Z] [DEBUG] UID: 32 Role Value (Dashboard) = true
+[2025-11-16T10:46:48.229Z] [DEBUG] UID: 32 Role Value (User_Mgr) = true
+[2025-11-16T10:46:48.609Z] [DEBUG] UID: 32 Role Value (User_Mgr) = true
+[2025-11-16T10:50:04.450Z] [DEBUG] UID: 32 Role Value (User_Mgr) = true
+[2025-11-16T10:50:15.552Z] [DEBUG] UID: 32 Role Value (Stock_Mgr) = true
+[2025-11-16T10:50:15.928Z] [DEBUG] UID: 32 Role Value (Stock_Mgr) = true
+[2025-11-16T17:24:51.345Z] [DEBUG] UID: 32 Role Value (Dashboard) = true
+[2025-11-16T17:24:51.350Z] [DEBUG] UID: 32 Role Value (Dashboard) = true
+[2025-11-16T17:24:57.249Z] [DEBUG] UID: 32 Role Value (Dashboard) = true
+[2025-11-16T17:24:57.251Z] [DEBUG] UID: 32 Role Value (Dashboard) = true
+[2025-11-16T17:24:57.320Z] [DEBUG] UID: 32 Role Value (Dashboard) = true
+[2025-11-16T17:24:57.322Z] [DEBUG] UID: 32 Role Value (Dashboard) = true
+[2025-11-16T17:24:57.470Z] [DEBUG] UID: 32 Role Value (Dashboard) = true
+[2025-11-16T17:24:57.472Z] [DEBUG] UID: 32 Role Value (Dashboard) = true
+[2025-11-16T17:26:48.352Z] [DEBUG] UID: 32 Role Value (Dashboard) = true
+[2025-11-16T17:26:48.390Z] [DEBUG] UID: 32 Role Value (Dashboard) = true
+[2025-11-16T17:26:49.301Z] [DEBUG] UID: 32 Role Value (Dashboard) = true
+[2025-11-16T17:26:49.486Z] [DEBUG] UID: 32 Role Value (Dashboard) = true
+[2025-11-16T17:26:49.522Z] [DEBUG] UID: 32 Role Value (Dashboard) = true
+[2025-11-16T17:26:49.633Z] [DEBUG] UID: 32 Role Value (Dashboard) = true
+[2025-11-16T17:26:49.650Z] [DEBUG] UID: 32 Role Value (Dashboard) = true
+[2025-11-16T17:26:49.990Z] [DEBUG] UID: 32 Role Value (Dashboard) = true
+[2025-11-16T17:28:20.599Z] [DEBUG] UID: 32 Role Value (Dashboard) = true
+[2025-11-16T17:28:20.608Z] [DEBUG] UID: 32 Role Value (Dashboard) = true
+[2025-11-16T17:28:21.745Z] [DEBUG] UID: 32 Role Value (Dashboard) = true
+[2025-11-16T17:28:21.908Z] [DEBUG] UID: 32 Role Value (Dashboard) = true
+[2025-11-16T17:28:21.998Z] [DEBUG] UID: 32 Role Value (Dashboard) = true
+[2025-11-16T17:28:22.044Z] [DEBUG] UID: 32 Role Value (Dashboard) = true
+[2025-11-16T17:28:22.083Z] [DEBUG] UID: 32 Role Value (Dashboard) = true
+[2025-11-16T17:28:22.125Z] [DEBUG] UID: 32 Role Value (Dashboard) = true
+[2025-11-16T19:09:35.534Z] [DEBUG] UID: 32 Role Value (Dashboard) = true
+[2025-11-16T19:09:35.539Z] [DEBUG] UID: 32 Role Value (Dashboard) = true
+[2025-11-16T19:09:40.019Z] [DEBUG] UID: 32 Role Value (Dashboard) = true
+[2025-11-16T19:09:40.021Z] [DEBUG] UID: 32 Role Value (Dashboard) = true
+[2025-11-16T19:09:40.099Z] [DEBUG] UID: 32 Role Value (Dashboard) = true
+[2025-11-16T19:09:40.104Z] [DEBUG] UID: 32 Role Value (Dashboard) = true
+[2025-11-16T19:09:40.368Z] [DEBUG] UID: 32 Role Value (Dashboard) = true
+[2025-11-16T19:09:40.376Z] [DEBUG] UID: 32 Role Value (Dashboard) = true
+[2025-11-17T05:59:51.545Z] [ERROR] Database Error: | meta: "function SP_USER_ORDER_TRANS_SLIP_UPD(unknown, unknown, unknown) does not exist"
+[2025-11-17T05:59:51.547Z] [ERROR] Error uploading transfer slip: | meta: {"length":248,"name":"error","severity":"ERROR","code":"42883","hint":"No function matches the given name and argument types. You might need to add explicit type casts.","position":"15","file":"parse_func.c","line":"636","routine":"ParseFuncOrColumn"}
+[2025-11-17T06:03:09.183Z] [ERROR] Database Error: | meta: "function SP_USER_ORDER_TRANS_SLIP_UPD(unknown, unknown, unknown) does not exist"
+[2025-11-17T06:03:09.184Z] [ERROR] Error uploading transfer slip: | meta: {"length":248,"name":"error","severity":"ERROR","code":"42883","hint":"No function matches the given name and argument types. You might need to add explicit type casts.","position":"15","file":"parse_func.c","line":"636","routine":"ParseFuncOrColumn"}

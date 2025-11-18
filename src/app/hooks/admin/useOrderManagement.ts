@@ -16,7 +16,7 @@ export function useOrderManagement() {
   const [filters, setFilters] = useState({
     searchTerm: '',
     statusFilter: 'all' as OrderStatus | 'all',
-    transferSlipFilter: 'all' as TransferSlipStatusFilter,
+    transferSlipStatusFilter: 'all' as TransferSlipStatusFilter,
   });
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
@@ -35,6 +35,7 @@ export function useOrderManagement() {
       }
       const data = await response.json();
       setOrders(data.orders || []);
+      // ตรวจสอบว่ามี selectedOrder อยู่หรือไม่ ถ้ามี ให้อัปเดตข้อมูลใน modal ด้วย
       if(selectedOrder){
         setSelectedOrder(data.orders.find((o : Order) => o.Order_ID === selectedOrder.Order_ID) || null)
       }
@@ -44,7 +45,7 @@ export function useOrderManagement() {
     } finally {
       setLoading(false);
     }
-  }, [showAlert]);
+  }, [showAlert, selectedOrder]); // เพิ่ม selectedOrder เพื่อให้ callback อัปเดตเมื่อ state นี้เปลี่ยน
 
   useEffect(() => {
     fetchOrders();
@@ -59,7 +60,7 @@ export function useOrderManagement() {
       });
       const result = await response.json();
       if (!response.ok) throw new Error(result.message);
-      await fetchOrders();
+      await fetchOrders(); // รีเฟรชข้อมูลทุกครั้งที่ save สำเร็จ
       return true;
     } catch (err: any) {
       showAlert(err.message, 'error');
@@ -81,13 +82,17 @@ export function useOrderManagement() {
     return success;
   }, [saveOrder, showAlert]);
 
-  const initiateRefund = useCallback((order: Order) => {
+  const initiateRefund = useCallback((order: Order, reason: string) => {
     showAlert(
       `คำสั่งซื้อนี้มีการแนบสลิปแล้ว\nระบบจะเปลี่ยนสถานะเป็น "กำลังรอคืนเงิน"`,
       'info',
       'ดำเนินการคืนเงิน',
       async () => {
-        const success = await saveOrder({ Order_ID: order.Order_ID, Status: 'refunding' });
+        const success = await saveOrder({ 
+          Order_ID: order.Order_ID, 
+          Status: 'refunding',
+          Cancellation_Reason: reason.trim() // บันทึกเหตุผล
+        });
         if (success) {
           showAlert('เปลี่ยนสถานะเป็น "กำลังรอคืนเงิน" สำเร็จ', 'success');
         }
@@ -95,19 +100,16 @@ export function useOrderManagement() {
     );
   }, [saveOrder, showAlert]);
   
-  const confirmRefund = useCallback((order: Order) => {
-    showAlert(
-      'ยืนยันว่าคุณได้ทำการโอนเงินคืนให้ลูกค้าสำหรับออเดอร์นี้เรียบร้อยแล้ว?',
-      'warning',
-      'ยืนยันการคืนเงิน',
-      async () => {
-        const success = await saveOrder({ Order_ID: order.Order_ID, Status: 'refunded' });
-        if (success) {
-          showAlert('ยืนยันการคืนเงินสำเร็จ!', 'success');
-        }
-      }
-    );
-  }, [saveOrder, showAlert]);
+  // --- (MODIFIED) ---
+  // ลบ confirmRefund อันเก่าทิ้ง
+  
+  // เพิ่มฟังก์ชันนี้เข้ามาแทน
+  const refreshAfterRefund = useCallback(async () => {
+    showAlert('ยืนยันการคืนเงินสำเร็จ!', 'success');
+    await fetchOrders(); // เรียก fetchOrders เพื่อรีเฟรชข้อมูล
+  }, [fetchOrders, showAlert]);
+  // --- (END MODIFICATION) ---
+
 
   const deleteOrder = (orderId: number) => {
     showAlert(`คุณแน่ใจหรือไม่ที่จะลบคำสั่งซื้อ #${orderId}?`, 'warning', 'ยืนยันการลบ', async () => {
@@ -117,7 +119,7 @@ export function useOrderManagement() {
         if (!response.ok) throw new Error(result.message);
         showAlert('ลบคำสั่งซื้อสำเร็จ!', 'success');
         await fetchOrders();
-        closeModal();
+        closeModal(); // ปิด Modal หลังจากลบ
       } catch (err: any) {
         showAlert(err.message, 'error');
       }
@@ -184,7 +186,15 @@ export function useOrderManagement() {
     filteredOrders,
     filters,
     setFilters,
-    actions: { saveOrder, deleteOrder, cancelOrderWithoutSlip, initiateRefund, confirmRefund },
+    // --- (MODIFIED) ---
+    actions: { 
+      saveOrder, 
+      deleteOrder, 
+      cancelOrderWithoutSlip, 
+      initiateRefund, 
+      refreshAfterRefund // <--- ส่งฟังก์ชันใหม่ไปแทน
+    },
+    // --- (END MODIFICATION) ---
     modalState: {
       isOpen: isModalOpen,
       isEditing,

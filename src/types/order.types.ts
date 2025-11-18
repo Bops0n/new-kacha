@@ -2,7 +2,7 @@
 import React from 'react';
 
 // Common types for Order Status
-export type OrderStatus = 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled' | 'refunding' | 'refunded';
+export type OrderStatus = 'waiting_payment' | 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled' | 'refunding' | 'refunded';
 export type TransferSlipStatusFilter = 'all' | 'has_slip' | 'no_slip';
 export type Payment_Type = 'bank_transfer' | 'cash_on_delivery'
 // Type for product items within an order (detailed snapshot)
@@ -44,6 +44,7 @@ export type Order = {
   Shipping_Carrier: string | null;
   Cancellation_Reason: string | null;
   Transfer_Slip_Image_URL: string | null;
+  Return_Slip_Image_URL : string | null;
   DeliveryDate: string | null;
   Invoice_ID: string | null;
   Address_1: string;

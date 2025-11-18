@@ -97,7 +97,7 @@ export async function updateCartProduct(userId: number, productId: number, qty: 
 }
 
 export async function uploadTransactionSlip(imageURL: string, orderId: number, userId: number) {
-  const { rowCount } = await poolQuery(`SELECT * FROM "SP_USER_ORDER_TRANS_SLIP_UPD"($1, $2, $3)`, [imageURL, orderId, userId]);
+  const { rowCount } = await poolQuery(`SELECT * FROM "SP_USER_ORDER_TRANS_SLIP_UPD"($1, $2)`, [imageURL, orderId]);
   return rowCount > 0;
 }
 

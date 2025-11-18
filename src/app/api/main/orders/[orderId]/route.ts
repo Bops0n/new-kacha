@@ -34,7 +34,7 @@ export async function GET(
         if (!order) {
             return NextResponse.json({ message: 'ไม่พบคำสั่งซื้อ' }, { status: 404 });
         }
-
+        console.log(order)
         return NextResponse.json({ order, error: false });
 
     } catch (error: any) {
@@ -58,8 +58,9 @@ export async function PATCH(
     const isCheck = checkRequire(auth);
     if (isCheck) return isCheck;
     
-    const orderId = parseInt(await params.orderId, 10);
-    if (isNaN(orderId)) {
+    const { orderId } = await params
+    const parseId = parseInt(orderId, 10);
+    if (isNaN(parseId)) {
         return NextResponse.json({ message: 'รหัสคำสั่งซื้อไม่ถูกต้อง' }, { status: 400 });
     }
 
@@ -88,8 +89,8 @@ export async function PATCH(
         const imageUrl = `/uploads/slips/${filename}`;
 
         await fs.writeFile(filePath, buffer);
-
-        const result = await uploadTransactionSlip(imageUrl, orderId, Number(auth.userId));
+        console.log(imageUrl, parseId, Number(auth.userId))
+        const result = await uploadTransactionSlip(imageUrl, parseId, Number(auth.userId));
 
         if (!result) {
             return NextResponse.json({ message: 'อัปโหลดสลิปล้มเหลว!' }, { status: 500 });

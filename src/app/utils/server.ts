@@ -9,16 +9,16 @@ export const mapDbRowsToOrders = (dbRows: any[]): Order[] => {
             ordersMap.set(orderId, {
                 Order_ID: row.Order_ID,
                 User_ID: row.User_ID,
-                Order_Date: row.Order_Date,
+                Order_Date: row.Order_Date, // SQL ส่งมาเป็น string ที่ format แล้ว
                 Status: row.Status,
                 Payment_Type: row.Payment_Type,
                 Invoice_ID: row.Invoice_ID,
-                Shipping_Address_ID: row.Address_ID,
-                DeliveryDate: row.DeliveryDate,
+                Shipping_Address_ID: 0, // 0 หรือ null: SQL ใหม่ไม่ได้ SELECT Address_ID มา (แต่ JOIN field มาแทน)
+                DeliveryDate: row.DeliveryDate, // SQL ส่งมาเป็น string ที่ format แล้ว
                 Tracking_ID: row.Tracking_ID,
                 Shipping_Carrier: row.Shipping_Carrier,
-                Transfer_Slip_Image_URL: row.Transfer_Slip_Image_URL,
-                Cancellation_Reason: row.Cancellation_Reason,
+                Transfer_Slip_Image_URL: row.Transaction_Slip, // <-- แก้ไข: แมปจาก OP."Transaction_Slip"
+                Cancellation_Reason: row.Cancel_Reason,     // <-- แก้ไข: แมปจาก OC."Cancel_Reason"
                 Address_1: row.Address_1,
                 Address_2: row.Address_2,
                 Sub_District: row.Sub_District,
@@ -27,11 +27,13 @@ export const mapDbRowsToOrders = (dbRows: any[]): Order[] => {
                 Zip_Code: row.Zip_Code,
                 Phone: row.Phone,
                 Total_Amount: parseFloat(row.Total_Amount),
+                Return_Slip_Image_URL : row.Refund_Slip,
+                cancelled : '',
 
                 Customer_Name: row.User_FullName || 'N/A',
                 Email: row.User_Email || null,
                 Products: [],
-                Action: {
+                Action: { // <-- ใช้ค่าเริ่มต้น เพราะ SQL ใหม่ไม่มีข้อมูลจาก Order_Action (OA_...)
                     Order_ID: -1,
                     Status: 'pending',
                     Update_By: -1,
@@ -43,6 +45,7 @@ export const mapDbRowsToOrders = (dbRows: any[]): Order[] => {
 
         const currentOrder = ordersMap.get(orderId)!;
 
+        // ส่วนนี้ยังใช้ได้เหมือนเดิม เพราะ SQL ใหม่ยังคง SELECT OD.* (Order_Detail) มา
         if (row.Product_ID) {
             const salePrice = parseFloat(row.Product_Sale_Price);
             const discountPrice = row.Product_Discount_Price ? parseFloat(row.Product_Discount_Price) : null;
@@ -64,13 +67,9 @@ export const mapDbRowsToOrders = (dbRows: any[]): Order[] => {
             });
         }
 
-        if (row.OA_Order_ID) {
-            currentOrder.Action.Order_ID = row.OA_Order_ID;
-            currentOrder.Action.Status = row.OA_Status;
-            currentOrder.Action.Update_By = row.OA_Update_By;
-            currentOrder.Action.Update_Name = row.OA_Update_Name;
-            currentOrder.Action.Update_Date = row.OA_Update_Date;
-        }
+        // --- ลบส่วน Action ออก ---
+        // โค้ด SQL ใหม่ไม่ได้ JOIN ตาราง Order_Action (ที่ใช้ชื่อย่อ OA)
+        // ดังนั้น เราจึงลบ block `if (row.OA_Order_ID)` เดิมออก
     });
     return Array.from(ordersMap.values()).sort((a, b) => b.Order_ID - a.Order_ID);
 };
