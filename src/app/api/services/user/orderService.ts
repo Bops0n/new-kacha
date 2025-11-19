@@ -7,3 +7,10 @@ export async function getOrderById(orderId: number): Promise<Order | null> {
     const orders = mapDbRowsToOrders(rows);
     return orders[0] || null;
 }
+export async function cancelOrder(orderId: number, userId: number, reason: string) {
+  const { rows } = await poolQuery(
+      `SELECT * FROM "SP_USER_ORDER_CANCEL"($1, $2, $3)`, 
+      [orderId, userId, reason]
+  );
+  return rows[0]; // จะคืนค่า { Status_Code: 200, Message: '...' }
+}

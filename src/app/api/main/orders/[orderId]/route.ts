@@ -103,3 +103,38 @@ export async function PATCH(
         return NextResponse.json({ message: 'เกิดข้อผิดพลาดในการอัปโหลดสลิป' }, { status: 500 });
     }
 }
+
+export async function DELETE(
+    request: NextRequest,
+    { params }: { params: { orderId: string } }
+) {
+    const auth = await authenticateRequest();
+    const isCheck = checkRequire(auth);
+    if (isCheck) return isCheck;
+
+    const orderId = parseInt(params.orderId, 10); // ไม่ต้อง await params
+    if (isNaN(orderId)) {
+        return NextResponse.json({ message: 'Invalid Order ID' }, { status: 400 });
+    }
+
+    try {
+        // อ่าน body เพื่อเอาเหตุผลการยกเลิก
+        const { reason } = await request.json();
+
+        if (!reason) {
+            return NextResponse.json({ message: 'กรุณาระบุเหตุผลการยกเลิก' }, { status: 400 });
+        }
+
+        const result = await cancelOrder(orderId, Number(auth.userId), reason);
+
+        if (result.Status_Code !== 200) {
+             return NextResponse.json({ message: result.Message }, { status: result.Status_Code });
+        }
+
+        return NextResponse.json({ message: 'ยกเลิกคำสั่งซื้อสำเร็จ' });
+
+    } catch (error) {
+        logger.error('API Error cancelling order:', error);
+        return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 });
+    }
+}

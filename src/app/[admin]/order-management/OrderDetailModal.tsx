@@ -213,11 +213,15 @@ const OrderDetailModal: React.FC<OrderDetailModalProps> = ({
           const success = await onCancelOrder(order.Order_ID, cancellationReason);
           if (success) {
               setIsCancelModalOpen(false); // ปิด Modal ย่อย
-              onClose(); // ปิด Modal หลัก
+              // onClose(); // ปิด Modal หลัก
           }
       }
       setCancellationReason(''); // เคลียร์เหตุผล
   };
+
+  useEffect(() => {
+    console.log(order, isOpen)
+  },[])
 
   if (!isOpen || !order) return null;
 

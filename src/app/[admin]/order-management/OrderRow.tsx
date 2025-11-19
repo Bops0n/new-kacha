@@ -44,7 +44,7 @@ const OrderRow: React.FC<OrderRowProps> = ({ order, statusConfig, viewOrderDetai
       <td>{order.Tracking_ID || '-'}</td>
       <td>
         <div className="flex gap-1">
-          <button
+          {/* <button
             className="btn btn-sm btn-ghost btn-square"
             onClick={(e) => {
               e.stopPropagation();
@@ -53,7 +53,7 @@ const OrderRow: React.FC<OrderRowProps> = ({ order, statusConfig, viewOrderDetai
             title="ดูรายละเอียด"
           >
             <FiEye className="w-4 h-4" />
-          </button>
+          </button> */}
           <button
             className="btn btn-sm btn-ghost btn-square text-error"
             onClick={(e) => {
