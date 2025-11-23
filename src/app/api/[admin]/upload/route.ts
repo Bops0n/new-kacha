@@ -41,7 +41,7 @@ export async function POST(req: NextRequest) {
         }, { status: 201 });
 
     } catch (error) {
-        logger.error('File upload error:', error);
+        logger.error('File upload error:', { error: error });
         return NextResponse.json({ message: "Server Error during file upload." }, { status: 500 });
     }
 }

@@ -15,7 +15,7 @@ export async function POST(req: NextRequest) {
     try {
         newUserData = await req.json();
     } catch (error) {
-        logger.error("Invalid JSON in request body:", error);
+        logger.error("Invalid JSON in request body:", { error: error });
         return NextResponse.json(
             { message: "Invalid request body. Expected JSON." },
             { status: 400 }
@@ -45,7 +45,7 @@ export async function POST(req: NextRequest) {
         );
 
     } catch (dbError: any) {
-        logger.error("User add failed", { error: dbError.message });
+        logger.error("User add failed", { error: dbError });
         return NextResponse.json(
             { message: dbError.message },
             { status: 500 }

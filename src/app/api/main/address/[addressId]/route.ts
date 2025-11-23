@@ -21,7 +21,7 @@ export async function PUT(request: NextRequest, context: { params: { addressId: 
   try {
     updatedAddressData = await request.json();
   } catch (error) {
-    logger.error('Invalid JSON in request body:', error);
+    logger.error('Invalid JSON in request body:', { error: error });
     return NextResponse.json(
       { message: 'Invalid request body. Expected JSON.', error: true },
       { status: 400 }
@@ -67,7 +67,7 @@ export async function DELETE(request: NextRequest, context: { params: { addressI
     return NextResponse.json({ message: 'Address deleted successfully', error: false }, { status: 200 });
 
   } catch (error) {
-    logger.error('Error deleting address:', error);
+    logger.error('Error deleting address:', { error: error });
     return NextResponse.json({ message: 'Failed to delete address', error: true }, { status: 500 });
   }
 }
@@ -93,7 +93,7 @@ export async function PATCH(request: NextRequest, context: { params: { addressId
   try {
     updatedAddressData = await request.json();
   } catch (error) {
-    logger.error('Invalid JSON in request body:', error);
+    logger.error('Invalid JSON in request body:', { error: error });
     return NextResponse.json(
       { message: 'Invalid request body. Expected JSON.', error: true },
       { status: 400 }

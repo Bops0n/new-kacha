@@ -14,7 +14,7 @@ export async function POST(req: NextRequest) {
     try {
         newAddressData = await req.json();
     } catch (error) {
-        logger.error("Invalid JSON in request body:", error);
+        logger.error("Invalid JSON in request body:", { error: error });
         return NextResponse.json(
             { message: "Invalid request body. Expected JSON." },
             { status: 400 }
