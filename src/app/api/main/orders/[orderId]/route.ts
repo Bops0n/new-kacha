@@ -12,24 +12,20 @@ import { logger } from '@/server/logger';
  * GET /api/main/orders/[orderId]
  * Retrieves detailed information for a specific order for the authenticated user.
  */
-export async function GET(
-    request: NextRequest,
-    { params }: { params: { orderId: string } }
-) {
+export async function GET(request: NextRequest, { params }: { params: { orderId: number } }) {
     const auth = await authenticateRequest();
     const isCheck = checkRequire(auth);
     if (isCheck) return isCheck;
 
     const { orderId } = await params;
     
-    const parseId = parseInt(orderId, 10);
-    if (isNaN(parseId)) {
+    if (isNaN(orderId)) {
         return NextResponse.json({ message: 'Invalid Order ID' }, { status: 400 });
     }
 
     try {
         // เรียกใช้ Service ที่อัปเดตแล้ว
-        const order = await getOrderById(parseId);
+        const order = await getOrderById(orderId);
 
         if (!order) {
             return NextResponse.json({ message: 'ไม่พบคำสั่งซื้อ' }, { status: 404 });
@@ -41,7 +37,7 @@ export async function GET(
         if (error.message === 'Access denied') {
             return NextResponse.json({ message: 'คุณไม่มีสิทธิ์เข้าถึงคำสั่งซื้อนี้' }, { status: 403 });
         }
-        logger.error('Error fetching order details:', error);
+        logger.error('Error fetching order details:', { error: error });
         return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 });
     }
 }
@@ -50,15 +46,13 @@ export async function GET(
  * PATCH /api/main/orders/[orderId]
  * Updates the transfer slip image URL for a specific order.
  */
-export async function PATCH(
-    request: NextRequest, 
-    { params }: { params: { orderId: string } }
-) {
+export async function PATCH(request: NextRequest, { params }: { params: { orderId: number } }) {
     const auth = await authenticateRequest();
     const isCheck = checkRequire(auth);
     if (isCheck) return isCheck;
-    
-    const orderId = parseInt(await params.orderId, 10);
+
+    const { orderId } = await params;
+
     if (isNaN(orderId)) {
         return NextResponse.json({ message: 'รหัสคำสั่งซื้อไม่ถูกต้อง' }, { status: 400 });
     }
@@ -89,7 +83,7 @@ export async function PATCH(
 
         await fs.writeFile(filePath, buffer);
 
-        const result = await uploadTransactionSlip(imageUrl, orderId, Number(auth.userId));
+        const result = await uploadTransactionSlip(imageUrl, orderId);
 
         if (!result) {
             return NextResponse.json({ message: 'อัปโหลดสลิปล้มเหลว!' }, { status: 500 });
@@ -98,7 +92,7 @@ export async function PATCH(
         return NextResponse.json({ message: 'อัปโหลดสลิปสำเร็จ', imageUrl });
 
     } catch (error) {
-        logger.error('Error uploading transfer slip:', error);
+        logger.error('Error uploading transfer slip:', { error: error });
         return NextResponse.json({ message: 'เกิดข้อผิดพลาดในการอัปโหลดสลิป' }, { status: 500 });
     }
 }
