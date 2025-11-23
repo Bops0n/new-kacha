@@ -8,25 +8,32 @@ import { formatPrice } from '@/app/utils/formatters';
 interface OrderRowProps {
   order: Order;
   statusConfig: StatusConfig;
-  viewOrderDetails: (order: Order) => void;
   deleteOrder: (orderId: number) => void;
 }
 
-const OrderRow: React.FC<OrderRowProps> = ({ order, statusConfig, viewOrderDetails, deleteOrder }) => {
+const OrderRow: React.FC<OrderRowProps> = ({ order, statusConfig, deleteOrder }) => {
   const StatusIcon = statusConfig[order.Status]?.icon;
   const statusInfo = statusConfig[order.Status];
 
+  const handleClickOpen = () => {
+    if (order.Status === 'refunding' || order.Status === 'refunded') {
+      window.open(`/admin/order-management/${order.Order_ID}/refunding`);
+    } else {
+      window.open(`/admin/order-management/${order.Order_ID}/checkorder`);
+    }
+  }
+
   return (
-    <tr className="hover cursor-pointer" onClick={() => viewOrderDetails(order)}>
+    <tr className="hover cursor-pointer" onClick={handleClickOpen}>
       <td><div className="font-bold text-primary">#{order.Order_ID}</div></td>
       <td>
         <div className="font-bold">{order.Customer_Name}</div>
-        <div className="text-sm opacity-70">{order.Email || '-'}</div>
+        <div className="text-sm opacity-70">{order.Customer_Email || '-'}</div>
       </td>
       <td>
         <ul className="list-disc list-inside text-sm">
           {order.Products.slice(0, 2).map((p, idx) => (
-            <li key={idx} className="truncate max-w-xs">{p.Product_Name} (x{p.Quantity})</li>
+            <li key={idx} className="truncate max-w-xs">{p.Product_Name} ({p.Quantity} {p.Product_Unit})</li>
           ))}
           {order.Products.length > 2 && <li className="text-xs opacity-60">...และอีก {order.Products.length - 2} รายการ</li>}
         </ul>
@@ -41,14 +48,13 @@ const OrderRow: React.FC<OrderRowProps> = ({ order, statusConfig, viewOrderDetai
         )}
       </td>
       <td>{order.Order_Date}</td>
-      <td>{order.Tracking_ID || '-'}</td>
       <td>
         <div className="flex gap-1">
           <button
             className="btn btn-sm btn-ghost btn-square"
             onClick={(e) => {
               e.stopPropagation();
-              viewOrderDetails(order);
+              handleClickOpen();
             }}
             title="ดูรายละเอียด"
           >

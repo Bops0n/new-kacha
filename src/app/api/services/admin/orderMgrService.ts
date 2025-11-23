@@ -58,3 +58,8 @@ export async function deleteOrder(orderId: number, UserID: number) {
     const { rowCount } = await poolQuery(`SELECT * FROM "SP_ADMIN_ORDER_DEL"($1, $2)`, [orderId, UserID]);
     return rowCount > 0;
 }
+
+export async function uploadRefundSlip(imageURL: string, orderId: number, userId: number) {
+  const { rowCount } = await poolQuery(`SELECT * FROM "SP_ADMIN_ORDER_REFUND_SLIP_UPD"($1, $2, $3)`, [imageURL, orderId, userId]);
+  return rowCount > 0;
+}

@@ -12,10 +12,10 @@ const LoadingSpinner = () => {
           aria-label="Loading"
         >
           {/* SR-only text for accessibility */}
-          <span className="sr-only text-black">Loading...</span>
+          <span className="sr-only text-black">กำลังโหลด...</span>
         </div>
         {/* Optional loading text */}
-        <p className="mt-4 text-lg font-medium text-gray-700">Loading data...</p>
+        <p className="mt-4 text-lg font-bold text-gray-700">กำลังโหลดข้อมูล...</p>
       </div>
     </div>
   );
