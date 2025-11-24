@@ -32,7 +32,8 @@ module.exports = {
             return res;
         } catch (dbError) {
             await client.query('ROLLBACK');
-            logger.error('Database Error:', dbError.message, '\nQuery:', queryString);
+            logger.error('Database Error:', { error: dbError });
+            logger.error('Query:', { query: queryString });
             throw dbError;
         } finally {
             client.release();

@@ -36,7 +36,7 @@ export async function GET(request: Request) {
 
         return NextResponse.json({ cartItems, error: false }, { status: 200 });
     } catch (error) {
-        logger.error('Error fetching cart with JOIN:', error);
+        logger.error('Error fetching cart with JOIN:', { error: error });
         return NextResponse.json({ message: 'เกิดข้อผิดพลาดภายในเซิร์ฟเวอร์ขณะดึงข้อมูลตะกร้าสินค้า', error: true }, { status: 500 });
     }
 }
@@ -67,7 +67,7 @@ export async function POST(request: Request) {
 
         return NextResponse.json({ message: 'อัปเดตตะกร้าสินค้าสำเร็จ', error: false }, { status: 200 });
     } catch (error) {
-        logger.error('Error adding/updating cart item:', error);
+        logger.error('Error adding/updating cart item:', { error: error });
         return NextResponse.json({ message: 'เกิดข้อผิดพลาดภายในเซิร์ฟเวอร์', error: true }, { status: 500 });
     }
 }
@@ -98,7 +98,7 @@ export async function DELETE(request: Request) {
         }
         return NextResponse.json({ message: 'นำสินค้าออกจากตะกร้าสำเร็จ', error: false }, { status: 200 });
     } catch (error) {
-        logger.error('Error removing cart item:', error);
+        logger.error('Error removing cart item:', { error: error });
         return NextResponse.json({ message: 'เกิดข้อผิดพลาดภายในเซิร์ฟเวอร์', error: true }, { status: 500 });
     }
 }
@@ -129,7 +129,7 @@ export async function PATCH(request: Request) {
         }
         return NextResponse.json({ message: 'อัปเดตจำนวนสินค้าในตะกร้าสำเร็จ', error: false }, { status: 200 });
     } catch (error) {
-        logger.error('Error patching cart item quantity:', error);
+        logger.error('Error patching cart item quantity:', { error: error });
         return NextResponse.json({ message: 'เกิดข้อผิดพลาดภายในเซิร์ฟเวอร์', error: true }, { status: 500 });
     }
 }

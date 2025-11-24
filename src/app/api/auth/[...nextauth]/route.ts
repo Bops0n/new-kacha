@@ -54,7 +54,7 @@ export const authOptions : AuthOptions = {
             default: throw new Error(result.Message);
           }
         } catch (error : any) {
-          logger.error("Auth error:", error);
+          logger.error("Auth error:", { error: error });
           throw new Error(error.message || "Internal Server Error");
         }
       },

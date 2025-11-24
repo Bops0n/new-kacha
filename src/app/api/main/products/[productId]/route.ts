@@ -22,7 +22,7 @@ export async function GET(
     return NextResponse.json({ Product, Related_Products, Category_Path, message: Message }, { status: Status_Code });
 
   } catch (error) {
-    logger.error('API Error fetching product:', error);
+    logger.error('API Error fetching product:', { error: error });
     return NextResponse.json({ message: 'เกิดข้อผิดพลาดภายในเซิร์ฟเวอร์' }, { status: 500 });
   }
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { SimpleProductDetail, OrderProductDetail } from '@/types';
 import { FiImage, FiArchive, FiShoppingBag, FiAlertTriangle } from 'react-icons/fi';
 import { formatPrice } from '@/app/utils/formatters';

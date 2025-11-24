@@ -7,16 +7,23 @@ import { formatPrice } from '@/app/utils/formatters';
 
 interface OrderCardProps {
   order: Order;
-  statusConfig: StatusConfig;
-  viewOrderDetails: (order: Order) => void;
+  statusTypeLabels: StatusConfig;
 }
 
-const OrderCard: React.FC<OrderCardProps> = ({ order, statusConfig, viewOrderDetails }) => {
-  const StatusIcon = statusConfig[order.Status]?.icon;
-  const statusInfo = statusConfig[order.Status];
+const OrderCard: React.FC<OrderCardProps> = ({ order, statusTypeLabels }) => {
+  const StatusIcon = statusTypeLabels[order.Status]?.icon;
+  const statusInfo = statusTypeLabels[order.Status];
+
+  const handleClickOpen = () => {
+    if (order.Status === 'refunding' || order.Status === 'refunded') {
+      window.open(`/admin/order-management/${order.Order_ID}/refunding`);
+    } else {
+      window.open(`/admin/order-management/${order.Order_ID}/checkorder`);
+    }
+  }
 
   return (
-    <div className="card bg-base-200 shadow-sm cursor-pointer" onClick={() => viewOrderDetails(order)}>
+    <div className="card bg-base-200 shadow-sm cursor-pointer" onClick={handleClickOpen}>
       <div className="card-body p-4">
         <div className="flex justify-between items-start">
             <div>
@@ -44,7 +51,7 @@ const OrderCard: React.FC<OrderCardProps> = ({ order, statusConfig, viewOrderDet
             className="btn btn-sm btn-outline btn-primary"
             onClick={(e) => {
               e.stopPropagation();
-              viewOrderDetails(order);
+              handleClickOpen();
             }}
           >
             <FiEye className="w-4 h-4" /> ดูรายละเอียด

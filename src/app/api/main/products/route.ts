@@ -17,7 +17,7 @@ export async function GET() {
     return NextResponse.json(payload);
 
   } catch (error) {
-    logger.error('API Error fetching products page data:', error);
+    logger.error('API Error fetching products page data:', { error: error });
     return NextResponse.json(
       { message: 'เกิดข้อผิดพลาดภายในเซิร์ฟเวอร์' },
       { status: 500 }
