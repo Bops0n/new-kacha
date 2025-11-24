@@ -106,6 +106,7 @@ export default function OrderCancelButton({ orderId, userId, onSuccess }: {
   }
 
   const currentStatus = statusTypeLabels[order.Status];
+  const pending = statusTypeLabels['pending'];
   const refunding = statusTypeLabels['refunding'];
   const cancelled = statusTypeLabels['cancelled'];
   
@@ -177,7 +178,12 @@ export default function OrderCancelButton({ orderId, userId, onSuccess }: {
                                   <lbCOD.icon className="inline-block w-4 h-4 mr-1" />
                                   {lbCOD?.label || order.Payment_Type}
                                 </span>{" "}
-                                หรือยังไม่มีการตรวจสอบการชำระเงิน ระบบจะเปลี่ยนสถานะคำสั่งซื้อเป็น{" "}
+                                หรือยังไม่มีการตรวจสอบการชำระเงิน และมีสถานะ{" "}
+                                <span className={`badge ${pending.color }`}>
+                                    <pending.icon className="inline-block w-4 h-4 mr-1" />
+                                    {pending.label}
+                                </span>{" "}
+                                ระบบจะเปลี่ยนสถานะคำสั่งซื้อเป็น{" "}
                                 <span className={`badge ${cancelled.color }`}>
                                     <cancelled.icon className="inline-block w-4 h-4 mr-1" />
                                     {cancelled.label}
