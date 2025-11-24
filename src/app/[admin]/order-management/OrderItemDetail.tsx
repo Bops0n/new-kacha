@@ -1,9 +1,8 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
-import { FiSave, FiX, FiEdit, FiImage, FiShoppingBag, FiArchive, FiAlertTriangle, FiCheckCircle, FiTrash2 } from 'react-icons/fi';
-import { Order, EditOrderFormData, OrderStatus, StatusConfig, SimpleProductDetail, OrderProductDetail } from '@/types';
-import { useAlert } from '@/app/context/AlertModalContext';
+import React from 'react';
+import { SimpleProductDetail, OrderProductDetail } from '@/types';
+import { FiImage, FiArchive, FiShoppingBag, FiAlertTriangle } from 'react-icons/fi';
 import { formatPrice } from '@/app/utils/formatters';
 import { calculateAvailableStock } from '@/app/utils/calculations';
 

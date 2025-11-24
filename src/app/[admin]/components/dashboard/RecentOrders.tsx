@@ -3,28 +3,9 @@ import { useEffect, useState } from "react";
 import { CardBoard, CardContent, CardHeader } from "./CardBoard";
 import LoadingSpinner from "@/app/components/LoadingSpinner";
 import { RecentOrder } from "@/types/dashboard";
-import {
-  FiCheckCircle,
-  FiClock,
-  FiPackage,
-  FiRefreshCw,
-  FiTruck,
-  FiXCircle,
-} from "react-icons/fi";
+import { FiTruck } from "react-icons/fi";
 import { motion } from "framer-motion";
-
-const statusConfig: Record<
-  string,
-  { label: string; color: string; icon: React.ElementType; bg: string }
-> = {
-  pending: { label: "รอดำเนินการ", color: "text-amber-700", icon: FiClock, bg: "bg-amber-50" },
-  processing: { label: "กำลังเตรียม", color: "text-sky-700", icon: FiPackage, bg: "bg-sky-50" },
-  shipped: { label: "จัดส่งแล้ว", color: "text-blue-700", icon: FiTruck, bg: "bg-blue-50" },
-  delivered: { label: "ส่งเรียบร้อย", color: "text-green-700", icon: FiCheckCircle, bg: "bg-green-50" },
-  refunding: { label: "รอคืนเงิน", color: "text-purple-700", icon: FiRefreshCw, bg: "bg-purple-50" },
-  refunded: { label: "คืนเงินแล้ว", color: "text-gray-700", icon: FiCheckCircle, bg: "bg-gray-100" },
-  cancelled: { label: "ยกเลิก", color: "text-red-700", icon: FiXCircle, bg: "bg-red-50" },
-};
+import { statusTypeLabels } from "@/app/utils/client";
 
 export function RecentOrders() {
   const [orders, setOrders] = useState<RecentOrder[]>([]);
@@ -71,7 +52,7 @@ export function RecentOrders() {
       <CardContent className="space-y-3 sm:space-y-4">
         {orders.length > 0 ? (
           orders.map((o, index) => {
-            const status = statusConfig[o.Status] ?? statusConfig.pending;
+            const status = statusTypeLabels[o.Status] ?? statusTypeLabels.pending;
             const Icon = status.icon;
 
             return (
@@ -111,7 +92,7 @@ export function RecentOrders() {
                 {/* Status + Extra Info */}
                 <div className="flex items-center justify-between text-xs sm:text-sm mt-1">
                   <div
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full font-medium ${status.bg} ${status.color}`}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full font-medium ${status.bgColor} ${status.color}`}
                   >
                     <Icon className="text-sm" />
                     <span>{status.label}</span>

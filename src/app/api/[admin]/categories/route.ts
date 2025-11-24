@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
         }
         return NextResponse.json({ message: 'เพิ่มหมวดหมู่สำเร็จ', data: newData }, { status: 201 });
     } catch (error: any) {
-        logger.error("API POST Error:", error.message);
+        logger.error("API POST Error:", { error: error });
         return NextResponse.json({ message: error.message || 'API Error' }, { status: 500 });
     }
 }
@@ -44,7 +44,7 @@ export async function PATCH(req: NextRequest) {
         }
         return NextResponse.json({ message: 'อัปเดตหมวดหมู่สำเร็จ', data: updatedData });
     } catch (error: any) {
-        logger.error("API PATCH Error:", error.message);
+        logger.error("API PATCH Error:", { error: error });
         return NextResponse.json({ message: error.message || 'API Error' }, { status: 500 });
     }
 }
@@ -75,7 +75,7 @@ export async function DELETE(req: NextRequest) {
 
         return NextResponse.json({ message: 'ลบหมวดหมู่สำเร็จ' });
     } catch (error: any) {
-        logger.error("API DELETE Error:", error.message);
+        logger.error("API DELETE Error:", { error: error });
         return NextResponse.json({ message: error.message || 'API Error' }, { status: 500 });
     }
 }

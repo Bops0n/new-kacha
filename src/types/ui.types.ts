@@ -35,3 +35,12 @@ export interface StatusConfig {
     bgColor: string;
   };
 }
+
+export interface PaymentConfig {
+  [key: string]: {
+    label: string;
+    color: string; // Tailwind/DaisyUI color class
+    icon: React.ElementType;
+    bgColor: string;
+  };
+}

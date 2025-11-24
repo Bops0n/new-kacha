@@ -9,16 +9,51 @@ export const mapDbRowsToOrders = (dbRows: any[]): Order[] => {
             ordersMap.set(orderId, {
                 Order_ID: row.Order_ID,
                 User_ID: row.User_ID,
-                Order_Date: row.Order_Date, // SQL ส่งมาเป็น string ที่ format แล้ว
+                Order_Date: row.Order_Date,
+                Total_Amount: parseFloat(row.Total_Amount),
                 Status: row.Status,
                 Payment_Type: row.Payment_Type,
-                Invoice_ID: row.Invoice_ID,
-                Shipping_Address_ID: 0, // 0 หรือ null: SQL ใหม่ไม่ได้ SELECT Address_ID มา (แต่ JOIN field มาแทน)
-                DeliveryDate: row.DeliveryDate, // SQL ส่งมาเป็น string ที่ format แล้ว
-                Tracking_ID: row.Tracking_ID,
-                Shipping_Carrier: row.Shipping_Carrier,
-                Transfer_Slip_Image_URL: row.Transaction_Slip, // <-- แก้ไข: แมปจาก OP."Transaction_Slip"
-                Cancellation_Reason: row.Cancel_Reason,     // <-- แก้ไข: แมปจาก OC."Cancel_Reason"
+                Is_Confirmed: row.Is_Confirmed,
+                Confirmed_By: row.Confirmed_By,
+                Confirmed_At: row.Confirmed_At,
+                Is_Deleted: row.Is_Deleted,
+                Delete_By: row.Delete_By,
+                Delete_At: row.Delete_At,
+                Update_By: row.Update_By,
+                Update_At: row.Update_At,
+
+                Is_Cancelled: row.Is_Cancelled,
+                Cancel_By: row.Cancel_By,
+                Cancel_Date: row.Cancel_Date,
+                Cancel_Reason: row.Cancel_Reason,
+
+                Is_Payment_Checked: row.Is_Payment_Checked,
+                Transaction_Date: row.Transaction_Date,
+                Transaction_Slip: row.Transaction_Slip,
+                Transaction_Status: row.Transaction_Status,
+                Checked_By: row.Checked_By,
+                Checked_At: row.Checked_At,
+
+                Is_Refunded: row.Is_Refunded,
+                Refund_Slip: row.Refund_Slip,
+                Refund_By: row.Refund_By,
+                Refund_At: row.Refund_At,
+
+                Shipping_Method: row.Shipping_Method,
+                Shipping_Provider: row.Shipping_Provider,
+                Shipping_Date: row.Shipping_Date,
+                Shipping_Cost: row.Shipping_Cost,
+                Vehicle_Type: row.Vehicle_Type,
+                Driver_Name: row.Driver_Name,
+                Driver_Phone: row.Driver_Phone,
+                Tracking_Number: row.Tracking_Number,
+                Tracking_URL: row.Tracking_URL,
+                Internal_Note: row.Internal_Note,
+                Customer_Note: row.Customer_Note,
+                Is_Auto_Update_Status: row.Is_Auto_Update_Status,
+                Shipping_Updated_By: row.Shipping_Updated_By,
+                Shipping_Updated_At: row.Shipping_Updated_At,
+
                 Address_1: row.Address_1,
                 Address_2: row.Address_2,
                 Sub_District: row.Sub_District,
@@ -26,20 +61,18 @@ export const mapDbRowsToOrders = (dbRows: any[]): Order[] => {
                 Province: row.Province,
                 Zip_Code: row.Zip_Code,
                 Phone: row.Phone,
-                Total_Amount: parseFloat(row.Total_Amount),
-                Return_Slip_Image_URL : row.Refund_Slip,
-                cancelled : '',
+                
+                Customer_Name: row.Customer_Name || 'N/A',
+                Customer_Email: row.Customer_Email || null,
 
-                Customer_Name: row.User_FullName || 'N/A',
-                Email: row.User_Email || null,
                 Products: [],
-                Action: { // <-- ใช้ค่าเริ่มต้น เพราะ SQL ใหม่ไม่มีข้อมูลจาก Order_Action (OA_...)
-                    Order_ID: -1,
-                    Status: 'pending',
-                    Update_By: -1,
-                    Update_Name: 'N/A',
-                    Update_Date: 'N/A',
-                }
+
+                // Action: {
+                //     Order_ID: -1,
+                //     Status: 'pending',
+                //     Update_By: 'N/A',
+                //     Update_Date: 'N/A',
+                // }
             });
         }
 
@@ -67,9 +100,12 @@ export const mapDbRowsToOrders = (dbRows: any[]): Order[] => {
             });
         }
 
-        // --- ลบส่วน Action ออก ---
-        // โค้ด SQL ใหม่ไม่ได้ JOIN ตาราง Order_Action (ที่ใช้ชื่อย่อ OA)
-        // ดังนั้น เราจึงลบ block `if (row.OA_Order_ID)` เดิมออก
+        // if (row.OA_Order_ID) {
+        //     currentOrder.Action.Order_ID = row.OA_Order_ID;
+        //     currentOrder.Action.Status = row.OA_Status;
+        //     currentOrder.Action.Update_By = row.OA_Update_By;
+        //     currentOrder.Action.Update_Date = row.OA_Update_Date;
+        // }
     });
     return Array.from(ordersMap.values()).sort((a, b) => b.Order_ID - a.Order_ID);
 };

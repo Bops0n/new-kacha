@@ -21,7 +21,7 @@ export async function GET(req: NextRequest) {
         // console.log()
         return NextResponse.json({ orders });
     } catch (error: any) {
-        logger.error("API GET Error:", error.message);
+        logger.error("API GET Error:", { error: error });
         return NextResponse.json({ message: error.message || "Failed to fetch orders" }, { status: 500 });
     }
 }
@@ -40,7 +40,7 @@ export async function PATCH(req: NextRequest) {
         const updatedOrder = await updateOrder(payload);
         return NextResponse.json({ message: `Order ID ${updatedOrder.Order_ID} updated successfully.`, data: updatedOrder });
     } catch (error: any) {
-        logger.error("API PATCH Error:", error.message);
+        logger.error("API PATCH Error:", { error: error });
         return NextResponse.json({ message: error.message || "Failed to update order" }, { status: error.message.includes('not found') ? 404 : 500 });
     }
 }
@@ -69,7 +69,7 @@ export async function DELETE(req: NextRequest) {
 
         return NextResponse.json({ message: `Order ID ${orderId} and its details deleted successfully.` });
     } catch (error: any) {
-        logger.error("API DELETE Error:", error.message);
+        logger.error("API DELETE Error:", { error: error });
         return NextResponse.json({ message: error.message || "Failed to delete order" }, { status: error.message.includes('not found') ? 404 : 500 });
     }
 }

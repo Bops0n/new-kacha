@@ -14,7 +14,7 @@ export async function GET(req: NextRequest) {
         if (!userProfile) return NextResponse.json({ message: 'ไม่พบผู้ใช้' }, { status: 404 });
         return NextResponse.json({ user: userProfile });
     } catch (err: any) {
-        logger.error("API GET Error:", err.message);
+        logger.error("API GET Error:", { error: err });
         return NextResponse.json({ message: 'Server Error' }, { status: 500 });
     }
 }
@@ -30,7 +30,7 @@ export async function PATCH(req: NextRequest) {
         if (!success) throw new Error('Update failed');
         return NextResponse.json({ message: 'อัปเดตโปรไฟล์สำเร็จ' });
     } catch (err) {
-        logger.error("API PATCH Error:", err.message);
+        logger.error("API PATCH Error:", { error: err });
         return NextResponse.json({ message: 'Update Error' }, { status: 500 });
     }
 }

@@ -31,12 +31,12 @@ export async function updateUserProfile(userId: number, data: Partial<UserSchema
  * ดึงที่อยู่ทั้งหมดของผู้ใช้
  */
 export async function getAddressesByUserId(userId: number): Promise<AddressSchema[]> {
-  const { rows } = await poolQuery(`SELECT * FROM "SP_USER_ADDRESS_UID_GET"($1)`, [userId]);
+  const { rows } = await poolQuery(`SELECT * FROM "SP_USER_ADDRESS_GET"($1, $2)`, ["User_ID", userId]);
   return rows;
 }
 
 export async function getAddressesByAddressId(addressId: number): Promise<AddressSchema[]> {
-  const { rows } = await poolQuery(`SELECT * FROM "SP_USER_ADDRESS_ADDRID_GET"($1)`, [addressId]);
+  const { rows } = await poolQuery(`SELECT * FROM "SP_USER_ADDRESS_GET"($1, $2)`, ["Address_ID", addressId]);
   return rows;
 }
 
@@ -72,7 +72,7 @@ export async function getAllCategories() {
 }
 
 export async function getOrderByUID(userId: number) {
-  const { rows } = await poolQuery(`SELECT * FROM "SP_USER_ORDER_UID_GET"($1)`, [userId]);
+  const { rows } = await poolQuery(`SELECT * FROM "SP_USER_ORDER_GET"($1, $2)`, ["User_ID", userId]);
   return rows;
 }
 
@@ -96,7 +96,7 @@ export async function updateCartProduct(userId: number, productId: number, qty: 
   return rowCount > 0;
 }
 
-export async function uploadTransactionSlip(imageURL: string, orderId: number, userId: number) {
+export async function uploadTransactionSlip(imageURL: string, orderId: number) {
   const { rowCount } = await poolQuery(`SELECT * FROM "SP_USER_ORDER_TRANS_SLIP_UPD"($1, $2)`, [imageURL, orderId]);
   return rowCount > 0;
 }

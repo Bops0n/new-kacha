@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ orders });
 
     } catch (error) {
-        logger.error('Error fetching user orders:', error);
+        logger.error('Error fetching user orders:', { error: error });
         return NextResponse.json({ message: 'เกิดข้อผิดพลาดในการดึงข้อมูลคำสั่งซื้อ', error: true }, { status: 500 });
     }
 }
@@ -63,7 +63,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ message: Message, orderId: Out_Order_ID }, { status: Status_Code });
 
     } catch (error) {
-        logger.error('API Error fetching product:', error);
+        logger.error('API Error fetching product:', { error: error });
         return NextResponse.json({ message: 'เกิดข้อผิดพลาดภายในเซิร์ฟเวอร์' }, { status: 500 });
     }
 }

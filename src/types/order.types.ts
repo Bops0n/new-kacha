@@ -1,10 +1,9 @@
-// types/order.types.ts
-import React from 'react';
-
 // Common types for Order Status
-export type OrderStatus = 'waiting_payment' | 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled' | 'refunding' | 'refunded';
+export type OrderStatus = 'waiting_payment' | 'pending' | 'preparing' | 'shipped' | 'delivered' | 'refunding' | 'refunded' | 'cancelled';
 export type TransferSlipStatusFilter = 'all' | 'has_slip' | 'no_slip';
 export type Payment_Type = 'bank_transfer' | 'cash_on_delivery'
+export type TransactionStatus = 'pending' | 'confirmed' | 'rejected';
+
 // Type for product items within an order (detailed snapshot)
 export interface OrderProductDetail {
   Product_ID?: number;
@@ -21,32 +20,67 @@ export interface OrderProductDetail {
   Subtotal?: number;
 }
 
-export interface OrderAction {
-  Order_ID: number;
-  Status: OrderStatus;
-  Update_By: number;
-  Update_Name: string | null;
-  Update_Date: string | null;
-}
+// export interface OrderAction {
+//   Order_ID: number;
+//   Status: OrderStatus;
+//   Update_By: string;
+//   Update_Date: string | null;
+// }
 
 // Main Order type
 export type Order = {
   Order_ID: number;
   User_ID: number;
-  Customer_Name: string;
-  Email: string | null;
   Order_Date: string;
   Total_Amount: number;
   Status: OrderStatus;
-  Shipping_Address_ID: number;
   Payment_Type: Payment_Type;
-  Tracking_ID: string | null;
-  Shipping_Carrier: string | null;
-  Cancellation_Reason: string | null;
-  Transfer_Slip_Image_URL: string | null;
-  Return_Slip_Image_URL : string | null;
-  DeliveryDate: string | null;
-  Invoice_ID: string | null;
+  Is_Confirmed: boolean;
+  Confirmed_By: string;
+  Confirmed_At: string;
+  Is_Deleted: boolean;
+  Delete_By: string;
+  Delete_At: string;
+  Update_By: string;
+  Update_At: string;
+
+  // Order Cancellation
+  Is_Cancelled: boolean;
+  Cancel_Reason: string | null;
+  Cancel_By: number;
+  Cancel_Date: string;
+
+  // Order Payment
+  Is_Payment_Checked: boolean;
+  Transaction_Date: string;
+  Transaction_Slip: string | null;
+  Transaction_Status: TransactionStatus;
+  Checked_By: string;
+  Checked_At: string;
+
+  // Order Refund
+  Is_Refunded: boolean;
+  Refund_Slip: string | null;
+  Refund_By: string;
+  Refund_At: string;
+
+  // Order Shipping
+  Shipping_Method: string;
+  Shipping_Provider: string;
+  Shipping_Date: string;
+  Shipping_Cost: number;
+  Vehicle_Type: string;
+  Driver_Name: string;
+  Driver_Phone: string;
+  Tracking_Number: string;
+  Tracking_URL: string;
+  Internal_Note: string;
+  Customer_Note: string;
+  Is_Auto_Update_Status: boolean;
+  Shipping_Updated_By: string;
+  Shipping_Updated_At: string;
+
+  // Address
   Address_1: string;
   Address_2: string | null;
   Sub_District: string;
@@ -54,8 +88,16 @@ export type Order = {
   Province: string;
   Zip_Code: string;
   Phone: string;
+
+  // Customer
+  Customer_Name: string;
+  Customer_Email: string | null;
+
+  // Product Details
   Products: OrderProductDetail[];
-  Action: OrderAction;
+
+  // Order Action History
+  // Action: OrderAction;
 };
 
 // Type for form data when editing an order in admin panel

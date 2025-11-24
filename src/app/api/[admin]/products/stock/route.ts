@@ -31,7 +31,7 @@ export async function PATCH(req: NextRequest) {
             product: data
         });
     } catch (error) {
-        logger.error('API Error adding stock:', error);
+        logger.error('API Error adding stock:', { error: error });
         const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred.';
         return NextResponse.json({ message: 'Failed to add stock.', error: errorMessage }, { status: 500 });
     }

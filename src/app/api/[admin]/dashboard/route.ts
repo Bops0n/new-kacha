@@ -14,7 +14,7 @@ export async function GET() {
 
     return NextResponse.json(rows[0], { status: 200 });
   } catch (error: any) {
-    logger.error("Error fetching dashboard summary:", error);
+    logger.error("Error fetching dashboard summary:", { error: error });
     return NextResponse.json({ message: error.message }, { status: 500 });
   }
 }
