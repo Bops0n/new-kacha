@@ -4,13 +4,10 @@ import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useAlert } from '@/app/context/AlertModalContext';
 import { Order, OrderStatus, TransferSlipStatusFilter } from '@/types';
 
-/**
- * Hook สำหรับจัดการ State และ Logic ทั้งหมดของหน้า Order Management
- */
 export function useOrderManagement() {
   const { showAlert } = useAlert();
   const [orders, setOrders] = useState<Order[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(true); // Loading สำหรับการโหลดครั้งแรกเท่านั้น
   const [error, setError] = useState<string | null>(null);
   const [bulkSteps, setBulkSteps] = useState<Record<number, any>>({});
 
@@ -35,9 +32,9 @@ export function useOrderManagement() {
       setError(err.message);
       showAlert(err.message, 'error');
     } finally {
-      setLoading(false);
+      // if (!isBackground) setLoading(false);
     }
-  }, [showAlert]);
+  }, [showAlert,]); // เพิ่ม dependency selectedOrder เพื่อให้รู้ว่าต้องอัปเดตตัวไหน
 
   async function loadBulk() {
     if (orders.length === 0) return;
@@ -56,7 +53,7 @@ export function useOrderManagement() {
 
   useEffect(() => {
     fetchOrders();
-  }, [fetchOrders]);
+  }, []); // เรียกแค่ครั้งแรก
 
   useEffect(() => {
     loadBulk();

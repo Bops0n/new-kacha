@@ -1,4 +1,5 @@
 import { poolQuery } from '@/app/api/lib/db';
+import { logger } from '@/server/logger';
 import { UserSchema, AddressSchema, PlaceOrderRequestBody } from '@/types';
 
 // --- Profile Functions ---
@@ -72,6 +73,8 @@ export async function getAllCategories() {
 }
 
 export async function getOrderByUID(userId: number) {
+  logger.info('userid'+userId,)
+  // const rows = {}
   const { rows } = await poolQuery(`SELECT * FROM "SP_USER_ORDER_GET"($1, $2)`, ["User_ID", userId]);
   return rows;
 }
