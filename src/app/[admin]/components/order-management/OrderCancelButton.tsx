@@ -20,8 +20,10 @@ export default function OrderCancelButton({ orderId, onlyIcon, onSuccess }: {
 
   const [btnDisable, setBtnDisable] = useState(false);
   const [lbButtonText, setButtonText] = useState("");
+  const [isNoPaymentChecked, setNoPaymentChecked] = useState(false);
   const [isRefunding, setIsRefunding] = useState(false);
   const [isCancelled, setIsCancelled] = useState(false);
+  const [href, setHref] = useState(null);
 
   const fetchOrderData = useCallback(async () => {
     async function load() {
@@ -48,8 +50,10 @@ export default function OrderCancelButton({ orderId, onlyIcon, onSuccess }: {
             const data = result[0];
             setBtnDisable(data.btnDisable);
             setButtonText(data.lbButtonText);
+            setNoPaymentChecked(data.isNoPaymentChecked);
             setIsRefunding(data.isRefunding);
             setIsCancelled(data.isCancelled);
+            setHref(data.Href);
         }
     }
 
@@ -128,6 +132,16 @@ export default function OrderCancelButton({ orderId, onlyIcon, onSuccess }: {
 
   const modalId = `cancelOrderModal_${orderId}`;
 
+  function showModal(type: boolean) {
+    if (type) {
+      setError(null);
+      (document.getElementById(modalId) as any).showModal();
+    } else {
+      setError(null);
+      (document.getElementById(modalId) as any).close();
+    }
+  }
+
   return (
     <>
       {/* ปุ่มหลัก */}
@@ -136,7 +150,7 @@ export default function OrderCancelButton({ orderId, onlyIcon, onSuccess }: {
             className="btn btn-warning"
             onClick={(e) => {
               e.stopPropagation();
-              (document.getElementById(modalId) as any).showModal();
+              showModal(true);
             }}
           >
             ยกเลิกคำสั่งซื้อ
@@ -146,7 +160,7 @@ export default function OrderCancelButton({ orderId, onlyIcon, onSuccess }: {
             className="btn btn-sm btn-ghost btn-square text-error"
             onClick={(e) => {
               e.stopPropagation();
-              (document.getElementById(modalId) as any).showModal();
+              showModal(true);
             }}
             title="ยกเลิกคำสั่งซื้อ"
           >
@@ -159,97 +173,158 @@ export default function OrderCancelButton({ orderId, onlyIcon, onSuccess }: {
       <dialog 
         id={modalId} 
         className="modal" 
-        onClick={(e) => e.stopPropagation()}
+        onClick={(e) => { 
+          e.stopPropagation();
+          showModal(false);
+        }}
       >
         <div 
           className="modal-box" 
-          onClick={(e) => e.stopPropagation()}
+          onClick={(e) => { 
+            e.stopPropagation();
+          }}
         >
-          <h3 className="font-bold text-lg">ยกเลิกคำสั่งซื้อ #{order.Order_ID}</h3>
-          <p className="mt-2 text-sm opacity-70">กรุณาระบุเหตุผลในการยกเลิกคำสั่งซื้อ</p>
+          {!isNoPaymentChecked ? (
+            <>
+              <h3 className="font-bold text-lg">ยกเลิกคำสั่งซื้อ #{order.Order_ID}</h3>
+              <p className="mt-2 text-sm opacity-70">กรุณาระบุเหตุผลในการยกเลิกคำสั่งซื้อ</p>
 
-          <textarea
-            className="textarea textarea-bordered w-full mt-3 mb-3"
-            rows={10}
-            placeholder="เหตุผล..."
-            value={reason}
-            onChange={(e) => setReason(e.target.value)}
-          />
+              <textarea
+                className="textarea textarea-bordered w-full mt-3 mb-3"
+                rows={10}
+                placeholder="เหตุผล..."
+                value={reason}
+                onChange={(e) => setReason(e.target.value)}
+              />
 
-          {error && <div className="alert alert-error mb-3">{error}</div>}
+              {error && <div className="alert alert-error mb-3">{error}</div>}
 
-          {/* Confirm Card */}
-          <div className="card bg-base-100 shadow-md border border-base-300 p-3 rounded-xl h-fit">
-              <div className="flex items-center gap-3 mb-4">
-                  <FiXCircle className="w-7 h-7 text-error" />
-                  <div>
-                      <h2 className="font-bold text-lg">ยืนยันการยกเลิกคำสั่งซื้อ</h2>
-                      <p className="text-sm text-base-content/70">
-                        โปรดตรวจสอบให้แน่ใจ หากทำการยกเลิกแล้ว จะไม่สามารถดำเนินการคำสั่งซื้อได้อีก
-                      </p>
+              {/* Confirm Card */}
+              <div className="card bg-base-100 shadow-md border border-base-300 p-3 rounded-xl h-fit">
+                  <div className="flex items-center gap-3 mb-4">
+                      <FiXCircle className="w-7 h-7 text-error" />
+                      <div>
+                          <h2 className="font-bold text-lg">ยืนยันการยกเลิกคำสั่งซื้อ</h2>
+                          <p className="text-sm text-base-content/70">
+                            โปรดตรวจสอบให้แน่ใจ หากทำการยกเลิกแล้ว จะไม่สามารถดำเนินการคำสั่งซื้อได้อีก
+                          </p>
+                      </div>
                   </div>
-              </div>
-              <div className="space-y-3">
-                  <div className="badge badge-lg badge-outline">
-                      สถานะปัจจุบัน : 
-                      <span className={`badge ${currentStatus.color}`}>
-                          <currentStatus.icon className="inline-block w-4 h-4 mr-1" />
-                          {currentStatus.label}
-                      </span>
-                  </div>
-                  <div className="rounded-xl bg-base-200 border border-base-300 p-4 flex gap-3">
-                      <FiInfo className="w-5 h-5 mt-1 text-info" />
-                      <div className="text-sm text-base-content/80 space-y-1">
-                        <p>
-                            หลังจากกด <span className="font-semibold">"{lbButtonText}"</span>{" "}
-                            {isRefunding &&
-                              <>
-                                หากคำสั่งซื้อมีการชำระเงิน และมีการตรวจสอบการชำระเงินแล้ว ระบบจะเปลี่ยนสถานะคำสั่งซื้อเป็น{" "}
-                                <span className={`badge ${refunding.color }`}>
-                                    <refunding.icon className="inline-block w-4 h-4 mr-1" />
-                                    {refunding.label}
-                                </span>{" "}เพื่อดำเนินการคืนเงิน
-                              </>
-                            }
-                            {isCancelled &&
-                              <>
-                                หากคำสั่งซื้อยังไม่มีการชำระเงิน หรือการชำระเงินเป็น 
-                                <span className={`badge ${lbCOD?.color || 'badge-primary'}`}>
-                                  <lbCOD.icon className="inline-block w-4 h-4 mr-1" />
-                                  {lbCOD?.label || order.Payment_Type}
-                                </span>{" "}
-                                หรือยังไม่มีการตรวจสอบการชำระเงิน และมีสถานะ{" "}
-                                <span className={`badge ${pending.color }`}>
-                                    <pending.icon className="inline-block w-4 h-4 mr-1" />
-                                    {pending.label}
-                                </span>{" "}
-                                ระบบจะเปลี่ยนสถานะคำสั่งซื้อเป็น{" "}
-                                <span className={`badge ${cancelled.color }`}>
-                                    <cancelled.icon className="inline-block w-4 h-4 mr-1" />
-                                    {cancelled.label}
-                                </span>{" "}
-                                และไม่สามารถทำรายการคำสั่งซื้อนี้ได้อีก
-                              </>
-                            }
-                        </p>
+                  <div className="space-y-3">
+                      <div className="badge badge-lg badge-outline">
+                          สถานะปัจจุบัน : 
+                          <span className={`badge ${currentStatus.color}`}>
+                              <currentStatus.icon className="inline-block w-4 h-4 mr-1" />
+                              {currentStatus.label}
+                          </span>
+                      </div>
+                      <div className="rounded-xl bg-base-200 border border-base-300 p-4 flex gap-3">
+                          <FiInfo className="w-5 h-5 mt-1 text-info" />
+                          <div className="text-sm text-base-content/80 space-y-1">
+                            <p>
+                                หลังจากกด <span className="font-semibold">"{lbButtonText}"</span>{" "}
+                                {isRefunding &&
+                                  <>
+                                    หากคำสั่งซื้อมีการชำระเงิน และมีการตรวจสอบการชำระเงินแล้ว ระบบจะเปลี่ยนสถานะคำสั่งซื้อเป็น{" "}
+                                    <span className={`badge ${refunding.color }`}>
+                                        <refunding.icon className="inline-block w-4 h-4 mr-1" />
+                                        {refunding.label}
+                                    </span>{" "}เพื่อดำเนินการคืนเงิน
+                                  </>
+                                }
+                                {isCancelled &&
+                                  <>
+                                    หากคำสั่งซื้อยังไม่มีการชำระเงิน หรือการชำระเงินเป็น 
+                                    <span className={`badge ${lbCOD?.color || 'badge-primary'}`}>
+                                      <lbCOD.icon className="inline-block w-4 h-4 mr-1" />
+                                      {lbCOD?.label || order.Payment_Type}
+                                    </span>{" "}
+                                    หรือยังไม่มีการตรวจสอบการชำระเงิน และมีสถานะ{" "}
+                                    <span className={`badge ${pending.color }`}>
+                                        <pending.icon className="inline-block w-4 h-4 mr-1" />
+                                        {pending.label}
+                                    </span>{" "}
+                                    ระบบจะเปลี่ยนสถานะคำสั่งซื้อเป็น{" "}
+                                    <span className={`badge ${cancelled.color }`}>
+                                        <cancelled.icon className="inline-block w-4 h-4 mr-1" />
+                                        {cancelled.label}
+                                    </span>{" "}
+                                    และไม่สามารถทำรายการคำสั่งซื้อนี้ได้อีก
+                                  </>
+                                }
+                            </p>
+                          </div>
                       </div>
                   </div>
               </div>
-          </div>
 
-          <div className="modal-action">
-            <button className="btn w-full md:w-24" onClick={(e) => {
-                e.stopPropagation();
-                setError(null);
-                (document.getElementById(modalId) as any).close();
-              }}>
-              ปิด
-            </button>
+              <div className="modal-action">
+                <button className="btn w-full md:w-24" onClick={(e) => {
+                    e.stopPropagation();
+                    showModal(false);
+                  }}>
+                  ปิด
+                </button>
 
-            <button className={`btn btn-error w-full md:w-24 text-white`} onClick={submitCancel} disabled={btnDisable}>
-              {lbButtonText}
-            </button>
-          </div>
+                <button className={`btn btn-error w-full md:w-24 text-white`} onClick={submitCancel} disabled={btnDisable}>
+                  {lbButtonText}
+                </button>
+              </div>
+            </>
+          ) : (
+            <>
+              {/* Confirm Card */}
+              <div className="card bg-base-100 shadow-md border border-base-300 p-3 rounded-xl h-fit">
+                  <div className="flex items-center gap-3 mb-4">
+                      <FiXCircle className="w-7 h-7 text-error" />
+                      <div>
+                          <h2 className="font-bold text-lg">ไม่สามารถยกเลิกคำสั่งซื้อ #{order.Order_ID} ได้</h2>
+                      </div>
+                  </div>
+                  <div className="space-y-3">
+                      <div className="badge badge-lg badge-outline">
+                          สถานะปัจจุบัน : 
+                          <span className={`badge ${currentStatus.color}`}>
+                              <currentStatus.icon className="inline-block w-4 h-4 mr-1" />
+                              {currentStatus.label}
+                          </span>
+                      </div>
+                      <div className="rounded-xl bg-base-200 border border-base-300 p-4 flex gap-3">
+                          <FiInfo className="w-5 h-5 mt-1 text-info" />
+                          <div className="text-sm text-base-content/80 space-y-1">
+                            <p>
+                                ยังไม่ได้มีการตรวจสอบหลักฐานการชำระเงิน กรุณากดปุ่ม{" "}
+                                <span className="font-semibold">"{lbButtonText}"</span>{" "}
+                                เพื่อดำเนินการต่อ
+                            </p>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+              <div className="modal-action">
+                <button 
+                  className="btn w-full md:w-24" 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    showModal(false);
+                  }}
+                >
+                  ปิด
+                </button>
+
+                <button 
+                  className={`btn btn-warning text-white`} 
+                  onClick={() => {
+                    if (href) {
+                      window.location.href = href;
+                    }
+                  }}
+                >
+                  {lbButtonText}
+                </button>
+              </div>
+            </>
+          )}
         </div>
       </dialog>
     </>
