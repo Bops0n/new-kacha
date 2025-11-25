@@ -38,9 +38,6 @@ export type Order = {
   Is_Confirmed: boolean;
   Confirmed_By: string;
   Confirmed_At: string;
-  Is_Deleted: boolean;
-  Delete_By: string;
-  Delete_At: string;
   Update_By: string;
   Update_At: string;
 

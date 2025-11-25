@@ -16,9 +16,6 @@ export const mapDbRowsToOrders = (dbRows: any[]): Order[] => {
                 Is_Confirmed: row.Is_Confirmed,
                 Confirmed_By: row.Confirmed_By,
                 Confirmed_At: row.Confirmed_At,
-                Is_Deleted: row.Is_Deleted,
-                Delete_By: row.Delete_By,
-                Delete_At: row.Delete_At,
                 Update_By: row.Update_By,
                 Update_At: row.Update_At,
 
