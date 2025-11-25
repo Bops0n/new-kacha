@@ -18,6 +18,7 @@ export async function GET(request: NextRequest) {
     try {
 
         const result = await getOrderByUID(Number(auth.userId));
+        console.log('d')
         const orders: Order[] = mapDbRowsToOrders(result);
 
         return NextResponse.json({ orders });
