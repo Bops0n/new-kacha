@@ -22,8 +22,8 @@ export default function OrderManagementPage() {
     orders, 
     filteredOrders, 
     filters, 
-    setFilters, 
-    actions
+    setFilters,
+    bulkSteps
   } = useOrderManagement();
 
   useEffect(() => {
@@ -111,7 +111,7 @@ export default function OrderManagementPage() {
                 <table className="table table-zebra w-full">
                     <thead><tr><th>รหัส</th><th>ลูกค้า</th><th>สินค้า</th><th>ยอดรวม</th><th>สถานะ</th><th>วันที่สั่ง</th><th>จัดการ</th></tr></thead>
                     <tbody>
-                        {paginatedOrders.map(order => <OrderRow key={order.Order_ID} order={order} statusConfig={statusTypeLabels} deleteOrder={actions.deleteOrder} />)}
+                        {paginatedOrders.map(order => <OrderRow key={order.Order_ID} order={order} statusConfig={statusTypeLabels} btnCancelOrder={bulkSteps[order.Order_ID]?.btnCancelOrder ?? false}/>)}
                     </tbody>
                 </table>
             </div>

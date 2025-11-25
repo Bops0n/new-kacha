@@ -6,9 +6,9 @@ import { FiInfo, FiXCircle } from "react-icons/fi";
 import { paymentTypeLabels, statusTypeLabels } from "@/app/utils/client";
 import { Order } from "@/types";
 
-export default function OrderCancelButton({ orderId, userId, onSuccess }: {
+export default function OrderCancelButton({ orderId, onlyIcon, onSuccess }: {
   orderId: number;
-  userId: number;
+  onlyIcon: boolean;
   onSuccess?: () => void;
 }) {
   const { showAlert } = useAlert();
@@ -95,13 +95,27 @@ export default function OrderCancelButton({ orderId, userId, onSuccess }: {
     }, [fetchOrderData]);
 
   if (!order) {
+    const btnText = loading ? 'รอซักครู่...' : 'ไม่สามารถยกเลิกได้';
     return (
-      <button
-        className="btn btn-warning"
-        disabled
-      >
-        {loading ? 'รอซักครู่...' : 'ไม่สามารถยกเลิกได้'}
-      </button>
+      <>
+        {!onlyIcon ? (
+            <button
+              className="btn btn-warning"
+              disabled
+            >
+              {btnText}
+            </button>
+          ) : (
+            <button
+              className="btn btn-sm btn-ghost btn-square text-error" 
+              disabled
+              title={btnText}
+            >
+              <FiXCircle className="w-4 h-4" />
+            </button>
+          )
+        }
+      </>
     );
   }
 
@@ -112,20 +126,46 @@ export default function OrderCancelButton({ orderId, userId, onSuccess }: {
   
   const lbCOD = paymentTypeLabels['cash_on_delivery'];
 
+  const modalId = `cancelOrderModal_${orderId}`;
+
   return (
     <>
       {/* ปุ่มหลัก */}
-      <button
-        className="btn btn-warning"
-        onClick={() => (document.getElementById("cancelOrderModal") as any).showModal()}
-      >
-        ยกเลิกคำสั่งซื้อ
-      </button>
+      {!onlyIcon ? (
+          <button
+            className="btn btn-warning"
+            onClick={(e) => {
+              e.stopPropagation();
+              (document.getElementById(modalId) as any).showModal();
+            }}
+          >
+            ยกเลิกคำสั่งซื้อ
+          </button>
+        ) : (
+          <button
+            className="btn btn-sm btn-ghost btn-square text-error"
+            onClick={(e) => {
+              e.stopPropagation();
+              (document.getElementById(modalId) as any).showModal();
+            }}
+            title="ยกเลิกคำสั่งซื้อ"
+          >
+            <FiXCircle className="w-4 h-4" />
+          </button>
+        )
+      }
 
       {/* Modal */}
-      <dialog id="cancelOrderModal" className="modal">
-        <div className="modal-box">
-          <h3 className="font-bold text-lg">ยกเลิกคำสั่งซื้อ</h3>
+      <dialog 
+        id={modalId} 
+        className="modal" 
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div 
+          className="modal-box" 
+          onClick={(e) => e.stopPropagation()}
+        >
+          <h3 className="font-bold text-lg">ยกเลิกคำสั่งซื้อ #{order.Order_ID}</h3>
           <p className="mt-2 text-sm opacity-70">กรุณาระบุเหตุผลในการยกเลิกคำสั่งซื้อ</p>
 
           <textarea
@@ -145,7 +185,7 @@ export default function OrderCancelButton({ orderId, userId, onSuccess }: {
                   <div>
                       <h2 className="font-bold text-lg">ยืนยันการยกเลิกคำสั่งซื้อ</h2>
                       <p className="text-sm text-base-content/70">
-                        โปรดระมัดระวังในยกเลิกคำสั่งซื้อ หากทำการยกเลิกไปแล้ว จะไม่สามารถดำเนินการคำสั่งซื้อได้อีก
+                        โปรดตรวจสอบให้แน่ใจ หากทำการยกเลิกแล้ว จะไม่สามารถดำเนินการคำสั่งซื้อได้อีก
                       </p>
                   </div>
               </div>
@@ -198,9 +238,10 @@ export default function OrderCancelButton({ orderId, userId, onSuccess }: {
           </div>
 
           <div className="modal-action">
-            <button className="btn w-full md:w-24" onClick={() => {
+            <button className="btn w-full md:w-24" onClick={(e) => {
+                e.stopPropagation();
                 setError(null);
-                (document.getElementById("cancelOrderModal") as any).close();
+                (document.getElementById(modalId) as any).close();
               }}>
               ปิด
             </button>

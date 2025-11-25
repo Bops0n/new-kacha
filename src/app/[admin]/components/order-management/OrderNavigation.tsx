@@ -40,7 +40,7 @@ export function OrderNavigation({
         </button>
 
         <div className="flex gap-3">
-            {btnCancelOrder && <OrderCancelButton orderId={orderId} userId={Number(session?.user.id)} onSuccess={() => fetchOrderData()}/>}
+            {btnCancelOrder && <OrderCancelButton orderId={orderId} onlyIcon={false} onSuccess={() => fetchOrderData()}/>}
 
             {/* ปุ่ม Next (ขนาดเท่ากัน) */}
             {nextHref && (

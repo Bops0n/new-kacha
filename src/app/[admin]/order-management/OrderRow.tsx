@@ -1,17 +1,18 @@
 'use client';
 
 import React from 'react';
-import { FiEye, FiTrash2 } from 'react-icons/fi';
+import { FiEye, FiXCircle } from 'react-icons/fi';
 import { Order, StatusConfig } from '@/types';
 import { formatPrice } from '@/app/utils/formatters';
+import OrderCancelButton from '../components/order-management/OrderCancelButton';
 
 interface OrderRowProps {
   order: Order;
   statusConfig: StatusConfig;
-  deleteOrder: (orderId: number) => void;
+  btnCancelOrder: boolean;
 }
 
-const OrderRow: React.FC<OrderRowProps> = ({ order, statusConfig, deleteOrder }) => {
+const OrderRow: React.FC<OrderRowProps> = ({ order, statusConfig, btnCancelOrder }) => {
   const StatusIcon = statusConfig[order.Status]?.icon;
   const statusInfo = statusConfig[order.Status];
 
@@ -60,16 +61,15 @@ const OrderRow: React.FC<OrderRowProps> = ({ order, statusConfig, deleteOrder })
           >
             <FiEye className="w-4 h-4" />
           </button>
-          <button
-            className="btn btn-sm btn-ghost btn-square text-error"
-            onClick={(e) => {
-              e.stopPropagation();
-              deleteOrder(order.Order_ID);
-            }}
-            title="ลบคำสั่งซื้อ"
-          >
-            <FiTrash2 className="w-4 h-4" />
-          </button>
+
+          {btnCancelOrder ? (
+              <OrderCancelButton orderId={order.Order_ID}  onlyIcon={true}/>
+            ) : (
+              <button className="btn btn-sm btn-ghost btn-square" title="ยกเลิกคำสั่งซื้อ" disabled>
+                <FiXCircle className="w-4 h-4" />
+              </button>
+            )
+          }
         </div>
       </td>
     </tr>
