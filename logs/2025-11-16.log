@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 [2025-11-16T10:26:09.887Z] [ERROR] Error fetching top selling: | meta: {"error":{"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"kacha-local"}}
 [2025-11-16T10:26:09.917Z] [ERROR] API Error fetching navigation data: | meta: {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"kacha-local"}
 [2025-11-16T10:26:12.170Z] [ERROR] Error fetching cart with JOIN: | meta: {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"kacha-local"}
@@ -78,3 +79,11 @@
 [2025-11-17T05:59:51.547Z] [ERROR] Error uploading transfer slip: | meta: {"length":248,"name":"error","severity":"ERROR","code":"42883","hint":"No function matches the given name and argument types. You might need to add explicit type casts.","position":"15","file":"parse_func.c","line":"636","routine":"ParseFuncOrColumn"}
 [2025-11-17T06:03:09.183Z] [ERROR] Database Error: | meta: "function SP_USER_ORDER_TRANS_SLIP_UPD(unknown, unknown, unknown) does not exist"
 [2025-11-17T06:03:09.184Z] [ERROR] Error uploading transfer slip: | meta: {"length":248,"name":"error","severity":"ERROR","code":"42883","hint":"No function matches the given name and argument types. You might need to add explicit type casts.","position":"15","file":"parse_func.c","line":"636","routine":"ParseFuncOrColumn"}
+=======
+[2025-11-16T17:55:07.238Z] [DEBUG] UID: 32 Role Value (Order_Mgr) = true
+[2025-11-16T17:55:07.754Z] [DEBUG] UID: 32 Role Value (Order_Mgr) = true
+[2025-11-16T17:55:12.599Z] [DEBUG] UID: 32 Role Value (Stock_Mgr) = true
+[2025-11-16T17:55:17.014Z] [DEBUG] UID: 32 Role Value (Stock_Mgr) = true
+[2025-11-16T17:57:41.975Z] [DEBUG] UID: 32 Role Value (Order_Mgr) = true
+[2025-11-16T17:57:44.146Z] [DEBUG] UID: 32 Role Value (Stock_Mgr) = true
+>>>>>>> 9e0ec2862237062b2e69aae4746d855824b1b7a5
