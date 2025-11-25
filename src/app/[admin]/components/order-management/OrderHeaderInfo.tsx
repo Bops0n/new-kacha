@@ -7,7 +7,7 @@ export default function OrderHeaderInfo({ order }: { order: Order }) {
     return (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Customer Info */}
-            <div className="card bg-base-100 shadow-md border border-base-300 p-6 rounded-xl">
+            <div id="customer_info" className="card bg-base-100 shadow-md border border-base-300 p-6 rounded-xl">
                 <div className="flex items-center gap-2 mb-3">
                 <FiUser className="text-primary w-5 h-5" />
                 <h2 className="font-bold text-lg">ข้อมูลลูกค้า</h2>
@@ -28,7 +28,7 @@ export default function OrderHeaderInfo({ order }: { order: Order }) {
             </div>
 
             {/* Order Info */}
-            <div className="card bg-base-100 shadow-md border border-base-300 p-6 rounded-xl">
+            <div  id="order_info" className="card bg-base-100 shadow-md border border-base-300 p-6 rounded-xl">
                 <div className="flex items-center gap-2 mb-3">
                 <FiFileText className="text-primary w-5 h-5" />
                 <h2 className="font-bold text-lg">ข้อมูลคำสั่งซื้อ</h2>

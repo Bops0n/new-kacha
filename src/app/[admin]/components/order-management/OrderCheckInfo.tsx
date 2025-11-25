@@ -86,7 +86,6 @@ export default function OrderCheckInfo({
     btnSpecial,
     fetchOrderData = () => {}
 }: OrderCheckProps) {
-    const { data: session } = useSession();
     const { showAlert } = useAlert();
 
       const [showImageModal, setShowImageModal] = useState(false);
@@ -114,7 +113,7 @@ export default function OrderCheckInfo({
     return (
         <>
             {/* Product List */}
-            <div className="card bg-base-100 shadow-md border border-base-300 p-6 rounded-xl">
+            <div id="product_list" className="card bg-base-100 shadow-md border border-base-300 p-6 rounded-xl">
                 <div className="flex items-center gap-2 mb-3">
                     <FiShoppingBag className="text-primary w-5 h-5" />
                     <h2 className="font-bold text-lg">รายการสินค้า</h2>
@@ -133,14 +132,14 @@ export default function OrderCheckInfo({
 
 
             {/* Total */}
-            <div className="card bg-base-100 shadow-md border border-base-300 p-4 rounded-xl flex justify-between items-center">
+            <div id="total_sum" className="card bg-base-100 shadow-md border border-base-300 p-4 rounded-xl flex justify-between items-center">
                 <h2 className="font-bold text-lg">ยอดรวมทั้งสิ้น</h2>
                 <p className="text-3xl font-bold text-primary">{formatPrice(order.Total_Amount)}</p>
             </div>
 
             {/* Transfer Slip */}
             {order.Payment_Type === 'bank_transfer' && (
-            <div className="card bg-base-100 shadow-md border border-base-300 p-8 rounded-2xl">
+            <div id="transfer_slip" className="card bg-base-100 shadow-md border border-base-300 p-8 rounded-2xl">
 
                 {/* Header */}
                 <div className="flex items-center gap-3 mb-7">
@@ -255,7 +254,7 @@ export default function OrderCheckInfo({
 
             {/* Refund Slip */}
             {order.Payment_Type === 'bank_transfer' && order.Is_Refunded && order.Status === 'cancelled' && (
-            <div className="card bg-base-100 shadow-md border border-base-300 p-8 rounded-2xl">
+            <div id="refund_slip" className="card bg-base-100 shadow-md border border-base-300 p-8 rounded-2xl">
 
                 {/* Header */}
                 <div className="flex items-center gap-3 mb-7">

@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { StepFlowBar } from "@/app/[admin]/components/order-management/StepFlowComponent";
 import { useAlert } from "@/app/context/AlertModalContext";
 import { OrderNavigation } from "@/app/[admin]/components/order-management/OrderNavigation";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import { Order } from "@/types";
 import OrderHeaderInfo from "@/app/[admin]/components/order-management/OrderHeaderInfo";
 import OrderShippingInfo from "@/app/[admin]/components/order-management/OrderShippingInfo";
@@ -12,6 +12,8 @@ import OrderShippingInfo from "@/app/[admin]/components/order-management/OrderSh
 export default function ShippingPage() {
     const { orderId } = useParams();
     const { showAlert } = useAlert();
+    const params = useSearchParams();
+    const goto = params.get("goto");
 
     const [order, setOrder] = useState<Order | null>(null);
     const [loading, setLoading] = useState(true);
@@ -108,6 +110,18 @@ export default function ShippingPage() {
     useEffect(() => {
         fetchOrderData();
     }, [fetchOrderData]);
+
+    useEffect(() => {
+        if (loading) return;
+        if (!goto) return;
+
+        setTimeout(() => {
+            const el = document.getElementById(goto);
+            if (el) {
+            el.scrollIntoView({ behavior: "smooth", block: "start" });
+            }
+        }, 100);
+    }, [loading, goto]);
 
     const handleFormChange = useCallback((e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value, type } = e.target;
