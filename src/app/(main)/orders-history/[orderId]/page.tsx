@@ -5,7 +5,7 @@ import { useRouter, useParams } from 'next/navigation';
 import { 
   FiClock, FiPackage, FiTruck, FiCheckCircle, FiXCircle, 
   FiArrowLeft, FiMapPin, FiShoppingCart, FiUploadCloud, FiDollarSign, 
-  FiRefreshCw, FiTrash2, FiAlertTriangle, FiInfo
+  FiRefreshCw, FiTrash2, FiAlertTriangle, FiFileText, FiInfo
 } from 'react-icons/fi';
 import { Order, OrderStatus, StatusConfig } from '@/types';
 import { useAlert } from '@/app/context/AlertModalContext';
@@ -24,6 +24,7 @@ const statusConfig: { [key in OrderStatus]: { label: string; color: string; icon
   refunding: { label: 'ยกเลิก: กำลังรอคืนเงิน', color: 'badge-accent', icon: FiRefreshCw, bgColor: 'bg-accent/10' },
   refunded: { label: 'ยกเลิก: คืนเงินสำเร็จ', color: 'badge-neutral', icon: FiCheckCircle, bgColor: 'bg-neutral/10' },
   cancelled: { label: 'ยกเลิก', color: 'badge-error', icon: FiXCircle, bgColor: 'bg-error/10' },
+  req_cancel: { label: 'ขอยกเลิก', color: 'badge-error', icon: FiFileText, bgColor: 'bg-error/10' },
 };
 
 // --- StepIndicator Component ---
@@ -35,6 +36,7 @@ const OrderStepIndicator = ({ order, statusConfig }: { order: Order, statusConfi
     : ['pending', 'preparing', 'shipped', 'delivered'];
     
   const refundPath: OrderStatus[] = ['refunding', 'refunded'];
+  
   const happyStepIndex = happyPath.indexOf(currentStatus);
 
   if (happyStepIndex > -1) {
@@ -82,7 +84,8 @@ const OrderStepIndicator = ({ order, statusConfig }: { order: Order, statusConfi
     );
   }
 
-  if (currentStatus === 'cancelled') {
+  if (currentStatus === 'cancelled' || currentStatus === 'req_cancel') {
+    const isReq = currentStatus === 'req_cancel';
     return (
       <ul className="steps steps-vertical md:steps-horizontal w-full my-6 max-w-md mx-auto text-center">
         <li className="step step-primary">
@@ -91,10 +94,12 @@ const OrderStepIndicator = ({ order, statusConfig }: { order: Order, statusConfi
             <span className="text-xs sm:text-sm mt-2 font-medium text-base-content/90">สั่งสินค้า</span>
           </div>
         </li>
-        <li className="step step-error">
+        <li className={`step ${isReq ? 'step-warning' : 'step-error'}`}>
           <div className="flex flex-col items-center">
-            <div className={`flex items-center justify-center w-10 h-10 rounded-full border-2 transition-colors duration-300 border-error bg-error text-error-content shadow-md`}> {React.createElement(statusConfig.cancelled.icon, { className: 'w-5 h-5' })}</div>
-            <span className="text-xs sm:text-sm mt-2 font-medium text-base-content/90">{statusConfig.cancelled.label}</span>
+            <div className={`flex items-center justify-center w-10 h-10 rounded-full border-2 transition-colors duration-300 ${isReq ? 'border-warning bg-warning text-warning-content' : 'border-error bg-error text-error-content'} shadow-md`}> 
+                {React.createElement(statusConfig[currentStatus].icon, { className: 'w-5 h-5' })}
+            </div>
+            <span className="text-xs sm:text-sm mt-2 font-medium text-base-content/90">{statusConfig[currentStatus].label}</span>
           </div>
         </li>
       </ul>
@@ -181,7 +186,7 @@ export default function OrderDetailsPage() {
       if (!response.ok) throw new Error(result.message);
       await fetchOrderDetails();
       setIsCancelModalOpen(false);
-      showAlert('ยกเลิกคำสั่งซื้อสำเร็จ', 'success');
+      showAlert('ดำเนินการสำเร็จ', 'success');
     } catch (err: any) {
       showAlert(err.message, 'error');
     } finally {
@@ -189,34 +194,124 @@ export default function OrderDetailsPage() {
     }
   };
 
-  // +++ Calculate Target Status Info +++
+  // +++ Logic คำนวณสถานะปลายทางสำหรับการยกเลิก +++
   const targetStatusInfo = useMemo(() => {
     if (!order) return null;
+    const hasSlip = !!order.Transaction_Slip;
+    const isChecked = order.Is_Payment_Checked;
 
-    // กรณี 1: Preparing (ยืนยันแล้ว) -> ไป Refunding
-    if (order.Status === 'preparing') {
+    if (hasSlip && isChecked) {
         return {
             key: 'refunding' as OrderStatus,
             config: statusConfig['refunding'],
             description: 'เนื่องจากมีการยืนยันชำระเงินแล้ว ระบบจะเปลี่ยนสถานะเป็น "รอคืนเงิน" เพื่อให้เจ้าหน้าที่ตรวจสอบและดำเนินการคืนเงิน'
         };
     }
-
-    // กรณี 2: มีสลิปแต่ยังไม่ตรวจ -> (Logic เดิม req_cancel) -> ไป Cancelled แต่แจ้งเตือน
-    if (order.Transaction_Slip && !order.Is_Payment_Checked) {
+    if (hasSlip && !isChecked) {
         return {
-            key: 'cancelled' as OrderStatus, // ใช้สถานะ cancelled เป็นหลักในการแสดงผล
-            config: statusConfig['cancelled'],
-            description: 'รายการนี้มีสลิปที่รอตรวจสอบ การยกเลิกจะเปลี่ยนสถานะเป็น "ขอยกเลิก (Request Cancel)" ทันที'
+            key: 'req_cancel' as OrderStatus,
+            config: statusConfig['req_cancel'],
+            description: 'เนื่องจากมีการแนบสลิปแล้วแต่ยังไม่ได้รับการตรวจสอบ ระบบจะเปลี่ยนสถานะเป็น "ขอยกเลิก" เพื่อให้เจ้าหน้าที่รับทราบ'
         };
     }
-
-    // กรณีทั่วไป: Waiting Payment, Pending -> ไป Cancelled
     return {
         key: 'cancelled' as OrderStatus,
         config: statusConfig['cancelled'],
         description: 'รายการจะถูกเปลี่ยนสถานะเป็น "ยกเลิก" ทันที'
     };
+  }, [order]);
+
+  // +++ Logic คำนวณข้อความแจ้งเตือนใน Text Box ด้านล่าง +++
+  const orderStatusNote = useMemo(() => {
+    if (!order) return null;
+    
+    const { Status, Payment_Type, Is_Payment_Checked, Transaction_Slip, Transaction_Status } = order;
+    
+    // 1. Pending + Rejected (สลิปถูกปฏิเสธ) -> ให้แจ้งเตือนและให้แนบใหม่
+    console.log(Status, Transaction_Status)
+    if (Status === 'waiting_payment' && Transaction_Status === 'rejected') {
+        return {
+            icon: FiAlertTriangle,
+            color: 'text-error',
+            bgColor: 'bg-error/10',
+            borderColor: 'border-error/20',
+            title: 'สลิปการโอนเงินถูกปฏิเสธ',
+            message: 'เจ้าหน้าที่ได้ปฏิเสธสลิปการโอนเงินของท่าน กรุณาตรวจสอบความถูกต้องและอัพโหลดหลักฐานการโอนเงินใหม่อีกครั้ง'
+        };
+    }
+
+    // 2. Pending + มีสลิป (ตรวจสอบสถานะการเช็ค)
+    if (Status === 'pending' && Payment_Type === 'bank_transfer' && Transaction_Slip) {
+        if (!Is_Payment_Checked) {
+            // ยังไม่ตรวจ
+            return {
+                icon: FiClock,
+                color: 'text-warning',
+                bgColor: 'bg-warning/10',
+                borderColor: 'border-warning/20',
+                title: 'มีการอัปโหลดสลิปแล้ว',
+                message: 'ระบบได้รับสลิปของท่านแล้ว ทีมงานกำลังตรวจสอบความถูกต้อง (รอเจ้าหน้าที่ตรวจสอบ)'
+            };
+        } else {
+            // ตรวจแล้ว
+            return {
+                icon: FiCheckCircle,
+                color: 'text-success',
+                bgColor: 'bg-success/10',
+                borderColor: 'border-success/20',
+                title: 'สลิปการโอนเงินได้รับการตรวจสอบแล้ว',
+                message: 'ข้อมูลการชำระเงินถูกต้อง ทางร้านจะดำเนินการคำสั่งซื้อให้เร็วที่สุด'
+            };
+        }
+    }
+
+    // 3. Waiting Payment (Bank Transfer)
+    if (Status === 'waiting_payment' && Payment_Type === 'bank_transfer') {
+        return {
+            icon: FiInfo,
+            color: 'text-info',
+            bgColor: 'bg-info/10',
+            borderColor: 'border-info/20',
+            title: 'รอชำระเงิน',
+            message: 'กรุณาชำระเงินและแนบหลักฐานการโอนเงิน เพื่อให้ทางร้านตรวจสอบและดำเนินการต่อ'
+        };
+    }
+
+    // 4. Refunding
+    if (Status === 'refunding') {
+        return {
+            icon: FiRefreshCw,
+            color: 'text-accent', 
+            bgColor: 'bg-accent/10',
+            borderColor: 'border-accent/20',
+            title: 'กำลังดำเนินการคืนเงิน',
+            message: 'การชำระเงินถูกตรวจสอบแล้ว เจ้าหน้าที่กำลังดำเนินการคืนเงิน'
+        };
+    }
+
+    // 5. Refunded
+    if (Status === 'refunded') {
+        return {
+            icon: FiCheckCircle,
+            color: 'text-neutral', 
+            bgColor: 'bg-neutral/10',
+            borderColor: 'border-neutral/20',
+            title: 'คืนเงินสำเร็จ',
+            message: 'คำสั่งซื้อของคุณได้รับการคืนเงินเรียบร้อยแล้ว'
+        };
+    }
+
+    // 6. กรณีอื่นๆ
+    const config = statusConfig[Status] || statusConfig.pending;
+    return {
+        icon: config.icon,
+        color: config.color.replace('badge-', 'text-'),
+        bgColor: config.bgColor,
+        borderColor: 'border-base-200',
+        title: config.label,
+        message: `สถานะปัจจุบัน: ${config.label}`
+    };
+
   }, [order]);
 
 
@@ -313,15 +408,9 @@ export default function OrderDetailsPage() {
               <div role="tabpanel" className="tab-content bg-base-100 border-base-300 rounded-b-box p-4 sm:p-6">
                 <div className="text-center">
                   {order.Transaction_Slip ? (
-                    <>
-                      <img src={order.Transaction_Slip} alt="Transfer Slip" className="max-w-sm h-auto rounded-md shadow-sm mx-auto mb-4" />
-                      <p className={`text-sm font-medium mt-2 mb-4 ${order.Is_Payment_Checked ? 'text-success' : 'text-warning'}`}>
-                        {order.Is_Payment_Checked 
-                          ? "สลิปการโอนเงินได้รับการตรวจสอบแล้ว ทางร้านจะดำเนินการคำสั่งซื้อให้เร็วที่สุด"
-                          : "สลิปยังไม่ได้ตรวจสอบ สามารถอัพโหลดสลิปใหม่ได้"
-                        }
-                      </p>
-                    </>
+                    <div className="mb-4">
+                      <img src={order.Transaction_Slip} alt="Transfer Slip" className="max-w-sm h-auto rounded-md shadow-sm mx-auto" />
+                    </div>
                   ) : (
                     <p className="text-base-content/70 mb-4 py-8">{order.Payment_Type === 'bank_transfer' ? 'ยังไม่มีสลิปการโอนเงิน' : 'ไม่จำเป็น (ชำระเงินปลายทาง)'}</p>
                   )}
@@ -338,6 +427,8 @@ export default function OrderDetailsPage() {
                     </button>
                   </div>
                 )}
+
+
               </div>
 
               {order.Refund_Slip && (
@@ -352,6 +443,18 @@ export default function OrderDetailsPage() {
                 </>
               )}
             </div>
+            {/* +++ เพิ่ม Text Box แจ้งเตือนสถานะด้านล่าง (รวมกรณี Rejected) +++ */}
+            {orderStatusNote && (
+                <div className={`alert ${orderStatusNote.bgColor} border ${orderStatusNote.borderColor} mt-6 flex items-start gap-3 text-left`}>
+                    <div className={`p-2 rounded-full bg-white/60 ${orderStatusNote.color}`}>
+                        {React.createElement(orderStatusNote.icon, { className: 'w-6 h-6' })}
+                    </div>
+                    <div>
+                        <h3 className={`font-bold text-lg ${orderStatusNote.color}`}>{orderStatusNote.title}</h3>
+                        <p className="text-sm opacity-90 mt-1">{orderStatusNote.message}</p>
+                    </div>
+                </div>
+            )}
           </div>
         )}
 
