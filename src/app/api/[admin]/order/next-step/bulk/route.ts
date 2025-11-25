@@ -10,15 +10,16 @@ export async function GET(req: NextRequest) {
     const isCheck = checkRequire(auth);
     if (isCheck) return isCheck;
 
-    const controller = req.nextUrl.searchParams.get("controller");
-    const orderId = req.nextUrl.searchParams.get("orderId");
+    const listParam = req.nextUrl.searchParams.get("list");
 
-    if (!controller || !orderId) return NextResponse.json({ error: "Required parameter missing" }, { status: 400 });
+    if (!listParam) return NextResponse.json({ error: "Required parameter missing" }, { status: 400 });
 
-    const { rows } = await poolQuery(`SELECT * FROM public."SP_ADMIN_ORDER_NEXT_STEP_GET"($1, $2);`, [controller, orderId]);
+    const list = listParam.split(",").map(orderId => Number(orderId));
+
+    const { rows } = await poolQuery(`SELECT * FROM public."SP_ADMIN_ORDER_NEXT_STEP_BULK_GET"($1);`, [list]);
     return NextResponse.json(rows);
   } catch (err) {
-    logger.error("Error fetching order next step:", { error: err });
+    logger.error("Error fetching order next step bulk:", { error: err });
     return NextResponse.json({ error: "Database error" }, { status: 500 });
   }
 }

@@ -43,7 +43,7 @@ export function RecentOrders() {
         </div>
         <button
           onClick={() => handleOpenOrderManagement()}
-          className="text-sm text-blue-600 hover:underline"
+          className="text-sm text-blue-600 hover:underline hover cursor-pointer"
         >
           ดูทั้งหมด
         </button>
@@ -99,7 +99,7 @@ export function RecentOrders() {
                   </div>
 
                   <p className="text-gray-400 italic">
-                    อัปเดตล่าสุด : {o.Update_Date || '-'}
+                    อัปเดตล่าสุด : {o.Update_At || '-'}
                   </p>
                 </div>
               </motion.div>

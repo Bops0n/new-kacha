@@ -12,6 +12,7 @@ import OrderCard from './OrderCard';
 import { useSession } from 'next-auth/react';
 import AccessDeniedPage from '@/app/components/AccessDenied';
 import { statusTypeLabels } from '@/app/utils/client';
+import { MdOutlinePendingActions } from 'react-icons/md';
 // --- END: อัปเดต statusConfig ---
 
 export default function OrderManagementPage() {
@@ -22,8 +23,8 @@ export default function OrderManagementPage() {
     orders, 
     filteredOrders, 
     filters, 
-    setFilters, 
-    actions
+    setFilters,
+    bulkSteps
   } = useOrderManagement();
 
   useEffect(() => {
@@ -55,6 +56,7 @@ export default function OrderManagementPage() {
     delivered: orders.filter(o => o.Status === 'delivered').length,
     refunding: orders.filter(o => o.Status === 'refunding').length,
     refunded: orders.filter(o => o.Status === 'refunded').length,
+    req_cancel: orders.filter(o => o.Status === 'req_cancel').length,
     cancelled: orders.filter(o => o.Status === 'cancelled').length,
   }), [orders]);
   // --- END: อัปเดต stats ---
@@ -78,7 +80,7 @@ export default function OrderManagementPage() {
         </div>
 
         {/* --- START: เพิ่ม Card สถิติใหม่ และปรับ Grid --- */}
-        <div className="grid grid-cols-3 md:grid-cols-3 lg:grid-cols-3 gap-3 mb-6">
+        <div className="grid grid-cols-2 md:grid-cols-5 lg:grid-cols-5 gap-5 mb-6">
             <div className="card bg-base-100 shadow-sm p-4 cursor-pointer hover:bg-base-200 transition-colors" onClick={() => handleStatCardClick('all')}><div className="flex items-center gap-3"><div className="p-2 bg-neutral/10 rounded-lg"><FiPackage className="w-5 h-5 text-neutral"/></div><div><p className="text-sm">ทั้งหมด</p><p className="font-bold text-xl">{stats.total}</p></div></div></div>
             <div className="card bg-base-100 shadow-sm p-4 cursor-pointer hover:bg-base-200 transition-colors" onClick={() => handleStatCardClick('waiting_payment')}><div className="flex items-center gap-3"><div className="p-2 bg-primary/10 rounded-lg"><FiClock className="w-5 h-5 text-purple-700"/></div><div><p className="text-sm">รอชำระเงิน</p><p className="font-bold text-xl">{stats.waiting_payment}</p></div></div></div>
             <div className="card bg-base-100 shadow-sm p-4 cursor-pointer hover:bg-base-200 transition-colors" onClick={() => handleStatCardClick('pending')}><div className="flex items-center gap-3"><div className="p-2 bg-warning/10 rounded-lg"><FiClock className="w-5 h-5 text-warning"/></div><div><p className="text-sm">รอดำเนินการ</p><p className="font-bold text-xl">{stats.pending}</p></div></div></div>
@@ -87,6 +89,7 @@ export default function OrderManagementPage() {
             <div className="card bg-base-100 shadow-sm p-4 cursor-pointer hover:bg-base-200 transition-colors" onClick={() => handleStatCardClick('delivered')}><div className="flex items-center gap-3"><div className="p-2 bg-success/10 rounded-lg"><FiCheckCircle className="w-5 h-5 text-success"/></div><div><p className="text-sm">เสร็จสิ้น</p><p className="font-bold text-xl">{stats.delivered}</p></div></div></div>
             <div className="card bg-base-100 shadow-sm p-4 cursor-pointer hover:bg-base-200 transition-colors" onClick={() => handleStatCardClick('refunding')}><div className="flex items-center gap-3"><div className="p-2 bg-accent/10 rounded-lg"><FiRefreshCw className="w-5 h-5 text-accent"/></div><div><p className="text-sm">รอคืนเงิน</p><p className="font-bold text-xl">{stats.refunding}</p></div></div></div>
             <div className="card bg-base-100 shadow-sm p-4 cursor-pointer hover:bg-base-200 transition-colors" onClick={() => handleStatCardClick('refunded')}><div className="flex items-center gap-3"><div className="p-2 bg-neutral/10 rounded-lg"><FiCheckCircle className="w-5 h-5 text-neutral"/></div><div><p className="text-sm">คืนเงินแล้ว</p><p className="font-bold text-xl">{stats.refunded}</p></div></div></div>
+            <div className="card bg-base-100 shadow-sm p-4 cursor-pointer hover:bg-base-200 transition-colors" onClick={() => handleStatCardClick('req_cancel')}><div className="flex items-center gap-3"><div className="p-2 bg-error/10 rounded-lg"><MdOutlinePendingActions className="w-5 h-5 text-error"/></div><div><p className="text-sm">ร้องขอยกเลิก</p><p className="font-bold text-xl">{stats.req_cancel}</p></div></div></div>
             <div className="card bg-base-100 shadow-sm p-4 cursor-pointer hover:bg-base-200 transition-colors" onClick={() => handleStatCardClick('cancelled')}><div className="flex items-center gap-3"><div className="p-2 bg-error/10 rounded-lg"><FiXCircle className="w-5 h-5 text-error"/></div><div><p className="text-sm">ยกเลิก</p><p className="font-bold text-xl">{stats.cancelled}</p></div></div></div>
         </div>
         {/* --- END: เพิ่ม Card สถิติใหม่ และปรับ Grid --- */}
@@ -111,7 +114,7 @@ export default function OrderManagementPage() {
                 <table className="table table-zebra w-full">
                     <thead><tr><th>รหัส</th><th>ลูกค้า</th><th>สินค้า</th><th>ยอดรวม</th><th>สถานะ</th><th>วันที่สั่ง</th><th>จัดการ</th></tr></thead>
                     <tbody>
-                        {paginatedOrders.map(order => <OrderRow key={order.Order_ID} order={order} statusConfig={statusTypeLabels} deleteOrder={actions.deleteOrder} />)}
+                        {paginatedOrders.map(order => <OrderRow key={order.Order_ID} order={order} statusConfig={statusTypeLabels} btnCancelOrder={bulkSteps[order.Order_ID]?.btnCancelOrder ?? false}/>)}
                     </tbody>
                 </table>
             </div>

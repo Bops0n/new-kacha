@@ -10,9 +10,9 @@ export async function POST(req: NextRequest) {
         const isCheck = checkRequire(auth);
         if (isCheck) return isCheck;
 
-        const { orderId, action, adminId } = await req.json();
+        const { orderId, action } = await req.json();
 
-        if (!orderId || !action || !adminId) {
+        if (!orderId || !action) {
             return NextResponse.json(
                 { error: "Missing required fields" },
                 { status: 400 }
@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
             );
         }
 
-        const { rows } = await poolQuery(`SELECT * FROM public."SP_ADMIN_ORDER_PAYMENT_VERIFY_UPD"($1, $2, $3)`, [orderId, action, adminId]);
+        const { rows } = await poolQuery(`SELECT * FROM public."SP_ADMIN_ORDER_PAYMENT_VERIFY_UPD"($1, $2, $3)`, [orderId, action, auth.userId]);
 
         const result = rows[0];
 

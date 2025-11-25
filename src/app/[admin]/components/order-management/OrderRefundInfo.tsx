@@ -55,7 +55,7 @@ export default function OrderRefundInfo({
                                 </div>
                             </>
                             ) : (
-                            <p className="opacity-70">ยังไม่มีหลักฐานการโอนเงิน</p>
+                            <p className="opacity-70">ยังไม่มีหลักฐานการคืนเงิน</p>
                             )}
                         </div>
                         {canUploadSlip && (

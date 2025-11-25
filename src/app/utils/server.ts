@@ -16,9 +16,6 @@ export const mapDbRowsToOrders = (dbRows: any[]): Order[] => {
                 Is_Confirmed: row.Is_Confirmed,
                 Confirmed_By: row.Confirmed_By,
                 Confirmed_At: row.Confirmed_At,
-                Is_Deleted: row.Is_Deleted,
-                Delete_By: row.Delete_By,
-                Delete_At: row.Delete_At,
                 Update_By: row.Update_By,
                 Update_At: row.Update_At,
 
@@ -53,6 +50,9 @@ export const mapDbRowsToOrders = (dbRows: any[]): Order[] => {
                 Is_Auto_Update_Status: row.Is_Auto_Update_Status,
                 Shipping_Updated_By: row.Shipping_Updated_By,
                 Shipping_Updated_At: row.Shipping_Updated_At,
+
+                Is_Received: row.Is_Received,
+                Received_At: row.Received_At,
 
                 Address_1: row.Address_1,
                 Address_2: row.Address_2,

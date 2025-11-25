@@ -12,7 +12,7 @@ export interface RecentOrder {
   Order_Date: string;
   Total_Amount: number;
   Status: string;
-  Update_Date: string;
+  Update_At: string;
 }
 
 export interface SalesData {

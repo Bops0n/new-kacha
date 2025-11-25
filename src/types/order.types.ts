@@ -1,5 +1,5 @@
 // Common types for Order Status
-export type OrderStatus = 'waiting_payment' | 'pending' | 'preparing' | 'shipped' | 'delivered' | 'refunding' | 'refunded' | 'cancelled';
+export type OrderStatus = 'waiting_payment' | 'pending' | 'preparing' | 'shipped' | 'delivered' | 'req_cancel' | 'refunding' | 'refunded' | 'cancelled';
 export type TransferSlipStatusFilter = 'all' | 'has_slip' | 'no_slip';
 export type Payment_Type = 'bank_transfer' | 'cash_on_delivery'
 export type TransactionStatus = 'pending' | 'confirmed' | 'rejected';
@@ -38,9 +38,6 @@ export type Order = {
   Is_Confirmed: boolean;
   Confirmed_By: string;
   Confirmed_At: string;
-  Is_Deleted: boolean;
-  Delete_By: string;
-  Delete_At: string;
   Update_By: string;
   Update_At: string;
 
@@ -79,6 +76,10 @@ export type Order = {
   Is_Auto_Update_Status: boolean;
   Shipping_Updated_By: string;
   Shipping_Updated_At: string;
+
+  // Order Receive
+  Is_Received: boolean;
+  Received_At: string;
 
   // Address
   Address_1: string;

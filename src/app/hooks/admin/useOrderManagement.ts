@@ -9,6 +9,7 @@ export function useOrderManagement() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true); // Loading สำหรับการโหลดครั้งแรกเท่านั้น
   const [error, setError] = useState<string | null>(null);
+  const [bulkSteps, setBulkSteps] = useState<Record<number, any>>({});
 
   const [filters, setFilters] = useState({
     searchTerm: '',
@@ -16,11 +17,8 @@ export function useOrderManagement() {
     transferSlipFilter: 'all' as TransferSlipStatusFilter,
   });
 
-  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
-
-  // ✅ ปรับปรุง fetchOrders ให้รองรับการโหลดแบบ Background (ไม่แสดง Spinner เต็มจอ)
-  const fetchOrders = useCallback(async (isBackground = false) => {
-    if (!isBackground) setLoading(true); // โหลดครั้งแรกให้หมุน
+  const fetchOrders = useCallback(async () => {
+    setLoading(true);
     setError(null);
     try {
       const response = await fetch('/api/admin/order');
@@ -30,39 +28,36 @@ export function useOrderManagement() {
       }
       const data = await response.json();
       setOrders(data.orders || []);
-      
-      // ถ้ามีการเปิด Modal ค้างไว้ ให้ update ข้อมูลใน Modal ด้วย
-      if(selectedOrder){
-        setSelectedOrder(prev => {
-             if(!prev) return null;
-             return data.orders.find((o : Order) => o.Order_ID === prev.Order_ID) || prev;
-        })
-      }
     } catch (err: any) {
       setError(err.message);
       showAlert(err.message, 'error');
     } finally {
-      if (!isBackground) setLoading(false);
+      // if (!isBackground) setLoading(false);
     }
-  }, [showAlert, selectedOrder]); // เพิ่ม dependency selectedOrder เพื่อให้รู้ว่าต้องอัปเดตตัวไหน
+  }, [showAlert,]); // เพิ่ม dependency selectedOrder เพื่อให้รู้ว่าต้องอัปเดตตัวไหน
+
+  async function loadBulk() {
+    if (orders.length === 0) return;
+
+    const list = orders.map(o => o.Order_ID).join(",");
+    const res = await fetch(`/api/admin/order/next-step/bulk?list=${list}`);
+    const data = await res.json();
+
+    const map: Record<number, any> = {};
+    data.forEach((item: any) => {
+      map[item.Order_ID] = item;
+    });
+
+    setBulkSteps(map);
+  }
 
   useEffect(() => {
     fetchOrders();
   }, []); // เรียกแค่ครั้งแรก
 
-  const deleteOrder = (orderId: number) => {
-    showAlert(`ยืนยันที่จะลบคำสั่งซื้อ #${orderId} หรือไม่?`, 'warning', 'ยืนยันการลบ', async () => {
-      try {
-        const response = await fetch(`/api/admin/order?id=${orderId}`, { method: 'DELETE' });
-        const result = await response.json();
-        if (!response.ok) throw new Error(result.message);
-        showAlert('ลบคำสั่งซื้อสำเร็จ!', 'success');
-        await fetchOrders();
-      } catch (err: any) {
-        showAlert(err.message, 'error');
-      }
-    });
-  };
+  useEffect(() => {
+    loadBulk();
+  }, [orders]);
 
   const filteredOrders = useMemo(() => {
     return orders.filter(order => {
@@ -90,6 +85,6 @@ export function useOrderManagement() {
     filteredOrders,
     filters,
     setFilters,
-    actions: { deleteOrder }
+    bulkSteps
   };
 }

@@ -16,7 +16,7 @@ export default function DashboardPage() {
   const [stats, setStats] = useState([
     { title: "ยอดขายวันนี้", value: "฿0", icon: <FiBarChart2 />, color: "bg-blue-500" },
     { title: "ยอดขายเดือนนี้", value: "0", icon: <FiBarChart2 />, color: "bg-orange-500" },
-    { title: "คำสั่งซื้อใหม่", value: "0", icon: <FiShoppingCart />, color: "bg-purple-500" },
+    { title: "คำสั่งซื้อใหม่ (วันนี้)", value: "0", icon: <FiShoppingCart />, color: "bg-purple-500" },
     { title: "ลูกค้าทั้งหมด", value: "0", icon: <FiUsers />, color: "bg-emerald-500" },
   ]);
 
@@ -29,7 +29,7 @@ export default function DashboardPage() {
         setStats([
           { title: "ยอดขายวันนี้", value: `฿${Sales_Today.toLocaleString()}`, icon: <FiBarChart2 />, color: "bg-blue-500" },
           { title: "ยอดขายเดือนนี้", value: `฿${Sales_Monthly.toLocaleString()}`, icon: <FiBarChart2 />, color: "bg-orange-500" },
-          { title: "คำสั่งซื้อใหม่", value: New_Orders.toString(), icon: <FiShoppingCart />, color: "bg-purple-500" },
+          { title: "คำสั่งซื้อใหม่ (วันนี้)", value: New_Orders.toString(), icon: <FiShoppingCart />, color: "bg-purple-500" },
           { title: "ลูกค้าทั้งหมด", value: Total_Customers.toString(), icon: <FiUsers />, color: "bg-emerald-500" },
         ]);
       } catch {

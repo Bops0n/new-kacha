@@ -2,6 +2,7 @@ import { PaymentConfig, StatusConfig } from "@/types";
 import { NextResponse } from "next/server";
 import { BsBank, BsCash } from "react-icons/bs";
 import { FiCheckCircle, FiClock, FiPackage, FiRefreshCw, FiTruck, FiXCircle } from "react-icons/fi";
+import { MdOutlinePendingActions } from "react-icons/md";
 
 export const checkRequire = (auth : any) => {
     if (!auth.authenticated) {
@@ -21,6 +22,7 @@ export const statusTypeLabels: StatusConfig = {
     delivered: { label: "เสร็จสิ้น", color: "text-green-700", icon: FiCheckCircle, bgColor: "bg-green-50" },
     refunding: { label: "รอคืนเงิน", color: "text-purple-700", icon: FiRefreshCw, bgColor: "bg-purple-50" },
     refunded: { label: "คืนเงินแล้ว", color: "text-gray-700", icon: FiCheckCircle, bgColor: "bg-gray-100" },
+    req_cancel: { label: "ร้องขอยกเลิก", color: "text-red-700", icon: MdOutlinePendingActions, bgColor: "bg-red-50" },
     cancelled: { label: "ยกเลิก", color: "text-red-700", icon: FiXCircle, bgColor: "bg-red-50" },
 };
 

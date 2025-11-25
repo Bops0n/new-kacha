@@ -99,8 +99,7 @@ export default function OrderCheckInfo({
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
                 orderId: order.Order_ID,
-                action: action,
-                adminId: session?.user.id
+                action: action
             })
             });
 
