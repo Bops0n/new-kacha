@@ -17,7 +17,7 @@ export default function OrderShippingInfo({
     return (
         <>
             {/* Form */}
-            <div className="card bg-base-100 shadow-md border border-base-300 p-6 rounded-xl">
+            <div id="shipping" className="card bg-base-100 shadow-md border border-base-300 p-6 rounded-xl">
                 <div className="flex items-center gap-2 mb-3">
                     <MdOutlineLocalShipping className="text-primary w-5 h-5" />
                     <h2 className="font-bold text-lg">ข้อมูลการจัดส่ง</h2>

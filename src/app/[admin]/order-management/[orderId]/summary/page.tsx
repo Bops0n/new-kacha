@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { StepFlowBar } from "@/app/[admin]/components/order-management/StepFlowComponent";
 import { OrderNavigation } from "@/app/[admin]/components/order-management/OrderNavigation";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import { Order, SimpleProductDetail } from "@/types";
 import OrderHeaderInfo from "@/app/[admin]/components/order-management/OrderHeaderInfo";
 import OrderCheckInfo from "@/app/[admin]/components/order-management/OrderCheckInfo";
@@ -11,6 +11,8 @@ import OrderShippingInfo from "@/app/[admin]/components/order-management/OrderSh
 
 export default function SummaryPage() {
     const { orderId } = useParams();
+    const params = useSearchParams();
+    const goto = params.get("goto");
 
     const [order, setOrder] = useState<Order | null>(null);
     const [liveDetails, setLiveDetails] = useState<Map<number, SimpleProductDetail>>(new Map());
@@ -112,6 +114,18 @@ export default function SummaryPage() {
     useEffect(() => {
         fetchOrderData();
     }, [fetchOrderData]);
+
+    useEffect(() => {
+        if (loading) return;
+        if (!goto) return;
+
+        setTimeout(() => {
+            const el = document.getElementById(goto);
+            if (el) {
+            el.scrollIntoView({ behavior: "smooth", block: "start" });
+            }
+        }, 100);
+    }, [loading, goto]);
 
     if (loading) {
         return (

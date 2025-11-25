@@ -2,7 +2,7 @@
 
 import React, { useCallback, useEffect, useState } from 'react';
 import { Order } from '@/types';
-import { useParams } from 'next/navigation';
+import { useParams, useSearchParams } from 'next/navigation';
 import { StepFlowBar } from '@/app/[admin]/components/order-management/StepFlowComponent';
 import { useAlert } from '@/app/context/AlertModalContext';
 import { OrderNavigation } from '@/app/[admin]/components/order-management/OrderNavigation';
@@ -16,6 +16,8 @@ import OrderRefundInfo from '@/app/[admin]/components/order-management/OrderRefu
 export default function RefundedPage() {
   const { orderId } = useParams();
   const { showAlert } = useAlert();
+  const params = useSearchParams();
+  const goto = params.get("goto");
 
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
@@ -143,6 +145,18 @@ export default function RefundedPage() {
   useEffect(() => {
     fetchOrderData();
   }, [fetchOrderData]);
+
+  useEffect(() => {
+    if (loading) return;
+    if (!goto) return;
+
+    setTimeout(() => {
+      const el = document.getElementById(goto);
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    }, 100);
+  }, [loading, goto]);
 
   if (loading) {
     return (

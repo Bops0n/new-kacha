@@ -26,7 +26,7 @@ export default function OrderRefundInfo({
         <>
             {/* Slip + Payment Datetime */}
             {order.Payment_Type === 'bank_transfer' && (
-            <div className="card bg-base-100 shadow-md border border-base-300 p-8 rounded-2xl">
+            <div id="refunded" className="card bg-base-100 shadow-md border border-base-300 p-8 rounded-2xl">
 
                 {/* Header */}
                 <div className="flex items-center gap-3 mb-7">

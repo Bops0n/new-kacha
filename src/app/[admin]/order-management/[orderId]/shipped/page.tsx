@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { StepFlowBar } from "@/app/[admin]/components/order-management/StepFlowComponent";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import { Order } from "@/types";
 import { OrderNavigation } from "@/app/[admin]/components/order-management/OrderNavigation";
 import { BiCheck, BiX } from "react-icons/bi";
@@ -13,7 +13,9 @@ import { MdOutlineLocalShipping } from "react-icons/md";
 
 export default function ShippedPage() {
     const { orderId } = useParams();
-     const { showAlert } = useAlert();
+    const { showAlert } = useAlert();
+    const params = useSearchParams();
+    const goto = params.get("goto");
 
     const [order, setOrder] = useState<Order | null>(null);
     const [loading, setLoading] = useState(true);
@@ -117,6 +119,17 @@ export default function ShippedPage() {
         onValidate();
     }, [order, onValidate]);
 
+    useEffect(() => {
+        if (loading) return;
+        if (!goto) return;
+
+        setTimeout(() => {
+            const el = document.getElementById(goto);
+            if (el) {
+            el.scrollIntoView({ behavior: "smooth", block: "start" });
+            }
+        }, 100);
+    }, [loading, goto]);
 
     if (loading || !order) {
         return (
