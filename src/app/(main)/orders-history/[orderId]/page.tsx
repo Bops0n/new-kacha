@@ -1,11 +1,11 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { 
   FiClock, FiPackage, FiTruck, FiCheckCircle, FiXCircle, 
   FiArrowLeft, FiMapPin, FiShoppingCart, FiUploadCloud, FiDollarSign, 
-  FiRefreshCw, FiTrash2
+  FiRefreshCw, FiTrash2, FiAlertTriangle, FiInfo
 } from 'react-icons/fi';
 import { Order, OrderStatus, StatusConfig } from '@/types';
 import { useAlert } from '@/app/context/AlertModalContext';
@@ -18,7 +18,7 @@ import AccessDeniedPage from '@/app/components/AccessDenied';
 const statusConfig: { [key in OrderStatus]: { label: string; color: string; icon: React.ElementType; bgColor: string; } } = {
   waiting_payment: { label: 'รอชำระเงิน', color: 'badge-warning', icon: FiClock, bgColor: 'bg-warning/10' },
   pending: { label: 'รอดำเนินการ', color: 'badge-warning', icon: FiClock, bgColor: 'bg-warning/10' },
-  processing: { label: 'กำลังเตรียม', color: 'badge-info', icon: FiPackage, bgColor: 'bg-info/10' },
+  preparing: { label: 'กำลังเตรียม', color: 'badge-info', icon: FiPackage, bgColor: 'bg-info/10' },
   shipped: { label: 'จัดส่งแล้ว', color: 'badge-primary', icon: FiTruck, bgColor: 'bg-primary/10' },
   delivered: { label: 'ส่งเรียบร้อย', color: 'badge-success', icon: FiCheckCircle, bgColor: 'bg-success/10' },
   refunding: { label: 'ยกเลิก: กำลังรอคืนเงิน', color: 'badge-accent', icon: FiRefreshCw, bgColor: 'bg-accent/10' },
@@ -26,12 +26,14 @@ const statusConfig: { [key in OrderStatus]: { label: string; color: string; icon
   cancelled: { label: 'ยกเลิก', color: 'badge-error', icon: FiXCircle, bgColor: 'bg-error/10' },
 };
 
-// --- StepIndicator (ดีไซน์วงกลม + เส้น) ---
+// --- StepIndicator Component ---
 const OrderStepIndicator = ({ order, statusConfig }: { order: Order, statusConfig: StatusConfig }) => {
   const currentStatus = order.Status;
+  
   const happyPath: OrderStatus[] = (order.Payment_Type === 'bank_transfer')
-    ? ['waiting_payment', 'pending', 'processing', 'shipped', 'delivered']
-    : ['pending', 'processing', 'shipped', 'delivered'];
+    ? ['waiting_payment', 'pending', 'preparing', 'shipped', 'delivered']
+    : ['pending', 'preparing', 'shipped', 'delivered'];
+    
   const refundPath: OrderStatus[] = ['refunding', 'refunded'];
   const happyStepIndex = happyPath.indexOf(currentStatus);
 
@@ -58,7 +60,6 @@ const OrderStepIndicator = ({ order, statusConfig }: { order: Order, statusConfi
     );
   }
 
-  // Refund Path
   const refundStepIndex = refundPath.indexOf(currentStatus);
   if (refundStepIndex > -1) {
     const refundComplete = refundStepIndex >= 0;
@@ -81,7 +82,6 @@ const OrderStepIndicator = ({ order, statusConfig }: { order: Order, statusConfi
     );
   }
 
-  // Cancelled Path
   if (currentStatus === 'cancelled') {
     return (
       <ul className="steps steps-vertical md:steps-horizontal w-full my-6 max-w-md mx-auto text-center">
@@ -103,9 +103,9 @@ const OrderStepIndicator = ({ order, statusConfig }: { order: Order, statusConfi
 
   return (
     <div className="text-center p-4">
-      <span className={`badge ${statusInfo?.color.replace('bg-', 'badge-')} badge-lg gap-2`}>
-        {statusInfo?.icon && React.createElement(statusInfo.icon)}
-        {statusInfo?.label || currentStatus}
+      <span className={`badge ${statusConfig[currentStatus]?.color.replace('bg-', 'badge-') || 'badge-ghost'} badge-lg gap-2`}>
+        {statusConfig[currentStatus]?.icon && React.createElement(statusConfig[currentStatus].icon)}
+        {statusConfig[currentStatus]?.label || currentStatus}
       </span>
     </div>
   );
@@ -124,10 +124,9 @@ export default function OrderDetailsPage() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState<boolean>(false);
 
-  // +++ เพิ่ม State สำหรับการยกเลิก +++
+  const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
   const [isCancelling, setIsCancelling] = useState(false);
   const [cancelReason, setCancelReason] = useState('');
-  const [showCancelSection, setShowCancelSection] = useState(false);
 
   const orderId = typeof params.orderId === 'string' ? parseInt(params.orderId, 10) : NaN;
 
@@ -169,40 +168,69 @@ export default function OrderDetailsPage() {
     } catch (err: any) { showAlert(err.message, 'error'); } finally { setIsUploading(false); }
   };
 
-  // +++ ฟังก์ชันยกเลิกคำสั่งซื้อ +++
   const handleCancelOrder = async () => {
-    if (!cancelReason.trim()) { showAlert('กรุณาระบุเหตุผลในการยกเลิก', 'warning'); return; }
-    
-    showAlert(`ยืนยันการยกเลิกออเดอร์ #${orderId} หรือไม่?`, 'warning', 'ยืนยันการยกเลิก', async () => {
-      setIsCancelling(true);
-      try {
-        const response = await fetch(`/api/main/orders/${orderId}`, {
-          method: 'DELETE',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ reason: cancelReason }),
-        });
-        const result = await response.json();
-        if (!response.ok) throw new Error(result.message);
-        
-        await fetchOrderDetails(); // โหลดข้อมูลใหม่เพื่ออัปเดตสถานะ
-        setShowCancelSection(false); // ปิดส่วนยกเลิก
-        showAlert('ยกเลิกคำสั่งซื้อสำเร็จ', 'success');
-      } catch (err: any) {
-        showAlert(err.message, 'error');
-      } finally {
-        setIsCancelling(false);
-      }
-    });
+    if (!cancelReason.trim()) { return; }
+    setIsCancelling(true);
+    try {
+      const response = await fetch(`/api/main/orders/${orderId}`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ reason: cancelReason }),
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.message);
+      await fetchOrderDetails();
+      setIsCancelModalOpen(false);
+      showAlert('ยกเลิกคำสั่งซื้อสำเร็จ', 'success');
+    } catch (err: any) {
+      showAlert(err.message, 'error');
+    } finally {
+      setIsCancelling(false);
+    }
   };
+
+  // +++ Calculate Target Status Info +++
+  const targetStatusInfo = useMemo(() => {
+    if (!order) return null;
+
+    // กรณี 1: Preparing (ยืนยันแล้ว) -> ไป Refunding
+    if (order.Status === 'preparing') {
+        return {
+            key: 'refunding' as OrderStatus,
+            config: statusConfig['refunding'],
+            description: 'เนื่องจากมีการยืนยันชำระเงินแล้ว ระบบจะเปลี่ยนสถานะเป็น "รอคืนเงิน" เพื่อให้เจ้าหน้าที่ตรวจสอบและดำเนินการคืนเงิน'
+        };
+    }
+
+    // กรณี 2: มีสลิปแต่ยังไม่ตรวจ -> (Logic เดิม req_cancel) -> ไป Cancelled แต่แจ้งเตือน
+    if (order.Transaction_Slip && !order.Is_Payment_Checked) {
+        return {
+            key: 'cancelled' as OrderStatus, // ใช้สถานะ cancelled เป็นหลักในการแสดงผล
+            config: statusConfig['cancelled'],
+            description: 'รายการนี้มีสลิปที่รอตรวจสอบ การยกเลิกจะเปลี่ยนสถานะเป็น "ขอยกเลิก (Request Cancel)" ทันที'
+        };
+    }
+
+    // กรณีทั่วไป: Waiting Payment, Pending -> ไป Cancelled
+    return {
+        key: 'cancelled' as OrderStatus,
+        config: statusConfig['cancelled'],
+        description: 'รายการจะถูกเปลี่ยนสถานะเป็น "ยกเลิก" ทันที'
+    };
+  }, [order]);
+
 
   if (loading) return <LoadingSpinner />;
   if (error) return <div className="container mx-auto p-4 text-center text-error"><h1 className="text-2xl font-bold mb-4">เกิดข้อผิดพลาด</h1><p>{error}</p><button onClick={() => router.back()} className="btn btn-primary mt-4">กลับ</button></div>;
   if (!order) return <div className="text-center p-8">ไม่พบข้อมูลคำสั่งซื้อ</div>;
   if (order.User_ID !== Number(session?.user.id)) return <AccessDeniedPage url="/"/>
 
-  const canUploadSlip = order.Payment_Type === 'bank_transfer' && order.Status === 'waiting_payment';
-  // +++ เช็คว่ายกเลิกได้หรือไม่ (เฉพาะสถานะเหล่านี้) +++
-  const canCancel = ['waiting_payment', 'pending', 'processing'].includes(order.Status);
+  const canUploadSlip = order.Payment_Type === 'bank_transfer' && (
+    order.Status === 'waiting_payment' || 
+    (order.Status === 'pending' && order.Is_Payment_Checked === false)
+  );
+
+  const canCancel = ['waiting_payment', 'pending', 'preparing'].includes(order.Status);
   const subtotalBeforeDiscount = order.Products.reduce((sum, product) => sum + (product.Product_Sale_Price * product.Quantity), 0);
 
   return (
@@ -231,9 +259,9 @@ export default function OrderDetailsPage() {
                 <h2 className="card-title text-xl mb-4"><FiTruck className="mr-2"/>ข้อมูลการจัดส่ง</h2>
                 <div className="space-y-1 text-base-content/90">
                     <p><strong>ประเภทชำระเงิน:</strong> {order.Payment_Type}</p>
-                    <p><strong>บริษัทขนส่ง:</strong> {order.Shipping_Carrier || '-'}</p>
-                    <p><strong>Tracking ID:</strong> {order.Tracking_ID || '-'}</p>
-                    <p><strong>วันที่จัดส่ง (คาดการณ์):</strong> {order.DeliveryDate ? order.DeliveryDate : '-'}</p>
+                    <p><strong>บริษัทขนส่ง:</strong> {order.Shipping_Method || '-'}</p>
+                    <p><strong>Tracking ID:</strong> {order.Tracking_Number || '-'}</p>
+                    <p><strong>วันที่จัดส่ง (คาดการณ์):</strong> {order.Shipping_Date ? order.Shipping_Date : '-'}</p>
                 </div>
             </div>
         </div>
@@ -278,23 +306,32 @@ export default function OrderDetailsPage() {
         </div>
         
         {/* Slip Upload & View Section */}
-        {(order.Payment_Type === 'bank_transfer' || (order as any).Return_Slip_Image_URL) && (
+        {(order.Payment_Type === 'bank_transfer' || order.Transaction_Slip) && (
           <div className="card bg-base-200 p-4 sm:p-6 mt-6">
             <div role="tablist" className="tabs tabs-bordered">
-              <input type="radio" name="payment_tabs" role="tab" className="tab" aria-label="หลักฐานการโอนเงิน" defaultChecked={!(order as any).Return_Slip_Image_URL} />
+              <input type="radio" name="payment_tabs" role="tab" className="tab" aria-label="หลักฐานการโอนเงิน" defaultChecked={!order.Refund_Slip} />
               <div role="tabpanel" className="tab-content bg-base-100 border-base-300 rounded-b-box p-4 sm:p-6">
                 <div className="text-center">
-                  {order.Transfer_Slip_Image_URL ? (
-                    <img src={order.Transfer_Slip_Image_URL} alt="Transfer Slip" className="max-w-sm h-auto rounded-md shadow-sm mx-auto mb-4" />
+                  {order.Transaction_Slip ? (
+                    <>
+                      <img src={order.Transaction_Slip} alt="Transfer Slip" className="max-w-sm h-auto rounded-md shadow-sm mx-auto mb-4" />
+                      <p className={`text-sm font-medium mt-2 mb-4 ${order.Is_Payment_Checked ? 'text-success' : 'text-warning'}`}>
+                        {order.Is_Payment_Checked 
+                          ? "สลิปการโอนเงินได้รับการตรวจสอบแล้ว ทางร้านจะดำเนินการคำสั่งซื้อให้เร็วที่สุด"
+                          : "สลิปยังไม่ได้ตรวจสอบ สามารถอัพโหลดสลิปใหม่ได้"
+                        }
+                      </p>
+                    </>
                   ) : (
                     <p className="text-base-content/70 mb-4 py-8">{order.Payment_Type === 'bank_transfer' ? 'ยังไม่มีสลิปการโอนเงิน' : 'ไม่จำเป็น (ชำระเงินปลายทาง)'}</p>
                   )}
                 </div>
+                
                 {canUploadSlip && (
                   <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-4 border-t border-base-300 pt-6">
                     <label className='flex flex-col items-center justify-center w-full max-w-xs'>
                       <input type="file" className="file-input file-input-bordered file-input-primary w-full" onChange={handleFileChange} accept="image/png, image/jpeg, image/jpg" />
-                      <span className="text-xs text-base-content/60 mt-2">{'สามารถอัพโหลดไฟล์ขนาดไม่เกิน 5MB เท่านั้น'}</span>
+                      <span className="text-xs text-base-content/60 mt-2">{'สามารถอัพโหลดไฟล์ขนาดไม่เกิน 5MB เท่านั้น (รองรับ .jpg, .png)'}</span>
                     </label>
                     <button onClick={handleUploadSlip} disabled={!selectedFile || isUploading} className="btn btn-primary mt-2 sm:mt-0 sm:self-start">
                         {isUploading && <span className="loading loading-spinner"></span>}<FiUploadCloud className="mr-2"/>{isUploading ? 'กำลังอัปโหลด...' : 'ยืนยันสลิป'}
@@ -303,12 +340,12 @@ export default function OrderDetailsPage() {
                 )}
               </div>
 
-              {(order as any).Return_Slip_Image_URL && (
+              {order.Refund_Slip && (
                 <>
-                  <input type="radio" name="payment_tabs" role="tab" className="tab" aria-label="หลักฐานการคืนเงิน" defaultChecked={!!(order as any).Return_Slip_Image_URL} />
+                  <input type="radio" name="payment_tabs" role="tab" className="tab" aria-label="หลักฐานการคืนเงิน" defaultChecked={!!order.Refund_Slip} />
                   <div role="tabpanel" className="tab-content bg-base-100 border-base-300 rounded-b-box p-6">
                     <div className="text-center">
-                      <img src={(order as any).Return_Slip_Image_URL} alt="Refund Slip" className="max-w-sm h-auto rounded-md shadow-sm mx-auto mb-4" />
+                      <img src={order.Refund_Slip} alt="Refund Slip" className="max-w-sm h-auto rounded-md shadow-sm mx-auto mb-4" />
                       <p className="text-base-content/70 text-sm">ผู้ดูแลระบบได้ทำการคืนเงินให้ท่านแล้ว</p>
                     </div>
                   </div>
@@ -318,42 +355,89 @@ export default function OrderDetailsPage() {
           </div>
         )}
 
-        {/* +++ 4. ส่วนยกเลิกคำสั่งซื้อ (เพิ่มใหม่) +++ */}
+        {/* ปุ่มขอยกเลิกคำสั่งซื้อ */}
         {canCancel && (
-            <div className="mt-8 pt-6 border-t border-base-300">
-                {!showCancelSection ? (
-                     <div className="flex justify-center sm:justify-end">
-                        <button onClick={() => setShowCancelSection(true)} className="btn btn-outline btn-error btn-sm">
-                            <FiTrash2 className="mr-2"/> ขอยกเลิกคำสั่งซื้อ
-                        </button>
-                     </div>
-                ) : (
-                    <div className="bg-error/10 border border-error rounded-lg p-4 animate-fadeIn">
-                        <div className="flex justify-between items-start mb-3">
-                            <h3 className="text-error font-bold flex items-center gap-2"><FiTrash2/> ยกเลิกคำสั่งซื้อ</h3>
-                            <button onClick={() => setShowCancelSection(false)} className="btn btn-sm btn-circle btn-ghost text-error"><FiXCircle/></button>
-                        </div>
-                        <div className="form-control w-full">
-                            <label className="label"><span className="label-text text-error-content/80">ระบุเหตุผลที่ต้องการยกเลิก (จำเป็น):</span></label>
-                            <input 
-                                type="text" 
-                                className="input input-bordered input-error w-full bg-white" 
-                                placeholder="เช่น เปลี่ยนใจ, สั่งผิด, ต้องการเปลี่ยนที่อยู่..." 
-                                value={cancelReason}
-                                onChange={(e) => setCancelReason(e.target.value)}
-                            />
-                        </div>
-                        <div className="flex justify-end mt-4 gap-2">
-                            <button onClick={() => setShowCancelSection(false)} className="btn btn-ghost btn-sm text-error-content/70" disabled={isCancelling}>ปิด</button>
-                            <button onClick={handleCancelOrder} className="btn btn-error btn-sm text-white" disabled={isCancelling || !cancelReason.trim()}>
-                                {isCancelling ? <span className="loading loading-spinner loading-xs"></span> : 'ยืนยันการยกเลิก'}
-                            </button>
-                        </div>
-                    </div>
-                )}
+            <div className="mt-8 pt-6 border-t border-base-300 flex justify-center sm:justify-end">
+                <button 
+                    onClick={() => {
+                        setCancelReason('');
+                        setIsCancelModalOpen(true);
+                    }} 
+                    className="btn btn-outline btn-error"
+                >
+                    <FiTrash2 className="mr-2"/> ขอยกเลิกคำสั่งซื้อ
+                </button>
             </div>
         )}
-        {/* --- จบส่วนยกเลิก --- */}
+
+        {/* +++ Modal ยกเลิกคำสั่งซื้อ (UI ใหม่) +++ */}
+        <dialog className={`modal ${isCancelModalOpen ? 'modal-open' : ''}`}>
+            <div className="modal-box">
+                <button 
+                    className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2"
+                    onClick={() => !isCancelling && setIsCancelModalOpen(false)}
+                >✕</button>
+                
+                <h3 className="font-bold text-lg text-error flex items-center gap-2">
+                    <FiAlertTriangle className="w-6 h-6" /> ยืนยันการยกเลิกคำสั่งซื้อ
+                </h3>
+                
+                <div className="py-4 space-y-3">
+                    <p className="font-medium">Order ID: #{orderId}</p>
+                    <p className="text-sm text-base-content/70">คุณต้องการยกเลิกคำสั่งซื้อนี้ใช่หรือไม่?</p>
+                    
+                    <div className="form-control w-full mt-2">
+                        <label className="label">
+                            <span className="label-text font-semibold text-error">ระบุเหตุผล (จำเป็น):</span>
+                        </label>
+                        <textarea 
+                            className="textarea textarea-bordered textarea-error h-24 w-full bg-base-50" 
+                            placeholder="เช่น เปลี่ยนใจ, สั่งผิด, ต้องการเปลี่ยนที่อยู่..."
+                            value={cancelReason}
+                            onChange={(e) => setCancelReason(e.target.value)}
+                            disabled={isCancelling}
+                        ></textarea>
+                    </div>
+
+                    {/* +++ กล่องแจ้งเตือนสถานะที่จะเปลี่ยนไป +++ */}
+                    {targetStatusInfo && (
+                        <div className={`alert ${targetStatusInfo.config.bgColor} border ${targetStatusInfo.config.color.replace('text-', 'border-')} mt-4 flex flex-col sm:flex-row items-start gap-3`}>
+                            <div className={`p-2 rounded-full bg-white/50 ${targetStatusInfo.config.color}`}>
+                                {React.createElement(targetStatusInfo.config.icon, { className: "w-5 h-5" })}
+                            </div>
+                            <div className="flex-1">
+                                <h3 className={`font-bold text-sm ${targetStatusInfo.config.color}`}>ผลการดำเนินการ</h3>
+                                <p className="text-xs opacity-80 mt-1">{targetStatusInfo.description}</p>
+                                <div className={`badge ${targetStatusInfo.config.color.replace('text-', 'badge-')} gap-1 mt-2`}>
+                                    สถานะใหม่: {targetStatusInfo.config.label}
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+
+                <div className="modal-action">
+                    <button 
+                        className="btn btn-ghost" 
+                        onClick={() => setIsCancelModalOpen(false)}
+                        disabled={isCancelling}
+                    >
+                        ปิด
+                    </button>
+                    <button 
+                        className="btn btn-error text-white" 
+                        onClick={handleCancelOrder}
+                        disabled={isCancelling || !cancelReason.trim()}
+                    >
+                        {isCancelling ? <span className="loading loading-spinner"></span> : 'ยืนยันการยกเลิก'}
+                    </button>
+                </div>
+            </div>
+            {/* Backdrop */}
+            <form method="dialog" className="modal-backdrop">
+                <button onClick={() => !isCancelling && setIsCancelModalOpen(false)}>close</button>
+            </form>
+        </dialog>
 
       </div>
     </div>

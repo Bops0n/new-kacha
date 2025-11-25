@@ -280,3 +280,9 @@
 [2025-11-25T19:51:55.652Z] [INFO] userid32
 [2025-11-25T19:51:58.853Z] [INFO] userid32
 [2025-11-25T19:52:01.102Z] [INFO] userid32
+[2025-11-25T20:02:58.473Z] [INFO] userid32
+[2025-11-25T20:02:58.923Z] [INFO] userid32
+[2025-11-25T20:41:18.639Z] [DEBUG] UID: 32 Role Value (Stock_Mgr) = true
+[2025-11-25T20:41:19.205Z] [DEBUG] UID: 32 Role Value (Order_Mgr) = true
+[2025-11-25T20:41:21.133Z] [DEBUG] UID: 32 Role Value (Order_Mgr) = true
+[2025-11-25T20:41:21.866Z] [DEBUG] UID: 32 Role Value (Order_Mgr) = true
