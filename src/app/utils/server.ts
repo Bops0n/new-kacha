@@ -51,6 +51,9 @@ export const mapDbRowsToOrders = (dbRows: any[]): Order[] => {
                 Shipping_Updated_By: row.Shipping_Updated_By,
                 Shipping_Updated_At: row.Shipping_Updated_At,
 
+                Is_Received: row.Is_Received,
+                Received_At: row.Received_At,
+
                 Address_1: row.Address_1,
                 Address_2: row.Address_2,
                 Sub_District: row.Sub_District,

@@ -77,6 +77,10 @@ export type Order = {
   Shipping_Updated_By: string;
   Shipping_Updated_At: string;
 
+  // Order Receive
+  Is_Received: boolean;
+  Received_At: string;
+
   // Address
   Address_1: string;
   Address_2: string | null;
