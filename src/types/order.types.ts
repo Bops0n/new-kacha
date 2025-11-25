@@ -1,5 +1,5 @@
 // Common types for Order Status
-export type OrderStatus = 'waiting_payment' | 'pending' | 'preparing' | 'shipped' | 'delivered' | 'refunding' | 'refunded' | 'cancelled';
+export type OrderStatus = 'waiting_payment' | 'pending' | 'preparing' | 'shipped' | 'delivered' | 'req_cancel' | 'refunding' | 'refunded' | 'cancelled';
 export type TransferSlipStatusFilter = 'all' | 'has_slip' | 'no_slip';
 export type Payment_Type = 'bank_transfer' | 'cash_on_delivery'
 export type TransactionStatus = 'pending' | 'confirmed' | 'rejected';
