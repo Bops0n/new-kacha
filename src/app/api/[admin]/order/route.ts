@@ -9,15 +9,13 @@ import { logger } from '@/server/logger';
  * สามารถกรองด้วย ID ผ่าน query parameter ได้ (e.g., ?id=123)
  */
 export async function GET(req: NextRequest) {
-    // const auth = await checkOrderMgrRequire();
-    // const isCheck = checkRequire(auth);
-    // if (isCheck) return isCheck;
+    const auth = await checkOrderMgrRequire();
+    const isCheck = checkRequire(auth);
+    if (isCheck) return isCheck;
 
-    
     try {
         const orderId = req.nextUrl.searchParams.get('id');
         const orders = await getOrders(orderId ? Number(orderId) : null);
-        // console.log()
         return NextResponse.json({ orders });
     } catch (error: any) {
         logger.error("API GET Error:", { error: error });

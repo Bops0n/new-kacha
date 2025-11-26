@@ -30,7 +30,7 @@ export default function OrderManagementPage() {
   useEffect(() => {
     const onVisible = () => {
       if (document.visibilityState === "visible") {
-        // window.location.reload();
+        window.location.reload();
       }
     };
     document.addEventListener("visibilitychange", onVisible);
@@ -66,7 +66,7 @@ export default function OrderManagementPage() {
     setCurrentPage(1);
   };
 
-  // if (loading) return <LoadingSpinner />;
+  if (loading) return <LoadingSpinner />;
   if (error) return <div className="text-center p-8 text-error"><h3>เกิดข้อผิดพลาด:</h3><p>{error}</p></div>;
 
   if (!session || !session.user.Order_Mgr) return <AccessDeniedPage url="/admin"/>;

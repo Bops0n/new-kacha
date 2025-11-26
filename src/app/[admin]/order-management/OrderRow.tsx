@@ -51,6 +51,16 @@ const OrderRow: React.FC<OrderRowProps> = ({ order, statusConfig, btnCancelOrder
       <td>{order.Order_Date}</td>
       <td>
         <div className="flex gap-1">
+          <button
+            className="btn btn-sm btn-ghost btn-square"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleClickOpen();
+            }}
+            title="ดูรายละเอียด"
+          >
+            <FiEye className="w-4 h-4" />
+          </button>
 
           {btnCancelOrder ? (
               <OrderCancelButton orderId={order.Order_ID}  onlyIcon={true}/>

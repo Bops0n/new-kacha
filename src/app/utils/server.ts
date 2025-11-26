@@ -78,7 +78,6 @@ export const mapDbRowsToOrders = (dbRows: any[]): Order[] => {
 
         const currentOrder = ordersMap.get(orderId)!;
 
-        // ส่วนนี้ยังใช้ได้เหมือนเดิม เพราะ SQL ใหม่ยังคง SELECT OD.* (Order_Detail) มา
         if (row.Product_ID) {
             const salePrice = parseFloat(row.Product_Sale_Price);
             const discountPrice = row.Product_Discount_Price ? parseFloat(row.Product_Discount_Price) : null;
