@@ -16,6 +16,7 @@ export async function GET(req: NextRequest) {
     if (!controller || !orderId) return NextResponse.json({ error: "Required parameter missing" }, { status: 400 });
 
     const { rows } = await poolQuery(`SELECT * FROM public."SP_ADMIN_ORDER_NEXT_STEP_GET"($1, $2);`, [controller, orderId]);
+    console.log(rows)
     return NextResponse.json(rows);
   } catch (err) {
     logger.error("Error fetching order next step:", { error: err });

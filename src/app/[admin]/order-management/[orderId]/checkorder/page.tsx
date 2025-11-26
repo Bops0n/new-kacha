@@ -2,12 +2,13 @@
 
 import React, { useCallback, useEffect, useState } from 'react';
 import { Order, SimpleProductDetail } from '@/types';
-import { useParams, useSearchParams } from 'next/navigation';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { StepFlowBar } from '@/app/[admin]/components/order-management/StepFlowComponent';
 import { useAlert } from '@/app/context/AlertModalContext';
 import { OrderNavigation } from '@/app/[admin]/components/order-management/OrderNavigation';
 import OrderHeaderInfo from '@/app/[admin]/components/order-management/OrderHeaderInfo';
 import OrderCheckInfo from '@/app/[admin]/components/order-management/OrderCheckInfo';
+import { Router } from 'next/router';
 
 // ===============================
 //          MAIN PAGE
@@ -58,8 +59,9 @@ export default function CheckOrderPage() {
       const response = await fetch('/api/admin/products/details', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ productIds }),
+        body: JSON.stringify({ productIds })
       });
+
 
       const details: SimpleProductDetail[] = await response.json();
       setLiveDetails(new Map(details.map(p => [p.Product_ID, p])));
