@@ -44,7 +44,6 @@ export async function POST(request: NextRequest) {
 
     try {
         const data: PlaceOrderRequestBody = await request.json();
-        console.log(data)
 
         if (!data) {
             return NextResponse.json({ message: 'ข้อมูลคำสั่งซื้อไม่ครบถ้วน', error: true }, { status: 400 });

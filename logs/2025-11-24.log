@@ -1,5 +1,0 @@
-[2025-11-24T22:35:59.573Z] [DEBUG] UID: 32 Role Value (Stock_Mgr) = true
-[2025-11-24T22:36:03.618Z] [DEBUG] UID: 32 Role Value (Order_Mgr) = true
-[2025-11-24T22:36:03.626Z] [ERROR] Database Error: | meta: {"error":{"length":248,"name":"error","severity":"ERROR","code":"42883","hint":"No function matches the given name and argument types. You might need to add explicit type casts.","position":"15","file":"parse_func.c","line":"636","routine":"ParseFuncOrColumn"}}
-[2025-11-24T22:36:03.628Z] [ERROR] Query: | meta: {"query":"SELECT * FROM public.\"SP_ADMIN_ORDER_REFUND_STEP_GET\"($1, $2);"}
-[2025-11-24T22:36:03.628Z] [ERROR] Error fetching order refunding step: | meta: {"error":{"length":248,"name":"error","severity":"ERROR","code":"42883","hint":"No function matches the given name and argument types. You might need to add explicit type casts.","position":"15","file":"parse_func.c","line":"636","routine":"ParseFuncOrColumn"}}
