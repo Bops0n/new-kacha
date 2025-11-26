@@ -1,7 +1,7 @@
-import { PaymentConfig, StatusConfig } from "@/types";
+import { OrderStatus, PaymentConfig, StatusConfig } from "@/types";
 import { NextResponse } from "next/server";
 import { BsBank, BsCash } from "react-icons/bs";
-import { FiCheckCircle, FiClock, FiPackage, FiRefreshCw, FiTruck, FiXCircle } from "react-icons/fi";
+import { FiCheckCircle, FiClock, FiFileText, FiPackage, FiRefreshCw, FiTruck, FiXCircle } from "react-icons/fi";
 import { MdOutlinePendingActions } from "react-icons/md";
 
 export const checkRequire = (auth : any) => {
@@ -24,6 +24,18 @@ export const statusTypeLabels: StatusConfig = {
     refunded: { label: "คืนเงินแล้ว", color: "text-gray-700", icon: FiCheckCircle, bgColor: "bg-gray-100" },
     req_cancel: { label: "ร้องขอยกเลิก", color: "text-red-700", icon: MdOutlinePendingActions, bgColor: "bg-red-50" },
     cancelled: { label: "ยกเลิก", color: "text-red-700", icon: FiXCircle, bgColor: "bg-red-50" },
+};
+
+export const statusConfig: { [key in OrderStatus]: { label: string; color: string; icon: React.ElementType; bgColor: string; textColor: string } } = {
+  waiting_payment: { label: 'รอชำระเงิน', color: 'warning', icon: FiClock, bgColor: 'bg-warning/10', textColor: 'text-warning' },
+  pending: { label: 'รอดำเนินการ', color: 'warning', icon: FiClock, bgColor: 'bg-warning/10', textColor: 'text-warning' },
+  preparing: { label: 'กำลังเตรียม', color: 'info', icon: FiPackage, bgColor: 'bg-info/10', textColor: 'text-info' },
+  shipped: { label: 'จัดส่งแล้ว', color: 'primary', icon: FiTruck, bgColor: 'bg-primary/10', textColor: 'text-primary' },
+  delivered: { label: 'ส่งเรียบร้อย', color: 'success', icon: FiCheckCircle, bgColor: 'bg-success/10', textColor: 'text-success' },
+  refunding: { label: 'กำลังคืนเงิน', color: 'secondary', icon: FiRefreshCw, bgColor: 'bg-secondary/10', textColor: 'text-secondary' },
+  refunded: { label: 'คืนเงินสำเร็จ', color: 'neutral', icon: FiCheckCircle, bgColor: 'bg-neutral/10', textColor: 'text-neutral' },
+  cancelled: { label: 'ยกเลิก', color: 'error', icon: FiXCircle, bgColor: 'bg-error/10', textColor: 'text-error' },
+  req_cancel: { label: 'ขอยกเลิก', color: 'warning', icon: FiFileText, bgColor: 'bg-warning/10', textColor: 'text-warning' },
 };
 
 export const paymentTypeLabels: PaymentConfig= {

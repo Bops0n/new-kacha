@@ -4,8 +4,9 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
-import { Order } from '../../types'; // Adjust path if your types are in a different location
+import { Order, OrderStatus } from '../../types'; // Adjust path if your types are in a different location
 import { useAlert } from '../context/AlertModalContext';
+import { FiCheckCircle, FiClock, FiFileText, FiPackage, FiRefreshCw, FiTruck, FiXCircle } from 'react-icons/fi';
 
 
 export function useOrderHistory() {
@@ -17,6 +18,8 @@ export function useOrderHistory() {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [isConfirming, setIsConfirming] = useState<boolean>()
+
+
   const handleConfirmReceive = (e: React.MouseEvent<HTMLButtonElement>, orderId : number) => {
     e.preventDefault(); // ป้องกันการทำงาน Default ของปุ่ม (เช่น การ Submit Form)
       showAlert(
@@ -43,7 +46,6 @@ export function useOrderHistory() {
         }
       );
     };
-
   const fetchOrders = useCallback(async () => {
     // Wait until session is loaded
     // if (status === 'loading') {
@@ -86,6 +88,6 @@ export function useOrderHistory() {
     orders,
     sessionStatus: status,
     fetchOrders,
-    handleConfirmReceive // Expose session status for initial loading check
+    handleConfirmReceive, // Expose session status for initial loading check
   };
 }

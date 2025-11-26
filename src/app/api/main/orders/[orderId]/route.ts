@@ -26,11 +26,9 @@ export async function GET(request: NextRequest, { params }: { params: { orderId:
     try {
         // เรียกใช้ Service ที่อัปเดตแล้ว
         const order = await getOrderById(orderId);
-
         if (!order) {
             return NextResponse.json({ message: 'ไม่พบคำสั่งซื้อ' }, { status: 404 });
         }
-
         return NextResponse.json({ order, error: false });
 
     } catch (error: any) {

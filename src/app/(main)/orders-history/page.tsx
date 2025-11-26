@@ -1,126 +1,184 @@
-// app/(main)/orders-history/page.tsx (Refactored)
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import Link from 'next/link';
-import { FiEye, FiClock, FiPackage, FiTruck, FiCheckCircle, FiXCircle, FiInfo, FiRefreshCw, FiFileText } from 'react-icons/fi';
-import { useOrderHistory } from '../../hooks/useOrderHistory'; // << 1. Import hook
+import {
+  FiEye,
+  FiClock,
+  FiPackage,
+  FiTruck,
+  FiCheckCircle,
+  FiXCircle,
+  FiInfo,
+  FiRefreshCw,
+  FiFileText,
+  FiAlertCircle
+} from 'react-icons/fi';
+import { useOrderHistory } from '../../hooks/useOrderHistory';
 import { OrderStatus } from '../../../types';
-import { formatPrice } from '../../utils/formatters'; // << Import formatters
+import { formatPrice } from '../../utils/formatters';
 import LoadingSpinner from '../../components/LoadingSpinner';
-import { useAlert } from '@/app/context/AlertModalContext';
+import { statusConfig } from '@/app/utils/client';
+// import { useAlert } from '@/app/context/AlertModalContext'; // ไม่ได้ใช้ในหน้านี้โดยตรง แต่ใช้ผ่าน hook
 
-// StatusConfig can be moved to a shared utils/config file if used elsewhere
-const statusConfig: { [key in OrderStatus]: { label: string; color: string; icon: React.ElementType; bgColor: string; } } = {
-  waiting_payment: { label: 'รอชำระเงิน', color: 'badge-warning', icon: FiClock, bgColor: 'bg-warning/10' },
-  pending: { label: 'รอดำเนินการ', color: 'badge-warning', icon: FiClock, bgColor: 'bg-warning/10' },
-  preparing: { label: 'กำลังเตรียม', color: 'badge-info', icon: FiPackage, bgColor: 'bg-info/10' },
-  shipped: { label: 'จัดส่งแล้ว', color: 'badge-primary', icon: FiTruck, bgColor: 'bg-primary/10' },
-  delivered: { label: 'ส่งเรียบร้อย', color: 'badge-success', icon: FiCheckCircle, bgColor: 'bg-success/10' },
-  refunding: { label: 'ยกเลิก: กำลังรอคืนเงิน', color: 'badge-accent', icon: FiRefreshCw, bgColor: 'bg-accent/10' },
-  refunded: { label: 'ยกเลิก: คืนเงินสำเร็จ', color: 'badge-neutral', icon: FiCheckCircle, bgColor: 'bg-neutral/10' },
-  cancelled: { label: 'ยกเลิก', color: 'badge-error', icon: FiXCircle, bgColor: 'bg-error/10' },
-  req_cancel: { label: 'ขอยกเลิก', color: 'badge-error', icon: FiFileText, bgColor: 'bg-error/10' },
-};
-
+// Status Config พร้อมสีและไอคอนที่สวยงาม
 
 export default function OrderHistoryPage() {
-    const {showAlert} = useAlert()
+  // เรียกใช้ Hook เพื่อดึง State และ Logic
+  const { loading, error, orders, sessionStatus, handleConfirmReceive} = useOrderHistory();
 
-    // 2. เรียกใช้ Hook เพื่อดึง State และ Logic
-    const { loading, error, orders, sessionStatus , handleConfirmReceive} = useOrderHistory();
-    
+  // Loading State
+  if (loading || sessionStatus === 'loading') {
+    return <LoadingSpinner />;
+  }
 
-    // Show a spinner while session is loading, which is the initial state
-    if (loading || sessionStatus === 'loading') {
-        return <LoadingSpinner />;
-    }
-
-    if (error) {
-        return (
-            <div className="container mx-auto p-6 text-center text-red-600">
-                <h1 className="text-2xl font-bold mb-4">เกิดข้อผิดพลาด</h1>
-                <p>{error}</p>
-            </div>
-        );
-    }
-
-    // 3. ส่วน JSX จะใช้ State จาก Hook เพื่อแสดงผล
+  // Error State
+  if (error) {
     return (
-        <div className="min-h-screen bg-base-200 p-4 sm:p-6 lg:p-8">
-            <div className="max-w-5xl mx-auto bg-base-100 rounded-xl shadow-xl p-6 md:p-10">
-                <h1 className="text-3xl sm:text-4xl font-bold text-base-content mb-8 text-center border-b-2 border-primary pb-4">
-                    ประวัติคำสั่งซื้อของคุณ
-                </h1>
-
-                {orders.length === 0 ? (
-                    <div className="text-center py-12">
-                        <FiInfo className="w-20 h-20 text-base-content/30 mx-auto mb-4" />
-                        <p className="text-xl text-base-content/70 font-semibold mb-2">คุณยังไม่มีคำสั่งซื้อ</p>
-                        <p className="text-base-content/60 mb-6">เริ่มสำรวจสินค้าของเราเพื่อทำการสั่งซื้อครั้งแรก!</p>
-                        <Link href="/products" className="btn btn-primary">
-                            ดูสินค้าทั้งหมด
-                        </Link>
-                    </div>
-                ) : (
-                    <div className="space-y-6">
-                        {orders.map((order) => {
-                            const statusInfo = statusConfig[order.Status as OrderStatus];
-                            return (
-                                <Link
-                                    key={order.Order_ID}
-                                    href={`/orders-history/${order.Order_ID}`}
-                                    className="block bg-base-200 border border-transparent rounded-lg shadow-sm hover:shadow-lg hover:border-primary transition-all duration-300 p-6"
-                                >
-                                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4">
-                                        <div>
-                                            <h2 className="text-xl font-bold text-primary">คำสั่งซื้อ #{order.Order_ID}</h2>
-                                            <p className="text-sm text-base-content/70 mt-1">สั่งเมื่อ: {order.Order_Date}</p>
-                                        </div>
-                                        <div className={`mt-2 md:mt-0 badge ${statusInfo?.bgColor} ${statusInfo?.color} badge-lg`}>
-                                            {statusInfo?.icon && React.createElement(statusInfo.icon, { className: 'mr-2' })}
-                                            {statusInfo?.label || order.Status}
-                                        </div>
-                                    </div>
-
-                                    <div className="border-t border-base-300 pt-4 grid grid-cols-2 sm:grid-cols-3 gap-4 text-base-content">
-                                        <div>
-                                            <p className="font-semibold">ยอดรวม:</p>
-                                            <p className="text-lg font-bold text-accent">{formatPrice(order.Total_Amount)}</p>
-                                        </div>
-                                        <div>
-                                            <p className="font-semibold">ประเภทชำระเงิน:</p>
-                                            <p>{order.Payment_Type === 'bank_transfer'? 'โอนผ่านธนาคาร':''}</p>
-                                        </div>
-                                        <div className="col-span-2 sm:col-span-1">
-                                            <p className="font-semibold">วันที่จัดส่ง (คาดการณ์):</p>
-                                            <p>{order.Shipping_Date ? order.Shipping_Date : 'ยังไม่ระบุ'}</p>
-                                        </div>
-                                    </div>
-                                    <div className="flex flex-wrap items-center justify-end gap-2 mt-4">
-                                        {/* ปุ่มยืนยันการรับสินค้า (แสดงเฉพาะตอนส่งของแล้ว) */}
-                                        {order.Status === 'shipped' && (
-                                            <button 
-                                                className="btn btn-sm btn-success text-white shadow-md hover:scale-105 transition-transform"
-                                                onClick={(e) => handleConfirmReceive(e, order.Order_ID)} // อย่าลืมใส่ฟังก์ชันกดรับของตรงนี้นะครับ
-                                            >
-                                                <FiCheckCircle className="w-4 h-4" /> ยืนยันรับสินค้า
-                                            </button>
-                                        )}
-
-                                        {/* ปุ่มดูรายละเอียด */}
-                                        <Link href={`/orders-history/${order.Order_ID}`}>
-                                            <button className="btn btn-sm btn-outline btn-primary hover:bg-primary hover:text-white transition-colors">
-                                                <FiEye className="w-4 h-4" /> ดูรายละเอียด
-                                            </button>
-                                        </Link>
-                                    </div>
-                                </Link>
-                            );
-                        })}
-                    </div>
-                )}
+      <div className="min-h-screen flex flex-col items-center justify-center text-center p-6 bg-base-200">
+        <div className="bg-white p-8 rounded-2xl shadow-lg max-w-md w-full">
+            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4 text-red-500">
+                <FiAlertCircle className="w-8 h-8" />
             </div>
+            <h1 className="text-2xl font-bold text-gray-800 mb-2">เกิดข้อผิดพลาด</h1>
+            <p className="text-gray-600 mb-6">{error}</p>
+            <button onClick={() => window.location.reload()} className="btn btn-primary w-full">ลองใหม่อีกครั้ง</button>
         </div>
+      </div>
     );
-};
+  }
+
+  return (
+    <div className="min-h-screen bg-base-200 py-10 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-5xl mx-auto">
+        
+        {/* Header Section */}
+        <div className="mb-8 text-center sm:text-left flex flex-col sm:flex-row justify-between items-end border-b border-base-300 pb-4">
+            <div>
+                <h1 className="text-3xl font-extrabold text-base-content tracking-tight">ประวัติคำสั่งซื้อ</h1>
+                <p className="text-base-content/60 mt-1">รายการสั่งซื้อและสถานะพัสดุของคุณ</p>
+            </div>
+            {/* อาจเพิ่มปุ่มติดต่อเจ้าหน้าที่ตรงนี้ในอนาคต */}
+        </div>
+
+        {/* Empty State */}
+        {orders.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-16 bg-base-100 rounded-2xl shadow-sm border border-base-200 text-center">
+            <div className="w-20 h-20 bg-base-200 rounded-full flex items-center justify-center mb-4">
+                <FiPackage className="w-10 h-10 text-base-content/30" />
+            </div>
+            <h2 className="text-xl font-bold text-base-content mb-2">คุณยังไม่มีคำสั่งซื้อ</h2>
+            <p className="text-base-content/60 max-w-md mb-8">เริ่มเลือกซื้อสินค้าคุณภาพจากเรา เพื่อสร้างบ้านในฝันของคุณได้เลย</p>
+            <Link href="/products" className="btn btn-primary px-8">
+              เลือกซื้อสินค้า
+            </Link>
+          </div>
+        ) : (
+          // Orders List
+          <div className="space-y-6">
+            {orders.map((order) => {
+              const statusInfo = statusConfig[order.Status as OrderStatus] || statusConfig.pending;
+              const isRejected = order.Transaction_Status === 'rejected';
+              const isShipped = order.Status === 'shipped';
+
+              return (
+                <div key={order.Order_ID} className="card bg-base-100 shadow-sm hover:shadow-md transition-all duration-300 border border-base-200 overflow-hidden group">
+                    <Link href={`/orders-history/${order.Order_ID}`} className="block h-full w-full">
+                        <div className="card-body p-6">
+                            
+                            {/* Card Header: Order ID & Status */}
+                            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+                                <div>
+                                    <div className="flex items-center gap-2">
+                                        <h2 className="text-lg font-bold text-primary group-hover:underline decoration-2 underline-offset-2">
+                                            คำสั่งซื้อ #{order.Order_ID}
+                                        </h2>
+                                    </div>
+                                    <p className="text-sm text-base-content/60 mt-1 flex items-center gap-1">
+                                        <FiClock className="w-3 h-3" /> สั่งเมื่อ: {new Date(order.Order_Date).toLocaleDateString('th-TH', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                                    </p>
+                                </div>
+                                <div className={`badge border-none px-3 py-4 rounded-lg font-medium flex items-center gap-2 ${statusInfo.bgColor} ${statusInfo.textColor}`}>
+                                    {statusInfo.icon && <statusInfo.icon className="w-4 h-4" />}
+                                    {statusInfo.label}
+                                </div>
+                            </div>
+
+                            <div className="divider my-0"></div>
+
+                            {/* Card Content: Details Grid */}
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 py-4">
+                                <div>
+                                    <p className="text-xs text-base-content/50 font-bold uppercase tracking-wider mb-1">ยอดรวมสุทธิ</p>
+                                    <p className="text-xl font-bold text-secondary">{formatPrice(order.Total_Amount)}</p>
+                                </div>
+                                <div>
+                                    <p className="text-xs text-base-content/50 font-bold uppercase tracking-wider mb-1">ช่องทางชำระเงิน</p>
+                                    <p className="text-base font-medium text-base-content/80">
+                                        {order.Payment_Type === 'bank_transfer' ? 'โอนเงินผ่านธนาคาร' : 'เก็บเงินปลายทาง (COD)'}
+                                    </p>
+                                </div>
+                                <div>
+                                    <p className="text-xs text-base-content/50 font-bold uppercase tracking-wider mb-1">สถานะการจัดส่ง</p>
+                                    <p className={`text-base font-medium ${order.Shipping_Date ? 'text-base-content/80' : 'text-base-content/40 italic'}`}>
+                                        {order.Shipping_Date 
+                                            ? new Date(order.Shipping_Date).toLocaleDateString('th-TH') 
+                                            : 'รออัปเดต'
+                                        }
+                                    </p>
+                                </div>
+                            </div>
+
+                            {/* Alerts & Actions Section */}
+                            {(isRejected || isShipped) && (
+                                <div className={`mt-4 p-4 rounded-xl flex flex-col sm:flex-row items-center justify-between gap-4 animate-fadeIn ${isRejected ? 'bg-error/10 border border-error/20' : 'bg-success/10 border border-success/20'}`}>
+                                    {/* Alert Message */}
+                                    <div className="flex items-center gap-3 text-sm font-medium">
+                                        {isRejected && (
+                                            <>
+                                                <div className="w-8 h-8 rounded-full bg-error/20 text-error flex items-center justify-center flex-shrink-0">
+                                                    <FiXCircle className="w-5 h-5" />
+                                                </div>
+                                                <span className="text-error">การชำระเงินถูกปฏิเสธ กรุณาตรวจสอบหลักฐานแล้วอัปโหลดใหม่อีกครั้ง</span>
+                                            </>
+                                        )}
+                                        {isShipped && (
+                                            <>
+                                                <div className="w-8 h-8 rounded-full bg-success/20 text-success flex items-center justify-center flex-shrink-0">
+                                                    <FiTruck className="w-5 h-5" />
+                                                </div>
+                                                <span className="text-success">สินค้าอยู่ระหว่างการจัดส่ง หากได้รับแล้วกรุณากดยืนยัน</span>
+                                            </>
+                                        )}
+                                    </div>
+
+                                    {/* Confirm Button (Specific Action) */}
+                                    {isShipped && (
+                                        <button 
+                                            className="btn btn-sm btn-success text-white shadow-sm hover:shadow-md border-none px-4 flex-shrink-0 w-full sm:w-auto"
+                                            onClick={(e) => handleConfirmReceive(e, order.Order_ID)}
+                                        >
+                                            <FiCheckCircle className="w-4 h-4 mr-1" /> ยืนยันรับสินค้า
+                                        </button>
+                                    )}
+                                </div>
+                            )}
+                            
+                            {/* Footer Action */}
+                            <div className="mt-4 flex justify-end">
+                                <span className="text-sm font-semibold text-primary flex items-center gap-1 group-hover:translate-x-1 transition-transform">
+                                    ดูรายละเอียดคำสั่งซื้อ <FiEye />
+                                </span>
+                            </div>
+
+                        </div>
+                    </Link>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
