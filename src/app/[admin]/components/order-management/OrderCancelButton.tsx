@@ -84,6 +84,8 @@ export default function OrderCancelButton({ orderId, onlyIcon, onSuccess }: {
         onSuccess();
       }
 
+      showModal(false);
+
       showAlert(Message, Is_Success ? "success" : "error", 'ยกเลิกคำสั่งซื้อ', async () => {
         if (Is_Success && Href) {
           window.location.href = Href;

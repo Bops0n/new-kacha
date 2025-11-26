@@ -12,6 +12,10 @@ export async function PATCH(req: NextRequest) {
 
         const { Order_ID, Reason } = await req.json();
 
+        if (!Reason) {
+            return NextResponse.json({ message: 'กรุณาระบุเหตุผลในการยกเลิกคำสั่งซื้อ' }, { status: 400 });
+        }
+
         const { rows } = await poolQuery(`SELECT * FROM public."SP_ADMIN_ORDER_REQ_CANCEL_UPD"($1, $2, $3)`, [
             Order_ID, Reason, auth.userId
         ]);
