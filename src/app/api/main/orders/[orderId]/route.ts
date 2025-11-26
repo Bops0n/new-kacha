@@ -1,6 +1,6 @@
 import { NextResponse, NextRequest } from 'next/server';
 import { authenticateRequest } from '@/app/api/auth/utils';
-import { getOrderById } from '@/app/api/services/user/orderService';
+import { cancelOrder, getOrderById } from '@/app/api/services/user/orderService';
 import { v4 as uuidv4 } from 'uuid';
 import path from 'path';
 import fs from 'fs/promises';
@@ -94,5 +94,33 @@ export async function PATCH(request: NextRequest, { params }: { params: { orderI
     } catch (error) {
         logger.error('Error uploading transfer slip:', { error: error });
         return NextResponse.json({ message: 'เกิดข้อผิดพลาดในการอัปโหลดสลิป' }, { status: 500 });
+    }
+}
+
+export async function POST(request: NextRequest, { params }: { params: { orderId: number } }) {
+    const auth = await authenticateRequest();
+    const isCheck = checkRequire(auth);
+    if (isCheck) return isCheck;
+
+    const { orderId } = await params;
+
+    try {
+        const { reason } = await request.json();
+
+        if (!reason) {
+            return NextResponse.json({ message: 'กรุณาระบุเหตุผลการยกเลิก' }, { status: 400 });
+        }
+
+        const result = await cancelOrder(orderId, Number(auth.userId), reason);
+
+        if (result.Status_Code !== 200) {
+             return NextResponse.json({ message: result.Message }, { status: result.Status_Code });
+        }
+
+        return NextResponse.json({ message: 'ยกเลิกคำสั่งซื้อสำเร็จ' });
+
+    } catch (error) {
+        logger.error('API Error cancelling order:', error);
+        return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 });
     }
 }
