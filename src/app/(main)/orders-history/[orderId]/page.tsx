@@ -465,7 +465,12 @@ export default function OrderDetailsPage() {
                                 <FiRefreshCw /> หลักฐานการคืนเงิน
                             </h3>
                             <div className="flex items-center justify-center bg-secondary/5 rounded-xl border border-secondary/20 p-2">
-                                <img src={order.Refund_Slip} alt="Refund Slip" className="w-full h-auto rounded-lg" />
+                                                                <img 
+                                    src={order.Refund_Slip} 
+                                    alt="Refund Slip" 
+                                    className="w-full h-auto object-contain rounded-lg shadow-sm hover:scale-105 transition-transform cursor-pointer" 
+                                    onClick={() => window.open(order.Refund_Slip!, '_blank')}
+                                />
                             </div>
                         </div>
                     </div>
