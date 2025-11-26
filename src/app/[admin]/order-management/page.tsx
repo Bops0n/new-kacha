@@ -24,13 +24,16 @@ export default function OrderManagementPage() {
     filteredOrders, 
     filters, 
     setFilters,
-    bulkSteps
+    bulkSteps,
+    fetchOrders
   } = useOrderManagement();
 
   useEffect(() => {
     const onVisible = () => {
       if (document.visibilityState === "visible") {
-        window.location.reload();
+        // window.location.reload();
+        fetchOrders()
+
       }
     };
     document.addEventListener("visibilitychange", onVisible);

@@ -464,7 +464,7 @@ export default function OrderDetailsPage() {
                             <h3 className="card-title text-lg flex items-center gap-2 mb-4 text-secondary">
                                 <FiRefreshCw /> หลักฐานการคืนเงิน
                             </h3>
-                            <div className="flex items-center justify-center bg-secondary/5 rounded-xl border border-secondary/20 p-2">
+                            <div className="flex-1 flex flex-col items-center justify-center bg-base-200/50 rounded-xl border-2 border-dashed border-base-300 min-h-[200px] p-4 relative overflow-hidden">
                                                                 <img 
                                     src={order.Refund_Slip} 
                                     alt="Refund Slip" 
