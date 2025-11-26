@@ -13,8 +13,11 @@ import { formatPrice } from '@/app/utils/formatters';
 import LoadingSpinner from '@/app/components/LoadingSpinner';
 import { useSession } from 'next-auth/react';
 import AccessDeniedPage from '@/app/components/AccessDenied';
+import { useOrderHistory } from '@/app/hooks/useOrderHistory';
 
-// --- UI Configuration ---
+// --- Configuration ---
+const PAYMENT_TIMEOUT_HOURS = 24; // กำหนดเวลาโอนเงิน (ชั่วโมง)
+
 const statusConfig: { [key in OrderStatus]: { label: string; color: string; icon: React.ElementType; bgColor: string; } } = {
   waiting_payment: { label: 'รอชำระเงิน', color: 'badge-warning', icon: FiClock, bgColor: 'bg-warning/10' },
   pending: { label: 'รอดำเนินการ', color: 'badge-warning', icon: FiClock, bgColor: 'bg-warning/10' },
@@ -135,6 +138,9 @@ export default function OrderDetailsPage() {
 
   const orderId = typeof params.orderId === 'string' ? parseInt(params.orderId, 10) : NaN;
 
+  const { handleConfirmReceive } = useOrderHistory()
+   
+
   const fetchOrderDetails = useCallback(async () => {
     if (isNaN(orderId)) { setError('รหัสคำสั่งซื้อไม่ถูกต้อง'); setLoading(false); return; }
     setLoading(true);
@@ -194,6 +200,15 @@ export default function OrderDetailsPage() {
     }
   };
 
+  // +++ Helper: ฟอร์แมตวันที่และเวลา +++
+  const formatDateTime = (dateStr: string | Date) => {
+    if (!dateStr) return '-';
+    return new Date(dateStr).toLocaleString('th-TH', {
+      year: 'numeric', month: 'short', day: 'numeric', 
+      hour: '2-digit', minute: '2-digit'
+    });
+  };
+
   // +++ Logic คำนวณสถานะปลายทางสำหรับการยกเลิก +++
   const targetStatusInfo = useMemo(() => {
     if (!order) return null;
@@ -221,14 +236,18 @@ export default function OrderDetailsPage() {
     };
   }, [order]);
 
-  // +++ Logic คำนวณข้อความแจ้งเตือนใน Text Box ด้านล่าง +++
+  // +++ Logic คำนวณข้อความแจ้งเตือนและเวลา +++
   const orderStatusNote = useMemo(() => {
     if (!order) return null;
     
-    const { Status, Payment_Type, Is_Payment_Checked, Transaction_Slip, Transaction_Status } = order;
+    const { Status, Payment_Type, Is_Payment_Checked, Transaction_Slip, Transaction_Status, Transaction_Date, Order_Date } = order;
+
+      // ถ้าไม่มี ให้นับจาก Order_Date
+    const baseDate = Transaction_Date ? new Date(Transaction_Date) : new Date(Order_Date);
+    const expireDate = new Date(baseDate.getTime() + (PAYMENT_TIMEOUT_HOURS * 60 * 60 * 1000));
+    const formattedExpire = formatDateTime(expireDate);
     
-    // 1. Pending + Rejected (สลิปถูกปฏิเสธ) -> ให้แจ้งเตือนและให้แนบใหม่
-    console.log(Status, Transaction_Status)
+    // 1. Pending + Rejected (สลิปถูกปฏิเสธ)
     if (Status === 'waiting_payment' && Transaction_Status === 'rejected') {
         return {
             icon: FiAlertTriangle,
@@ -236,7 +255,7 @@ export default function OrderDetailsPage() {
             bgColor: 'bg-error/10',
             borderColor: 'border-error/20',
             title: 'สลิปการโอนเงินถูกปฏิเสธ',
-            message: 'เจ้าหน้าที่ได้ปฏิเสธสลิปการโอนเงินของท่าน กรุณาตรวจสอบความถูกต้องและอัพโหลดหลักฐานการโอนเงินใหม่อีกครั้ง'
+            message: `เจ้าหน้าที่ได้ปฏิเสธสลิปการโอนเงินของท่าน กรุณาตรวจสอบความถูกต้องและอัพโหลดหลักฐานการโอนเงินใหม่อีกครั้งภายในวันที่ \n ${formattedExpire} `
         };
     }
 
@@ -267,13 +286,17 @@ export default function OrderDetailsPage() {
 
     // 3. Waiting Payment (Bank Transfer)
     if (Status === 'waiting_payment' && Payment_Type === 'bank_transfer') {
+        // +++ คำนวณเวลาหมดอายุ +++
+        // ถ้ามี Transaction_Date (เคยแนบสลิปมาแล้วแต่โดน Reject หรืออื่นๆ) ให้นับจาก Transaction_Date
+
         return {
             icon: FiInfo,
             color: 'text-info',
             bgColor: 'bg-info/10',
             borderColor: 'border-info/20',
             title: 'รอชำระเงิน',
-            message: 'กรุณาชำระเงินและแนบหลักฐานการโอนเงิน เพื่อให้ทางร้านตรวจสอบและดำเนินการต่อ'
+            // +++ เพิ่มข้อความเวลา +++
+            message: `กรุณาชำระเงินและแนบหลักฐานภายใน ${formattedExpire} หากเกินกำหนดระบบจะยกเลิกคำสั่งซื้ออัตโนมัติ`
         };
     }
 
@@ -353,7 +376,7 @@ export default function OrderDetailsPage() {
             <div className="card bg-base-200 p-6">
                 <h2 className="card-title text-xl mb-4"><FiTruck className="mr-2"/>ข้อมูลการจัดส่ง</h2>
                 <div className="space-y-1 text-base-content/90">
-                    <p><strong>ประเภทชำระเงิน:</strong> {order.Payment_Type}</p>
+                    <p><strong>ประเภทชำระเงิน:</strong> {order.Payment_Type === 'bank_transfer'? 'โอนผ่านธนาคาร':'ชำระเงินปลายทาง'}</p>
                     <p><strong>บริษัทขนส่ง:</strong> {order.Shipping_Method || '-'}</p>
                     <p><strong>Tracking ID:</strong> {order.Tracking_Number || '-'}</p>
                     <p><strong>วันที่จัดส่ง (คาดการณ์):</strong> {order.Shipping_Date ? order.Shipping_Date : '-'}</p>
@@ -428,6 +451,7 @@ export default function OrderDetailsPage() {
                   </div>
                 )}
 
+                {/* +++ Text Box แจ้งเตือนสถานะและเวลา (ด้านล่าง) +++ */}
 
               </div>
 
@@ -443,22 +467,36 @@ export default function OrderDetailsPage() {
                 </>
               )}
             </div>
-            {/* +++ เพิ่ม Text Box แจ้งเตือนสถานะด้านล่าง (รวมกรณี Rejected) +++ */}
-            {orderStatusNote && (
-                <div className={`alert ${orderStatusNote.bgColor} border ${orderStatusNote.borderColor} mt-6 flex items-start gap-3 text-left`}>
-                    <div className={`p-2 rounded-full bg-white/60 ${orderStatusNote.color}`}>
-                        {React.createElement(orderStatusNote.icon, { className: 'w-6 h-6' })}
-                    </div>
-                    <div>
-                        <h3 className={`font-bold text-lg ${orderStatusNote.color}`}>{orderStatusNote.title}</h3>
-                        <p className="text-sm opacity-90 mt-1">{orderStatusNote.message}</p>
-                    </div>
-                </div>
-            )}
           </div>
         )}
 
+        {orderStatusNote && (
+            <div className={`alert ${orderStatusNote.bgColor} border ${orderStatusNote.borderColor} mt-6 flex items-start gap-3 text-left`}>
+                <div className={`p-2 rounded-full bg-white/60 ${orderStatusNote.color}`}>
+                    {React.createElement(orderStatusNote.icon, { className: 'w-6 h-6' })}
+                </div>
+                <div>
+                    <h3 className={`font-bold text-lg ${orderStatusNote.color}`}>{orderStatusNote.title}</h3>
+                    <p className="text-sm opacity-90 mt-1">{orderStatusNote.message}</p>
+                </div>
+                        {order.Status === 'shipped' && (
+           <div className="my-auto pt-6 ml-auto flex justify-center sm:justify-end">
+
+            <button 
+                className="btn btn-sm btn-success text-white shadow-md hover:scale-105 transition-transform"
+                onClick={(e) => {
+                  handleConfirmReceive(e, order.Order_ID)
+                  fetchOrderDetails()
+                }} // อย่าลืมใส่ฟังก์ชันกดรับของตรงนี้นะครับ
+                >
+                <FiCheckCircle className="w-4 h-4" /> ยืนยันรับสินค้า
+            </button>
+            </div>
+        )}
+            </div>
+        )}
         {/* ปุ่มขอยกเลิกคำสั่งซื้อ */}
+
         {canCancel && (
             <div className="mt-8 pt-6 border-t border-base-300 flex justify-center sm:justify-end">
                 <button 

@@ -16,6 +16,33 @@ export function useOrderHistory() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [isConfirming, setIsConfirming] = useState<boolean>()
+  const handleConfirmReceive = (e: React.MouseEvent<HTMLButtonElement>, orderId : number) => {
+    e.preventDefault(); // ป้องกันการทำงาน Default ของปุ่ม (เช่น การ Submit Form)
+      showAlert(
+        'คุณได้รับสินค้าและตรวจสอบความถูกต้องเรียบร้อยแล้วใช่หรือไม่?', // Message
+        'info', // Type
+        'ยืนยันการรับสินค้า', // Title
+        async () => { // onConfirm Callback
+          setIsConfirming(true);
+          try {
+            // เรียก API ยืนยันรับของ
+            const response = await fetch(`/api/main/orders/${orderId}/receive`, {
+              method: 'PATCH',
+            });
+            const result = await response.json();
+            if (!response.ok) throw new Error(result.message);
+            // โหลดข้อมูลใหม่เพื่ออัปเดตสถานะเป็น Delivered
+            fetchOrders()
+            showAlert('ยืนยันการรับสินค้าเรียบร้อยแล้ว ขอบคุณที่ใช้บริการครับ', 'success');
+          } catch (err: any) {
+            showAlert(err.message, 'error');
+          } finally {
+            setIsConfirming(false);
+          }
+        }
+      );
+    };
 
   const fetchOrders = useCallback(async () => {
     // Wait until session is loaded
@@ -57,6 +84,8 @@ export function useOrderHistory() {
     loading,
     error,
     orders,
-    sessionStatus: status, // Expose session status for initial loading check
+    sessionStatus: status,
+    fetchOrders,
+    handleConfirmReceive // Expose session status for initial loading check
   };
 }

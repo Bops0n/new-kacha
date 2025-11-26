@@ -1,13 +1,14 @@
 // app/(main)/orders-history/page.tsx (Refactored)
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import { FiEye, FiClock, FiPackage, FiTruck, FiCheckCircle, FiXCircle, FiInfo, FiRefreshCw, FiFileText } from 'react-icons/fi';
 import { useOrderHistory } from '../../hooks/useOrderHistory'; // << 1. Import hook
 import { OrderStatus } from '../../../types';
 import { formatPrice } from '../../utils/formatters'; // << Import formatters
 import LoadingSpinner from '../../components/LoadingSpinner';
+import { useAlert } from '@/app/context/AlertModalContext';
 
 // StatusConfig can be moved to a shared utils/config file if used elsewhere
 const statusConfig: { [key in OrderStatus]: { label: string; color: string; icon: React.ElementType; bgColor: string; } } = {
@@ -24,8 +25,11 @@ const statusConfig: { [key in OrderStatus]: { label: string; color: string; icon
 
 
 export default function OrderHistoryPage() {
+    const {showAlert} = useAlert()
+
     // 2. เรียกใช้ Hook เพื่อดึง State และ Logic
-    const { loading, error, orders, sessionStatus } = useOrderHistory();
+    const { loading, error, orders, sessionStatus , handleConfirmReceive} = useOrderHistory();
+    
 
     // Show a spinner while session is loading, which is the initial state
     if (loading || sessionStatus === 'loading') {
@@ -86,18 +90,30 @@ export default function OrderHistoryPage() {
                                         </div>
                                         <div>
                                             <p className="font-semibold">ประเภทชำระเงิน:</p>
-                                            <p>{order.Payment_Type}</p>
+                                            <p>{order.Payment_Type === 'bank_transfer'? 'โอนผ่านธนาคาร':''}</p>
                                         </div>
                                         <div className="col-span-2 sm:col-span-1">
                                             <p className="font-semibold">วันที่จัดส่ง (คาดการณ์):</p>
-                                            <p>{order.DeliveryDate ? order.DeliveryDate : 'ยังไม่ระบุ'}</p>
+                                            <p>{order.Shipping_Date ? order.Shipping_Date : 'ยังไม่ระบุ'}</p>
                                         </div>
                                     </div>
+                                    <div className="flex flex-wrap items-center justify-end gap-2 mt-4">
+                                        {/* ปุ่มยืนยันการรับสินค้า (แสดงเฉพาะตอนส่งของแล้ว) */}
+                                        {order.Status === 'shipped' && (
+                                            <button 
+                                                className="btn btn-sm btn-success text-white shadow-md hover:scale-105 transition-transform"
+                                                onClick={(e) => handleConfirmReceive(e, order.Order_ID)} // อย่าลืมใส่ฟังก์ชันกดรับของตรงนี้นะครับ
+                                            >
+                                                <FiCheckCircle className="w-4 h-4" /> ยืนยันรับสินค้า
+                                            </button>
+                                        )}
 
-                                    <div className="text-right mt-4">
-                                        <button className="btn btn-sm btn-outline btn-primary">
-                                            <FiEye className="mr-2" /> ดูรายละเอียด
-                                        </button>
+                                        {/* ปุ่มดูรายละเอียด */}
+                                        <Link href={`/orders-history/${order.Order_ID}`}>
+                                            <button className="btn btn-sm btn-outline btn-primary hover:bg-primary hover:text-white transition-colors">
+                                                <FiEye className="w-4 h-4" /> ดูรายละเอียด
+                                            </button>
+                                        </Link>
                                     </div>
                                 </Link>
                             );

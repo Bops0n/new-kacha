@@ -448,3 +448,37 @@
 [2025-11-25T23:40:11.071Z] [INFO] userid32
 [2025-11-25T23:41:38.341Z] [INFO] userid32
 [2025-11-25T23:41:38.632Z] [INFO] userid32
+[2025-11-25T23:50:04.542Z] [INFO] userid32
+[2025-11-25T23:50:04.801Z] [INFO] userid32
+[2025-11-25T23:50:27.067Z] [DEBUG] UID: 32 Role Value (Order_Mgr) = true
+[2025-11-25T23:50:28.081Z] [DEBUG] UID: 32 Role Value (Order_Mgr) = true
+[2025-11-25T23:50:29.776Z] [DEBUG] UID: 32 Role Value (Order_Mgr) = true
+[2025-11-25T23:50:29.813Z] [DEBUG] UID: 32 Role Value (Order_Mgr) = true
+[2025-11-25T23:50:29.877Z] [DEBUG] UID: 32 Role Value (Order_Mgr) = true
+[2025-11-25T23:50:31.418Z] [DEBUG] UID: 32 Role Value (Order_Mgr) = true
+[2025-11-25T23:50:31.909Z] [DEBUG] UID: 32 Role Value (Order_Mgr) = true
+[2025-11-25T23:50:31.967Z] [DEBUG] UID: 32 Role Value (Order_Mgr) = true
+[2025-11-25T23:50:32.852Z] [DEBUG] UID: 32 Role Value (Order_Mgr) = true
+[2025-11-25T23:50:32.860Z] [DEBUG] UID: 32 Role Value (Order_Mgr) = true
+[2025-11-25T23:50:32.913Z] [DEBUG] UID: 32 Role Value (Order_Mgr) = true
+[2025-11-25T23:50:32.948Z] [DEBUG] UID: 32 Role Value (Order_Mgr) = true
+[2025-11-25T23:50:36.314Z] [DEBUG] UID: 32 Role Value (Stock_Mgr) = true
+[2025-11-25T23:50:37.142Z] [DEBUG] UID: 32 Role Value (Order_Mgr) = true
+[2025-11-26T00:28:52.452Z] [DEBUG] UID: 32 Role Value (Dashboard) = true
+[2025-11-26T00:28:52.454Z] [DEBUG] UID: 32 Role Value (Dashboard) = true
+[2025-11-26T00:29:00.650Z] [DEBUG] UID: 32 Role Value (Dashboard) = true
+[2025-11-26T00:29:00.652Z] [DEBUG] UID: 32 Role Value (Dashboard) = true
+[2025-11-26T00:29:01.646Z] [DEBUG] UID: 32 Role Value (Dashboard) = true
+[2025-11-26T00:29:01.650Z] [DEBUG] UID: 32 Role Value (Dashboard) = true
+[2025-11-26T00:29:01.812Z] [DEBUG] UID: 32 Role Value (Dashboard) = true
+[2025-11-26T00:29:01.821Z] [DEBUG] UID: 32 Role Value (Dashboard) = true
+[2025-11-26T01:10:56.571Z] [INFO] userid32
+[2025-11-26T01:10:57.400Z] [INFO] userid32
+[2025-11-26T01:11:26.108Z] [INFO] userid32
+[2025-11-26T01:11:27.266Z] [INFO] userid32
+[2025-11-26T01:12:39.933Z] [INFO] userid32
+[2025-11-26T01:12:40.666Z] [INFO] userid32
+[2025-11-26T01:15:19.960Z] [INFO] userid32
+[2025-11-26T01:15:21.016Z] [INFO] userid32
+[2025-11-26T01:19:23.075Z] [INFO] userid32
+[2025-11-26T01:19:23.458Z] [INFO] userid32
