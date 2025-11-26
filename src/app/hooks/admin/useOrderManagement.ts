@@ -39,8 +39,12 @@ export function useOrderManagement() {
   async function loadBulk() {
     if (orders.length === 0) return;
 
-    const list = orders.map(o => o.Order_ID).join(",");
-    const res = await fetch(`/api/admin/order/next-step/bulk?list=${list}`);
+    const list = orders.map(o => o.Order_ID);
+    const res = await fetch("/api/admin/order/next-step/bulk", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ list })
+    });
     const data = await res.json();
 
     const map: Record<number, any> = {};
