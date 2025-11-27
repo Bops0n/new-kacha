@@ -110,7 +110,7 @@ export default function OrderHistoryPage() {
                             <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 py-4">
                                 <div>
                                     <p className="text-xs text-base-content/50 font-bold uppercase tracking-wider mb-1">ยอดรวมสุทธิ</p>
-                                    <p className="text-xl font-bold text-secondary">{formatPrice(order.Total_Amount)}</p>
+                                    <p className="text-xl font-bold text-primary/90">{formatPrice(order.Total_Amount)}</p>
                                 </div>
                                 <div>
                                     <p className="text-xs text-base-content/50 font-bold uppercase tracking-wider mb-1">ช่องทางชำระเงิน</p>

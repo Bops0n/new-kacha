@@ -5,7 +5,8 @@ import { useRouter, useParams } from 'next/navigation';
 import { 
   FiClock, FiPackage, FiTruck, FiCheckCircle, FiXCircle, 
   FiArrowLeft, FiMapPin, FiShoppingCart, FiUploadCloud, FiDollarSign, 
-  FiRefreshCw, FiTrash2, FiAlertTriangle, FiFileText, FiInfo, FiCreditCard
+  FiRefreshCw, FiTrash2, FiAlertTriangle, FiFileText, FiInfo, FiCreditCard,
+  FiArrowDown
 } from 'react-icons/fi';
 import { Order, OrderStatus, StatusConfig } from '@/types';
 import { useAlert } from '@/app/context/AlertModalContext';
@@ -14,12 +15,22 @@ import LoadingSpinner from '@/app/components/LoadingSpinner';
 import { useSession } from 'next-auth/react';
 import AccessDeniedPage from '@/app/components/AccessDenied';
 import { useOrderHistory } from '@/app/hooks/useOrderHistory';
-import { statusConfig } from '@/app/utils/client';
 
 // --- Configuration ---
 const PAYMENT_TIMEOUT_HOURS = 24;
 
 // Status Config พร้อมสีที่สวยงาม
+const statusConfig: { [key in OrderStatus]: { label: string; color: string; icon: React.ElementType; bgColor: string; textColor: string } } = {
+  waiting_payment: { label: 'รอชำระเงิน', color: 'warning', icon: FiClock, bgColor: 'bg-warning/10', textColor: 'text-warning' },
+  pending: { label: 'รอดำเนินการ', color: 'warning', icon: FiClock, bgColor: 'bg-warning/10', textColor: 'text-warning' },
+  preparing: { label: 'กำลังเตรียม', color: 'info', icon: FiPackage, bgColor: 'bg-info/10', textColor: 'text-info' },
+  shipped: { label: 'จัดส่งแล้ว', color: 'primary', icon: FiTruck, bgColor: 'bg-primary/10', textColor: 'text-primary' },
+  delivered: { label: 'ส่งเรียบร้อย', color: 'success', icon: FiCheckCircle, bgColor: 'bg-success/10', textColor: 'text-success' },
+  refunding: { label: 'กำลังคืนเงิน', color: 'secondary', icon: FiRefreshCw, bgColor: 'bg-secondary/10', textColor: 'text-secondary' },
+  refunded: { label: 'คืนเงินสำเร็จ', color: 'neutral', icon: FiCheckCircle, bgColor: 'bg-neutral/10', textColor: 'text-neutral' },
+  cancelled: { label: 'ยกเลิก', color: 'error', icon: FiXCircle, bgColor: 'bg-error/10', textColor: 'text-error' },
+  req_cancel: { label: 'ขอยกเลิก', color: 'error', icon: FiFileText, bgColor: 'bg-error/10', textColor: 'text-error' },
+};
 
 // --- StepIndicator Component ---
 const OrderStepIndicator = ({ order, statusConfig }: { order: Order, statusConfig: any }) => {
@@ -33,19 +44,45 @@ const OrderStepIndicator = ({ order, statusConfig }: { order: Order, statusConfi
   
   const happyStepIndex = happyPath.indexOf(currentStatus);
 
+  const renderArrow = () => (
+    <div className="absolute -top-14 left-1/2 transform -translate-x-1/2 flex flex-col items-center animate-bounce z-20 w-max">
+        <span className="text-[10px] font-bold text-primary bg-base-100 px-2 py-0.5 rounded-full shadow-sm mb-1 border border-base-200">อยู่ที่นี่</span>
+        <FiArrowDown className="w-6 h-6 text-primary filter drop-shadow-sm" />
+    </div>
+  );
+
+  const renderIconCircle = (icon: React.ElementType, isCurrent: boolean, isComplete: boolean, colorClass: string) => {
+      let bgClass = 'bg-base-100 border-base-300 text-base-content/30'; // Default (ยังไม่ถึง)
+      if (isComplete) bgClass = 'bg-success text-success-content border-success';
+      else if (isCurrent) bgClass = `bg-primary text-primary-content border-primary shadow-lg scale-110 ring-2 ring-primary/30`;
+
+      return (
+        <div className={`w-10 h-10 rounded-full border-2 flex items-center justify-center transition-all duration-300 relative z-10 ${bgClass}`}>
+            {React.createElement(icon, { className: 'w-5 h-5' })}
+        </div>
+      );
+  };
+
   if (happyStepIndex > -1) {
     return (
-      <ul className="steps steps-vertical md:steps-horizontal w-full my-8 text-center px-4">
+      <ul className="steps steps-vertical md:steps-horizontal w-full my-12 text-center px-4">
         {happyPath.map((step, index) => {
           const statusInfo = statusConfig[step];
           if (!statusInfo) return null; 
+          
           const isComplete = index < happyStepIndex;
           const isCurrent = index === happyStepIndex;
-          // ปรับสี Step ให้สวยงาม
-          const stepClass = isComplete ? 'step-success' : isCurrent ? 'step-primary' : '';
+          const stepColor = isComplete ? 'step-success' : isCurrent ? 'step-primary' : '';
+
           return (
-            <li key={step} className={`step ${stepClass} text-sm font-medium`}>
-                {statusInfo.label}
+            <li key={step} className={`step ${stepColor} overflow-visible`} data-content="">
+              <div className="flex flex-col items-center relative">
+                {isCurrent && renderArrow()}
+                {renderIconCircle(statusInfo.icon, isCurrent, isComplete, 'primary')}
+                <span className={`text-xs sm:text-sm mt-3 font-medium ${isCurrent ? 'text-primary font-bold' : 'text-base-content/70'}`}>
+                    {statusInfo.label}
+                </span>
+              </div>
             </li>
           );
         })}
@@ -56,34 +93,55 @@ const OrderStepIndicator = ({ order, statusConfig }: { order: Order, statusConfi
   // Refund Path
   const refundStepIndex = refundPath.indexOf(currentStatus);
   if (refundStepIndex > -1) {
-    const refundComplete = refundStepIndex >= 0;
-    const refundedComplete = refundStepIndex >= 1;
     return (
-      <ul className="steps steps-vertical md:steps-horizontal w-full my-8 text-center px-4">
-        <li className={`step ${refundComplete ? 'step-secondary' : ''}`}>กำลังคืนเงิน</li>
-        <li className={`step ${refundedComplete ? 'step-neutral' : ''}`}>คืนเงินสำเร็จ</li>
+      <ul className="steps steps-vertical md:steps-horizontal w-full my-12 text-center px-4">
+        {refundPath.map((step, index) => {
+            const statusInfo = statusConfig[step];
+            const isComplete = index < refundStepIndex;
+            const isCurrent = index === refundStepIndex;
+            const stepColor = isComplete ? 'step-success' : isCurrent ? 'step-secondary' : '';
+
+            return (
+                <li key={step} className={`step ${stepColor} overflow-visible`} data-content="">
+                    <div className="flex flex-col items-center relative">
+                        {isCurrent && renderArrow()}
+                        {renderIconCircle(statusInfo.icon, isCurrent, isComplete, 'secondary')}
+                        <span className="text-xs sm:text-sm mt-3 font-medium">{statusInfo.label}</span>
+                    </div>
+                </li>
+            );
+        })}
       </ul>
     );
   }
 
   // Cancelled Path
   if (currentStatus === 'cancelled' || currentStatus === 'req_cancel') {
+    const isReq = currentStatus === 'req_cancel';
     return (
-      <ul className="steps steps-vertical md:steps-horizontal w-full my-8 text-center px-4">
-        <li className="step step-primary">สั่งสินค้า</li>
-        <li className="step step-error" data-content="✕">{statusConfig[currentStatus].label}</li>
+      <ul className="steps steps-vertical md:steps-horizontal w-full my-12 text-center px-4 overflow-visible">
+        <li className="step step-primary overflow-visible" data-content="">
+            <div className="flex flex-col items-center relative">
+                {renderIconCircle(FiShoppingCart, false, true, 'primary')}
+                <span className="text-xs sm:text-sm mt-3 font-medium">สั่งสินค้า</span>
+            </div>
+        </li>
+        <li className={`step ${isReq ? 'step-warning' : 'step-error'} overflow-visible`} data-content="">
+            <div className="flex flex-col items-center relative">
+                {renderArrow()}
+                <div className={`w-10 h-10 rounded-full border-2 flex items-center justify-center relative z-10 ${isReq ? 'bg-warning text-warning-content border-warning shadow-lg' : 'bg-error text-error-content border-error shadow-lg'}`}>
+                    {React.createElement(statusConfig[currentStatus].icon, { className: 'w-5 h-5' })}
+                </div>
+                <span className={`text-xs sm:text-sm mt-3 font-bold ${isReq ? 'text-warning' : 'text-error'}`}>
+                    {statusConfig[currentStatus].label}
+                </span>
+            </div>
+        </li>
       </ul>
     );
   }
 
-  return (
-    <div className="text-center p-6">
-      <span className={`badge badge-lg gap-2 px-4 py-3 h-auto ${statusConfig[currentStatus]?.bgColor} ${statusConfig[currentStatus]?.textColor}`}>
-        {statusConfig[currentStatus]?.icon && React.createElement(statusConfig[currentStatus].icon)}
-        {statusConfig[currentStatus]?.label || currentStatus}
-      </span>
-    </div>
-  );
+  return null;
 };
 
 // --- Main Page Component ---
@@ -116,7 +174,6 @@ export default function OrderDetailsPage() {
       const response = await fetch(`/api/main/orders/${orderId}`);
       if (!response.ok) { const errorData = await response.json(); throw new Error(errorData.message || 'ไม่สามารถดึงข้อมูลคำสั่งซื้อได้'); }
       const data = await response.json();
-      console.log(data.order)
       setOrder(data.order);
     } catch (err: any) { setError(err.message); } finally { setLoading(false); }
   }, [orderId]);
@@ -213,13 +270,15 @@ export default function OrderDetailsPage() {
   // +++ Logic คำนวณข้อความแจ้งเตือนและเวลา +++
   const orderStatusNote = useMemo(() => {
     if (!order) return null;
-    console.log(order)
     
-    const { Status, Payment_Type, Is_Payment_Checked, Transaction_Slip, Transaction_Status, Transaction_Date, Order_Date } = order;
+    const { Status, Payment_Type, Is_Payment_Checked, Transaction_Slip, Transaction_Status, Transaction_Date, Order_Date, Cancel_Reason } = order;
 
     const baseDate = Transaction_Date ? new Date(Transaction_Date) : new Date(Order_Date);
     const expireDate = new Date(baseDate.getTime() + (PAYMENT_TIMEOUT_HOURS * 60 * 60 * 1000));
     const formattedExpire = formatDateTime(expireDate);
+
+    // Helper Text สำหรับแสดงเหตุผล
+    const reasonText = Cancel_Reason ? `\nสาเหตุ: ${Cancel_Reason}` : '';
     
     // 1. Pending + Rejected (สลิปถูกปฏิเสธ)
     if (Status === 'waiting_payment' && Transaction_Status === 'rejected') {
@@ -268,7 +327,7 @@ export default function OrderDetailsPage() {
         };
     }
 
-    // 4. Refunding
+    // 4. Refunding - เพิ่มเหตุผล
     if (Status === 'refunding') {
         return {
             icon: FiRefreshCw,
@@ -276,11 +335,11 @@ export default function OrderDetailsPage() {
             bgColor: 'bg-secondary/10',
             borderColor: 'border-secondary/20',
             title: 'กำลังดำเนินการคืนเงิน',
-            message: 'การชำระเงินถูกตรวจสอบแล้ว เจ้าหน้าที่กำลังดำเนินการคืนเงิน'
+            message: `การชำระเงินถูกตรวจสอบแล้ว เจ้าหน้าที่กำลังดำเนินการคืนเงิน${reasonText}`
         };
     }
 
-    // 5. Refunded
+    // 5. Refunded - เพิ่มเหตุผล
     if (Status === 'refunded') {
         return {
             icon: FiCheckCircle,
@@ -288,7 +347,7 @@ export default function OrderDetailsPage() {
             bgColor: 'bg-neutral/10',
             borderColor: 'border-neutral/20',
             title: 'คืนเงินสำเร็จ',
-            message: 'คำสั่งซื้อของคุณได้รับการคืนเงินเรียบร้อยแล้ว'
+            message: `คำสั่งซื้อของคุณได้รับการคืนเงินเรียบร้อยแล้ว${reasonText}`
         };
     }
 
@@ -304,6 +363,18 @@ export default function OrderDetailsPage() {
             title: 'สินค้าอยู่ระหว่างการจัดส่ง',
             message: 'เมื่อได้รับสินค้าแล้ว กรุณาตรวจสอบความเรียบร้อยและกดปุ่ม "ยืนยันรับสินค้า" ด้านล่าง'
         };
+    }
+    
+    // 7. Cancelled / Req_Cancel - มีเหตุผลอยู่แล้ว
+    if (Status === 'cancelled' || Status === 'req_cancel') {
+         return {
+            icon: config.icon, 
+            color: config.textColor, 
+            bgColor: config.bgColor, 
+            borderColor: 'border-error/20',
+            title: config.label, 
+            message: Cancel_Reason ? `เหตุผล: ${Cancel_Reason}` : 'ไม่ระบุเหตุผล'
+        };       
     }
 
     return {
@@ -408,11 +479,9 @@ export default function OrderDetailsPage() {
             </div>
 
             {/* Right Column: Payment & Slip */}
-{/* Right Column: Payment & Slip */}
             <div className="space-y-6">
                 {/* Slip Upload & View Section */}
                 {(order.Payment_Type === 'bank_transfer' || order.Transaction_Slip) && (
-                /* --- แก้ไข: ลบ h-full ออกจาก className --- */
                 <div className="card bg-base-100 border border-base-200 shadow-sm"> 
                     <div className="card-body p-6 flex flex-col">
                         <h3 className="card-title text-lg flex items-center gap-2 mb-4">
@@ -465,12 +534,7 @@ export default function OrderDetailsPage() {
                                 <FiRefreshCw /> หลักฐานการคืนเงิน
                             </h3>
                             <div className="flex items-center justify-center bg-secondary/5 rounded-xl border border-secondary/20 p-2">
-                                                                <img 
-                                    src={order.Refund_Slip} 
-                                    alt="Refund Slip" 
-                                    className="w-full h-auto object-contain rounded-lg shadow-sm hover:scale-105 transition-transform cursor-pointer" 
-                                    onClick={() => window.open(order.Refund_Slip!, '_blank')}
-                                />
+                                <img src={order.Refund_Slip} alt="Refund Slip" className="w-full h-auto rounded-lg" />
                             </div>
                         </div>
                     </div>
@@ -566,7 +630,7 @@ export default function OrderDetailsPage() {
                         </div>
                         <div>
                             <h3 className={`font-bold text-lg ${orderStatusNote.color}`}>{orderStatusNote.title}</h3>
-                            <p className="text-sm opacity-90 mt-1">{orderStatusNote.message}</p>
+                            <p className="text-sm opacity-90 mt-1 whitespace-pre-line">{orderStatusNote.message}</p>
                         </div>
                     </div>
 
@@ -638,7 +702,7 @@ export default function OrderDetailsPage() {
                             <div className="flex-1">
                                 <h3 className={`font-bold text-sm ${targetStatusInfo.config.color}`}>ผลการดำเนินการ</h3>
                                 <p className="text-xs opacity-80 mt-1">{targetStatusInfo.description}</p>
-                                <div className={`badge ${targetStatusInfo.config.color.replace('text-', 'badge-')} gap-1 mt-2 border-none ${targetStatusInfo.config.textColor}`}>
+                                <div className={`badge ${targetStatusInfo.config.color.replace('text-', 'badge-')} gap-1 mt-2 border-none text-white`}>
                                     สถานะใหม่: {targetStatusInfo.config.label}
                                 </div>
                             </div>
