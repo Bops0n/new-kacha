@@ -119,7 +119,7 @@ const OrderStepIndicator = ({ order, statusConfig }: { order: Order, statusConfi
   if (currentStatus === 'cancelled' || currentStatus === 'req_cancel') {
     const isReq = currentStatus === 'req_cancel';
     return (
-      <ul className="steps steps-vertical md:steps-horizontal w-full my-12 text-center px-4">
+      <ul className="steps steps-vertical md:steps-horizontal w-full my-12 text-center px-4 overflow-visible">
         <li className="step step-primary overflow-visible" data-content="">
             <div className="flex flex-col items-center relative">
                 {renderIconCircle(FiShoppingCart, false, true, 'primary')}
