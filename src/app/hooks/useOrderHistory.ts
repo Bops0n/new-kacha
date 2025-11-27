@@ -78,6 +78,20 @@ export function useOrderHistory() {
     }
   }, [status, router, showAlert]);
 
+  const getCancelTarget = useCallback((order: Order | null) => {
+    if (!order) return null;
+    const hasSlip = !!order.Transaction_Slip;
+    const isChecked = order.Is_Payment_Checked;
+
+    if (hasSlip && isChecked) {
+        return { targetStatus: 'refunding' as OrderStatus, description: 'เนื่องจากมีการยืนยันชำระเงินแล้ว ระบบจะเปลี่ยนสถานะเป็น "รอคืนเงิน" เพื่อให้เจ้าหน้าที่ตรวจสอบและดำเนินการคืนเงิน' };
+    }
+    if (hasSlip && !isChecked && order.Transaction_Status !== 'rejected') {
+        return { targetStatus: 'req_cancel' as OrderStatus, description: 'เนื่องจากมีการแนบสลิปแล้วแต่ยังไม่ได้รับการตรวจสอบ ระบบจะเปลี่ยนสถานะเป็น "ขอยกเลิก" เพื่อให้เจ้าหน้าที่รับทราบ' };
+    }
+    return { targetStatus: 'cancelled' as OrderStatus, description: 'รายการจะถูกเปลี่ยนสถานะเป็น "ยกเลิก" ทันที' };
+  }, []);
+
   useEffect(() => {
     fetchOrders();
   }, [fetchOrders]); // The dependency array ensures this runs when fetchOrders is stable
@@ -88,6 +102,7 @@ export function useOrderHistory() {
     orders,
     sessionStatus: status,
     fetchOrders,
-    handleConfirmReceive, // Expose session status for initial loading check
+    handleConfirmReceive,
+    getCancelTarget // Expose session status for initial loading check
   };
 }
