@@ -5,61 +5,90 @@ import { useAlert } from "@/app/context/AlertModalContext";
 import { FiInfo, FiXCircle } from "react-icons/fi";
 import { paymentTypeLabels, statusTypeLabels } from "@/app/utils/client";
 import { Order } from "@/types";
+import { useRouter } from "next/navigation";
 
-export default function OrderCancelButton({ orderId, onlyIcon, onSuccess }: {
-  orderId: number;
+export default function OrderCancelButton({ order, onlyIcon, onSuccess }: {
+  order: Order;
   onlyIcon: boolean;
   onSuccess?: () => void;
 }) {
   const { showAlert } = useAlert();
+  const { push } = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [reason, setReason] = useState("");
   const [loading, setLoading] = useState(false);
-
-  const [order, setOrder] = useState<Order | null>(null);
 
   const [btnDisable, setBtnDisable] = useState(false);
   const [lbButtonText, setButtonText] = useState("");
   const [isNoPaymentChecked, setNoPaymentChecked] = useState(false);
   const [isRefunding, setIsRefunding] = useState(false);
   const [isCancelled, setIsCancelled] = useState(false);
-  const [href, setHref] = useState(null);
+  const [href, setHref] = useState<string | null>(null);
 
   const fetchOrderData = useCallback(async () => {
-    async function load() {
-        try {
-            setLoading(true);
+    // async function loadNextStep(orderId: number) {
+    //     const response = await fetch(`/api/admin/order/req-cancel-step?orderId=${orderId}`);
+    //     const result = await response.json();
+    //     if (result && result.length > 0) {
+    //         const data = result[0];
+    //         setBtnDisable(data.btnDisable);
+    //         setButtonText(data.lbButtonText);
+    //         setNoPaymentChecked(data.isNoPaymentChecked);
+    //         setIsRefunding(data.isRefunding);
+    //         setIsCancelled(data.isCancelled);
+    //         setHref(data.Href);
+    //     }
+    // }
 
-            const res = await fetch(`/api/admin/order?id=${orderId}`);
-            const { orders } = await res.json();
+    // await loadNextStep(order.Order_ID);
 
-            const order : Order = orders[0];
-            if (order) {
-                setOrder(order);
-                await loadNextStep(order.Order_ID);
-            }
-        } finally {
-            setLoading(false);
-        }
+    const isCOD = order.Payment_Type === 'cash_on_delivery';
+
+    const v_isNoPaymentChecked = !isCOD && 
+      order.Transaction_Slip !== null && 
+      !order.Is_Payment_Checked && 
+      order.Transaction_Status === 'pending' &&
+      order.Status === 'pending' && 
+      !order.Is_Confirmed;
+
+    if (order.Status === 'cancelled' || order.Status === 'refunding' || order.Status === 'refunded') {
+      setBtnDisable(false);
+      setButtonText('คำสั่งซื้อถูกยกเลิกแล้ว');
+      setNoPaymentChecked(v_isNoPaymentChecked);
+      setIsRefunding(false);
+      setIsCancelled(false);
+      setHref(null);
+      return;
     }
 
-    async function loadNextStep(orderId: number) {
-        const response = await fetch(`/api/admin/order/req-cancel-step?orderId=${orderId}`);
-        const result = await response.json();
-        if (result && result.length > 0) {
-            const data = result[0];
-            setBtnDisable(data.btnDisable);
-            setButtonText(data.lbButtonText);
-            setNoPaymentChecked(data.isNoPaymentChecked);
-            setIsRefunding(data.isRefunding);
-            setIsCancelled(data.isCancelled);
-            setHref(data.Href);
-        }
+    const v_lock = order.Status === 'shipped' || order.Status === 'delivered';
+
+    const v_isRefunding = !isCOD && order.Transaction_Slip !== null && order.Is_Payment_Checked && order.Transaction_Status === 'confirmed' && order.Status === 'preparing' && order.Is_Confirmed;
+
+    if (v_isRefunding) {
+      setHref(`/admin/order-management/${order.Order_ID}?controller=refunding`);
     }
 
-    load();
+    setIsCancelled(v_lock ? false : !v_isRefunding);
 
-  }, [orderId]);
+    if (isCancelled) {
+      setHref(`/admin/order-management`);
+    }
+
+    if (v_isNoPaymentChecked) {
+      setBtnDisable(false);
+      setHref(`/admin/order-management/${order.Order_ID}?controller=checkorder&goto=transfer_slip`);
+    } else {
+      setBtnDisable(v_lock);
+    }
+
+    setButtonText(btnDisable ? 'ไม่สามารถยกเลิกได้' : v_isNoPaymentChecked ? 'ดำเนินการตรวจสอบหลักฐาน' : 'ยืนยัน');
+    setNoPaymentChecked(v_isNoPaymentChecked);
+    setIsRefunding(v_isRefunding);
+
+    console.log(`${order.Order_ID} : ${isRefunding}`)
+
+  }, [order]);
 
   async function submitCancel() {
     if (!reason.trim()) {
@@ -75,7 +104,7 @@ export default function OrderCancelButton({ orderId, onlyIcon, onSuccess }: {
       const res = await fetch("/api/admin/order/req-cancel-order", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ Order_ID: orderId, Reason: reason })
+        body: JSON.stringify({ Order_ID: order.Order_ID, Reason: reason })
       });
 
       const { Is_Success, Message, Href } = await res.json();
@@ -88,7 +117,7 @@ export default function OrderCancelButton({ orderId, onlyIcon, onSuccess }: {
 
       showAlert(Message, Is_Success ? "success" : "error", 'ยกเลิกคำสั่งซื้อ', async () => {
         if (Is_Success && Href) {
-          window.location.href = Href;
+          push(Href);
         }
       });
     } finally {
@@ -132,7 +161,7 @@ export default function OrderCancelButton({ orderId, onlyIcon, onSuccess }: {
   
   const lbCOD = paymentTypeLabels['cash_on_delivery'];
 
-  const modalId = `cancelOrderModal_${orderId}`;
+  const modalId = `cancelOrderModal_${order.Order_ID}`;
 
   function showModal(type: boolean) {
     if (type) {
@@ -318,7 +347,7 @@ export default function OrderCancelButton({ orderId, onlyIcon, onSuccess }: {
                   className={`btn btn-warning text-white`} 
                   onClick={() => {
                     if (href) {
-                      window.location.href = href;
+                      push(href);
                     }
                   }}
                 >

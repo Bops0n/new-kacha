@@ -10,7 +10,7 @@ export async function POST(req: NextRequest) {
         const isCheck = checkRequire(auth);
         if (isCheck) return isCheck;
 
-        const { orderId, action } = await req.json();
+        const { orderId, action, isReqCancel } = await req.json();
 
         if (!orderId || !action) {
             return NextResponse.json(
@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
             );
         }
 
-        const { rows } = await poolQuery(`SELECT * FROM public."SP_ADMIN_ORDER_PAYMENT_VERIFY_UPD"($1, $2, $3)`, [orderId, action, auth.userId]);
+        const { rows } = await poolQuery(`SELECT * FROM public."SP_ADMIN_ORDER_PAYMENT_VERIFY_UPD"($1, $2, $3, $4)`, [orderId, action, isReqCancel, auth.userId]);
 
         const result = rows[0];
 

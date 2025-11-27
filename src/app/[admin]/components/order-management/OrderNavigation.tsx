@@ -1,10 +1,11 @@
 "use client";
 
-import { useSession } from "next-auth/react";
+import { Order } from "@/types";
 import OrderCancelButton from "./OrderCancelButton";
+import { useRouter } from "next/navigation";
 
 type OrderNavigationProps = {
-    orderId: number;
+    order: Order;
     backHref?: string;
     nextHref?: string | null;
     nextLabel?: string;
@@ -16,7 +17,7 @@ type OrderNavigationProps = {
 };
 
 export function OrderNavigation({
-  orderId,
+  order,
   backHref = "/admin/order-management",
   nextHref,
   nextLabel = "ถัดไป",
@@ -26,21 +27,21 @@ export function OrderNavigation({
   onValidate = () => true,
   onSaved = () => {},
 }: OrderNavigationProps) {
-  const { data: session } = useSession();
+  const { push } = useRouter();
 
   return (
     <>
       {/* Navigation Bar */}
       <div className="flex justify-between mt-6">
         <button className="btn btn-ghost" onClick={() => {
-            window.location.href = backHref
+            push(backHref);
           }
         }>
           ย้อนกลับ
         </button>
 
         <div className="flex gap-3">
-            {btnCancelOrder && <OrderCancelButton orderId={orderId} onlyIcon={false} onSuccess={() => fetchOrderData()}/>}
+            {btnCancelOrder && <OrderCancelButton order={order} onlyIcon={false} onSuccess={() => fetchOrderData()}/>}
 
             {/* ปุ่ม Next (ขนาดเท่ากัน) */}
             {nextHref && (
@@ -55,7 +56,7 @@ export function OrderNavigation({
 
                   if (onSaved) onSaved();
 
-                  if (nextHref) window.location.href = nextHref;
+                  if (nextHref) push(nextHref);
                 }}
             >
               {nextLabel}
