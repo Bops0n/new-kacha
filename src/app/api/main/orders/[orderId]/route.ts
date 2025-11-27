@@ -95,7 +95,7 @@ export async function PATCH(request: NextRequest, { params }: { params: { orderI
     }
 }
 
-export async function POST(request: NextRequest, { params }: { params: { orderId: number } }) {
+export async function DELETE(request: NextRequest, { params }: { params: { orderId: number } }) {
     const auth = await authenticateRequest();
     const isCheck = checkRequire(auth);
     if (isCheck) return isCheck;

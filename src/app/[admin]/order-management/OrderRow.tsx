@@ -10,17 +10,20 @@ interface OrderRowProps {
   order: Order;
   statusConfig: StatusConfig;
   btnCancelOrder: boolean;
+  fetchOrders: () => { };
 }
 
-const OrderRow: React.FC<OrderRowProps> = ({ order, statusConfig, btnCancelOrder }) => {
+const OrderRow: React.FC<OrderRowProps> = ({ order, statusConfig, btnCancelOrder, fetchOrders }) => {
   const StatusIcon = statusConfig[order.Status]?.icon;
   const statusInfo = statusConfig[order.Status];
 
   const handleClickOpen = () => {
     if (order.Status === 'refunding' || order.Status === 'refunded') {
-      window.open(`/admin/order-management/${order.Order_ID}/refunding`);
+      window.open(`/admin/order-management/${order.Order_ID}?controller=refunding`);
+    } else if (order.Status === 'req_cancel') {
+      window.open(`/admin/order-management/${order.Order_ID}?controller=req_cancel&goto=transfer_slip`);
     } else {
-      window.open(`/admin/order-management/${order.Order_ID}/checkorder`);
+      window.open(`/admin/order-management/${order.Order_ID}?controller=checkorder`);
     }
   }
 
@@ -63,7 +66,7 @@ const OrderRow: React.FC<OrderRowProps> = ({ order, statusConfig, btnCancelOrder
           </button>
 
           {btnCancelOrder ? (
-              <OrderCancelButton orderId={order.Order_ID}  onlyIcon={true}/>
+              <OrderCancelButton order={order}  onlyIcon={true} onSuccess={fetchOrders}/>
             ) : (
               <button className="btn btn-sm btn-ghost btn-square" title="ยกเลิกคำสั่งซื้อ" disabled>
                 <FiXCircle className="w-4 h-4" />

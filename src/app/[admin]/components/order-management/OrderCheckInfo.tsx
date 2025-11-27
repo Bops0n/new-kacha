@@ -2,9 +2,9 @@ import { formatPrice } from "@/app/utils/formatters";
 import { Order, OrderProductDetail, SimpleProductDetail } from "@/types";
 import { FiAlertTriangle, FiArchive, FiCreditCard, FiImage, FiShoppingBag } from "react-icons/fi";
 import { useAlert } from "@/app/context/AlertModalContext";
-import { useSession } from "next-auth/react";
 import { calculateAvailableStock } from "@/app/utils/calculations";
 import { useState } from "react";
+import { statusTypeLabels } from "@/app/utils/client";
 
 const OrderItemDetail: React.FC<{ orderProduct: OrderProductDetail; liveProduct: SimpleProductDetail; }> = ({ orderProduct, liveProduct }) => {
   const name = liveProduct?.Name || orderProduct.Product_Name;
@@ -77,6 +77,7 @@ type OrderCheckProps = {
     order: Order;
     liveDetails: Map<number, SimpleProductDetail>;
     btnSpecial: boolean;
+    isReqCancel: boolean;
     fetchOrderData?: () => void;
 };
 
@@ -84,6 +85,7 @@ export default function OrderCheckInfo({
     order,
     liveDetails,
     btnSpecial,
+    isReqCancel,
     fetchOrderData = () => {}
 }: OrderCheckProps) {
     const { showAlert } = useAlert();
@@ -98,7 +100,8 @@ export default function OrderCheckInfo({
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
                 orderId: order.Order_ID,
-                action: action
+                action: action,
+                isReqCancel: isReqCancel
             })
             });
 
@@ -109,6 +112,9 @@ export default function OrderCheckInfo({
             }
         });
     }
+
+    const cancelled = statusTypeLabels['cancelled'];
+    const refunding = statusTypeLabels['refunding'];
 
     return (
         <>
@@ -198,7 +204,23 @@ export default function OrderCheckInfo({
 
                         <div>
                             <p className="text-sm opacity-60">หมายเหตุ</p>
-                            <p className="text-sm text-base-content/80">กรุณาตรวจสอบว่าข้อมูลตรงกับสลิป</p>
+                            {isReqCancel ? (
+                              <p className="text-sm text-base-content/80">
+                                หากกดปุ่ม 'ปฏิเสธ' สถานะคำสั่งซื้อจะถูกเปลี่ยนเป็น
+                                <span className={`badge ${cancelled.color }`}>
+                                  <cancelled.icon className="inline-block w-4 h-4 mr-1" />
+                                  {cancelled.label}
+                                </span><br/>
+                                หากกดปุ่ม 'ยืนยัน' ระบบจะเปลี่ยนสถานะเป็น{" "}
+                                <span className={`badge ${refunding.color }`}>
+                                    <refunding.icon className="inline-block w-4 h-4 mr-1" />
+                                    {refunding.label}
+                                </span>{" "}
+                                เพื่อดำเนินการคืนเงินต่อไป
+                              </p>
+                            ) : (
+                              <p className="text-sm text-base-content/80">กรุณาตรวจสอบว่าข้อมูลตรงกับสลิป</p>
+                            )}
                         </div>
                       </div>
 

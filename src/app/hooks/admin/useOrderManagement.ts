@@ -89,6 +89,7 @@ export function useOrderManagement() {
     filteredOrders,
     filters,
     setFilters,
-    bulkSteps
+    bulkSteps,
+    fetchOrders
   };
 }

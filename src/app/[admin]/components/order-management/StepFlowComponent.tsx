@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import React from "react";
 
 export const StepFlowBar = ({ currentStep, orderId, refund }: { currentStep: number, orderId: number, refund: boolean }) => {
@@ -7,22 +8,22 @@ export const StepFlowBar = ({ currentStep, orderId, refund }: { currentStep: num
     {
       id: 1,
       label: "ตรวจสอบการชำระเงิน",
-      href: `/admin/order-management/${orderId}/checkorder`,
+      controller: `checkorder`,
     },
     {
       id: 2,
       label: "ข้อมูลการจัดส่ง",
-      href: `/admin/order-management/${orderId}/shipping`,
+      controller: `shipping`,
     },
     {
       id: 3,
       label: "สรุปคำสั่งซื้อ",
-      href: `/admin/order-management/${orderId}/summary`,
+      controller: `summary`,
     },
     {
       id: 4,
       label: "ยืนยันการจัดส่ง",
-      href: `/admin/order-management/${orderId}/shipped`,
+      controller: `shipped`,
     }
   ];
 
@@ -30,14 +31,16 @@ export const StepFlowBar = ({ currentStep, orderId, refund }: { currentStep: num
     {
       id: 1,
       label: "ตรวจสอบการชำระเงิน",
-      href: `/admin/order-management/${orderId}/refunding`,
+      controller: `refunding`,
     },
     {
       id: 2,
       label: "ดำเนินการคืนเงิน",
-      href: `/admin/order-management/${orderId}/refunded`,
+      controller: `refunded`,
     }
   ]
+
+  const { push } = useRouter();
 
   return (
     <ul className="steps steps-horizontal w-full text-lg">
@@ -50,7 +53,7 @@ export const StepFlowBar = ({ currentStep, orderId, refund }: { currentStep: num
             "--tw-border": "2px",
             } as React.CSSProperties}
             data-content={step.id}
-            onClick={() => { window.location.href = step.href }}
+            onClick={() => { push(`/admin/order-management/${orderId}?controller=${step.controller}`) }}
           >
             {step.label}
           </li>
@@ -65,7 +68,7 @@ export const StepFlowBar = ({ currentStep, orderId, refund }: { currentStep: num
             "--tw-border": "2px",
             } as React.CSSProperties}
             data-content={step.id}
-            onClick={() => { window.location.href = step.href }}
+            onClick={() => { push(`/admin/order-management/${orderId}?controller=${step.controller}`) }}
           >
             {step.label}
           </li>
