@@ -1,4 +1,3 @@
-// src/app/api/[admin]/report/daily/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { poolQuery } from '@/app/api/lib/db';
 import { checkReportRequire } from '@/app/api/auth/utils';
@@ -11,14 +10,16 @@ export async function GET(request: NextRequest) {
     if (isCheck) return isCheck;
 
     const { searchParams } = new URL(request.url);
-    const date = searchParams.get('date');
+    
+    // รับค่า startDate และ endDate
+    const startDate = searchParams.get('startDate');
+    const endDate = searchParams.get('endDate');
 
-    if (!date) {
-        return NextResponse.json({ message: 'Date is required' }, { status: 400 });
+    if (!startDate || !endDate) {
+        return NextResponse.json({ message: 'Start Date and End Date are required' }, { status: 400 });
     }
 
     try {
-        // เพิ่ม OP."Status" AS "Transaction_Status"
         const queryString = `
             SELECT 
                 O."Order_ID",
@@ -34,16 +35,16 @@ export async function GET(request: NextRequest) {
             FROM public."Order" O
             LEFT JOIN public."User" U ON O."User_ID" = U."User_ID"
             LEFT JOIN public."Order_Payment" OP ON O."Order_ID" = OP."Order_ID"
-            WHERE DATE(O."Order_Date") = $1
+            WHERE DATE(O."Order_Date") BETWEEN $1 AND $2  -- กรองตามช่วงเวลา
             ORDER BY O."Order_ID" ASC
         `;
 
-        const { rows } = await poolQuery(queryString, [date]);
+        const { rows } = await poolQuery(queryString, [startDate, endDate]);
 
         return NextResponse.json({ orders: rows });
 
     } catch (error: any) {
-        logger.error("Daily Report API Error:", { error });
+        logger.error("Report API Error:", { error });
         return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 });
     }
 }

@@ -1,4 +1,4 @@
-import fs from "fs";
+const fs = require('fs')
 import path from "path";
 
 type LOG_LEVEL = "debug" | "info" | "warn" | "error";
