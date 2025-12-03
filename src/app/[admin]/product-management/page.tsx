@@ -209,7 +209,9 @@ export default function ProductManagementPage() {
     const handleFilterChange = (filterName: string, value: string | number) => {
         setFilters(prev => {
             const newFilters = { ...prev, [filterName]: value };
-            if (filterName === 'categoryFilter') { newFilters.subCategoryFilter = 'all'; newFilters.childCategoryFilter = 'all'; }
+            if (filterName === 'categoryFilter') { 
+                newFilters.subCategoryFilter = 'all'; 
+                newFilters.childCategoryFilter = 'all'; }
             if (filterName === 'subCategoryFilter') { newFilters.childCategoryFilter = 'all'; }
             return newFilters;
         });
