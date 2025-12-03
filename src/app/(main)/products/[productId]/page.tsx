@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { FiPlus, FiMinus, FiShoppingCart, FiPhone } from 'react-icons/fi';
+import { FiPlus, FiMinus, FiShoppingCart, FiPhone, FiX, FiZoomIn } from 'react-icons/fi';
 import { FaLine } from 'react-icons/fa';
 import { useParams } from 'next/navigation';
 import { formatPrice } from '@/app/utils/formatters';
@@ -11,17 +11,38 @@ import { useAddToCart } from '@/app//hooks/useAddToCart';
 import { useProductDetail } from '@/app/hooks/useProductDetail';
 import { FullCategoryPath } from '@/types';
 import { calculateAvailableStock } from '@/app/utils/calculations';
+import ProductDisplayCard from '../../components/ProductDisplayCard';
 
-// Component สำหรับ Breadcrumbs (คงไว้เหมือนเดิม)
+// --- Component: Image Preview Modal ---
+const ImagePreviewModal = ({ imageUrl, onClose }: { imageUrl: string | null, onClose: () => void }) => {
+    if (!imageUrl) return null;
+    return (
+        <div className="fixed inset-0 bg-black/90 z-[9999] flex items-center justify-center p-4 animate-fadeIn backdrop-blur-sm" onClick={onClose}>
+            <div className="relative max-w-6xl w-full h-full flex items-center justify-center">
+                <button className="absolute top-4 right-4 btn btn-circle btn-ghost text-white bg-black/20 hover:bg-red-500 z-20" onClick={onClose}>
+                    <FiX className="w-8 h-8" />
+                </button>
+                <img 
+                    src={imageUrl} 
+                    alt="Preview" 
+                    className="max-w-full max-h-[90vh] rounded-lg shadow-2xl object-contain"
+                    onClick={(e) => e.stopPropagation()} 
+                />
+            </div>
+        </div>
+    );
+};
+
+// --- Component: Breadcrumbs ---
 const Breadcrumbs = ({ path }: { path: FullCategoryPath | null }) => {
     if (!path) return <div className="h-6 mb-6"></div>;
     return (
-        <div className="text-sm breadcrumbs mb-6">
+        <div className="text-sm breadcrumbs mb-6 text-base-content/70">
             <ul>
-                <li><Link href="/">หน้าแรก</Link></li>
-                <li><Link href={`/products?categoryId=${path.Category_ID}`}>{path.Category_Name}</Link></li>
-                <li><Link href={`/products?categoryId=${path.Category_ID}&subCategoryId=${path.Sub_Category_ID}`}>{path.Sub_Category_Name}</Link></li>
-                <li><Link href={`/products?categoryId=${path.Category_ID}&subCategoryId=${path.Sub_Category_ID}&childCategoryId=${path.Child_ID}`}>{path.Child_Name}</Link></li>
+                <li><Link href="/" className="hover:text-primary">หน้าแรก</Link></li>
+                <li><Link href={`/products?categoryId=${path.Category_ID}`} className="hover:text-primary">{path.Category_Name}</Link></li>
+                <li><Link href={`/products?categoryId=${path.Category_ID}&subCategoryId=${path.Sub_Category_ID}`} className="hover:text-primary">{path.Sub_Category_Name}</Link></li>
+                <li><Link href={`/products?categoryId=${path.Category_ID}&subCategoryId=${path.Sub_Category_ID}&childCategoryId=${path.Child_ID}`} className="font-semibold text-primary">{path.Child_Name}</Link></li>
             </ul>
         </div>
     );
@@ -35,6 +56,8 @@ export default function ProductDetailPage() {
   const { addToCart, isAdding } = useAddToCart();
 
   const [quantity, setQuantity] = useState(1);
+  // State สำหรับ Modal ดูรูป
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
 
   const handleQuantityChange = (type: 'increase' | 'decrease') => {
     setQuantity(prevQty => {
@@ -52,133 +75,128 @@ export default function ProductDetailPage() {
 
   if (loading) return <LoadingSpinner />;
   if (error) return <div className="text-center py-20 text-error"><h2 className="text-2xl font-bold">เกิดข้อผิดพลาด</h2><p>{error}</p></div>;
-  if (!product) return <div className="text-center py-20">ไม่พบสินค้า</div>;
+  if (!product) return <div className="text-center py-20 text-base-content/60">ไม่พบสินค้า</div>;
 
   const hasDiscount = product.Discount_Price !== null && product.Discount_Price < product.Sale_Price;
   const displayPrice = hasDiscount ? product.Discount_Price : product.Sale_Price;
+
   return (
-    <div className="min-h-screen bg-base-200 p-4 lg:p-8">
+    <div className="min-h-screen bg-base-200 p-4 lg:p-8 font-sarabun">
       <div className="max-w-7xl mx-auto">
         <Breadcrumbs path={categoryPath} />
 
-        <div className="bg-base-100 rounded-lg shadow-xl p-6 lg:p-8">
-          <div className="flex flex-col lg:flex-row gap-8">
+        <div className="bg-base-100 rounded-2xl shadow-xl overflow-hidden">
+          <div className="flex flex-col lg:flex-row">
             
-            {/* --- 1. ส่วนรูปภาพสินค้า --- */}
-            <div className="lg:w-1/2 flex justify-center items-center p-4 relative">
-              <img
-                src={product.Image_URL || 'https://placehold.co/600x400?text=No+Image'}
-                alt={product.Name}
-                className="rounded-lg max-w-full h-auto"
-              />
-              {hasDiscount && (
-                <div className="absolute top-2 left-2 bg-red-500 text-white text-sm font-bold px-3 py-1 rounded">
-                  ลดราคา
-                </div>
-              )}
-            </div>
-
-            {/* --- 2. ส่วนข้อมูลสินค้า (ปรับปรุงให้ตรงตามรูปภาพ) --- */}
-            <div className="lg:w-1/2 flex flex-col space-y-4">
-              <h1 className="text-3xl font-bold text-base-content leading-tight">{product.Name}</h1>
-              
-              <div>
-                {hasDiscount && <p className="text-xl text-base-content/60 line-through">{formatPrice(product.Sale_Price)}</p>}
-                <p className="text-4xl font-bold text-primary">{formatPrice(displayPrice)}</p>
-              </div>
-
-              <div className="text-base-content/90 text-sm space-y-2 border-t border-base-300 pt-4">
-                <p><strong>รหัสสินค้า:</strong> {product.Product_ID}</p>
-                <p><strong>สถานะ:</strong> 
-                  <span className={`font-semibold ${calculateAvailableStock(product) > 0 ? 'text-success' : 'text-error'}`}>
-                    {calculateAvailableStock(product) > 0 ? ` มีสินค้า (${calculateAvailableStock(product)} ชิ้น)` : ' สินค้าหมด'}
-                  </span>
-                </p>
-                {product.Dimensions && <p><strong>ขนาด:</strong> {product.Dimensions}</p>}
-                {product.Material && <p><strong>วัสดุ:</strong> {product.Material}</p>}
-              </div>
-
-              {product.Review_Rating !== null && (
-                <div className="flex items-center">
-                  <div className="rating rating-sm items-center">
-                    {[...Array(5)].map((_, i) => (
-                      <input key={i} type="radio" name="rating-2" className="mask mask-star-2 bg-orange-400" readOnly checked={i < Math.round(product.Review_Rating!)} />
-                    ))}
-                  </div>
-                  <span className="ml-2 text-base-content/70 text-sm">({product.Review_Rating} รีวิว)</span>
-                </div>
-              )}
-
-              <div className="flex items-center gap-4 pt-4">
-                <span className="font-semibold text-base-content">จำนวน:</span>
-                <div className="flex border border-base-300 rounded-md overflow-hidden">
-                  <button onClick={() => handleQuantityChange('decrease')} disabled={quantity <= 1} className="btn btn-sm btn-ghost">-</button>
-                  <input
-                  type="number"
-                  value={quantity}
-                  onChange={(e) => setQuantity(parseInt(e.target.value) || 1)}
-                  className="input input-sm input-bordered w-16 text-center focus:outline-none"
+            {/* --- 1. ส่วนรูปภาพสินค้า (ซ้าย) --- */}
+            <div className="lg:w-1/2 p-6 lg:p-10 bg-base-200/30 flex items-center justify-center">
+               <div 
+                  className="relative group w-full max-w-md aspect-square rounded-2xl overflow-hidden border border-base-200 shadow-sm bg-white cursor-zoom-in"
+                  onClick={() => setPreviewImage(product.Image_URL || 'https://placehold.co/600x400?text=No+Image')}
+               >
+                  <img
+                    src={product.Image_URL || 'https://placehold.co/600x400?text=No+Image'}
+                    alt={product.Name}
+                    className="w-full h-full object-contain p-4 transition-transform duration-500 group-hover:scale-110"
                   />
-                  <button onClick={() => handleQuantityChange('increase')} disabled={quantity >= calculateAvailableStock(product)} className="btn btn-sm btn-ghost">+</button>
-                </div>
-              </div>
-           
-              <button onClick={handleAddToCartClick} disabled={calculateAvailableStock(product) === 0 || isAdding} className="btn btn-primary btn-lg w-full">
-                {isAdding ? <span className="loading loading-spinner"></span> : <FiShoppingCart className="w-6 h-6 mr-2" />}
-                {isAdding ? 'กำลังเพิ่ม...' : 'เพิ่มลงรถเข็น'}
-              </button>
+                  
+                  {/* Hover Overlay */}
+                  <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center pointer-events-none">
+                      <span className="text-white font-medium flex items-center gap-2 px-4 py-2 bg-black/60 backdrop-blur-sm rounded-full shadow-lg transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
+                          <FiZoomIn className="w-5 h-5" /> คลิกเพื่อขยาย
+                      </span>
+                  </div>
 
-              <div className="border-t border-base-300 pt-4 mt-4 space-y-3">
-                <h3 className="font-semibold">สอบถามข้อมูลเพิ่มเติม</h3>
-                <div className="flex items-center gap-3">
-                  <FaLine className="w-6 h-6 text-green-500" />
-                  <span>LINE: kacha982</span>
+                  {hasDiscount && (
+                    <div className="badge badge-error badge-lg absolute top-4 right-4 text-white font-bold shadow-md z-10">
+                      ลดราคา
+                    </div>
+                  )}
+               </div>
+            </div>
+
+            {/* --- 2. ส่วนข้อมูลสินค้า (ขวา) --- */}
+            <div className="lg:w-1/2 p-6 lg:p-10 flex flex-col">
+              <div className="mb-4">
+                <h1 className="text-3xl font-bold text-base-content leading-snug mb-2">{product.Name}</h1>
+                <p className="text-base-content/60 text-sm">รหัสสินค้า: <span className="font-mono">{product.Product_ID}</span></p>
+              </div>
+              
+              <div className="mb-6">
+                {hasDiscount && <p className="text-xl text-base-content/40 line-through">{formatPrice(product.Sale_Price)}</p>}
+                <p className="text-4xl font-bold text-primary tracking-tight">{formatPrice(displayPrice)}</p>
+              </div>
+
+              <div className="bg-base-200/50 rounded-xl p-4 mb-6 text-sm text-base-content/80 space-y-2 border border-base-200">
+                <p className="flex justify-between">
+                    <span>สถานะสต็อก:</span> 
+                    <span className={`font-bold ${calculateAvailableStock(product) > 0 ? 'text-success' : 'text-error'}`}>
+                        {calculateAvailableStock(product) > 0 ? `มีสินค้า (${calculateAvailableStock(product)} ${product.Unit})` : 'สินค้าหมด'}
+                    </span>
+                </p>
+                {product.Dimensions && <p className="flex justify-between"><span>ขนาด:</span> <span className="font-medium">{product.Dimensions}</span></p>}
+                {product.Material && <p className="flex justify-between"><span>วัสดุ:</span> <span className="font-medium">{product.Material}</span></p>}
+                {product.Brand && <p className="flex justify-between"><span>แบรนด์:</span> <span className="font-medium">{product.Brand}</span></p>}
+              </div>
+
+              <div className="flex items-end gap-4 mb-8">
+                <div className="form-control w-full max-w-[140px]">
+                    <label className="label"><span className="label-text font-semibold">จำนวน</span></label>
+                    <div className="flex items-center border border-base-300 rounded-lg overflow-hidden bg-base-100">
+                        <button onClick={() => handleQuantityChange('decrease')} disabled={quantity <= 1} className="btn btn-ghost btn-sm px-3 rounded-none h-10"><FiMinus /></button>
+                        <input
+                            type="number"
+                            value={quantity}
+                            onChange={(e) => setQuantity(Math.max(1, Math.min(parseInt(e.target.value) || 1, calculateAvailableStock(product))))}
+                            className="input input-sm input-ghost w-full text-center focus:outline-none h-10 font-bold text-lg"
+                        />
+                        <button onClick={() => handleQuantityChange('increase')} disabled={quantity >= calculateAvailableStock(product)} className="btn btn-ghost btn-sm px-3 rounded-none h-10"><FiPlus /></button>
+                    </div>
                 </div>
-                <div className="flex items-center gap-3">
-                  <FiPhone className="w-6 h-6 text-blue-500" />
-                  <span>โทร: 081-896-2687</span>
+                <button 
+                    onClick={handleAddToCartClick} 
+                    disabled={calculateAvailableStock(product) === 0 || isAdding} 
+                    className="btn btn-primary btn-lg flex-1 shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all h-[3.25rem]"
+                >
+                    {isAdding ? <span className="loading loading-spinner"></span> : <FiShoppingCart className="w-6 h-6 mr-2" />}
+                    {isAdding ? 'กำลังเพิ่ม...' : 'เพิ่มลงรถเข็น'}
+                </button>
+              </div>
+
+              <div className="divider"></div>
+
+              <div className="space-y-3 text-sm">
+                <h3 className="font-semibold text-base-content/80">สอบถามข้อมูลเพิ่มเติม</h3>
+                <div className="flex flex-col sm:flex-row gap-4">
+                    <a href="https://line.me/ti/p/~kacha982" target="_blank" rel="noreferrer" className="btn btn-outline btn-success btn-sm gap-2">
+                        <FaLine className="w-5 h-5" /> LINE: kacha982
+                    </a>
+                    <a href="tel:0818962687" className="btn btn-outline btn-info btn-sm gap-2">
+                        <FiPhone className="w-4 h-4" /> โทร: 081-896-2687
+                    </a>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* === 3. ส่วนรายละเอียดสินค้าและสินค้าที่เกี่ยวข้อง (จากโครงสร้างเดิม) === */}
-          <div className="mt-12 p-6 bg-base-200 rounded-lg">
-            <h2 className="text-2xl font-bold text-base-content mb-4">รายละเอียดสินค้า</h2>
-            <p className="text-base-content/90 leading-relaxed">{product.Description || 'ไม่มีรายละเอียดเพิ่มเติมสำหรับสินค้านี้'}</p>
+          {/* === 3. ส่วนรายละเอียดสินค้า === */}
+          <div className="p-8 lg:p-10 border-t border-base-200 bg-base-50/50">
+            <h2 className="text-2xl font-bold text-base-content mb-6 border-l-4 border-primary pl-4">รายละเอียดสินค้า</h2>
+            <div className="prose max-w-none text-base-content/80 leading-relaxed whitespace-pre-wrap">
+                {product.Description || 'ไม่มีรายละเอียดเพิ่มเติมสำหรับสินค้านี้'}
+            </div>
           </div>
 
+          {/* === 4. สินค้าที่เกี่ยวข้อง === */}
           {relatedProducts.length > 0 && (
-            <div className="mt-12">
-              <h2 className="text-2xl font-bold text-base-content mb-6 text-center">สินค้าที่เกี่ยวข้อง</h2>
+            <div className="p-8 lg:p-10 border-t border-base-200">
+              <h2 className="text-2xl font-bold text-base-content mb-8 text-center">สินค้าที่เกี่ยวข้อง</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 {relatedProducts.map(related => {
                   const relatedHasDiscount = related.Discount_Price !== null && related.Discount_Price < related.Sale_Price;
                   const relatedDisplayPrice = relatedHasDiscount ? related.Discount_Price : related.Sale_Price;
                   return (
-                    <Link key={related.Product_ID} href={`/products/${related.Product_ID}`} className="card bg-base-100 shadow-lg hover:shadow-2xl transition-shadow">
-                      <figure className="relative">
-                        <img src={related.Image_URL || 'https://placehold.co/400x300?text=No+Image'} alt={related.Name} className="h-40 w-full object-cover" />
-                        {relatedHasDiscount && (
-                          <div className="badge badge-error absolute top-2 left-2 text-white font-bold">
-                            ลดราคา
-                          </div>
-                        )}
-                      </figure>
-                      <div className="card-body p-4">
-                        <h3 className="card-title text-base line-clamp-2 h-12">{related.Name}</h3>
-                        <div>
-                          {relatedHasDiscount && (
-                            <p className="text-sm text-base-content/60 line-through">
-                              {formatPrice(related.Sale_Price)}
-                            </p>
-                          )}
-                          <p className="text-lg font-semibold text-primary">
-                            {formatPrice(relatedDisplayPrice)}
-                          </p>
-                        </div>
-                      </div>
-                    </Link>
+                    <ProductDisplayCard product={related} key={related.Product_ID} ></ProductDisplayCard>
                   );
                 })}
               </div>
@@ -186,6 +204,9 @@ export default function ProductDetailPage() {
           )}
         </div>
       </div>
+
+      {/* Image Preview Modal */}
+      <ImagePreviewModal imageUrl={previewImage} onClose={() => setPreviewImage(null)} />
     </div>
   );
 }

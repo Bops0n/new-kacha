@@ -68,7 +68,7 @@ export async function POST(request: Request) {
         return NextResponse.json({ message: 'อัปเดตตะกร้าสินค้าสำเร็จ', error: false }, { status: 200 });
     } catch (error) {
         logger.error('Error adding/updating cart item:', { error: error });
-        return NextResponse.json({ message: 'เกิดข้อผิดพลาดภายในเซิร์ฟเวอร์', error: true }, { status: 500 });
+        return NextResponse.json({ message: `${error.message}`, error: true }, { status: 500 });
     }
 }
 
@@ -130,6 +130,6 @@ export async function PATCH(request: Request) {
         return NextResponse.json({ message: 'อัปเดตจำนวนสินค้าในตะกร้าสำเร็จ', error: false }, { status: 200 });
     } catch (error) {
         logger.error('Error patching cart item quantity:', { error: error });
-        return NextResponse.json({ message: 'เกิดข้อผิดพลาดภายในเซิร์ฟเวอร์', error: true }, { status: 500 });
+        return NextResponse.json({ message: `เกิดข้อผิดพลาดภายในเซิร์ฟเวอร์`, error: true }, { status: 500 });
     }
 }

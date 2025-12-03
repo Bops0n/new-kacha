@@ -107,7 +107,20 @@ export function useCart() {
     }
     if (newQuantity > availableStock) {
         showAlert(`สินค้ามีในสต็อกเพียง ${availableStock} ชิ้น`, 'warning');
-        return;
+        console.log(availableStock, newQuantity)
+        try {
+        const response = await fetch('/api/main/cart', {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ productId, newQuantity :availableStock }),
+        });
+        if (!response.ok) throw new Error('ไม่สามารถอัปเดตจำนวนสินค้าได้');
+        setCartItems(prevItems => prevItems.map(i => i.Product_ID === productId ? { ...i, Cart_Quantity: availableStock } : i));
+      } catch (err: any) {
+        showAlert(err.message, 'error');
+    }
+
+        return ;
     }
 
     try {
