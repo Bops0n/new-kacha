@@ -5,7 +5,6 @@ import { Order } from '@/types';
 export async function getOrderById(orderId: number): Promise<Order | null> {    
     const { rows } = await poolQuery(`SELECT * FROM "SP_USER_ORDER_GET"($1, $2)`, ["Order_ID", orderId]);
     const orders = mapDbRowsToOrders(rows);
-    console.log(orders)
     return orders[0] || null;
 }
 export async function cancelOrder(orderId: number, userId: number, reason: string) {

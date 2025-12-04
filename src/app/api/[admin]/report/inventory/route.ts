@@ -13,7 +13,6 @@ export async function GET(request: NextRequest) {
     try {
         // ใช้ Stored Procedure เดิมที่มีอยู่เพื่อดึงสินค้าทั้งหมด
         const { rows } = await poolQuery(`SELECT * FROM public."SP_ADMIN_PRODUCT_GET"()`);
-        console.log(rows)
         return NextResponse.json({ products: rows });
 
     } catch (error: any) {

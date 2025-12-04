@@ -85,9 +85,6 @@ export default function OrderCancelButton({ order, onlyIcon, onSuccess }: {
     setButtonText(btnDisable ? 'ไม่สามารถยกเลิกได้' : v_isNoPaymentChecked ? 'ดำเนินการตรวจสอบหลักฐาน' : 'ยืนยัน');
     setNoPaymentChecked(v_isNoPaymentChecked);
     setIsRefunding(v_isRefunding);
-
-    console.log(`${order.Order_ID} : ${isRefunding}`)
-
   }, [order]);
 
   async function submitCancel() {
