@@ -20,29 +20,8 @@ export async function GET(request: NextRequest) {
     }
 
     try {
-        const queryString = `
-            SELECT 
-                O."Order_ID",
-                O."Order_Date",
-                COALESCE(U."Full_Name", 'ลูกค้าทั่วไป') as "Customer_Name",
-                O."Total_Amount",
-                O."Payment_Type",
-                O."Status",
-                (SELECT COUNT(*) FROM public."Order_Detail" OD WHERE OD."Order_ID" = O."Order_ID") as "Item_Count",
-                OP."Transaction_Slip",
-                OP."Is_Payment_Checked",
-                OP."Status" AS "Transaction_Status"
-            FROM public."Order" O
-            LEFT JOIN public."User" U ON O."User_ID" = U."User_ID"
-            LEFT JOIN public."Order_Payment" OP ON O."Order_ID" = OP."Order_ID"
-            WHERE DATE(O."Order_Date") BETWEEN $1 AND $2  -- กรองตามช่วงเวลา
-            ORDER BY O."Order_ID" ASC
-        `;
-
-        const { rows } = await poolQuery(queryString, [startDate, endDate]);
-
+        const { rows } = await poolQuery('SELECT * FROM public."SP_ADMIN_REPORT_SUMMARY_SALES_REPORT_GET"($1, $2)', [startDate, endDate]);
         return NextResponse.json({ orders: rows });
-
     } catch (error: any) {
         logger.error("Report API Error:", { error });
         return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 });
