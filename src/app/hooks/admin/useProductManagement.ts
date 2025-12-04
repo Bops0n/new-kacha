@@ -6,11 +6,12 @@ import { useCategoryData } from '@/app/hooks/useCategoryData';
 import { ProductFormData, ProductInventory, StockStatus } from '@/types';
 import { calculateAvailableStock } from '@/app/utils/calculations';
 
-const getProductStockStatus = (product: ProductInventory | null): StockStatus => {
+const getProductStockStatus = (product: ProductInventory | ProductFormData | null): StockStatus => {
   if (!product) return 'out_of_stock';
   const availableStock = calculateAvailableStock(product);
   if (availableStock <= 0) return 'out_of_stock';
-  if (availableStock <= product.Reorder_Point) return 'low_stock';
+  const reorderPoint = product.Reorder_Point ?? 0;
+  if (availableStock <= reorderPoint) return 'low_stock';
   return 'in_stock';
 };
 

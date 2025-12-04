@@ -1,9 +1,9 @@
 'use client';
 
-import React, { useMemo, useState, useCallback, useEffect } from 'react';
+import React, { useMemo, useState } from 'react';
 import { 
-  FiSearch, FiPlus, FiEye, FiEdit, FiTrash2, FiBox, FiSave, FiX, 
-  FiDownload, FiCheckCircle, FiAlertTriangle, FiAlertCircle, FiPackage 
+  FiPlus, FiEye, FiEdit, FiBox, FiSave, FiX, 
+  FiCheckCircle, FiAlertTriangle, FiAlertCircle 
 } from 'react-icons/fi';
 
 import { useProductManagement } from '@/app/hooks/admin/useProductManagement';
@@ -27,7 +27,7 @@ const ProductModal = ({
     isOpen: boolean;
     onClose: () => void;
     handleSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
-    product: ProductInventory | null;
+    product: ProductInventory | ProductFormData  | null;
     isEditing: boolean;
     onToggleEditMode: () => void;
     formData: ProductFormData;
@@ -39,7 +39,7 @@ const ProductModal = ({
     subCategories: any[];
     childSubCategories: any[];
     allCategoriesMap: Map<number, any>;
-    getProductStockStatus: (product: ProductInventory | null) => StockStatus;
+    getProductStockStatus: (product: ProductInventory | ProductFormData | null) => StockStatus;
     addStock: (productId: number, amountToAdd: number) => Promise<boolean>; // <-- PROP FOR ADDING STOCK
 }) => {
     const filteredSubCategories = useMemo(() => formData.Selected_Category_ID ? subCategories.filter(s => s.Category_ID === Number(formData.Selected_Category_ID)) : [], [formData.Selected_Category_ID, subCategories]);
@@ -244,7 +244,6 @@ export default function ProductManagementPage() {
                 </div>
                 <div className="flex gap-2">
                     <button onClick={() => openModal(null, 'add')} className="btn btn-primary"><FiPlus /> เพิ่มสินค้าใหม่</button>
-                    <button className="btn btn-outline"><FiDownload /> ส่งออกข้อมูล</button>
                 </div>
             </div>
 
@@ -306,15 +305,12 @@ export default function ProductManagementPage() {
 
             <ProductModal 
                 {...modalProps}
-                
-
                 categories={data.categories}
                 subCategories={data.subCategories}
                 childSubCategories={data.childSubCategories}
                 allCategoriesMap={allCategoriesMap}
                 getProductStockStatus={actions.getProductStockStatus}
                 addStock={actions.addStock}
-                
             />
         </div>
     </div>
