@@ -20,23 +20,66 @@ export default function OrderRefundInfo({
     const [showImageModal, setShowImageModal] = useState(false);
     const [previewImage, setPreviewImage] = useState("");
 
-    const canUploadSlip = order.Payment_Type === 'bank_transfer' && order.Status === 'refunding';
+    const canUploadSlip = order.Payment_Type === 'bank_transfer' && order.Status === 'refunding' && !order.Refund_Slip;
 
     return (
         <>
-            {/* Slip + Payment Datetime */}
-            {order.Payment_Type === 'bank_transfer' && (
-            <div id="refunded" className="card bg-base-100 shadow-md border border-base-300 p-8 rounded-2xl">
+            {/* Main Container */}
+            <div className="card bg-base-100 shadow-md border border-base-300 p-6 rounded-2xl">
 
                 {/* Header */}
-                <div className="flex items-center gap-3 mb-7">
-                  <FiCreditCard className="text-primary w-6 h-6" />
-                  <h2 className="font-bold text-lg">หลักฐานการคืนเงิน</h2>
+                <div className="flex items-center gap-3 mb-6">
+                    <FiCreditCard className="text-primary w-6 h-6" />
+                    <h2 className="font-bold text-lg">รายละเอียดการชำระเงิน / การคืนเงิน</h2>
                 </div>
 
-                {order.Payment_Type === 'bank_transfer' && (
-                    <>
-                        <div className="relative group flex justify-center items-center bg-base-200 rounded-2xl border border-base-300 shadow-inner p-5 cursor-pointer hover:shadow-xl transition">
+                {/* 2 Columns */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                    {/* ================= LEFT : REFUND ================= */}
+                    <div className="flex flex-col gap-4">
+                        {/* Payment Slip */}
+                        <div className="relative group flex justify-center items-center bg-base-200 rounded-xl border border-base-300 shadow-inner p-4 cursor-pointer hover:shadow-xl transition">
+                            {order.Transaction_Slip ? (
+                            <>
+                                <img
+                                    src={order.Transaction_Slip}
+                                    alt="Transaction Slip"
+                                    className="max-w-full max-h-[25rem] rounded-xl object-contain shadow-md transition-transform group-hover:scale-[1.05]"
+                                    onClick={() => {
+                                        if (!order.Transaction_Slip) return;
+                                        setPreviewImage(order.Transaction_Slip);
+                                        setShowImageModal(true);
+                                }}
+                                />
+
+                                {/* Zoom Icon */}
+                                <div className="absolute bottom-3 right-3 bg-black/60 text-white px-3 py-1 rounded-lg text-sm opacity-0 group-hover:opacity-100 transition">
+                                    คลิกเพื่อขยาย
+                                </div>
+                            </>
+                            ) : (
+                                <p className="opacity-70 text-center">ยังไม่มีหลักฐานการชำระเงิน</p>
+                            )}
+                        </div>
+
+                        {/* Payment Info */}
+                        <div className="bg-base-200 p-4 rounded-xl border border-base-300 shadow-inner">
+                            <p className="text-sm opacity-60">วันที่ – เวลาที่แนบหลักฐาน</p>
+                            <p className="font-bold">{order.Transaction_Date || "-"}</p>
+
+                            <p className="text-sm opacity-60 mt-3">วันที่ – เวลาที่ตรวจสอบ</p>
+                            <p className="font-bold">{order.Checked_At || "-"}</p>
+
+                            <p className="text-sm opacity-60 mt-3">ผู้ตรวจสอบ</p>
+                            <p className="font-bold">{order.Checked_By || "-"}</p>
+                        </div>
+                    </div>
+
+                    {/* ================= RIGHT : PAYMENT ================= */}
+                    <div className="flex flex-col gap-4">
+                        {/* Refund Slip */}
+                        <div className="relative group flex justify-center items-center bg-base-200 rounded-xl border border-base-300 shadow-inner p-4 cursor-pointer hover:shadow-xl transition">
                             {order.Refund_Slip ? (
                             <>
                                 <img
@@ -44,7 +87,8 @@ export default function OrderRefundInfo({
                                     alt="Refund Slip"
                                     className="max-w-full max-h-[25rem] rounded-xl object-contain shadow-md transition-transform group-hover:scale-[1.05]"
                                     onClick={() => {
-                                        setPreviewImage(order.Refund_Slip!);
+                                        if (!order.Refund_Slip) return;
+                                        setPreviewImage(order.Refund_Slip);
                                         setShowImageModal(true);
                                 }}
                                 />
@@ -55,41 +99,43 @@ export default function OrderRefundInfo({
                                 </div>
                             </>
                             ) : (
-                            <p className="opacity-70">ยังไม่มีหลักฐานการคืนเงิน</p>
+                                <p className="opacity-70 text-center">ยังไม่มีหลักฐานการคืนเงิน</p>
                             )}
                         </div>
+
+                        {/* Refund Info */}
+                        <div className="bg-base-200 p-4 rounded-xl border border-base-300 shadow-inner">
+                            <p className="text-sm opacity-60">วันที่ – เวลาการคืนเงิน</p>
+                            <p className="font-bold">{order.Refund_At || "-"}</p>
+
+                            <p className="text-sm opacity-60 mt-3">ผู้บันทึกหลักฐานการคืนเงิน</p>
+                            <p className="font-bold">{order.Refund_By || "-"}</p>
+                        </div>
+
+                        {/* Upload Refund Slip */}
                         {canUploadSlip && (
-                            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mt-4 border-t border-base-300 pt-4">
-                            <label className='flex flex-col items-center justify-center'>
-                            <input type="file" className="file-input file-input-bordered file-input-primary w-full max-w-xs" onChange={handleFileChange} accept="image/png, image/jpeg, image/jpg" placeholder='s'></input>
-                                {'สามารถอัพโหลดไฟล์ขนาดไม่เกิน 5MB เท่านั้น'}
-                            </label>
-                                <button onClick={handleUploadSlip} disabled={!selectedFile || isUploading} className="btn btn-primary mb-auto">
+                            <div className="border-t border-base-300 pt-4 flex flex-col gap-3">
+                                <input
+                                    type="file"
+                                    className="file-input file-input-bordered file-input-primary w-full"
+                                    onChange={handleFileChange}
+                                    accept="image/png, image/jpeg, image/jpg"
+                                />
+
+                                <button
+                                    onClick={handleUploadSlip}
+                                    disabled={!selectedFile || isUploading}
+                                    className="btn btn-primary w-full"
+                                >
                                     {isUploading && <span className="loading loading-spinner"></span>}
-                                    <FiUploadCloud className="mr-2"/>
-                                    {isUploading ? 'กำลังอัปโหลด...' : 'อัปโหลดหลักฐาน'}
+                                        <FiUploadCloud />
+                                    {isUploading ? "กำลังอัปโหลด..." : "อัปโหลดหลักฐานการคืนเงิน"}
                                 </button>
                             </div>
                         )}
-                    </>
-                )}
-
-                {/* Refund By */}
-                <div className="mt-8 p-7 flex flex-col justify-between bg-base-200 rounded-2xl border border-base-300 shadow-inner">
-                  <div className="space-y-4">
-                      <div>
-                          <p className="text-sm opacity-60">วันที่ – เวลาที่แนบหลักฐานการคืนเงิน</p>
-                          <p className="text-xl font-bold mt-1">{order.Refund_At || "-"}</p>
-                      </div>
-
-                      <div>
-                          <p className="text-sm opacity-60">ผู้บันทึกหลักฐานการคืนเงิน</p>
-                          <p className="text-xl font-bold mt-1">{order.Refund_By || "-"}</p>
-                      </div>
-                  </div>
+                    </div>
                 </div>
             </div>
-            )}
 
             {showImageModal && (
             <div

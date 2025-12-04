@@ -256,31 +256,28 @@ export default function OrderCancelButton({ order, onlyIcon, onSuccess }: {
                                 หลังจากกด <span className="font-semibold">"{lbButtonText}"</span>{" "}
                                 {isRefunding &&
                                   <>
-                                    หากคำสั่งซื้อมีการชำระเงิน และมีการตรวจสอบการชำระเงินแล้ว ระบบจะเปลี่ยนสถานะคำสั่งซื้อเป็น{" "}
+                                    หากคำสั่งซื้อได้รับการชำระเงินและตรวจสอบแล้ว ระบบจะเปลี่ยนสถานะคำสั่งซื้อเป็น{" "}
                                     <span className={`badge ${refunding.color }`}>
                                         <refunding.icon className="inline-block w-4 h-4 mr-1" />
                                         {refunding.label}
-                                    </span>{" "}เพื่อดำเนินการคืนเงิน
+                                    </span>{" "}เพื่อดำเนินการขั้นตอนการคืนเงินต่อไป
                                   </>
                                 }
                                 {isCancelled &&
                                   <>
-                                    หากคำสั่งซื้อยังไม่มีการชำระเงิน หรือการชำระเงินเป็น 
+                                    <br/>
+                                    1. หากคำสั่งซื้อ ยังไม่ได้ชำระเงิน<br/>
+                                    2. หรือคำสั่งซื้อเป็นแบบ{" "}
                                     <span className={`badge ${lbCOD?.color || 'badge-primary'}`}>
                                       <lbCOD.icon className="inline-block w-4 h-4 mr-1" />
                                       {lbCOD?.label || order.Payment_Type}
-                                    </span>{" "}
-                                    หรือยังไม่มีการตรวจสอบการชำระเงิน และมีสถานะ{" "}
-                                    <span className={`badge ${pending.color }`}>
-                                        <pending.icon className="inline-block w-4 h-4 mr-1" />
-                                        {pending.label}
-                                    </span>{" "}
+                                    </span><br/>
                                     ระบบจะเปลี่ยนสถานะคำสั่งซื้อเป็น{" "}
                                     <span className={`badge ${cancelled.color }`}>
                                         <cancelled.icon className="inline-block w-4 h-4 mr-1" />
                                         {cancelled.label}
-                                    </span>{" "}
-                                    และไม่สามารถทำรายการคำสั่งซื้อนี้ได้อีก
+                                    </span>{" "}<br/>
+                                    และจะไม่สามารถดำเนินการใด ๆ กับคำสั่งซื้อนี้ได้อีก
                                   </>
                                 }
                             </p>

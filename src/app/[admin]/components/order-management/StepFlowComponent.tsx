@@ -1,74 +1,82 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import React from "react";
 
-export const StepFlowBar = ({ currentStep, orderId, refund }: { currentStep: number, orderId: number, refund: boolean }) => {
+export type STEP_TYPE = 'normal' | 'refund' | 'req_cancel';
+
+export const StepFlowBar = ({ controller, type }: { controller: string, type: STEP_TYPE }) => {
   const NORMAL_STEP = [
     {
-      id: 1,
-      label: "ตรวจสอบการชำระเงิน",
       controller: `checkorder`,
+      label: "ตรวจสอบการชำระเงิน",
     },
     {
-      id: 2,
-      label: "ข้อมูลการจัดส่ง",
       controller: `shipping`,
+      label: "ข้อมูลการจัดส่ง",
     },
     {
-      id: 3,
-      label: "สรุปคำสั่งซื้อ",
       controller: `summary`,
+      label: "สรุปคำสั่งซื้อ",
     },
     {
-      id: 4,
-      label: "ยืนยันการจัดส่ง",
       controller: `shipped`,
+      label: "ยืนยันการจัดส่ง",
     }
   ];
 
   const REFUND_STEP = [
     {
-      id: 1,
-      label: "ตรวจสอบการชำระเงิน",
       controller: `refunding`,
-    },
-    {
-      id: 2,
       label: "ดำเนินการคืนเงิน",
-      controller: `refunded`,
     }
   ]
 
-  const { push } = useRouter();
+  const REQ_STEP = [
+    {
+      controller: `req_cancel`,
+      label: "ร้องขอยกเลิกคำสั่งซื้อ",
+    }
+  ]
 
   return (
     <ul className="steps steps-horizontal w-full text-lg">
-        {!refund && NORMAL_STEP.map((step) => (
+        {type === 'normal' && NORMAL_STEP.map((step, index) => (
           <li
-            key={step.id}
-            className={`step ${step.id <= currentStep ? "step-primary" : ""} text-base font-semibold hover cursor-pointer`}
+            key={index}
+            className={`step ${index + 1 <= NORMAL_STEP.findIndex(s => s.controller === controller) + 1 ? "step-primary" : ""} text-base font-semibold`}
             style={{
             "--size": "2.4rem",
             "--tw-border": "2px",
             } as React.CSSProperties}
-            data-content={step.id}
-            onClick={() => { push(`/admin/order-management/${orderId}?controller=${step.controller}`) }}
+            data-content={index + 1}
           >
             {step.label}
           </li>
         ))}
 
-        {refund && REFUND_STEP.map((step) => (
+        {type === 'refund' && REFUND_STEP.map((step, index) => (
           <li
-            key={step.id}
-            className={`step ${step.id <= currentStep ? "step-primary" : ""} text-base font-semibold hover cursor-pointer`}
+            key={index}
+            className={`step ${index + 1 <= REFUND_STEP.findIndex(s => s.controller === controller) + 1 ? "step-primary" : ""} text-base font-semibold`}
             style={{
             "--size": "2.4rem",
             "--tw-border": "2px",
             } as React.CSSProperties}
-            data-content={step.id}
-            onClick={() => { push(`/admin/order-management/${orderId}?controller=${step.controller}`) }}
+            data-content={index + 1}
+          >
+            {step.label}
+          </li>
+        ))}
+
+        {type === 'req_cancel' && REQ_STEP.map((step, index) => (
+          <li
+            key={index}
+            className={`step ${index + 1 <= REQ_STEP.findIndex(s => s.controller === controller) + 1 ? "step-primary" : ""} text-base font-semibold`}
+            style={{
+            "--size": "2.4rem",
+            "--tw-border": "2px",
+            } as React.CSSProperties}
+            data-content={index + 1}
           >
             {step.label}
           </li>

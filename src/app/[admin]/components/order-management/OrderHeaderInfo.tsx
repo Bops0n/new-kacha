@@ -9,29 +9,29 @@ export default function OrderHeaderInfo({ order }: { order: Order }) {
             {/* Customer Info */}
             <div id="customer_info" className="card bg-base-100 shadow-md border border-base-300 p-6 rounded-xl">
                 <div className="flex items-center gap-2 mb-3">
-                <FiUser className="text-primary w-5 h-5" />
-                <h2 className="font-bold text-lg">ข้อมูลลูกค้า</h2>
+                    <FiUser className="text-primary w-5 h-5" />
+                    <h2 className="font-bold text-lg">ข้อมูลลูกค้า</h2>
                 </div>
 
                 <div className="text-sm space-y-1">
-                <p><strong>ชื่อ :</strong> {order.Customer_Name}</p>
-                <p><strong>เบอร์โทร :</strong> {order.Phone || '-'}</p>
-                <p><strong>อีเมล :</strong> {order.Customer_Email || '-'}</p>
-                <br />
-                <p className="flex gap-1">
-                    <FiMapPin className="mt-1" />
-                    <span>
-                    {order.Address_1} {order.Address_2} {order.Sub_District} {order.District}, {order.Province} {order.Zip_Code}
-                    </span>
-                </p>
+                    <p><strong>ชื่อ :</strong> {order.Customer_Name}</p>
+                    <p><strong>เบอร์โทร :</strong> {order.Phone || '-'}</p>
+                    <p><strong>อีเมล :</strong> {order.Customer_Email || '-'}</p>
+                    <br />
+                    <p className="flex gap-1">
+                        <FiMapPin className="mt-1" />
+                        <span>
+                        {order.Address_1} {order.Address_2} {order.Sub_District} {order.District}, {order.Province} {order.Zip_Code}
+                        </span>
+                    </p>
                 </div>
             </div>
 
             {/* Order Info */}
             <div  id="order_info" className="card bg-base-100 shadow-md border border-base-300 p-6 rounded-xl">
                 <div className="flex items-center gap-2 mb-3">
-                <FiFileText className="text-primary w-5 h-5" />
-                <h2 className="font-bold text-lg">ข้อมูลคำสั่งซื้อ</h2>
+                    <FiFileText className="text-primary w-5 h-5" />
+                    <h2 className="font-bold text-lg">ข้อมูลคำสั่งซื้อ</h2>
                 </div>
 
                 <div className="text-sm space-y-1">

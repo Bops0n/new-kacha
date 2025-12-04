@@ -50,6 +50,7 @@ export default function OrderShippingInfo({
                             value={form.Shipping_Provider}
                             onChange={handleFormChange}
                             readOnly={IsReadOnly}
+                            disabled={IsReadOnly}
                         />
                     </div>
 
@@ -62,6 +63,7 @@ export default function OrderShippingInfo({
                             value={form.Shipping_Date}
                             onChange={handleFormChange}
                             readOnly={IsReadOnly}
+                            disabled={IsReadOnly}
                         />
                     </div>
 
@@ -73,6 +75,7 @@ export default function OrderShippingInfo({
                             min={0}
                             onChange={handleFormChange}
                             readOnly={IsReadOnly}
+                            disabled={IsReadOnly}
                         />
                     </div>
 
@@ -85,6 +88,7 @@ export default function OrderShippingInfo({
                             value={form.Vehicle_Type}
                             onChange={handleFormChange}
                             readOnly={IsReadOnly}
+                            disabled={IsReadOnly}
                         />
                     </div>
 
@@ -97,6 +101,7 @@ export default function OrderShippingInfo({
                             value={form.Driver_Name}
                             onChange={handleFormChange}
                             readOnly={IsReadOnly}
+                            disabled={IsReadOnly}
                         />
                     </div>
 
@@ -109,6 +114,7 @@ export default function OrderShippingInfo({
                             value={form.Driver_Phone}
                             onChange={handleFormChange}
                             readOnly={IsReadOnly}
+                            disabled={IsReadOnly}
                         />
                     </div>
 
@@ -119,6 +125,7 @@ export default function OrderShippingInfo({
                             value={form.Tracking_Number}
                             onChange={handleFormChange}
                             readOnly={IsReadOnly}
+                            disabled={IsReadOnly}
                         />
                     </div>
 
@@ -129,6 +136,7 @@ export default function OrderShippingInfo({
                             value={form.Tracking_URL}
                             onChange={handleFormChange}
                             readOnly={IsReadOnly}
+                            disabled={IsReadOnly}
                         />
                     </div>
 
@@ -143,6 +151,7 @@ export default function OrderShippingInfo({
                             value={form.Internal_Note}
                             onChange={handleFormChange}
                             readOnly={IsReadOnly}
+                            disabled={IsReadOnly}
                         />
                     </div>
                     <div>
@@ -152,6 +161,7 @@ export default function OrderShippingInfo({
                             value={form.Customer_Note}
                             onChange={handleFormChange}
                             readOnly={IsReadOnly}
+                            disabled={IsReadOnly}
                         />
                     </div>
                 </div>
