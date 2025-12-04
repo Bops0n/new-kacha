@@ -58,6 +58,14 @@ export function useProductModal({ onSave }: UseProductModalProps) {
 
     if (type === 'checkbox') finalValue = checked;
     else if (type === 'number' || e.target.tagName === 'SELECT') finalValue = value === '' ? null : Number(value);
+
+            if (name === 'Selected_Category_ID') { 
+                setFormData(prev => ({...prev, Selected_Sub_Category_ID : null, Child_ID : null }))
+                return
+            }
+            // if (filterName === 'subCategoryFilter') { newFilters.childCategoryFilter = 'all'; }
+            // return newFilters;
+    
     
     setFormData(prev => ({ ...prev, [name]: finalValue }));
   }, []);

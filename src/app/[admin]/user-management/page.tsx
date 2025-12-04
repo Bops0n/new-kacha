@@ -82,6 +82,8 @@ export default function UserManagement() {
   const [paginatedUsers, setPaginatedUsers] = useState<UserAccount[]>([]);
   const [totalPages, setTotalPages] = useState<number>(1);
 
+
+
   // --- call data from api ---
   useEffect(() => {
     async function apiGetUsers() {
@@ -197,14 +199,14 @@ export default function UserManagement() {
   const saveUserDetails = async() => {
 
     if (!editFormData.Username) {
-      // alert('กรุณากรอก Username และ Full Name'); // Replace with custom modal
+      showAlert('กรุณากรอก Username และ Full Name'); // Replace with custom modal
       // Using a placeholder for custom alert
       // showAlert('กรุณากรอก Username และ Full Name');
       return;
     }
     // Password validation only for new users or if password field is explicitly changed in edit mode
     if (!isEditing && !editFormData.Password) {
-      // alert('กรุณากำหนดรหัสผ่านสำหรับผู้ใช้ใหม่');
+      showAlert('กรุณากำหนดรหัสผ่านสำหรับผู้ใช้ใหม่');
       // Using a placeholder for custom alert
       // showAlert('กรุณากำหนดรหัสผ่านสำหรับผู้ใช้ใหม่');
       return;
@@ -341,7 +343,7 @@ export default function UserManagement() {
     if (!newAddressForm.Address_1 || !newAddressForm.District || !newAddressForm.Province || !newAddressForm.Zip_Code || !newAddressForm.Sub_District || !newAddressForm.Phone) {
       // alert('กรุณากรอกข้อมูลที่อยู่ให้ครบถ้วน');
       // Using a placeholder for custom alert
-      // showAlert('กรุณากรอกข้อมูลที่อยู่ให้ครบถ้วน');
+      showAlert('กรุณากรอกข้อมูลที่อยู่ให้ครบถ้วน');
       return;
     }
 

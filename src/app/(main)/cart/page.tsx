@@ -45,7 +45,7 @@ const CartItem: React.FC<CartItemProps> = ({ item, onUpdateQuantity, onRemove })
                         <span className="font-bold text-xl min-w-[30px] text-center">{item.Cart_Quantity}</span>
                         <button
                             className="btn btn-sm btn-circle btn-outline"
-                            onClick={() => onUpdateQuantity(item.Product_ID, item.Cart_Quantity + 1)}
+                            onClick={() => onUpdateQuantity(item.Product_ID, item.Cart_Quantity + 1) }
                             disabled={item.Cart_Quantity >= calculateAvailableStock(item)}
                         >
                             <FiPlusCircle />
