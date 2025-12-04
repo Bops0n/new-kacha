@@ -1,9 +1,10 @@
-import { paymentTypeLabels } from "@/app/utils/client";
+import { paymentTypeLabels, statusTypeLabels } from "@/app/utils/client";
 import { Order } from "@/types";
 import { FiFileText, FiMapPin, FiUser } from "react-icons/fi";
 
 export default function OrderHeaderInfo({ order }: { order: Order }) {
     const paymentLabel = paymentTypeLabels[order.Payment_Type];
+    const statusInfo = statusTypeLabels[order.Status];
     return (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Customer Info */}
@@ -41,6 +42,12 @@ export default function OrderHeaderInfo({ order }: { order: Order }) {
                         <span className={`badge ${paymentLabel?.color || 'badge-primary'}`}>
                             <paymentLabel.icon className="inline-block w-4 h-4 mr-1" />
                             {paymentLabel?.label || order.Payment_Type}
+                        </span>
+                    </p>
+                    <p><strong>สถานะคำสั่งซื้อ :</strong>
+                        <span className={`badge ${statusInfo.color}`}>
+                            {statusInfo.icon && <statusInfo.icon className="w-3 h-3 mr-1" />} 
+                            {statusInfo.label}
                         </span>
                     </p>
                     {order.Is_Cancelled && (
