@@ -356,7 +356,7 @@ export default function OrderDetailsPage() {
                                             <button onClick={handleUploadSlip} disabled={!selectedFile || isUploading} className="btn btn-primary btn-sm w-full">
                                                 {isUploading ? <span className="loading loading-spinner loading-xs"></span> : 'ยืนยันส่งสลิป'}
                                             </button>
-                                            <p className="text-[10px] text-center text-base-content/40 mt-1">รองรับ .jpg, .png (Max 5MB)</p>
+                                            <p className="text-[10px] text-center text-base-content/40 mt-1">รองรับนามสกุลไฟล์ .jpg และ .png (ขนาดไฟล์สูงสุด 5MB)</p>
                                         </div>
                                     )}
                                 </>

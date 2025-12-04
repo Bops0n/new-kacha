@@ -122,6 +122,8 @@ export default function OrderRefundInfo({
                                     accept="image/png, image/jpeg, image/jpg"
                                 />
 
+                                <p className="text-[14px] text-center text-base-content/40 mt-1">รองรับนามสกุลไฟล์ .jpg และ .png (ขนาดไฟล์สูงสุด 5MB)</p>
+
                                 <button
                                     onClick={handleUploadSlip}
                                     disabled={!selectedFile || isUploading}
