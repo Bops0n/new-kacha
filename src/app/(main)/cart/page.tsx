@@ -143,9 +143,17 @@ export default function CartPage() {
                             </div>
                             <div className="divider my-4"></div>
                             <h3 className="text-xl font-bold mb-4">ช่องทางการชำระเงิน</h3>
-                            <div className="form-control mb-6">
-                                <label className="label cursor-pointer justify-start gap-3"><input type="radio" name="payment_method" className="radio radio-primary" checked={paymentMethod === 'bank_transfer'} onChange={() => setPaymentMethod('bank_transfer')} /><span className="label-text text-lg">โอนเงินผ่านธนาคาร</span></label>
-                                <label className="label cursor-pointer justify-start gap-3"><input type="radio" name="payment_method" className="radio radio-primary" checked={paymentMethod === 'cash_on_delivery'} onChange={() => setPaymentMethod('cash_on_delivery')} /><span className="label-text text-lg">เก็บเงินปลายทาง (COD)</span></label>
+                            <div className="form-control mb-6 flex flex-col gap-3">
+                                <div className="flex items-center gap-8">
+                                    <label className="label cursor-pointer flex items-center gap-2">
+                                        <input type="radio" name="payment_method" className="radio radio-primary" checked={paymentMethod === 'bank_transfer'} onChange={() => setPaymentMethod('bank_transfer')} />
+                                        <span className="label-text text-lg">โอนเงินผ่านธนาคาร</span>
+                                    </label>
+                                    <label className="label cursor-pointer flex items-center gap-2">
+                                        <input type="radio" name="payment_method" className="radio radio-primary" checked={paymentMethod === 'cash_on_delivery'} onChange={() => setPaymentMethod('cash_on_delivery')} />
+                                        <span className="label-text text-lg">เก็บเงินปลายทาง (COD)</span>
+                                    </label>
+                                </div>
                             </div>
                             <div className="divider my-4"></div>
                             <div className="flex justify-between items-center text-xl font-bold mb-6"><span>ยอดชำระทั้งหมด:</span><span className="text-primary">{formatPrice(totalPrice)}</span></div>
