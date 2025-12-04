@@ -11,6 +11,7 @@ import OrderCheckInfo from '@/app/[admin]/components/order-management/OrderCheck
 import OrderShippingInfo from '../../components/order-management/OrderShippingInfo';
 import OrderShippedInfo from '../../components/order-management/OrderShippedInfo';
 import OrderRefundInfo from '../../components/order-management/OrderRefundInfo';
+import { boolean } from 'zod';
 
 export default function OrderStepPage() {
     const { orderId } = useParams();
@@ -245,9 +246,9 @@ export default function OrderStepPage() {
 
     }, [orderId, controller]);
 
-    async function onSaved() {
-        if (!onValidate()) return;
-        if (!isSaved) return;
+    async function onSaved(): Promise<boolean> {
+        if (!onValidate()) return false;
+        if (!isSaved) return false;
 
         if (IsCheckOrder) {
             try {
@@ -258,13 +259,12 @@ export default function OrderStepPage() {
                 });
                 const result = await response.json();
                 if (!response.ok) throw new Error(result.message);
-
-                await fetchOrderData();
+                return true;
                 } catch (err: any) {
                 showAlert(err.message, 'error');
             }
         } else if (IsShipping) {
-            if (isReadOnly) return;
+            if (isReadOnly) return false;
 
             try {
                 const response = await fetch('/api/admin/order/shipping-update', {
@@ -274,8 +274,7 @@ export default function OrderStepPage() {
                 });
                 const result = await response.json();
                 if (!response.ok) throw new Error(result.message);
-
-                await fetchOrderData();
+                return true;
             } catch (err: any) {
                 showAlert(err.message, 'error');
             }
@@ -283,7 +282,7 @@ export default function OrderStepPage() {
             try {
                 const pStatus = IsShipped ? 'shipped' : IsRefunding ? 'refunded' : null;
 
-                if (!pStatus) return;
+                if (!pStatus) return false;
 
                 const response = await fetch('/api/admin/order', {
                 method: 'PATCH',
@@ -292,12 +291,12 @@ export default function OrderStepPage() {
                 });
                 const result = await response.json();
                 if (!response.ok) throw new Error(result.message);
-
-                await fetchOrderData();
+                return true;
             } catch (err: any) {
                 showAlert(err.message, 'error');
             }
         }
+        return false;
     }
 
     const handleFormChange = useCallback((e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
