@@ -35,7 +35,7 @@ export default function OrderHeaderInfo({ order }: { order: Order }) {
                 </div>
 
                 <div className="text-sm space-y-1">
-                    <p><strong>หมายเลขคำสั่งซื้อ :</strong> #{order.Order_ID}</p>
+                    <p><strong>หมายเลขคำสั่งซื้อ :</strong> {order.Order_ID}</p>
                     <p><strong>วันที่สั่ง :</strong> {order.Order_Date || '-'}</p>
                     <p><strong>ประเภทการชำระเงิน :</strong>
                         <span className={`badge ${paymentLabel?.color || 'badge-primary'}`}>

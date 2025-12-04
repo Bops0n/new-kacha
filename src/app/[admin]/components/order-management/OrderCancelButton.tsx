@@ -214,7 +214,7 @@ export default function OrderCancelButton({ order, onlyIcon, onSuccess }: {
         >
           {!isNoPaymentChecked ? (
             <>
-              <h3 className="font-bold text-lg">ยกเลิกคำสั่งซื้อ #{order.Order_ID}</h3>
+              <h3 className="font-bold text-lg">ยกเลิกคำสั่งซื้อ: {order.Order_ID}</h3>
               <p className="mt-2 text-sm opacity-70">กรุณาระบุเหตุผลในการยกเลิกคำสั่งซื้อ</p>
 
               <textarea
@@ -303,7 +303,7 @@ export default function OrderCancelButton({ order, onlyIcon, onSuccess }: {
                   <div className="flex items-center gap-3 mb-4">
                       <FiXCircle className="w-7 h-7 text-error" />
                       <div>
-                          <h2 className="font-bold text-lg">ไม่สามารถยกเลิกคำสั่งซื้อ #{order.Order_ID} ได้</h2>
+                          <h2 className="font-bold text-lg">ไม่สามารถยกเลิกคำสั่งซื้อ: {order.Order_ID}</h2>
                       </div>
                   </div>
                   <div className="space-y-3">

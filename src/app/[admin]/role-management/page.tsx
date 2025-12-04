@@ -111,7 +111,7 @@ function RoleModal({ isOpen, onClose, isEditing, onSaved, form, handleRoleFormCh
     <dialog className="modal modal-open">
         <div className="modal-box w-11/12 max-w-2xl">
         <button onClick={onClose} className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2"><FiX/></button>
-        <h3 className="font-bold text-lg flex items-center gap-2"><FiShield/>{isEditing ? `แก้ไขบทบาท #${form.Role}` : "เพิ่มบทบาทใหม่"}</h3>
+        <h3 className="font-bold text-lg flex items-center gap-2"><FiShield/>{isEditing ? `แก้ไขบทบาท: ${form.Role}` : "เพิ่มบทบาทใหม่"}</h3>
         {error && <div className="alert alert-error mt-3">{error}</div>}
 
         <form onSubmit={handleSubmit} className="mt-4 space-y-4">

@@ -17,7 +17,7 @@ export const checkRequire = (auth : any) => {
 export const statusTypeLabels: StatusConfig = {
     waiting_payment: { label: 'รอชำระเงิน', color: 'text-purple-700', icon: FiClock, bgColor: 'bg-purple-50' },
     pending: { label: "รอดำเนินการ", color: "text-amber-700", icon: FiClock, bgColor: "bg-amber-50" },
-    preparing: { label: "กำลังจัดเตรียม", color: "text-sky-700", icon: FiPackage, bgColor: "bg-sky-50" },
+    preparing: { label: "กำลังเตรียมสินค้า", color: "text-sky-700", icon: FiPackage, bgColor: "bg-sky-50" },
     shipped: { label: "อยู่ระหว่างจัดส่ง", color: "text-blue-700", icon: FiTruck, bgColor: "bg-blue-50" },
     delivered: { label: "จัดส่งสำเร็จ", color: "text-green-700", icon: FiCheckCircle, bgColor: "bg-green-50" },
     refunding: { label: "รอคืนเงิน", color: "text-purple-700", icon: FiRefreshCw, bgColor: "bg-purple-50" },
@@ -29,7 +29,7 @@ export const statusTypeLabels: StatusConfig = {
 export const statusConfig: { [key in OrderStatus]: { label: string; color: string; icon: React.ElementType; bgColor: string; textColor: string } } = {
   waiting_payment: { label: 'รอชำระเงิน', color: 'warning', icon: FiClock, bgColor: 'bg-warning/10', textColor: 'text-warning' },
   pending: { label: 'รอดำเนินการ', color: 'warning', icon: FiClock, bgColor: 'bg-warning/10', textColor: 'text-warning' },
-  preparing: { label: 'กำลังจัดเตรียม', color: 'info', icon: FiPackage, bgColor: 'bg-info/10', textColor: 'text-info' },
+  preparing: { label: 'กำลังเตรียมสินค้า', color: 'info', icon: FiPackage, bgColor: 'bg-info/10', textColor: 'text-info' },
   shipped: { label: 'อยู่ระหว่างจัดส่ง', color: 'primary', icon: FiTruck, bgColor: 'bg-primary/10', textColor: 'text-primary' },
   delivered: { label: 'จัดส่งสำเร็จ', color: 'success', icon: FiCheckCircle, bgColor: 'bg-success/10', textColor: 'text-success' },
   refunding: { label: 'รอคืนเงิน', color: 'secondary', icon: FiRefreshCw, bgColor: 'bg-secondary/10', textColor: 'text-secondary' },

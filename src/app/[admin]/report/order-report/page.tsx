@@ -146,7 +146,7 @@ export default function OrdersReportPage() {
                 )}
                 {items.map((order) => (
                     <tr key={order.Order_ID} className="border-b border-gray-200">
-                        <td className="py-2 px-2 text-center">#{order.Order_ID}</td>
+                        <td className="py-2 px-2 text-center">{order.Order_ID}</td>
                         <td className="py-2 px-2 text-center">{formatDateTimeShort(order.Order_Date)}</td>
                         <td className="py-2 px-2 truncate max-w-[120px]">{order.Customer_Name}</td>
                         <td className="py-2 px-2 text-center">{order.Item_Count}</td>
@@ -262,7 +262,7 @@ export default function OrdersReportPage() {
                                     <div className="flex justify-between items-center mb-2">
                                         <h3 className="font-bold flex items-center gap-2"><FiFilter/> กรองสถานะ</h3>
                                         <button onClick={toggleAll} className="btn btn-xs btn-ghost text-primary">
-                                            {selectedStatuses.length === allStatuses.length ? 'ล้าง' : 'เลือกหมด'}
+                                            {selectedStatuses.length === allStatuses.length ? 'ล้างทั้งหมด' : 'เลือกทั้งหมด'}
                                         </button>
                                     </div>
                                     <div className="flex flex-col gap-2">
@@ -296,8 +296,8 @@ export default function OrdersReportPage() {
                                             <table className="table w-full">
                                                 <thead>
                                                     <tr className="bg-base-100 text-base-content">
-                                                        <th>รหัส</th>
-                                                        <th>เวลา</th>
+                                                        <th>หมายเลขคำสั่งซื้อ</th>
+                                                        <th>วันที่และเวลา</th>
                                                         <th>ลูกค้า</th>
                                                         <th className="text-center">สินค้า</th>
                                                         <th>ชำระเงิน</th>
@@ -372,8 +372,8 @@ export default function OrdersReportPage() {
                                 <table className="w-full text-xs border-collapse">
                                     <thead>
                                         <tr className="border-b border-black">
-                                            <th className="py-1 px-2 text-left w-16 font-bold">รหัส</th>
-                                            <th className="py-1 px-2 text-left w-20 font-bold">เวลา</th>
+                                            <th className="py-1 px-2 text-left w-16 font-bold">หมายเลขคำสั่งซื้อ</th>
+                                            <th className="py-1 px-2 text-left w-20 font-bold">วันที่และเวลา</th>
                                             <th className="py-1 px-2 text-left font-bold">ลูกค้า</th>
                                             <th className="py-1 px-2 text-center w-12 font-bold">สินค้า</th>
                                             <th className="py-1 px-2 text-left w-20 font-bold">ชำระเงิน</th>
