@@ -2,7 +2,7 @@
 
 import React, { useCallback, useEffect, useState } from 'react';
 import { Order, SimpleProductDetail } from '@/types';
-import { useParams, useSearchParams } from 'next/navigation';
+import { redirect, useParams, useRouter, useSearchParams } from 'next/navigation';
 import { STEP_TYPE, StepFlowBar } from '@/app/[admin]/components/order-management/StepFlowComponent';
 import { useAlert } from '@/app/context/AlertModalContext';
 import { OrderNavigation } from '@/app/[admin]/components/order-management/OrderNavigation';
@@ -11,11 +11,24 @@ import OrderCheckInfo from '@/app/[admin]/components/order-management/OrderCheck
 import OrderShippingInfo from '../../components/order-management/OrderShippingInfo';
 import OrderShippedInfo from '../../components/order-management/OrderShippedInfo';
 import OrderRefundInfo from '../../components/order-management/OrderRefundInfo';
-import { boolean } from 'zod';
+import Link from 'next/link';
+
+const Breadcrumbs = ({ orderId }: { orderId: number }) => {
+    if (!orderId) return <div className="h-6 mb-6"></div>;
+    return (
+        <div className="text-sm breadcrumbs mb-6 text-base-content/70">
+            <ul>
+                <li><Link href="/admin/order-management" className="hover:text-primary">จัดการคำสั่งซื้อ</Link></li>
+                <li><Link href={`/admin/order-management/${orderId}`} className="hover:text-primary">หมายเลขคำสั่งซื้อ: {orderId}</Link></li>
+            </ul>
+        </div>
+    );
+};
 
 export default function OrderStepPage() {
     const { orderId } = useParams();
     const { showAlert } = useAlert();
+    const { replace } = useRouter();
     const params = useSearchParams();
     const controller = params.get("controller");
     const goto = params.get("goto");
@@ -392,6 +405,24 @@ export default function OrderStepPage() {
     };
 
     useEffect(() => {
+        if (!order) return;
+        if (controller) return;
+
+        let url = "";
+
+        if (order.Status === "refunding" || order.Status === "refunded") {
+            url = `/admin/order-management/${order.Order_ID}?controller=refunding`;
+        } else if (order.Status === "req_cancel") {
+            url = `/admin/order-management/${order.Order_ID}?controller=req_cancel&goto=transfer_slip`;
+        } else {
+            url = `/admin/order-management/${order.Order_ID}?controller=checkorder`;
+        }
+
+        replace(url);
+    }, [order, controller]);
+
+
+    useEffect(() => {
         fetchOrderData();
     }, [fetchOrderData]);
 
@@ -426,6 +457,9 @@ export default function OrderStepPage() {
         <div className="min-h-screen bg-base-200 p-4">
             <div className="max-w-7xl mx-auto">
                 <div className="max-w-5xl mx-auto p-6 space-y-8">
+
+                    <Breadcrumbs orderId={order.Order_ID} />
+
                     <div className="bg-base-100 rounded-lg shadow-sm p-6 mb-6">
                         <StepFlowBar 
                             controller={controller || ''}

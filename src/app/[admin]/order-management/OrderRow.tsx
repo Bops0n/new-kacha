@@ -18,18 +18,12 @@ const OrderRow: React.FC<OrderRowProps> = ({ order, statusConfig, btnCancelOrder
   const statusInfo = statusConfig[order.Status];
 
   const handleClickOpen = () => {
-    if (order.Status === 'refunding' || order.Status === 'refunded') {
-      window.open(`/admin/order-management/${order.Order_ID}?controller=refunding`);
-    } else if (order.Status === 'req_cancel') {
-      window.open(`/admin/order-management/${order.Order_ID}?controller=req_cancel&goto=transfer_slip`);
-    } else {
-      window.open(`/admin/order-management/${order.Order_ID}?controller=checkorder`);
-    }
+    window.open(`/admin/order-management/${order.Order_ID}`);
   }
 
   return (
     <tr className="hover cursor-pointer" onClick={handleClickOpen}>
-      <td><div className="font-bold text-primary">#{order.Order_ID}</div></td>
+      <td><div className="font-bold text-primary">{order.Order_ID}</div></td>
       <td>
         <div className="font-bold">{order.Customer_Name}</div>
         <div className="text-sm opacity-70">{order.Customer_Email || '-'}</div>
