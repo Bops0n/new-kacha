@@ -206,12 +206,13 @@ export default function OrderCheckInfo({
                             <p className="text-sm opacity-60">หมายเหตุ</p>
                             {isReqCancel ? (
                               <p className="text-sm text-base-content/80">
-                                หากกดปุ่ม 'ปฏิเสธ' สถานะคำสั่งซื้อจะถูกเปลี่ยนเป็น
+                                <br/>
+                                1. หากกดปุ่ม 'ปฏิเสธ' สถานะคำสั่งซื้อจะถูกเปลี่ยนเป็น
                                 <span className={`badge ${cancelled.color }`}>
                                   <cancelled.icon className="inline-block w-4 h-4 mr-1" />
                                   {cancelled.label}
-                                </span><br/>
-                                หากกดปุ่ม 'ยืนยัน' ระบบจะเปลี่ยนสถานะเป็น{" "}
+                                </span><br/><br/>
+                                2. หากกดปุ่ม 'ยืนยัน' ระบบจะเปลี่ยนสถานะเป็น{" "}
                                 <span className={`badge ${refunding.color }`}>
                                     <refunding.icon className="inline-block w-4 h-4 mr-1" />
                                     {refunding.label}

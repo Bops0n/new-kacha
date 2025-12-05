@@ -13,7 +13,7 @@ type OrderNavigationProps = {
     btnCancelOrder?: boolean;
     fetchOrderData?: () => void;
     onValidate?: () => boolean;
-    onSaved?: () => void;
+    onSaved?: () => Promise<boolean>;
 };
 
 export function OrderNavigation({
@@ -25,7 +25,7 @@ export function OrderNavigation({
   btnCancelOrder = false,
   fetchOrderData = () => {},
   onValidate = () => true,
-  onSaved = () => {},
+  onSaved = () => Promise.resolve(true),
 }: OrderNavigationProps) {
   const { push } = useRouter();
 
@@ -49,12 +49,17 @@ export function OrderNavigation({
                 className="btn btn-primary"
                 disabled={!nextEnabled}
                 type="button"
-                onClick={(e) => {
+                onClick={async (e) => {
                   e.preventDefault();
 
                   if (onValidate && !onValidate()) return;
 
-                  if (onSaved) onSaved();
+                  if (onSaved) {
+                    const isSaved = await onSaved();
+                    if (isSaved) {
+                      fetchOrderData();
+                    }
+                  }
 
                   if (nextHref) push(nextHref);
                 }}

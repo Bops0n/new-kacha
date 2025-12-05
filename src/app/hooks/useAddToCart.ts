@@ -21,9 +21,6 @@ export function useAddToCart() {
 
     const availableStock = calculateAvailableStock(product);
 
-
-    console.log(quantity, availableStock)
-
     if (quantity > availableStock) {
       showAlert(`สินค้ามีในสต็อกเพียง ${availableStock} ชิ้น`, 'error');
       return ;

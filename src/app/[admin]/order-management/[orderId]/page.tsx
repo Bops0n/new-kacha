@@ -2,8 +2,8 @@
 
 import React, { useCallback, useEffect, useState } from 'react';
 import { Order, SimpleProductDetail } from '@/types';
-import { useParams, useSearchParams } from 'next/navigation';
-import { StepFlowBar } from '@/app/[admin]/components/order-management/StepFlowComponent';
+import { redirect, useParams, useRouter, useSearchParams } from 'next/navigation';
+import { STEP_TYPE, StepFlowBar } from '@/app/[admin]/components/order-management/StepFlowComponent';
 import { useAlert } from '@/app/context/AlertModalContext';
 import { OrderNavigation } from '@/app/[admin]/components/order-management/OrderNavigation';
 import OrderHeaderInfo from '@/app/[admin]/components/order-management/OrderHeaderInfo';
@@ -11,10 +11,24 @@ import OrderCheckInfo from '@/app/[admin]/components/order-management/OrderCheck
 import OrderShippingInfo from '../../components/order-management/OrderShippingInfo';
 import OrderShippedInfo from '../../components/order-management/OrderShippedInfo';
 import OrderRefundInfo from '../../components/order-management/OrderRefundInfo';
+import Link from 'next/link';
+
+const Breadcrumbs = ({ orderId }: { orderId: number }) => {
+    if (!orderId) return <div className="h-6 mb-6"></div>;
+    return (
+        <div className="text-sm breadcrumbs mb-6 text-base-content/70">
+            <ul>
+                <li><Link href="/admin/order-management" className="hover:text-primary">จัดการคำสั่งซื้อ</Link></li>
+                <li><Link href={`/admin/order-management/${orderId}`} className="hover:text-primary">หมายเลขคำสั่งซื้อ: {orderId}</Link></li>
+            </ul>
+        </div>
+    );
+};
 
 export default function OrderStepPage() {
     const { orderId } = useParams();
     const { showAlert } = useAlert();
+    const { replace } = useRouter();
     const params = useSearchParams();
     const controller = params.get("controller");
     const goto = params.get("goto");
@@ -24,7 +38,6 @@ export default function OrderStepPage() {
     const IsSummary = controller === 'summary';
     const IsShipped = controller === 'shipped';
     const IsRefunding = controller === 'refunding';
-    const IsRefunded = controller === 'refunded';
     const IsReqCancel = controller === 'req_cancel';
 
     const [order, setOrder] = useState<Order | null>(null);
@@ -56,6 +69,8 @@ export default function OrderStepPage() {
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [isUploading, setIsUploading] = useState<boolean>(false);
 
+    const [isReadOnly, setIsReadOnly] = useState<boolean>(false);
+
     const fetchOrderData = useCallback(async () => {
         async function load() {
             try {
@@ -73,6 +88,7 @@ export default function OrderStepPage() {
                         await loadProductDetails(order);   
                     }
                     if (IsShipping || IsSummary) {
+                        setIsReadOnly(order.Status !== 'preparing' || IsSummary);
                         setForm({
                             Shipping_Method: order.Shipping_Method || "",
                             Shipping_Provider: order.Shipping_Provider || "",
@@ -111,31 +127,20 @@ export default function OrderStepPage() {
 
         function loadNextStep(order: Order) {
             if (IsRefunding) {
-                setBtnNextEnable(true);
-                setButtonText('ถัดไป');
-                setBackStep(`/admin/order-management/${order.Order_ID}?controller=checkorder`);
-                setNextStep(`/admin/order-management/${order.Order_ID}?controller=refunded`);
-                setBtnSpecial(false);
-                setIsSaved(false);
-                setBtnCancelOrder(false);
-                return;
-            }
-
-            if (IsRefunded) {
-                // if (order.Status === 'refunded') {
-                //     setBtnNextEnable(true);
-                //     setButtonText('ยืนยันการคืนเงิน');
-                //     setBackStep(`/admin/order-management/${order.Order_ID}?controller=refunding`);
-                //     setNextStep(`/admin/order-management/${order.Order_ID}?controller=refunded`);
-                //     setBtnSpecial(false);
-                //     setIsSaved(false);
-                //     setBtnCancelOrder(false);
-                //     return;
-                // }
+                if (order.Status === 'refunding') {
+                    setBtnNextEnable(order.Refund_Slip !== null && order.Is_Refunded);
+                    setButtonText('ยืนยันการคืนเงิน');
+                    setBackStep(`/admin/order-management/${order.Order_ID}?controller=checkorder`);
+                    setNextStep(`/admin/order-management/${order.Order_ID}?controller=refunding`);
+                    setBtnSpecial(false);
+                    setIsSaved(true);
+                    setBtnCancelOrder(false);
+                    return;
+                }
 
                 setBtnNextEnable(true);
                 setButtonText('จัดการคำสั่งซื้อ');
-                setBackStep(`/admin/order-management/${order.Order_ID}?controller=refunding`);
+                setBackStep(`/admin/order-management`);
                 setNextStep(null);
                 setBtnSpecial(false);
                 setIsSaved(false);
@@ -254,9 +259,9 @@ export default function OrderStepPage() {
 
     }, [orderId, controller]);
 
-    async function onSaved() {
-        if (!onValidate()) return;
-        if (!isSaved) return;
+    async function onSaved(): Promise<boolean> {
+        if (!onValidate()) return false;
+        if (!isSaved) return false;
 
         if (IsCheckOrder) {
             try {
@@ -267,12 +272,13 @@ export default function OrderStepPage() {
                 });
                 const result = await response.json();
                 if (!response.ok) throw new Error(result.message);
-
-                await fetchOrderData();
+                return true;
                 } catch (err: any) {
                 showAlert(err.message, 'error');
             }
         } else if (IsShipping) {
+            if (isReadOnly) return false;
+
             try {
                 const response = await fetch('/api/admin/order/shipping-update', {
                     method: 'PATCH',
@@ -281,16 +287,15 @@ export default function OrderStepPage() {
                 });
                 const result = await response.json();
                 if (!response.ok) throw new Error(result.message);
-
-                await fetchOrderData();
+                return true;
             } catch (err: any) {
                 showAlert(err.message, 'error');
             }
-        } else if (IsShipped) {
+        } else if (IsShipped || IsRefunding) {
             try {
-                const pStatus = IsShipped ? 'shipped' : undefined;
+                const pStatus = IsShipped ? 'shipped' : IsRefunding ? 'refunded' : null;
 
-                if (!pStatus) return;
+                if (!pStatus) return false;
 
                 const response = await fetch('/api/admin/order', {
                 method: 'PATCH',
@@ -299,12 +304,12 @@ export default function OrderStepPage() {
                 });
                 const result = await response.json();
                 if (!response.ok) throw new Error(result.message);
-
-                await fetchOrderData();
+                return true;
             } catch (err: any) {
                 showAlert(err.message, 'error');
             }
         }
+        return false;
     }
 
     const handleFormChange = useCallback((e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -393,11 +398,29 @@ export default function OrderStepPage() {
             const STEP_2_VALID = requiredShippingFields.every((x) => order[x as keyof Order] && order[x as keyof Order] !== "");
     
             return STEP_1_VALID && STEP_2_VALID;
-        } else if (IsRefunded) {
+        } else if (IsRefunding) {
             return order.Status !== 'refunded' || !order.Refund_Slip || order.Is_Refunded;
         }
         return true;
     };
+
+    useEffect(() => {
+        if (!order) return;
+        if (controller) return;
+
+        let url = "";
+
+        if (order.Status === "refunding" || order.Status === "refunded") {
+            url = `/admin/order-management/${order.Order_ID}?controller=refunding`;
+        } else if (order.Status === "req_cancel") {
+            url = `/admin/order-management/${order.Order_ID}?controller=req_cancel&goto=transfer_slip`;
+        } else {
+            url = `/admin/order-management/${order.Order_ID}?controller=checkorder`;
+        }
+
+        replace(url);
+    }, [order, controller]);
+
 
     useEffect(() => {
         fetchOrderData();
@@ -428,17 +451,25 @@ export default function OrderStepPage() {
 
     const IsValidate = onValidate();
 
+    const Type : STEP_TYPE = IsRefunding ? 'refund' : IsReqCancel ? 'req_cancel' : 'normal';
+
     return (
         <div className="min-h-screen bg-base-200 p-4">
             <div className="max-w-7xl mx-auto">
                 <div className="max-w-5xl mx-auto p-6 space-y-8">
+
+                    <Breadcrumbs orderId={order.Order_ID} />
+
                     <div className="bg-base-100 rounded-lg shadow-sm p-6 mb-6">
-                        <StepFlowBar currentStep={1} orderId={order.Order_ID} refund={(IsRefunding || IsRefunded)}/>
+                        <StepFlowBar 
+                            controller={controller || ''}
+                            type={Type}
+                        />
                     </div>
 
                     <OrderHeaderInfo order={order} />
 
-                    {(IsCheckOrder || IsSummary || IsRefunding || IsReqCancel) && 
+                    {(IsCheckOrder || IsSummary || IsReqCancel) && 
                         <OrderCheckInfo 
                             order={order}
                             liveDetails={liveDetails}
@@ -450,7 +481,7 @@ export default function OrderStepPage() {
 
                     {(IsShipping || IsSummary) && 
                         <OrderShippingInfo 
-                            IsReadOnly={(order.Status !== 'preparing' || IsSummary)}
+                            IsReadOnly={isReadOnly}
                             order={order}
                             form={form} 
                             handleFormChange={handleFormChange}
@@ -465,7 +496,7 @@ export default function OrderStepPage() {
                         />
                     }
 
-                    {IsRefunded && 
+                    {IsRefunding && 
                         <OrderRefundInfo 
                             order={order}
                             selectedFile={selectedFile}

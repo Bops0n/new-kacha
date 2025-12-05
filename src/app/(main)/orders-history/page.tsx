@@ -91,7 +91,7 @@ export default function OrderHistoryPage() {
                                 <div>
                                     <div className="flex items-center gap-2">
                                         <h2 className="text-lg font-bold text-primary group-hover:underline decoration-2 underline-offset-2">
-                                            คำสั่งซื้อ #{order.Order_ID}
+                                            หมายเลขคำสั่งซื้อ: {order.Order_ID}
                                         </h2>
                                     </div>
                                     <p className="text-sm text-base-content/60 mt-1 flex items-center gap-1">

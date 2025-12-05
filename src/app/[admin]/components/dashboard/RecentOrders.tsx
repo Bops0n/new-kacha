@@ -69,7 +69,7 @@ export function RecentOrders() {
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-2">
                   <div className="flex flex-col sm:flex-row sm:items-center gap-3">
                     <span className="inline-block bg-blue-50 text-blue-700 font-bold px-3 py-1 rounded-lg text-sm shadow-sm">
-                      #{o.Order_ID}
+                      หมายเลขคำสั่งซื้อ: {o.Order_ID}
                     </span>
                     <div>
                       <p className="font-semibold text-gray-800 group-hover:text-blue-700 transition-colors">

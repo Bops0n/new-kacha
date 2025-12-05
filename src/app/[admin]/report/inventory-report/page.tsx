@@ -220,7 +220,7 @@ export default function InventoryReportPage() {
                             <table className="table table-zebra w-full">
                                 <thead>
                                     <tr className="bg-base-200 text-base-content font-bold">
-                                        <th className="w-16">รหัส</th>
+                                        <th className="w-16">หมายเลขสินค้า</th>
                                         <th>ชื่อสินค้า</th>
                                         <th>หมวดหมู่ (รอง)</th>
                                         <th className="text-right w-20">จุดสั่งซื้อ</th>
@@ -317,7 +317,7 @@ export default function InventoryReportPage() {
                 <table className="w-full text-xs border-collapse">
                     <thead>
                         <tr className="border-b border-black">
-                            <th className="py-1 text-left w-12 font-bold">รหัส</th>
+                            <th className="py-1 text-left w-12 font-bold">หมายเลขสินค้า</th>
                             <th className="py-1 text-left font-bold">ชื่อสินค้า</th>
                             <th className="py-1 text-left w-20 font-bold">หมวดหมู่</th>
                             <th className="py-1 text-right w-12 font-bold">จุดสั่งซื้อ</th>

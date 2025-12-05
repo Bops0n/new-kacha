@@ -167,7 +167,7 @@ export default function SummarySalesReportPage() {
                                     <thead className="bg-base-200/50 text-base-content">
                                         <tr>
                                             <th>วันที่</th>
-                                            <th>เลขที่คำสั่งซื้อ</th>
+                                            <th>หมายเลขคำสั่งซื้อ</th>
                                             <th>ลูกค้า</th>
                                             <th className="text-center">สถานะ</th>
                                             <th className="text-right text-base-content/70">มูลค่าสินค้า</th>
@@ -186,7 +186,7 @@ export default function SummarySalesReportPage() {
                                                 return (
                                                     <tr key={order.Order_ID} className="hover:bg-base-50">
                                                         <td className="font-mono text-xs">{formatDateThai(order.Order_Date)}</td>
-                                                        <td className="font-bold text-primary">#{order.Order_ID}</td>
+                                                        <td className="font-bold text-primary">{order.Order_ID}</td>
                                                         <td>{order.Customer_Name}</td>
                                                         <td className="text-center">
                                                             <span className={`badge badge-sm ${order.Status === 'delivered' ? 'badge-success' : 'badge-primary'}`}>
@@ -262,7 +262,7 @@ export default function SummarySalesReportPage() {
                     <thead>
                         <tr className="border-b border-black">
                             <th className="py-1 text-left w-24 font-bold">วันที่</th>
-                            <th className="py-1 text-left w-24 font-bold">เลขที่คำสั่งซื้อ</th>
+                            <th className="py-1 text-left w-24 font-bold">หมายเลขคำสั่งซื้อ</th>
                             <th className="py-1 text-left font-bold">ลูกค้า</th>
                             <th className="py-1 text-right w-24 font-bold">มูลค่าสินค้า</th>
                             <th className="py-1 text-right w-24 font-bold">VAT (7%)</th>
@@ -277,7 +277,7 @@ export default function SummarySalesReportPage() {
                             return (
                                 <tr key={order.Order_ID} className="border-b border-gray-300">
                                     <td className="py-1 text-left">{formatDateThai(order.Order_Date)}</td>
-                                    <td className="py-1 text-left">#{order.Order_ID}</td>
+                                    <td className="py-1 text-left">{order.Order_ID}</td>
                                     <td className="py-1 text-left truncate max-w-[150px]">{order.Customer_Name}</td>
                                     <td className="py-1 text-right">{formatPrice(net)}</td>
                                     <td className="py-1 text-right">{formatPrice(vat)}</td>

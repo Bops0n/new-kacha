@@ -28,7 +28,7 @@ const OrderCard: React.FC<OrderCardProps> = ({ order, statusTypeLabels }) => {
         <div className="flex justify-between items-start">
             <div>
                 <h2 className="card-title text-base">{order.Customer_Name}</h2>
-                <p className="text-sm text-base-content/70">ID: #{order.Order_ID}</p>
+                <p className="text-sm text-base-content/70">หมายเลขคำสั่งซื้อ: {order.Order_ID}</p>
             </div>
             {statusInfo && (
                 <span className={`badge ${statusInfo.color}`}>

@@ -107,7 +107,6 @@ export function useCart() {
     }
     if (newQuantity > availableStock) {
         showAlert(`สินค้ามีในสต็อกเพียง ${availableStock} ชิ้น`, 'warning');
-        console.log(availableStock, newQuantity)
         try {
         const response = await fetch('/api/main/cart', {
             method: 'PATCH',

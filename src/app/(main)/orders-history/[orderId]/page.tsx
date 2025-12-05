@@ -347,7 +347,7 @@ export default function OrderDetailsPage() {
             <div>
                 <div className="flex items-center gap-3">
                     <button onClick={() => router.back()} className="btn btn-circle btn-ghost btn-sm text-base-content/70 hover:bg-base-200"><FiArrowLeft className="w-5 h-5" /></button>
-                    <h1 className="text-2xl sm:text-3xl font-extrabold text-base-content tracking-tight">คำสั่งซื้อ #{order.Order_ID}</h1>
+                    <h1 className="text-2xl sm:text-3xl font-extrabold text-base-content tracking-tight">หมายเลขคำสั่งซื้อ: {order.Order_ID}</h1>
                 </div>
                 <p className="text-base-content/60 mt-1 ml-12 text-sm">วันที่สั่งซื้อ: {formatDateTime(order.Order_Date)}</p>
             </div>
@@ -455,7 +455,7 @@ export default function OrderDetailsPage() {
                                             <button onClick={handleUploadSlip} disabled={!selectedFile || isUploading} className="btn btn-primary btn-sm w-full">
                                                 {isUploading ? <span className="loading loading-spinner loading-xs"></span> : 'ยืนยันส่งสลิป'}
                                             </button>
-                                            <p className="text-[10px] text-center text-base-content/40 mt-1">รองรับ .jpg, .png (Max 5MB)</p>
+                                            <p className="text-[10px] text-center text-base-content/40 mt-1">รองรับนามสกุลไฟล์ .jpg และ .png (ขนาดไฟล์สูงสุด 5MB)</p>
                                         </div>
                                     )}
                                 </>
@@ -613,7 +613,7 @@ export default function OrderDetailsPage() {
                 <button className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2" onClick={() => !isCancelling && setIsCancelModalOpen(false)}>✕</button>
                 <h3 className="font-bold text-lg text-error flex items-center gap-2"><FiAlertTriangle className="w-6 h-6" /> ยืนยันการยกเลิกคำสั่งซื้อ</h3>
                 <div className="py-4 space-y-3">
-                    <p className="font-medium">Order ID: #{orderId}</p>
+                    <p className="font-medium">หมายเลขคำสั่งซื้อ: {orderId}</p>
                     <p className="text-sm text-base-content/70">คุณต้องการยกเลิกคำสั่งซื้อนี้ใช่หรือไม่?</p>
                     <div className="form-control w-full mt-2">
                         <label className="label"><span className="label-text font-semibold text-error">ระบุเหตุผล (จำเป็น):</span></label>

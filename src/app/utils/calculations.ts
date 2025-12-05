@@ -1,5 +1,5 @@
 import { CartDetailSchema } from '@/types';
-import { ProductInventory, SimpleProductDetail } from '@/types/product.types';
+import { ProductFormData, ProductInventory, SimpleProductDetail } from '@/types/product.types';
 
 /**
  * Calculates the available stock for a product based on the perpetual inventory formula.
@@ -7,9 +7,14 @@ import { ProductInventory, SimpleProductDetail } from '@/types/product.types';
  * @param product The product inventory object.
  * @returns The number of units available for sale.
  */
-export function calculateAvailableStock(product: ProductInventory | CartDetailSchema | SimpleProductDetail): number {
+export function calculateAvailableStock(product: ProductInventory | CartDetailSchema | SimpleProductDetail | ProductFormData ): number {
   if (!product) {
     return 0;
   }
-  return product.Quantity - product.Total_Sales + product.Cancellation_Count;
+  
+  const quantity = product.Quantity ?? 0;
+  const totalSales = product.Total_Sales ?? 0;
+  const cancellationCount = product.Cancellation_Count ?? 0;
+  
+  return quantity - totalSales + cancellationCount;
 }
