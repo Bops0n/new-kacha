@@ -344,7 +344,7 @@ export default function OrdersReportPage() {
                     </div>
                 </div>
 
-                <div className="flex gap-4 mb-6 border border-black p-3 bg-gray-50">
+                {/* <div className="flex gap-4 mb-6 border border-black p-3 bg-gray-50">
                     <div className="flex-1 text-center border-r border-black">
                         <div className="text-xs font-bold">รายการที่เลือก</div>
                         <div className="text-xl font-bold">{summary.totalCount}</div>
@@ -357,7 +357,7 @@ export default function OrdersReportPage() {
                         <div className="text-xs font-bold">ยอดขายรวมสุทธิ</div>
                         <div className="text-xl font-bold">{formatPrice(summary.totalRevenue)}</div>
                     </div>
-                </div>
+                </div> */}
 
                 <div className="space-y-6">
                     {Object.keys(groupedOrders).map(status => {
