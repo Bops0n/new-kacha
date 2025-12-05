@@ -137,7 +137,7 @@ const OrderStepIndicator = ({ order, statusConfig }: { order: Order, statusConfi
 
   if (happyStepIndex > -1) {
     return (
-      <ul className="steps steps-vertical md:steps-horizontal w-full my-12 text-center px-4 overflow-visible">
+      <ul className="steps steps-vertical md:steps-horizontal w-full my-8 py-4 text-center px-4 overflow-visible">
         {happyPath.map((step, index) => {
           const statusInfo = statusConfig[step];
           if (!statusInfo) return null; 
@@ -163,7 +163,7 @@ const OrderStepIndicator = ({ order, statusConfig }: { order: Order, statusConfi
   const refundStepIndex = refundPath.indexOf(currentStatus);
   if (refundStepIndex > -1) {
     return (
-      <ul className="steps steps-vertical md:steps-horizontal w-full my-12 text-center px-4 overflow-visible">
+      <ul className="steps steps-vertical md:steps-horizontal w-full my-8 py-4 text-center px-4 overflow-visible">
         {refundPath.map((step, index) => {
             const statusInfo = statusConfig[step];
             const isComplete = index < refundStepIndex;
@@ -186,7 +186,7 @@ const OrderStepIndicator = ({ order, statusConfig }: { order: Order, statusConfi
   if (currentStatus === 'cancelled' || currentStatus === 'req_cancel') {
     const isReq = currentStatus === 'req_cancel';
     return (
-      <ul className="steps steps-vertical md:steps-horizontal w-full my-12 text-center px-4 overflow-visible">
+      <ul className="steps steps-vertical md:steps-horizontal w-full my-8 py-4 text-center px-4 overflow-visible">
         <li className="step step-primary overflow-visible" data-content="">
             <div className="flex flex-col items-center relative">
                 {renderIconCircle(FiShoppingCart, false, true)}
