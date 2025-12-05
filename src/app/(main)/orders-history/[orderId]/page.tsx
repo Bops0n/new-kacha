@@ -6,7 +6,7 @@ import {
   FiClock, FiPackage, FiTruck, FiCheckCircle, FiXCircle, 
   FiArrowLeft, FiMapPin, FiShoppingCart, FiUploadCloud, FiDollarSign, 
   FiRefreshCw, FiTrash2, FiAlertTriangle, FiFileText, FiInfo, FiCreditCard,
-  FiArrowDown, FiZoomIn, FiUser, FiPhone
+  FiArrowDown, FiZoomIn, FiUser, FiPhone, FiCopy, FiX
 } from 'react-icons/fi';
 import { Order, OrderStatus } from '@/types';
 import { useAlert } from '@/app/context/AlertModalContext';
@@ -15,11 +15,94 @@ import LoadingSpinner from '@/app/components/LoadingSpinner';
 import { useSession } from 'next-auth/react';
 import AccessDeniedPage from '@/app/components/AccessDenied';
 import { useOrderHistory } from '@/app/hooks/useOrderHistory';
-import { statusConfig } from '@/app/utils/client';
 
 // --- Configuration ---
+const PAYMENT_TIMEOUT_HOURS = 24;
+
+// ข้อมูลบัญชีธนาคาร (สามารถแก้ไขให้ตรงกับของจริงได้ที่นี่)
+const BANK_INFO = {
+  bankName: 'ธนาคารกสิกรไทย (KBANK)',
+  accountName: 'บจก. คชาโฮม จำกัด',
+  accountNumber: '123-4-56789-0',
+  branch: 'สาขาสุขุมวิท',
+  promptPayId: '010555XXXXXXX' // ถ้ามี
+};
 
 // Status Config
+const statusConfig: { [key in OrderStatus]: { label: string; color: string; icon: React.ElementType; bgColor: string; textColor: string } } = {
+  waiting_payment: { label: 'รอชำระเงิน', color: 'warning', icon: FiClock, bgColor: 'bg-warning/10', textColor: 'text-warning' },
+  pending: { label: 'รอดำเนินการ', color: 'warning', icon: FiClock, bgColor: 'bg-warning/10', textColor: 'text-warning' },
+  preparing: { label: 'กำลังเตรียม', color: 'info', icon: FiPackage, bgColor: 'bg-info/10', textColor: 'text-info' },
+  shipped: { label: 'จัดส่งแล้ว', color: 'primary', icon: FiTruck, bgColor: 'bg-primary/10', textColor: 'text-primary' },
+  delivered: { label: 'ส่งเรียบร้อย', color: 'success', icon: FiCheckCircle, bgColor: 'bg-success/10', textColor: 'text-success' },
+  refunding: { label: 'กำลังคืนเงิน', color: 'secondary', icon: FiRefreshCw, bgColor: 'bg-secondary/10', textColor: 'text-secondary' },
+  refunded: { label: 'คืนเงินสำเร็จ', color: 'neutral', icon: FiCheckCircle, bgColor: 'bg-neutral/10', textColor: 'text-neutral' },
+  cancelled: { label: 'ยกเลิก', color: 'error', icon: FiXCircle, bgColor: 'bg-error/10', textColor: 'text-error' },
+  req_cancel: { label: 'ขอยกเลิก', color: 'warning', icon: FiFileText, bgColor: 'bg-warning/10', textColor: 'text-warning' },
+};
+
+// --- Component: Payment Info Modal ---
+const PaymentInfoModal = ({ isOpen, onClose, totalAmount }: { isOpen: boolean; onClose: () => void; totalAmount: number }) => {
+    const { showAlert } = useAlert();
+
+    const handleCopy = (text: string) => {
+        navigator.clipboard.writeText(text.replace(/-/g, ''));
+        showAlert('คัดลอกเลขบัญชีเรียบร้อยแล้ว', 'success');
+    };
+
+    if (!isOpen) return null;
+
+    return (
+        <dialog className="modal modal-open">
+            <div className="modal-box">
+                <button onClick={onClose} className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
+                <h3 className="font-bold text-lg flex items-center gap-2">
+                    <FiCreditCard className="text-primary" /> ช่องทางการชำระเงิน
+                </h3>
+                
+                <div className="py-4 space-y-4">
+                    <div className="bg-primary/5 p-4 rounded-xl border border-primary/20 text-center">
+                        <p className="text-sm text-base-content/70">ยอดที่ต้องชำระ</p>
+                        <p className="text-3xl font-bold text-primary">{formatPrice(totalAmount)}</p>
+                    </div>
+
+                    <div className="card bg-base-100 border border-base-200 shadow-sm">
+                        <div className="card-body p-4">
+                            <h4 className="font-bold text-base mb-2">{BANK_INFO.bankName}</h4>
+                            <div className="space-y-1 text-sm">
+                                <p><span className="opacity-70">ชื่อบัญชี:</span> {BANK_INFO.accountName}</p>
+                                <p><span className="opacity-70">สาขา:</span> {BANK_INFO.branch}</p>
+                            </div>
+                            <div className="divider my-2"></div>
+                            <div className="flex items-center justify-between bg-base-200 p-3 rounded-lg">
+                                <span className="font-mono text-lg font-bold tracking-wider">{BANK_INFO.accountNumber}</span>
+                                <button 
+                                    className="btn btn-xs btn-ghost text-primary tooltip tooltip-left" 
+                                    data-tip="คัดลอก"
+                                    onClick={() => handleCopy(BANK_INFO.accountNumber)}
+                                >
+                                    <FiCopy /> คัดลอก
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div className="text-xs text-center text-base-content/60 mt-2">
+                        * กรุณาตรวจสอบยอดเงินและเลขบัญชีก่อนโอน <br/>
+                        เมื่อโอนเสร็จแล้ว กรุณาแนบสลิปในหน้าคำสั่งซื้อ
+                    </div>
+                </div>
+
+                <div className="modal-action">
+                    <button className="btn btn-primary w-full" onClick={onClose}>ปิดหน้าต่าง</button>
+                </div>
+            </div>
+            <form method="dialog" className="modal-backdrop bg-black/50 backdrop-blur-sm">
+                <button onClick={onClose}>close</button>
+            </form>
+        </dialog>
+    );
+};
 
 // --- StepIndicator Component ---
 const OrderStepIndicator = ({ order, statusConfig }: { order: Order, statusConfig: any }) => {
@@ -30,6 +113,7 @@ const OrderStepIndicator = ({ order, statusConfig }: { order: Order, statusConfi
     : ['pending', 'preparing', 'shipped', 'delivered'];
     
   const refundPath: OrderStatus[] = ['refunding', 'refunded'];
+  
   const happyStepIndex = happyPath.indexOf(currentStatus);
 
   const renderArrow = () => (
@@ -53,7 +137,7 @@ const OrderStepIndicator = ({ order, statusConfig }: { order: Order, statusConfi
 
   if (happyStepIndex > -1) {
     return (
-      <ul className="steps steps-vertical md:steps-horizontal w-full my-8 py-5 text-center px-4 overflow-visible">
+      <ul className="steps steps-vertical md:steps-horizontal w-full my-12 text-center px-4 overflow-visible">
         {happyPath.map((step, index) => {
           const statusInfo = statusConfig[step];
           if (!statusInfo) return null; 
@@ -79,7 +163,7 @@ const OrderStepIndicator = ({ order, statusConfig }: { order: Order, statusConfi
   const refundStepIndex = refundPath.indexOf(currentStatus);
   if (refundStepIndex > -1) {
     return (
-      <ul className="steps steps-vertical md:steps-horizontal w-full my-8 py-5 text-center px-4 overflow-visible">
+      <ul className="steps steps-vertical md:steps-horizontal w-full my-12 text-center px-4 overflow-visible">
         {refundPath.map((step, index) => {
             const statusInfo = statusConfig[step];
             const isComplete = index < refundStepIndex;
@@ -102,7 +186,7 @@ const OrderStepIndicator = ({ order, statusConfig }: { order: Order, statusConfi
   if (currentStatus === 'cancelled' || currentStatus === 'req_cancel') {
     const isReq = currentStatus === 'req_cancel';
     return (
-      <ul className="steps steps-vertical md:steps-horizontal w-full my-8 py-5 text-center px-4 overflow-visible">
+      <ul className="steps steps-vertical md:steps-horizontal w-full my-12 text-center px-4 overflow-visible">
         <li className="step step-primary overflow-visible" data-content="">
             <div className="flex flex-col items-center relative">
                 {renderIconCircle(FiShoppingCart, false, true)}
@@ -146,6 +230,9 @@ export default function OrderDetailsPage() {
   
   // State สำหรับ Tab (Default = Payment)
   const [activeTab, setActiveTab] = useState<'payment' | 'refund'>('payment');
+  
+  // +++ State สำหรับ Modal ช่องทางการชำระเงิน +++
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
 
   const orderId = typeof params.orderId === 'string' ? parseInt(params.orderId, 10) : NaN;
 
@@ -342,7 +429,19 @@ export default function OrderDetailsPage() {
                                     ) : (
                                         <div className="w-full min-h-[150px] flex flex-col items-center justify-center bg-base-200/50 rounded-xl border-2 border-dashed border-base-300 p-6 text-base-content/40">
                                             <FiUploadCloud className="w-10 h-10 mb-2" />
-                                            <p className="text-sm text-center">{order.Payment_Type === 'bank_transfer' ? 'ยังไม่มีสลิปการโอนเงิน' : 'ชำระเงินปลายทาง'}</p>
+                                            <p className="text-sm text-center">
+                                                {order.Payment_Type === 'bank_transfer' ? 'ยังไม่มีสลิปการโอนเงิน' : 'ชำระเงินปลายทาง'}
+                                            </p>
+                                            
+                                            {/* +++ ปุ่มดูช่องทางชำระเงิน (เฉพาะเมื่อยังไม่มีสลิป และเป็นโอนเงิน) +++ */}
+                                            {canUploadSlip && order.Payment_Type === 'bank_transfer' && (
+                                                <button 
+                                                    onClick={() => setIsPaymentModalOpen(true)}
+                                                    className="btn btn-xs btn-ghost text-primary mt-2"
+                                                >
+                                                    ดูช่องทางการชำระเงิน
+                                                </button>
+                                            )}
                                         </div>
                                     )}
 
@@ -387,6 +486,12 @@ export default function OrderDetailsPage() {
                                     )}
                                 </div>
                             )}
+                                                                            <button 
+                                                    onClick={() => setIsPaymentModalOpen(true)}
+                                                    className="btn btn-xs btn-ghost text-primary mt-2"
+                                                >
+                                                    ดูช่องทางการชำระเงิน
+                                                </button>
                         </div>
 
                         {/* Bottom Toggle Buttons (Only show if refund context exists) */}
@@ -502,6 +607,7 @@ export default function OrderDetailsPage() {
             )}
         </div>
 
+        {/* Modal: Cancel Order */}
         <dialog className={`modal ${isCancelModalOpen ? 'modal-open' : ''}`}>
             <div className="modal-box">
                 <button className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2" onClick={() => !isCancelling && setIsCancelModalOpen(false)}>✕</button>
@@ -519,7 +625,7 @@ export default function OrderDetailsPage() {
                             <div className="flex-1">
                                 <h3 className={`font-bold text-sm ${targetStatusInfo.config.color}`}>ผลการดำเนินการ</h3>
                                 <p className="text-xs opacity-80 mt-1">{targetStatusInfo.description}</p>
-                                <div className={`badge ${targetStatusInfo.config.color.replace('text-', 'badge-')} gap-1 mt-2 border-none ${targetStatusInfo.config.textColor}`}>สถานะใหม่: {targetStatusInfo.config.label}</div>
+                                <div className={`badge ${targetStatusInfo.config.color.replace('text-', 'badge-')} gap-1 mt-2 border-none text-white`}>สถานะใหม่: {targetStatusInfo.config.label}</div>
                             </div>
                         </div>
                     )}
@@ -531,6 +637,13 @@ export default function OrderDetailsPage() {
             </div>
             <form method="dialog" className="modal-backdrop bg-black/50 backdrop-blur-sm"><button onClick={() => !isCancelling && setIsCancelModalOpen(false)}>close</button></form>
         </dialog>
+
+        {/* Modal: Payment Info (New) */}
+        <PaymentInfoModal 
+            isOpen={isPaymentModalOpen} 
+            onClose={() => setIsPaymentModalOpen(false)} 
+            totalAmount={order.Total_Amount} 
+        />
 
       </div>
     </div>
