@@ -147,6 +147,8 @@ export default function OrderDetailsPage() {
   // State สำหรับ Tab (Default = Payment)
   const [activeTab, setActiveTab] = useState<'payment' | 'refund'>('payment');
 
+  const [isDragging, setIsDragging] = useState(false);
+
   const orderId = typeof params.orderId === 'string' ? parseInt(params.orderId, 10) : NaN;
 
   const fetchOrderDetails = useCallback(async () => {
@@ -176,11 +178,9 @@ export default function OrderDetailsPage() {
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (file) {
-      if (file.size > 5 * 1024 * 1024) { setSelectedFile(null); showAlert('ขนาดไฟล์ต้องไม่เกิน 5MB', 'warning'); return }
-      if (!['image/jpeg', 'image/png'].includes(file.type)) { setSelectedFile(null); showAlert('ไฟล์ต้องเป็นรูปภาพ (JPEG หรือ PNG)', 'warning'); return }
-      setSelectedFile(file);
-    }
+    if (!file) return;
+
+    handleFileChangeManual(file);
   };
 
   const handleUploadSlip = async () => {
@@ -197,6 +197,24 @@ export default function OrderDetailsPage() {
       showAlert('อัปโหลดสลิปสำเร็จ!', 'success');
     } catch (err: any) { showAlert(err.message, 'error'); } finally { setIsUploading(false); }
   };
+
+    function handleFileChangeManual(file: File) {
+        if (!file) return;
+
+        if (file.size > 5 * 1024 * 1024) { // 5MB Limit
+            setSelectedFile(null);
+            showAlert('ขนาดไฟล์ต้องไม่เกิน 5MB', 'warning');
+            return;
+        }
+        if (file.type !== 'image/jpeg' && 
+            file.type !== 'image/png') {
+            setSelectedFile(null);
+            showAlert('ไฟล์ต้องเป็นรูปภาพ (JPG, JPEG หรือ PNG)', 'warning');
+            return;
+        }
+
+        setSelectedFile(file);
+    }
 
   const handleCancelOrder = async () => {
     if (!cancelReason.trim()) { return; }
@@ -340,24 +358,80 @@ export default function OrderDetailsPage() {
                                             </div>
                                         </div>
                                     ) : (
-                                        <div className="w-full min-h-[150px] flex flex-col items-center justify-center bg-base-200/50 rounded-xl border-2 border-dashed border-base-300 p-6 text-base-content/40">
-                                            <FiUploadCloud className="w-10 h-10 mb-2" />
-                                            <p className="text-sm text-center">{order.Payment_Type === 'bank_transfer' ? 'ยังไม่มีสลิปการโอนเงิน' : 'ชำระเงินปลายทาง'}</p>
-                                        </div>
-                                    )}
+                                        <>
+                                            {order.Payment_Type === 'bank_transfer' ? (
+                                                <>
+                                                    <div
+                                                        onDragOver={(e) => {
+                                                            e.preventDefault();
+                                                            setIsDragging(true);
+                                                        }}
+                                                        onDragLeave={(e) => {
+                                                            e.preventDefault();
+                                                            setIsDragging(false);
+                                                        }}
+                                                        onDrop={(e) => {
+                                                            e.preventDefault();
+                                                            setIsDragging(false);
 
-                                    {canUploadSlip && (
-                                        <div className="mt-4 w-full animate-fadeIn">
-                                            <label className="btn btn-outline btn-primary btn-sm w-full mb-2 normal-case">
-                                                {selectedFile ? 'เปลี่ยนไฟล์' : 'เลือกรูปสลิป'}
-                                                <input type="file" className="hidden" onChange={handleFileChange} accept="image/png, image/jpeg, image/jpg" />
-                                            </label>
-                                            {selectedFile && <p className="text-xs text-center text-primary mb-2 truncate border border-primary/20 bg-primary/5 p-1 rounded">{selectedFile.name}</p>}
-                                            <button onClick={handleUploadSlip} disabled={!selectedFile || isUploading} className="btn btn-primary btn-sm w-full">
-                                                {isUploading ? <span className="loading loading-spinner loading-xs"></span> : 'ยืนยันส่งสลิป'}
-                                            </button>
-                                            <p className="text-[10px] text-center text-base-content/40 mt-1">รองรับนามสกุลไฟล์ .jpg และ .png (ขนาดไฟล์สูงสุด 5MB)</p>
-                                        </div>
+                                                            const file = e.dataTransfer.files?.[0];
+                                                            if (file) handleFileChangeManual(file);
+                                                        }}
+                                                        className={`
+                                                            w-full h-52 border-2 border-dashed rounded-xl 
+                                                            flex flex-col justify-center items-center cursor-pointer transition
+                                                            ${isDragging ? "bg-primary/10 border-primary" : "bg-base-200 border-base-300 hover:border-primary"}
+                                                        `}
+                                                        onClick={() => {
+                                                            document.getElementById("transfer-slip-upload")?.click();
+                                                        }}
+                                                    >
+                                                        <FiUploadCloud className="w-10 h-10 text-base-content/60 mt-4" />
+
+                                                        <p className="mt-2 text-base-content/70 text-center">
+                                                            ยังไม่มีสลิปการโอนเงิน<br/>
+                                                            คลิกเพื่อเลือกไฟล์
+                                                        </p>
+                                                        <p className="text-sm text-base-content/50">หรือวางไฟล์ลงบริเวณนี้</p>
+
+                                                        <button className="btn btn-sm mt-3 my-4">เลือกไฟล์รูปภาพ</button>
+
+                                                        <input
+                                                            id="transfer-slip-upload"
+                                                            type="file"
+                                                            className="hidden"
+                                                            accept="image/png, image/jpeg, image/jpg"
+                                                            onChange={handleFileChange}
+                                                        />
+                                                    </div>
+
+                                                    {/* File Info */}
+                                                    {selectedFile && (
+                                                        <div className="text-sm text-center text-success mt-2">
+                                                            ไฟล์ที่เลือก : {selectedFile.name}
+                                                        </div>
+                                                    )}
+
+                                                    <p className="text-xs text-base-content/60 text-center mt-2">
+                                                        รองรับไฟล์ JPG, JPEG, PNG (ขนาดไฟล์สูงสุด 5MB)
+                                                    </p>
+
+                                                    {/* Upload Button */}
+                                                    <button
+                                                        className="btn btn-primary w-full mt-2 flex gap-2 justify-center items-center"
+                                                        disabled={!selectedFile || isUploading}
+                                                        onClick={handleUploadSlip}
+                                                    >
+                                                        {isUploading && <span className="loading loading-spinner"></span>}
+                                                        {isUploading ? "กำลังอัปโหลด..." : "อัปโหลดหลักฐานการโอนเงิน"}
+                                                    </button>
+                                                </>
+                                            ) : (
+                                                <div className="w-full min-h-[150px] flex flex-col items-center justify-center bg-base-200/50 rounded-xl border-2 border-dashed border-base-300 p-6 text-base-content/40">
+                                                    <p className="text-sm text-center mt-9">ชำระเงินปลายทาง</p>
+                                                </div>
+                                            )}
+                                        </>
                                     )}
                                 </>
                             ) : (
