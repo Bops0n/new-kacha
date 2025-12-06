@@ -15,6 +15,7 @@ import LoadingSpinner from '@/app/components/LoadingSpinner';
 import { useSession } from 'next-auth/react';
 import AccessDeniedPage from '@/app/components/AccessDenied';
 import { useOrderHistory } from '@/app/hooks/useOrderHistory';
+import { ImagePreviewModal } from '@/app/components/ImagePreviewModal';
 
 // --- Configuration ---
 const PAYMENT_TIMEOUT_HOURS = 24;
@@ -227,6 +228,8 @@ export default function OrderDetailsPage() {
   const [isCancelling, setIsCancelling] = useState(false);
   const [cancelReason, setCancelReason] = useState('');
   const [isConfirming, setIsConfirming] = useState(false);
+
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
   
   // State สำหรับ Tab (Default = Payment)
   const [activeTab, setActiveTab] = useState<'payment' | 'refund'>('payment');
@@ -431,7 +434,7 @@ export default function OrderDetailsPage() {
                                     {order.Transaction_Slip ? (
                                         <div 
                                             className="relative group w-full rounded-xl overflow-hidden border border-base-300 shadow-sm cursor-pointer bg-base-200"
-                                            onClick={() => window.open(order.Transaction_Slip!, '_blank')}
+                                            onClick={() => setPreviewImage(order.Transaction_Slip!)}
                                         >
                                             <img 
                                                 src={order.Transaction_Slip} 
@@ -521,7 +524,7 @@ export default function OrderDetailsPage() {
                                                 </>
                                             ) : (
                                                 <div className="w-full min-h-[150px] flex flex-col items-center justify-center bg-base-200/50 rounded-xl border-2 border-dashed border-base-300 p-6 text-base-content/40">
-                                                    <p className="text-sm text-center">ชำระเงินปลายทาง</p>
+                                                    <p className="text-sm text-center mt-9">ชำระเงินปลายทาง</p>
                                                 </div>
                                             )}
                                         </>
@@ -533,7 +536,7 @@ export default function OrderDetailsPage() {
                                     {order.Refund_Slip ? (
                                         <div 
                                             className="relative group w-full rounded-xl overflow-hidden border border-base-300 shadow-sm cursor-pointer bg-base-200"
-                                            onClick={() => window.open(order.Refund_Slip!, '_blank')}
+                                            onClick={() => setPreviewImage(order.Refund_Slip!)}
                                         >
                                             <img 
                                                 src={order.Refund_Slip} 
@@ -708,6 +711,8 @@ export default function OrderDetailsPage() {
         />
 
       </div>
+
+      <ImagePreviewModal imageUrl={previewImage} onClose={() => setPreviewImage(null)} />
     </div>
   );
 }
