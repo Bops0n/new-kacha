@@ -445,23 +445,58 @@ export default function OrderDetailsPage() {
                                             </div>
                                         </div>
                                     ) : (
-                                        <div className="w-full min-h-[150px] flex flex-col items-center justify-center bg-base-200/50 rounded-xl border-2 border-dashed border-base-300 p-6 text-base-content/40">
-                                            <FiUploadCloud className="w-10 h-10 mb-2" />
-                                            <p className="text-sm text-center">
-                                                {order.Payment_Type === 'bank_transfer' ? 'ยังไม่มีสลิปการโอนเงิน' : 'ชำระเงินปลายทาง'}
-                                            </p>
-                                            
-                                            {/* +++ ปุ่มดูช่องทางชำระเงิน (เฉพาะเมื่อยังไม่มีสลิป และเป็นโอนเงิน) +++ */}
-                                            {canUploadSlip && order.Payment_Type === 'bank_transfer' && (
-                                                <button 
-                                                    onClick={() => setIsPaymentModalOpen(true)}
-                                                    className="btn btn-xs btn-ghost text-primary mt-2"
-                                                >
-                                                    ดูช่องทางการชำระเงิน
-                                                </button>
-                                            )}
-                                        </div>
-                                    )}
+                                        <>
+                                            {canUploadSlip && order.Payment_Type === 'bank_transfer' ? (
+                                                <>
+                                                    <button 
+                                                        onClick={() => setIsPaymentModalOpen(true)}
+                                                        className="btn w-full btn-base-200 text-primary"
+                                                    >
+                                                        ดูช่องทางการชำระเงิน
+                                                    </button>
+                                                    <div
+                                                        onDragOver={(e) => {
+                                                            e.preventDefault();
+                                                            setIsDragging(true);
+                                                        }}
+                                                        onDragLeave={(e) => {
+                                                            e.preventDefault();
+                                                            setIsDragging(false);
+                                                        }}
+                                                        onDrop={(e) => {
+                                                            e.preventDefault();
+                                                            setIsDragging(false);
+
+                                                            const file = e.dataTransfer.files?.[0];
+                                                            if (file) handleFileChangeManual(file);
+                                                        }}
+                                                        className={`
+                                                            mt-4 w-full h-52 border-2 border-dashed rounded-xl 
+                                                            flex flex-col justify-center items-center cursor-pointer transition
+                                                            ${isDragging ? "bg-primary/10 border-primary" : "bg-base-200 border-base-300 hover:border-primary"}
+                                                        `}
+                                                        onClick={() => {
+                                                            document.getElementById("transfer-slip-upload")?.click();
+                                                        }}
+                                                    >
+                                                        <FiUploadCloud className="w-10 h-10 text-base-content/60 mt-4" />
+
+                                                        <p className="mt-2 text-base-content/70 text-center">
+                                                            ยังไม่มีสลิปการโอนเงิน<br/>
+                                                            คลิกเพื่อเลือกไฟล์
+                                                        </p>
+                                                        <p className="text-sm text-base-content/50">หรือวางไฟล์ลงบริเวณนี้</p>
+
+                                                        <button className="btn btn-sm mt-3 my-4">เลือกไฟล์รูปภาพ</button>
+
+                                                        <input
+                                                            id="transfer-slip-upload"
+                                                            type="file"
+                                                            className="hidden"
+                                                            accept="image/png, image/jpeg, image/jpg"
+                                                            onChange={handleFileChange}
+                                                        />
+                                                    </div>
 
                                                     {/* File Info */}
                                                     {selectedFile && (
@@ -486,7 +521,7 @@ export default function OrderDetailsPage() {
                                                 </>
                                             ) : (
                                                 <div className="w-full min-h-[150px] flex flex-col items-center justify-center bg-base-200/50 rounded-xl border-2 border-dashed border-base-300 p-6 text-base-content/40">
-                                                    <p className="text-sm text-center mt-9">ชำระเงินปลายทาง</p>
+                                                    <p className="text-sm text-center">ชำระเงินปลายทาง</p>
                                                 </div>
                                             )}
                                         </>
@@ -519,12 +554,6 @@ export default function OrderDetailsPage() {
                                     )}
                                 </div>
                             )}
-                                                                            <button 
-                                                    onClick={() => setIsPaymentModalOpen(true)}
-                                                    className="btn btn-xs btn-ghost text-primary mt-2"
-                                                >
-                                                    ดูช่องทางการชำระเงิน
-                                                </button>
                         </div>
 
                         {/* Bottom Toggle Buttons (Only show if refund context exists) */}
