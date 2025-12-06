@@ -66,6 +66,7 @@ export default function OrderStepPage() {
         Is_Auto_Update_Status: false,
     });
 
+    const [isDragging, setIsDragging] = useState(false);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [isUploading, setIsUploading] = useState<boolean>(false);
 
@@ -325,21 +326,9 @@ export default function OrderStepPage() {
 
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
-        if (file) {
-    
-          if (file.size > 5 * 1024 * 1024) { // 5MB Limit
-            setSelectedFile(null);
-            showAlert('ขนาดไฟล์ต้องไม่เกิน 5MB', 'warning');
-            return 
-          }
-          if (file.type !== 'image/jpeg' && file.type !== 'image/png') {
-            setSelectedFile(null);
-            showAlert('ไฟล์ต้องเป็นรูปภาพ (JPEG หรือ PNG)', 'warning');
-            return
-          }
-    
-          setSelectedFile(file);
-        }
+        if (!file) return;
+
+        handleFileChangeManual(file);
     };
     
     const handleUploadSlip = async () => {
@@ -372,6 +361,24 @@ export default function OrderStepPage() {
           setIsUploading(false);
         }
     };
+
+    function handleFileChangeManual(file: File) {
+        if (!file) return;
+
+        if (file.size > 5 * 1024 * 1024) { // 5MB Limit
+            setSelectedFile(null);
+            showAlert('ขนาดไฟล์ต้องไม่เกิน 5MB', 'warning');
+            return;
+        }
+        if (file.type !== 'image/jpeg' && 
+            file.type !== 'image/png') {
+            setSelectedFile(null);
+            showAlert('ไฟล์ต้องเป็นรูปภาพ (JPG, JPEG หรือ PNG)', 'warning');
+            return;
+        }
+    
+        setSelectedFile(file);
+    }
 
     function onValidate(): boolean {
         if (!order) return false;
@@ -501,8 +508,11 @@ export default function OrderStepPage() {
                             order={order}
                             selectedFile={selectedFile}
                             isUploading={isUploading}
+                            isDragging={isDragging}
+                            setIsDragging={setIsDragging}
                             handleFileChange={handleFileChange}
                             handleUploadSlip={handleUploadSlip}
+                            handleFileChangeManual={handleFileChangeManual}
                         />
                     }
 
