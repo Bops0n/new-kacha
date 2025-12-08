@@ -8,13 +8,15 @@ import { Order, OrderStatus } from '../../types'; // Adjust path if your types a
 import { useAlert } from '../context/AlertModalContext';
 import { FiAlertTriangle, FiCheckCircle, FiClock, FiFileText, FiInfo, FiPackage, FiRefreshCw, FiTruck, FiXCircle } from 'react-icons/fi';
 import { statusConfig } from '../utils/client';
-import { PAYMENT_TIMEOUT_HOURS } from '../utils/constant';
+import { useWebsiteSettings } from '../providers/WebsiteSettingProvider';
 
 
 export function useOrderHistory() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const { showAlert } = useAlert();
+
+  const settings = useWebsiteSettings();
 
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -32,7 +34,7 @@ export function useOrderHistory() {
     };
 
     const baseDate = Transaction_Date ? new Date(Transaction_Date) : new Date(Order_Date);
-    const expireDate = new Date(baseDate.getTime() + (PAYMENT_TIMEOUT_HOURS * 60 * 60 * 1000));
+    const expireDate = new Date(baseDate.getTime() + (settings.paymentTimeoutHours * 60 * 60 * 1000));
     const formattedExpire = formatDateTime(expireDate);
     
     // Helper: ข้อความเหตุผล (ใช้ร่วมกันทุกสถานะที่มีการยกเลิก/คืนเงิน)

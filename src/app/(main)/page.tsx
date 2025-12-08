@@ -7,13 +7,6 @@ import ProductDisplayCard from './components/ProductDisplayCard';
 import { CategoryTopSelling, ProductInventory } from '@/types';
 import LoadingSpinner from '../components/LoadingSpinner';
 
-const formatPrice = (price: number): string => {
-  return new Intl.NumberFormat('th-TH', {
-    style: 'currency',
-    currency: 'THB'
-  }).format(price);
-};
-
 export default function HomePage() {
   const [loading, setLoading] = useState(true);
 
@@ -123,7 +116,7 @@ export default function HomePage() {
             <h2 className="text-3xl font-bold text-center mb-10 text-base-content">สินค้าแนะนำ</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {products && products.map(product => (
-                <ProductDisplayCard key={product.Product_ID} product={product} formatPrice={formatPrice} />
+                <ProductDisplayCard key={product.Product_ID} product={product} />
               ))}
             </div>
             <div className="text-center mt-12">
@@ -146,7 +139,7 @@ export default function HomePage() {
             ทีมงานผู้เชี่ยวชาญของเราพร้อมให้คำแนะนำและช่วยเหลือคุณในการเลือกวัสดุที่เหมาะสมกับทุกโครงการ
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-4">
-            <Link href="#" className="btn btn-warning btn-lg shadow-lg hover:scale-105 transition-transform duration-300">
+            <Link href="/contact" className="btn btn-warning btn-lg shadow-lg hover:scale-105 transition-transform duration-300">
               ติดต่อเรา
             </Link>
             <Link href="/products" className="btn btn-outline btn-lg text-white border-white hover:bg-white hover:text-blue-700 shadow-lg hover:scale-105 transition-transform duration-300">

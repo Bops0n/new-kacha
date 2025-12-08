@@ -8,12 +8,14 @@ import {
   FaWarehouse, FaBox, FaUserCog, FaChartLine 
 } from 'react-icons/fa';
 import { 
-  FiSettings, FiLogOut, FiUser, FiMenu, FiX, FiGrid, FiShield 
+  FiLogOut, FiUser, FiMenu, FiX, FiShield 
 } from "react-icons/fi";
 import { MdDashboard, MdCategory, MdInventory } from "react-icons/md";
 import { TbReportAnalytics } from "react-icons/tb";
 import { GoTriangleDown } from "react-icons/go";
 import LoadingSpinner from "@/app/components/LoadingSpinner";
+import { FaGears } from 'react-icons/fa6';
+import { BiMessage } from 'react-icons/bi';
 
 export default function AdminNavbar() {
     const { data: session, status } = useSession();
@@ -65,7 +67,7 @@ export default function AdminNavbar() {
                         <div className="hidden md:flex flex-col items-end mr-2">
                             <span className="text-sm font-bold text-base-content">{session.user?.name}</span>
                             <span className="text-[10px] px-2 py-0.5 rounded-full bg-primary/10 text-primary font-semibold">
-                                Admin Level: {session.user?.accessLevel}
+                                ระดับการเข้าถึง: {session.user?.accessLevel}
                             </span>
                         </div>
 
@@ -123,7 +125,14 @@ export default function AdminNavbar() {
                             </li>
                         )}
 
-                        {/* 3. Inventory (Stock + Category) Group */}
+                        {/* 3. Contact Message */}
+                        <li>
+                            <Link href="/admin/contact-messages" className={isActive('/admin/contact-messages') ? 'active font-bold' : ''}>
+                                <BiMessage className="w-4 h-4" /> ข้อความจากลูกค้า
+                            </Link>
+                        </li>
+
+                        {/* 4. Inventory (Stock + Category) Group */}
                         {session.user.Stock_Mgr && (
                             <li className="dropdown dropdown-hover">
                                 <label tabIndex={0} className={`flex items-center gap-1 ${isActive('/admin/product-management') || isActive('/admin/category-management') ? 'text-primary font-bold' : ''}`}>
@@ -144,7 +153,7 @@ export default function AdminNavbar() {
                             </li>
                         )}
 
-                        {/* 4. Order Management */}
+                        {/* 5. Order Management */}
                         {session.user.Order_Mgr && (
                             <li>
                                 <Link href="/admin/order-management" className={isActive('/admin/order-management') ? 'active font-bold' : ''}>
@@ -153,7 +162,7 @@ export default function AdminNavbar() {
                             </li>
                         )}
 
-                        {/* 5. Report */}
+                        {/* 6. Report */}
                         {session.user.Report && (
                             <li className="dropdown dropdown-hover">
                                 <label tabIndex={0} className={`flex items-center gap-1 ${isActive('/admin/report') ? 'text-primary font-bold' : ''}`}>
@@ -181,11 +190,20 @@ export default function AdminNavbar() {
 
                         <div className="flex-1"></div>
 
-                        {/* 6. System Settings (Roles) */}
+                        {/* 7. System Settings */}
+                        {session.user.Sys_Admin && (
+                            <li>
+                                <Link href="/admin/sys-management" className={`text-primary hover:bg-primary/10 ${isActive('/admin/sys-management') ? 'font-bold bg-primary/10' : ''}`}>
+                                    <FaGears className="w-4 h-4" /> ตั้งค่าระบบ
+                                </Link>
+                            </li>
+                        )}
+                        
+                        {/* 8. Roles Settings */}
                         {session.user.Sys_Admin && (
                             <li>
                                 <Link href="/admin/role-management" className={`text-warning hover:bg-warning/10 ${isActive('/admin/role-management') ? 'font-bold bg-warning/10' : ''}`}>
-                                    <FiShield className="w-4 h-4" /> ตั้งค่าบทบาท (Roles)
+                                    <FiShield className="w-4 h-4" /> ตั้งค่าบทบาท
                                 </Link>
                             </li>
                         )}
@@ -235,7 +253,7 @@ export default function AdminNavbar() {
 
                     {session.user.Sys_Admin && (
                         <li className="mt-2 border-t border-base-200 pt-2">
-                            <Link href="/admin/role-management" onClick={closeMobileMenu} className="text-warning hover:bg-warning/10"><FiShield/> จัดการบทบาท (Role)</Link>
+                            <Link href="/admin/role-management" onClick={closeMobileMenu} className="text-warning hover:bg-warning/10"><FiShield/> ตั้งค่าบทบาท</Link>
                         </li>
                     )}
                 </ul>

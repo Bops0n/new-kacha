@@ -1,8 +1,9 @@
 // app/layout.tsx
 import './globals.css';
 import { Sarabun } from 'next/font/google'; // นำเข้าฟอนต์ Kanit
-import NextAuthSessionProvider from './providers/authProviders';
-import AlertProvider from './providers/AlertProviders'; './providers/AlertProviders';
+import AlertProvider from './providers/AlertProviders';
+import { WebsiteSettingsProvider } from './providers/WebsiteSettingProvider';
+import NextAuthSessionProvider from './providers/AuthProviders';
 
 // กำหนด subset สำหรับภาษาไทยและน้ำหนักฟอนต์ที่คุณต้องการ
 // preload: true จะช่วยให้โหลดฟอนต์ได้เร็วขึ้นสำหรับภาษาไทย
@@ -22,15 +23,16 @@ export default function RootLayout({
   return (
     // <html lang="th" data-theme="light" className={``}>
     <html lang="th" data-theme="light" className={`${sarabun.variable}`}>
-    <head></head>
-    <NextAuthSessionProvider>
-
-      <body>
-      <AlertProvider>
-        {children}
-      </AlertProvider>
+      <head></head>
+      <NextAuthSessionProvider>
+        <body>
+          <WebsiteSettingsProvider>
+            <AlertProvider>
+              {children}
+            </AlertProvider>
+          </WebsiteSettingsProvider>
         </body>
-    </NextAuthSessionProvider>
+      </NextAuthSessionProvider>
     </html>
   );
 }

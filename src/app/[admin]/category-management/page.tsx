@@ -197,7 +197,12 @@ export default function CategoryManagementPage() {
             
             <div className="bg-base-100 rounded-lg shadow-sm p-6 mb-6">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <input type="text" placeholder="ค้นหาด้วยชื่อหรือ ID..." value={filters.searchTerm} onChange={e => setFilters({...filters, searchTerm: e.target.value})} className="input input-bordered w-full" />
+                <div className="flex-1">
+                    <div className="relative">
+                        <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-base-content/50 w-4 h-4 z-10" />
+                        <input type="text" placeholder="ค้นหาด้วยชื่อหรือ ID..." value={filters.searchTerm} onChange={e => setFilters({...filters, searchTerm: e.target.value})} className="input input-bordered w-full pl-10" />
+                    </div>
+                </div>
                 <select value={filters.typeFilter} onChange={e => setFilters({...filters, typeFilter: e.target.value as any})} className="select select-bordered w-full">
                     <option value="all">ทุกระดับ</option>
                     <option value="main">หมวดหมู่หลัก</option>
