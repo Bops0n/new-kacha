@@ -53,8 +53,6 @@ export default function SummarySalesReportPage() {
             if (res.ok) {
                 setOrders(data.orders || []);
             }
-        } catch (error) {
-            console.error(error);
         } finally {
             setLoading(false);
         }

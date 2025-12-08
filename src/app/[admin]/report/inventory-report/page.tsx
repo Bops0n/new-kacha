@@ -32,8 +32,6 @@ export default function InventoryReportPage() {
             if (res.ok) {
                 setProducts(data.products || []);
             }
-        } catch (error) {
-            console.error(error);
         } finally {
             setLoading(false);
         }

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { writeFile, unlink, mkdir } from "fs/promises";
 import path from "path";
+import { logger } from "@/server/logger";
 
 const MAX_FILE_SIZE = 1024 * 1024 * 3; // 3MB
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"];
@@ -56,7 +57,7 @@ export async function POST(req: Request) {
       try {
         await unlink(oldPath);
       } catch {
-        console.warn("ลบไฟล์เก่าไม่สำเร็จ (อาจไม่มีอยู่แล้ว)");
+        logger.warn("ลบไฟล์เก่าไม่สำเร็จ (อาจไม่มีอยู่แล้ว)");
       }
     }
 
@@ -64,7 +65,7 @@ export async function POST(req: Request) {
       url: relativePath
     });
   } catch (err) {
-    console.error("UPLOAD ERROR:", err);
+    logger.error("UPLOAD ERROR:", { error: err });
     return NextResponse.json({ error: "Upload failed" }, { status: 500 });
   }
 }

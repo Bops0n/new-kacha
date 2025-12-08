@@ -13,8 +13,6 @@ export default function AdminMessagesPage() {
   const [page, setPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState<number>(10);
 
-  console.log("Items per page setting:", itemsPerPage);
-
   const [filter, setFilter] = useState<"all" | "read" | "unread">("all");
   const [search, setSearch] = useState("");
 
