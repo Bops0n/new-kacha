@@ -15,6 +15,7 @@ import LoadingSpinner from '@/app/components/LoadingSpinner';
 import { useSession } from 'next-auth/react';
 import AccessDeniedPage from '@/app/components/AccessDenied';
 import { useOrderHistory } from '@/app/hooks/useOrderHistory';
+import { ImagePreviewModal } from '@/app/components/ImagePreviewModal';
 
 // --- Configuration ---
 const PAYMENT_TIMEOUT_HOURS = 24;
@@ -227,6 +228,8 @@ export default function OrderDetailsPage() {
   const [isCancelling, setIsCancelling] = useState(false);
   const [cancelReason, setCancelReason] = useState('');
   const [isConfirming, setIsConfirming] = useState(false);
+
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
   
   // State สำหรับ Tab (Default = Payment)
   const [activeTab, setActiveTab] = useState<'payment' | 'refund'>('payment');
@@ -431,7 +434,7 @@ export default function OrderDetailsPage() {
                                     {order.Transaction_Slip ? (
                                         <div 
                                             className="relative group w-full rounded-xl overflow-hidden border border-base-300 shadow-sm cursor-pointer bg-base-200"
-                                            onClick={() => window.open(order.Transaction_Slip!, '_blank')}
+                                            onClick={() => setPreviewImage(order.Transaction_Slip!)}
                                         >
                                             <img 
                                                 src={order.Transaction_Slip} 
@@ -445,15 +448,58 @@ export default function OrderDetailsPage() {
                                             </div>
                                         </div>
                                     ) : (
-                                        <div className="w-full min-h-[150px] flex flex-col items-center justify-center bg-base-200/50 rounded-xl border-2 border-dashed border-base-300 p-6 text-base-content/40">
-                                            <FiUploadCloud className="w-10 h-10 mb-2" />
-                                            <p className="text-sm text-center">
-                                                {order.Payment_Type === 'bank_transfer' ? 'ยังไม่มีสลิปการโอนเงิน' : 'ชำระเงินปลายทาง'}
-                                            </p>
-                                            
-                                            {/* +++ ปุ่มดูช่องทางชำระเงิน (เฉพาะเมื่อยังไม่มีสลิป และเป็นโอนเงิน) +++ */}
-                                        </div>
-                                    )}
+                                        <>
+                                            {canUploadSlip && order.Payment_Type === 'bank_transfer' ? (
+                                                <>
+                                                    <button 
+                                                        onClick={() => setIsPaymentModalOpen(true)}
+                                                        className="btn w-full btn-base-200 text-primary"
+                                                    >
+                                                        ดูช่องทางการชำระเงิน
+                                                    </button>
+                                                    <div
+                                                        onDragOver={(e) => {
+                                                            e.preventDefault();
+                                                            setIsDragging(true);
+                                                        }}
+                                                        onDragLeave={(e) => {
+                                                            e.preventDefault();
+                                                            setIsDragging(false);
+                                                        }}
+                                                        onDrop={(e) => {
+                                                            e.preventDefault();
+                                                            setIsDragging(false);
+
+                                                            const file = e.dataTransfer.files?.[0];
+                                                            if (file) handleFileChangeManual(file);
+                                                        }}
+                                                        className={`
+                                                            mt-4 w-full h-52 border-2 border-dashed rounded-xl 
+                                                            flex flex-col justify-center items-center cursor-pointer transition
+                                                            ${isDragging ? "bg-primary/10 border-primary" : "bg-base-200 border-base-300 hover:border-primary"}
+                                                        `}
+                                                        onClick={() => {
+                                                            document.getElementById("transfer-slip-upload")?.click();
+                                                        }}
+                                                    >
+                                                        <FiUploadCloud className="w-10 h-10 text-base-content/60 mt-4" />
+
+                                                        <p className="mt-2 text-base-content/70 text-center">
+                                                            ยังไม่มีสลิปการโอนเงิน<br/>
+                                                            คลิกเพื่อเลือกไฟล์
+                                                        </p>
+                                                        <p className="text-sm text-base-content/50">หรือวางไฟล์ลงบริเวณนี้</p>
+
+                                                        <button className="btn btn-sm mt-3 my-4">เลือกไฟล์รูปภาพ</button>
+
+                                                        <input
+                                                            id="transfer-slip-upload"
+                                                            type="file"
+                                                            className="hidden"
+                                                            accept="image/png, image/jpeg, image/jpg"
+                                                            onChange={handleFileChange}
+                                                        />
+                                                    </div>
 
                                                     {/* File Info */}
                                                     {selectedFile && (
@@ -491,7 +537,7 @@ export default function OrderDetailsPage() {
                                     {order.Refund_Slip ? (
                                         <div 
                                             className="relative group w-full rounded-xl overflow-hidden border border-base-300 shadow-sm cursor-pointer bg-base-200"
-                                            onClick={() => window.open(order.Refund_Slip!, '_blank')}
+                                            onClick={() => setPreviewImage(order.Refund_Slip!)}
                                         >
                                             <img 
                                                 src={order.Refund_Slip} 
@@ -673,6 +719,8 @@ export default function OrderDetailsPage() {
         />
 
       </div>
+
+      <ImagePreviewModal imageUrl={previewImage} onClose={() => setPreviewImage(null)} />
     </div>
   );
 }

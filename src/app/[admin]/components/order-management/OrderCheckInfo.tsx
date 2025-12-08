@@ -1,6 +1,6 @@
 import { formatPrice } from "@/app/utils/formatters";
 import { Order, OrderProductDetail, SimpleProductDetail } from "@/types";
-import { FiAlertTriangle, FiArchive, FiCreditCard, FiImage, FiShoppingBag } from "react-icons/fi";
+import { FiAlertTriangle, FiArchive, FiCreditCard, FiImage, FiShoppingBag, FiZoomIn } from "react-icons/fi";
 import { useAlert } from "@/app/context/AlertModalContext";
 import { calculateAvailableStock } from "@/app/utils/calculations";
 import { useState } from "react";
@@ -79,6 +79,8 @@ type OrderCheckProps = {
     btnSpecial: boolean;
     isReqCancel: boolean;
     fetchOrderData?: () => void;
+    previewImage: string | null;
+    setPreviewImage: (url: string | null) => void;
 };
 
 export default function OrderCheckInfo({ 
@@ -86,12 +88,11 @@ export default function OrderCheckInfo({
     liveDetails,
     btnSpecial,
     isReqCancel,
-    fetchOrderData = () => {}
+    fetchOrderData = () => {},
+    previewImage,
+    setPreviewImage = () => {}
 }: OrderCheckProps) {
     const { showAlert } = useAlert();
-
-      const [showImageModal, setShowImageModal] = useState(false);
-      const [previewImage, setPreviewImage] = useState("");
 
     async function verifyPayment(action: "confirmed" | "rejected") {
         showAlert(`ต้องการ${action === "confirmed" ? "ยืนยัน" : "ปฏิเสธ"}การชำระเงินหรือไม่?`, "info", "", async () => {
@@ -156,7 +157,10 @@ export default function OrderCheckInfo({
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
 
                   {/* LEFT — Slip Image */}
-                  <div className="relative group flex justify-center items-center bg-base-200 rounded-2xl border border-base-300 shadow-inner p-5 cursor-pointer hover:shadow-xl transition">
+                  <div 
+                      className="relative group flex justify-center items-center bg-base-200 rounded-2xl border border-base-300 shadow-inner p-5 cursor-zoom-in hover:shadow-xl transition"
+                      onClick={() => setPreviewImage(order.Transaction_Slip!)}
+                    >
                       {order.Transaction_Slip ? (
                       <>
                           <img
@@ -165,13 +169,14 @@ export default function OrderCheckInfo({
                             className="max-w-full max-h-[25rem] rounded-xl object-contain shadow-md transition-transform group-hover:scale-[1.05]"
                             onClick={() => {
                                 setPreviewImage(order.Transaction_Slip!);
-                                setShowImageModal(true);
-                          }}
+                            }}
                           />
 
                           {/* Zoom Icon */}
-                          <div className="absolute bottom-3 right-3 bg-black/60 text-white px-3 py-1 rounded-lg text-sm opacity-0 group-hover:opacity-100 transition">
-                          คลิกเพื่อขยาย
+                          <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center pointer-events-none">
+                              <span className="text-white font-medium flex items-center gap-2 px-4 py-2 bg-black/60 backdrop-blur-sm rounded-full shadow-lg transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
+                                  <FiZoomIn className="w-5 h-5" /> คลิกเพื่อขยาย
+                              </span>
                           </div>
                       </>
                       ) : (
@@ -285,22 +290,23 @@ export default function OrderCheckInfo({
                   <h2 className="font-bold text-lg">หลักฐานการคืนเงิน</h2>
                 </div>
 
-                <div className="relative group flex justify-center items-center bg-base-200 rounded-2xl border border-base-300 shadow-inner p-5 cursor-pointer hover:shadow-xl transition">
+                <div 
+                  className="relative group flex justify-center items-center bg-base-200 rounded-2xl border border-base-300 shadow-inner p-5 cursor-zoom-in hover:shadow-xl transition"
+                  onClick={() => setPreviewImage(order.Refund_Slip!)}
+                >                    
                   {order.Refund_Slip ? (
                     <>
                         <img
                             src={order.Refund_Slip}
                             alt="Refund Slip"
                             className="max-w-full max-h-[25rem] rounded-xl object-contain shadow-md transition-transform group-hover:scale-[1.05]"
-                            onClick={() => {
-                                setPreviewImage(order.Refund_Slip!);
-                                setShowImageModal(true);
-                        }}
                         />
 
                         {/* Zoom Icon */}
-                        <div className="absolute bottom-3 right-3 bg-black/60 text-white px-3 py-1 rounded-lg text-sm opacity-0 group-hover:opacity-100 transition">
-                        คลิกเพื่อขยาย
+                        <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center pointer-events-none">
+                            <span className="text-white font-medium flex items-center gap-2 px-4 py-2 bg-black/60 backdrop-blur-sm rounded-full shadow-lg transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
+                                <FiZoomIn className="w-5 h-5" /> คลิกเพื่อขยาย
+                            </span>
                         </div>
                     </>
                     ) : (
@@ -321,30 +327,6 @@ export default function OrderCheckInfo({
                           <p className="text-xl font-bold mt-1">{order.Refund_By || "-"}</p>
                       </div>
                   </div>
-                </div>
-            </div>
-            )}
-
-            {showImageModal && (
-            <div
-                className="fixed inset-0 bg-black/70 flex justify-center items-center z-50 p-4"
-                onClick={() => setShowImageModal(false)}
-            >
-                <div
-                className="relative bg-base-100 rounded-xl shadow-2xl p-4 max-w-3xl w-full"
-                onClick={(e) => e.stopPropagation()}
-                >
-                <button
-                    onClick={() => setShowImageModal(false)}
-                    className="btn btn-sm btn-circle absolute right-3 top-3"
-                >
-                    ✕
-                </button>
-
-                <img
-                    src={previewImage}
-                    className="max-h-[90vh] rounded-lg shadow-lg object-contain"
-                />
                 </div>
             </div>
             )}

@@ -12,6 +12,7 @@ import OrderShippingInfo from '../../components/order-management/OrderShippingIn
 import OrderShippedInfo from '../../components/order-management/OrderShippedInfo';
 import OrderRefundInfo from '../../components/order-management/OrderRefundInfo';
 import Link from 'next/link';
+import { ImagePreviewModal } from '@/app/components/ImagePreviewModal';
 
 const Breadcrumbs = ({ orderId }: { orderId: number }) => {
     if (!orderId) return <div className="h-6 mb-6"></div>;
@@ -71,6 +72,8 @@ export default function OrderStepPage() {
     const [isUploading, setIsUploading] = useState<boolean>(false);
 
     const [isReadOnly, setIsReadOnly] = useState<boolean>(false);
+
+      const [previewImage, setPreviewImage] = useState<string | null>(null);
 
     const fetchOrderData = useCallback(async () => {
         async function load() {
@@ -483,6 +486,8 @@ export default function OrderStepPage() {
                             btnSpecial={btnSpecial}
                             isReqCancel={IsReqCancel}
                             fetchOrderData={fetchOrderData}
+                            previewImage={previewImage}
+                            setPreviewImage={setPreviewImage}
                         />
                     }
 
@@ -513,6 +518,8 @@ export default function OrderStepPage() {
                             handleFileChange={handleFileChange}
                             handleUploadSlip={handleUploadSlip}
                             handleFileChangeManual={handleFileChangeManual}
+                            previewImage={previewImage}
+                            setPreviewImage={setPreviewImage}
                         />
                     }
 
@@ -529,6 +536,8 @@ export default function OrderStepPage() {
                     />
                 </div>
             </div>
+
+            <ImagePreviewModal imageUrl={previewImage} onClose={() => setPreviewImage(null)} />
         </div>
     );
 }
