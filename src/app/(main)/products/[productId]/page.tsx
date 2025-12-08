@@ -13,6 +13,7 @@ import { FullCategoryPath } from '@/types';
 import { calculateAvailableStock } from '@/app/utils/calculations';
 import ProductDisplayCard from '../../components/ProductDisplayCard';
 import { ImagePreviewModal } from '@/app/components/ImagePreviewModal';
+import { useWebsiteSettings } from '@/app/providers/WebsiteSettingProvider';
 
 // --- Component: Breadcrumbs ---
 const Breadcrumbs = ({ path }: { path: FullCategoryPath | null }) => {
@@ -32,6 +33,7 @@ const Breadcrumbs = ({ path }: { path: FullCategoryPath | null }) => {
 export default function ProductDetailPage() {
   const params = useParams();
   const productId = params.productId as string;
+  const settings = useWebsiteSettings();
   
   const { product, relatedProducts, categoryPath, loading, error } = useProductDetail(productId);
   const { addToCart, isAdding } = useAddToCart();
@@ -149,12 +151,12 @@ export default function ProductDetailPage() {
               <div className="space-y-3 text-sm">
                 <h3 className="font-semibold text-base-content/80">สอบถามข้อมูลเพิ่มเติม</h3>
                 <div className="flex flex-col sm:flex-row gap-4">
-                    <a href="https://line.me/ti/p/~kacha982" target="_blank" rel="noreferrer" className="btn btn-outline btn-success btn-sm gap-2">
-                        <FaLine className="w-5 h-5" /> LINE: kacha982
+                    <a href={settings.lineURL} target="_blank" rel="noreferrer" className="btn btn-outline btn-success btn-sm gap-2">
+                        <FaLine className="w-5 h-5" /> LINE: {settings.lineOfficialName}
                     </a>
-                    <a href="tel:0818962687" className="btn btn-outline btn-info btn-sm gap-2">
-                        <FiPhone className="w-4 h-4" /> โทร: 081-896-2687
-                    </a>
+                    <p className="btn btn-outline btn-info btn-sm gap-2">
+                        <FiPhone className="w-4 h-4" /> โทร: {settings.contactPhone}
+                    </p>
                 </div>
               </div>
             </div>

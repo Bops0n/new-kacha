@@ -476,7 +476,7 @@ export default function UserManagement() {
           <div className="flex flex-col md:flex-row gap-4">
             <div className="flex-1">
               <div className="relative">
-                <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-base-content/50 w-4 h-4" />
+                <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-base-content/50 w-4 h-4 z-10" />
                 <input
                   type="text"
                   placeholder="ค้นหาด้วยชื่อผู้ใช้, ชื่อเต็ม, อีเมล, เบอร์โทร..."

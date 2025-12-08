@@ -3,7 +3,7 @@
 import React, { useState, useCallback, ReactNode } from 'react';
 import AlertContext from '../context/AlertModalContext';
 import AlertModal from '../components/AlertModal';
-import { AlertModalType } from '../../types/types';
+import { AlertModalType } from '@/types';
 
 interface AlertProviderProps {
   children: ReactNode;

@@ -10,6 +10,7 @@ import { useCounter } from '@/app/context/CartCount';
 import { ProductInventory } from '@/types';
 import { calculateAvailableStock } from '@/app/utils/calculations';
 import { formatPrice } from '@/app/utils/formatters';
+import { ImagePreviewModal } from '@/app/components/ImagePreviewModal';
 
 interface ProductDisplayCardProps {
   product: ProductInventory;
@@ -44,7 +45,7 @@ const AddToCartQuantityModal: React.FC<{
   onAddToCart: (product: ProductInventory, quantity: number) => void;
 }> = ({ isOpen, onClose, product, onAddToCart }) => {
   const [quantity, setQuantity] = useState(1);
-  const [isZoomed, setIsZoomed] = useState(false);
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
 
   // คำนวณราคาปัจจุบัน (เช็คส่วนลด)
   const currentPrice = useMemo(() => {
@@ -87,7 +88,7 @@ const AddToCartQuantityModal: React.FC<{
                 <div className="w-full md:w-5/12 bg-base-200/50 p-6 flex items-center justify-center relative group">
                     <div 
                         className="relative w-full aspect-square cursor-zoom-in bg-white rounded-xl border border-base-200 p-2 shadow-sm"
-                        onClick={() => setIsZoomed(true)}
+                        onClick={() => setPreviewImage(product.Image_URL || 'https://placehold.co/400x400?text=No+Image')}
                     >
                         <Image
                             src={product.Image_URL || 'https://placehold.co/400x400?text=No+Image'}
@@ -96,7 +97,7 @@ const AddToCartQuantityModal: React.FC<{
                             className="object-contain rounded-lg hover:scale-105 transition-transform duration-300"
                         />
                         <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/10 rounded-xl">
-                            <span className="badge badge-neutral gap-1 shadow-lg"><FiZoomIn /> ขยายรูป</span>
+                            <span className="text-white text-xs font-medium flex items-center gap-2 px-3 py-1.5 bg-black/60 rounded-full border border-white/20"><FiZoomIn /> คลิกเพื่อขยาย</span>
                         </div>
                     </div>
                 </div>
@@ -122,7 +123,7 @@ const AddToCartQuantityModal: React.FC<{
                         <div className="flex items-center gap-2 mb-6">
                             {availableStock > 0 ? (
                                 <div className="badge badge-success badge-outline gap-1 p-3">
-                                    <FiCheckCircle /> มีสินค้า ({availableStock})
+                                    <FiCheckCircle /> มีสินค้า {availableStock} {product.Unit}
                                 </div>
                             ) : (
                                 <div className="badge badge-error gap-1 p-3 text-white">
@@ -169,13 +170,7 @@ const AddToCartQuantityModal: React.FC<{
         </div>
 
         {/* Render Zoom Modal if active */}
-        {isZoomed && (
-            <FullImageModal 
-                src={product.Image_URL || 'https://placehold.co/400x400?text=No+Image'} 
-                alt={product.Name} 
-                onClose={() => setIsZoomed(false)} 
-            />
-        )}
+        <ImagePreviewModal imageUrl={previewImage} onClose={() => setPreviewImage(null)} />
     </>
   );
 };

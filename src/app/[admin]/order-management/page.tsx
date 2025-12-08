@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useMemo, useState } from 'react';
-import { FiPackage, FiTruck, FiCheckCircle, FiXCircle, FiClock, FiRefreshCw } from 'react-icons/fi';
+import { FiPackage, FiTruck, FiCheckCircle, FiXCircle, FiClock, FiRefreshCw, FiSearch } from 'react-icons/fi';
 
 import { useOrderManagement } from '@/app/hooks/admin/useOrderManagement';
 import { OrderStatus } from '@/types';
@@ -97,7 +97,12 @@ export default function OrderManagementPage() {
         
         <div className="bg-base-100 rounded-lg shadow-sm p-6 mb-6">
             <div className="flex flex-col md:flex-row flex-wrap gap-4">
-                <input type="text" placeholder="ค้นหาด้วยรหัส, ชื่อลูกค้า, Tracking Number..." value={filters.searchTerm} onChange={e => setFilters(f => ({...f, searchTerm: e.target.value}))} className="input input-bordered w-full flex-1" />
+                <div className="flex-1">
+                    <div className="relative">
+                        <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-base-content/50 w-4 h-4 z-10" />
+                        <input type="text" placeholder="ค้นหาด้วยรหัส, ชื่อลูกค้า, Tracking Number..." value={filters.searchTerm} onChange={e => setFilters(f => ({...f, searchTerm: e.target.value}))} className="input input-bordered w-full flex-1 pl-10" />
+                    </div>
+                </div>
                 <select value={filters.statusFilter} onChange={e => { setFilters(f => ({...f, statusFilter: e.target.value as any})); setCurrentPage(1); }} className="select select-bordered w-full md:w-auto">
                     <option value="all">สถานะทั้งหมด</option>
                     {Object.keys(statusTypeLabels).map(key => <option key={key} value={key}>{statusTypeLabels[key as OrderStatus].label}</option>)}

@@ -3,7 +3,8 @@
 import React, { useMemo, useState } from 'react';
 import { 
   FiPlus, FiEye, FiEdit, FiBox, FiSave, FiX, 
-  FiCheckCircle, FiAlertTriangle, FiAlertCircle 
+  FiCheckCircle, FiAlertTriangle, FiAlertCircle, 
+  FiSearch
 } from 'react-icons/fi';
 
 import { useProductManagement } from '@/app/hooks/admin/useProductManagement';
@@ -257,7 +258,10 @@ export default function ProductManagementPage() {
 
             <div className="card bg-base-100 shadow-sm p-4 mb-6">
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-7 gap-4 items-center">
-                    <div className="col-span-full xl:col-span-2"><input type="text" placeholder="ค้นหา..." value={filters.searchTerm} onChange={(e) => handleFilterChange('searchTerm', e.target.value)} className="input input-bordered w-full" /></div>
+                    <div className="col-span-full xl:col-span-2 relative">
+                            <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-base-content/50 w-4 h-4 z-10" />
+                            <input type="text" placeholder="ค้นหา..." value={filters.searchTerm} onChange={(e) => handleFilterChange('searchTerm', e.target.value)} className="input input-bordered w-full pl-10" />
+                        </div>
                     <select value={filters.categoryFilter} onChange={(e) => handleFilterChange('categoryFilter', e.target.value)} className="select select-bordered w-full"><option value="all">หมวดหมู่หลัก</option>{data.categories.map(c => <option key={c.Category_ID} value={c.Category_ID}>{c.Name}</option>)}</select>
                     <select value={filters.subCategoryFilter} onChange={(e) => handleFilterChange('subCategoryFilter', e.target.value)} className="select select-bordered w-full" disabled={filters.categoryFilter === 'all'}><option value="all">หมวดหมู่รอง</option>{data.subCategories.filter(s=>s.Category_ID === Number(filters.categoryFilter)).map(s => <option key={s.Sub_Category_ID} value={s.Sub_Category_ID}>{s.Name}</option>)}</select>
                     <select value={filters.childCategoryFilter} onChange={(e) => handleFilterChange('childCategoryFilter', e.target.value)} className="select select-bordered w-full" disabled={filters.subCategoryFilter === 'all'}><option value="all">หมวดหมู่ย่อย</option>{data.childSubCategories.filter(c=>c.Sub_Category_ID === Number(filters.subCategoryFilter)).map(c => <option key={c.Child_ID} value={c.Child_ID}>{c.Name}</option>)}</select>
