@@ -442,12 +442,7 @@ export default function OrderDetailsPage() {
                                         <>
                                             {canUploadSlip && order.Payment_Type === 'bank_transfer' ? (
                                                 <>
-                                                    <button 
-                                                        onClick={() => setIsPaymentModalOpen(true)}
-                                                        className="btn w-full btn-base-200 text-primary"
-                                                    >
-                                                        ดูช่องทางการชำระเงิน
-                                                    </button>
+
                                                     <div
                                                         onDragOver={(e) => {
                                                             e.preventDefault();
