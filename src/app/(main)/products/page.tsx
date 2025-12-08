@@ -236,7 +236,6 @@ export default function ProductsPage() {
                 <ProductDisplayCard
                   key={product.Product_ID}
                   product={product}
-                  formatPrice={formatPrice}
                 />
               ))}
             </div>
