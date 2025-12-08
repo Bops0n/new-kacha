@@ -20,6 +20,7 @@ export default function RootLayout({
 }) {
   
   return (
+    // <html lang="th" data-theme="light" className={``}>
     <html lang="th" data-theme="light" className={`${sarabun.variable}`}>
     <head></head>
     <NextAuthSessionProvider>

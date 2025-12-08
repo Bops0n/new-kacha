@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { FiMapPin, FiPhone, FiMail, FiSend } from 'react-icons/fi';
 import { FaLine, FaFacebookSquare } from 'react-icons/fa';
-import { logger } from '@/server/logger';
+// import { logger } from '@/server/logger';
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
@@ -21,7 +21,7 @@ export default function ContactPage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     // Logic for sending form data to an API would go here
-    logger.info('Form submitted:', formData);
+    // logger.info('Form submitted:', formData);
     alert('ขอบคุณสำหรับข้อความของคุณ! เราจะติดต่อกลับโดยเร็วที่สุด');
     // Reset form
     setFormData({ name: '', email: '', subject: '', message: '' });

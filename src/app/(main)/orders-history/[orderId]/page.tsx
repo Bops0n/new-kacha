@@ -118,8 +118,8 @@ const OrderStepIndicator = ({ order, statusConfig }: { order: Order, statusConfi
 
   const renderArrow = () => (
     <div className="absolute -top-14 left-1/2 transform -translate-x-1/2 flex flex-col items-center animate-bounce z-20 w-max">
-        <span className="text-[10px] font-bold text-primary bg-base-100 px-2 py-0.5 rounded-full shadow-sm mb-1 border border-base-200">อยู่ที่นี่</span>
-        <FiArrowDown className="w-6 h-6 text-primary filter drop-shadow-sm" />
+        <span className="text-[10px] font-bold text-black bg-base-100 px-2 py-0.5 rounded-full shadow-sm mb-1 border border-base-200">อยู่ที่นี่</span>
+        <FiArrowDown className="w-6 h-6 text-black filter drop-shadow-sm" />
     </div>
   );
 
@@ -400,8 +400,8 @@ export default function OrderDetailsPage() {
                         {/* Header Title Change based on activeTab */}
                         <h3 className={`card-title text-lg flex items-center gap-2 mb-4 ${activeTab === 'payment' ? 'text-primary' : 'text-secondary'}`}>
                             {activeTab === 'payment' 
-                                ? <><FiCreditCard className="w-5 h-5" /> หลักฐานการชำระเงิน</>
-                                : <><FiRefreshCw className="w-5 h-5" /> หลักฐานการคืนเงิน</>
+                                ? <><FiCreditCard className="w-5 h-5" /><span className='text-black'>หลักฐานการชำระเงิน</span></>
+                                : <><FiRefreshCw className="w-5 h-5" /> <span className='text-black'>หลักฐานการคืนเงิน</span></>
                             }
                         </h3>
 
@@ -434,14 +434,6 @@ export default function OrderDetailsPage() {
                                             </p>
                                             
                                             {/* +++ ปุ่มดูช่องทางชำระเงิน (เฉพาะเมื่อยังไม่มีสลิป และเป็นโอนเงิน) +++ */}
-                                            {canUploadSlip && order.Payment_Type === 'bank_transfer' && (
-                                                <button 
-                                                    onClick={() => setIsPaymentModalOpen(true)}
-                                                    className="btn btn-xs btn-ghost text-primary mt-2"
-                                                >
-                                                    ดูช่องทางการชำระเงิน
-                                                </button>
-                                            )}
                                         </div>
                                     )}
 
@@ -458,6 +450,7 @@ export default function OrderDetailsPage() {
                                             <p className="text-[10px] text-center text-base-content/40 mt-1">รองรับนามสกุลไฟล์ .jpg และ .png (ขนาดไฟล์สูงสุด 5MB)</p>
                                         </div>
                                     )}
+                                    
                                 </>
                             ) : (
                                 // --- REFUND TAB CONTENT ---
@@ -486,12 +479,6 @@ export default function OrderDetailsPage() {
                                     )}
                                 </div>
                             )}
-                                                                            <button 
-                                                    onClick={() => setIsPaymentModalOpen(true)}
-                                                    className="btn btn-xs btn-ghost text-primary mt-2"
-                                                >
-                                                    ดูช่องทางการชำระเงิน
-                                                </button>
                         </div>
 
                         {/* Bottom Toggle Buttons (Only show if refund context exists) */}
@@ -516,10 +503,17 @@ export default function OrderDetailsPage() {
                                         <span className="loading loading-spinner loading-xs"></span> ⏳ รอการคืนเงิน
                                     </button>
                                 )}
+                                
                             </div>
                         )}
-
+                                                                    <button 
+                                                    onClick={() => setIsPaymentModalOpen(true)}
+                                                    className="btn btn-sm btn-ghost text-primary mt-4"
+                                                >
+                                                    ดูช่องทางการชำระเงิน
+                                                </button>
                     </div>
+                    
                 </div>
             </div>
         </div>
@@ -580,7 +574,7 @@ export default function OrderDetailsPage() {
                         <div className="flex justify-between text-sm text-error"><span>ส่วนลด</span><span>- {formatPrice(subtotalBeforeDiscount - order.Total_Amount)}</span></div>
                         <div className="flex justify-between text-sm text-success"><span>ค่าจัดส่ง</span><span>ฟรี</span></div>
                         <div className="divider my-1"></div>
-                        <div className="flex justify-between items-center"><span className="font-bold text-lg">ยอดสุทธิ</span><span className="font-extrabold text-2xl text-primary">{formatPrice(order.Total_Amount)}</span></div>
+                        <div className="flex justify-between items-center"><span className="font-bold text-lg">ยอดสุทธิ</span><span className="font-extrabold text-2xl text-success underline-offset-1 underline">{formatPrice(order.Total_Amount)}</span></div>
                     </div>
                 </div>
             </div>
