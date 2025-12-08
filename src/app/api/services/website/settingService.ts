@@ -114,6 +114,7 @@ export async function getWebsiteSettings() {
     paymentBankName: await getSettingTyped<string>("PAYMENT_BANK_NAME"),
     paymentBankAccountName: await getSettingTyped<string>("PAYMENT_BANK_ACCOUNT_NAME"),
     paymentBankAccountNumber: await getSettingTyped<string>("PAYMENT_BANK_ACCOUNT_NUMBER"),
+    paymentQRScanImage: await await getSettingTyped<string>("PAYMENT_QR_SCAN_IMAGE"),
     paymentTimeoutHours: await getSettingTyped<number>("PAYMENT_TIMEOUT_HOURS"),
     // paymentCODFee: await getSettingTyped<number>("PAYMENT_COD_FEE"),
 

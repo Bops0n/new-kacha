@@ -3,10 +3,10 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { 
-  FiClock, FiPackage, FiTruck, FiCheckCircle, FiXCircle, 
-  FiArrowLeft, FiMapPin, FiShoppingCart, FiUploadCloud, FiDollarSign, 
-  FiRefreshCw, FiTrash2, FiAlertTriangle, FiFileText, FiInfo, FiCreditCard,
-  FiArrowDown, FiZoomIn, FiUser, FiPhone, FiCopy, FiX
+  FiTruck, FiCheckCircle, 
+  FiArrowLeft, FiMapPin, FiShoppingCart, FiUploadCloud, 
+  FiRefreshCw, FiTrash2, FiAlertTriangle, FiCreditCard,
+  FiArrowDown, FiZoomIn, FiCopy
 } from 'react-icons/fi';
 import { Order, OrderStatus } from '@/types';
 import { useAlert } from '@/app/context/AlertModalContext';
@@ -20,7 +20,9 @@ import { useWebsiteSettings } from '@/app/providers/WebsiteSettingProvider';
 import { statusConfig } from '@/app/utils/client';
 
 // --- Component: Payment Info Modal ---
-const PaymentInfoModal = ({ isOpen, onClose, totalAmount }: { isOpen: boolean; onClose: () => void; totalAmount: number }) => {
+const PaymentInfoModal = (
+{ isOpen, onClose, totalAmount, setPreviewImage }: 
+{ isOpen: boolean; onClose: () => void; totalAmount: number; setPreviewImage: (image: string) => void }) => {
     const { showAlert } = useAlert();
     const settings = useWebsiteSettings();
 
@@ -33,30 +35,60 @@ const PaymentInfoModal = ({ isOpen, onClose, totalAmount }: { isOpen: boolean; o
 
     return (
         <dialog className="modal modal-open">
-            <div className="modal-box">
-                <button onClick={onClose} className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
-                <h3 className="font-bold text-lg flex items-center gap-2">
+            <div className="modal-box max-w-4xl">
+                <button
+                    onClick={onClose}
+                    className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2"
+                >
+                    ✕
+                </button>
+
+                <h3 className="font-bold text-lg flex items-center gap-2 mb-4">
                     <FiCreditCard className="text-primary" /> ช่องทางการชำระเงิน
                 </h3>
-                
-                <div className="py-4 space-y-4">
-                    <div className="bg-primary/5 p-4 rounded-xl border border-primary/20 text-center">
-                        <p className="text-sm text-base-content/70">ยอดที่ต้องชำระ</p>
-                        <p className="text-3xl font-bold text-primary">{formatPrice(totalAmount)}</p>
-                    </div>
 
-                    <div className="card bg-base-100 border border-base-200 shadow-sm">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
+                    <div className="flex justify-center h-full">
+                        <div
+                            className="relative group w-full max-w-full aspect-square rounded-2xl overflow-hidden border border-base-200 shadow-sm bg-white cursor-zoom-in h-full"
+                            onClick={() => setPreviewImage(settings.paymentQRScanImage)}
+                        >
+                            <img
+                                src={settings.paymentQRScanImage}
+                                className="w-full h-full object-contain p-4 transition-transform duration-500 group-hover:scale-110"
+                            />
+                            <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition duration-300 flex items-center justify-center pointer-events-none">
+                                <span className="text-white bg-black/60 px-4 py-2 rounded-full flex items-center gap-2 shadow-lg">
+                                <FiZoomIn /> คลิกเพื่อขยาย
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="flex flex-col gap-4 h-full">
+                        <div className="bg-primary/5 p-4 rounded-xl border border-primary/20 text-center">
+                            <p className="text-sm text-base-content/70">ยอดที่ต้องชำระ</p>
+                            <p className="text-3xl font-bold text-primary">
+                                {formatPrice(totalAmount)}
+                            </p>
+                        </div>
+                        <div className="card bg-base-100 border border-base-200 shadow-sm flex-grow">
                         <div className="card-body p-4">
                             <h4 className="font-bold text-base mb-2">{settings.bankName}</h4>
-                            <div className="space-y-1 text-sm">
+
+                            <div className="text-sm space-y-1">
                                 <p><span className="opacity-70">ธนาคาร:</span> {settings.paymentBankName}</p>
                                 <p><span className="opacity-70">ชื่อบัญชี:</span> {settings.paymentBankAccountName}</p>
                             </div>
+
                             <div className="divider my-2"></div>
+
                             <div className="flex items-center justify-between bg-base-200 p-3 rounded-lg">
-                                <span className="font-mono text-lg font-bold tracking-wider">{settings.paymentBankAccountNumber}</span>
-                                <button 
-                                    className="btn btn-xs btn-ghost text-primary tooltip tooltip-left" 
+                                <span className="font-mono text-lg font-bold tracking-wider">
+                                    เลขบัญชี: {settings.paymentBankAccountNumber}
+                                </span>
+
+                                <button
+                                    className="btn btn-xs btn-ghost text-primary tooltip tooltip-left"
                                     data-tip="คัดลอก"
                                     onClick={() => handleCopy(settings.paymentBankAccountNumber)}
                                 >
@@ -64,20 +96,28 @@ const PaymentInfoModal = ({ isOpen, onClose, totalAmount }: { isOpen: boolean; o
                                 </button>
                             </div>
                         </div>
-                    </div>
-                    
-                    <div className="text-xs text-center text-base-content/60 mt-2">
-                        * กรุณาตรวจสอบยอดเงินและเลขบัญชีก่อนโอน <br/>
-                        เมื่อโอนเสร็จแล้ว กรุณาแนบสลิปในหน้าคำสั่งซื้อ
+                        </div>
                     </div>
                 </div>
 
-                <div className="modal-action">
-                    <button className="btn btn-primary w-full" onClick={onClose}>ปิดหน้าต่าง</button>
+                <div className="text-xs text-center text-base-content/60 mt-6">
+                    * กรุณาตรวจสอบยอดเงินและเลขบัญชีก่อนโอน  
+                    <br />
+                    เมื่อโอนเสร็จแล้ว กรุณาแนบสลิปในหน้าคำสั่งซื้อ
+                </div>
+
+                <div className="modal-action mt-2">
+                    <button className="btn btn-primary w-full text-white" onClick={onClose}>
+                        ปิดหน้าต่าง
+                    </button>
                 </div>
             </div>
-            <form method="dialog" className="modal-backdrop bg-black/50 backdrop-blur-sm">
-                <button onClick={onClose}>close</button>
+
+            <form
+                method="dialog"
+                className="modal-backdrop bg-black/50 backdrop-blur-sm"
+            >
+                <button onClick={onClose}>ปิด</button>
             </form>
         </dialog>
     );
@@ -119,7 +159,6 @@ const OrderStepIndicator = ({ order, statusConfig }: { order: Order, statusConfi
       <ul className="steps steps-vertical md:steps-horizontal w-full my-8 py-4 text-center px-4 overflow-visible">
         {happyPath.map((step, index) => {
           const statusInfo = statusConfig[step];
-          console.log(step)
           if (!statusInfo) return null; 
           const isComplete = index < happyStepIndex;
           const isCurrent = index === happyStepIndex;
@@ -557,12 +596,6 @@ export default function OrderDetailsPage() {
                                 
                             </div>
                         )}
-                                                                    <button 
-                                                    onClick={() => setIsPaymentModalOpen(true)}
-                                                    className="btn btn-sm btn-ghost text-primary mt-4"
-                                                >
-                                                    ดูช่องทางการชำระเงิน
-                                                </button>
                     </div>
                     
                 </div>
@@ -687,7 +720,8 @@ export default function OrderDetailsPage() {
         <PaymentInfoModal 
             isOpen={isPaymentModalOpen} 
             onClose={() => setIsPaymentModalOpen(false)} 
-            totalAmount={order.Total_Amount} 
+            totalAmount={order.Total_Amount}
+            setPreviewImage={setPreviewImage}
         />
 
       </div>

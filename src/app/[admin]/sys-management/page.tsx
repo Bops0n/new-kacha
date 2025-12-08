@@ -1,7 +1,9 @@
 "use client";
 
+import { ImagePreviewModal } from "@/app/components/ImagePreviewModal";
 import { WEBSITE_SETTING_GROUP, WEBSITE_SETTING_TYPE } from "@/app/utils/setting";
 import { useEffect, useMemo, useState } from "react";
+import { FiZoomIn } from "react-icons/fi";
 
 type AdminSettingItem = {
   key: string;
@@ -34,6 +36,8 @@ export default function AdminSettingsPage() {
   const [history, setHistory] = useState<HistoryItem[]>([]);
   const [historyKey, setHistoryKey] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
 
   // load all settings
   useEffect(() => {
@@ -126,7 +130,7 @@ export default function AdminSettingsPage() {
             </h2>
 
             {/* Setting Cards Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 items-start">
               {items.map(item => (
                 <div
                   key={item.key}
@@ -155,11 +159,23 @@ export default function AdminSettingsPage() {
 
                       {/* ตัวอย่างรูปที่ตั้งค่าไว้ */}
                       {item.value ? (
-                        <img
-                          src={item.value}
-                          alt={item.label}
-                          className="w-32 h-32 object-cover rounded-lg border"
-                        />
+                        <div 
+                          className="relative group w-full max-w-md aspect-square rounded-2xl overflow-hidden border border-base-200 shadow-sm bg-white cursor-zoom-in"
+                          onClick={() => setPreviewImage(item.value || 'https://placehold.co/600x400?text=No+Image')}
+                        >
+                          <img
+                            src={item.value || 'https://placehold.co/600x400?text=No+Image'}
+                            alt={item.label}
+                            className="w-full h-full object-contain p-4 transition-transform duration-500 group-hover:scale-110"
+                          />
+                          
+                          {/* Hover Overlay */}
+                          <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center pointer-events-none">
+                              <span className="text-white font-medium flex items-center gap-2 px-4 py-2 bg-black/60 backdrop-blur-sm rounded-full shadow-lg transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
+                                  <FiZoomIn className="w-5 h-5" /> คลิกเพื่อขยาย
+                              </span>
+                          </div>
+                        </div>
                       ) : (
                         <div className="w-32 h-32 flex items-center justify-center border rounded-lg text-xs opacity-50">
                           ไม่มีรูป
@@ -311,6 +327,9 @@ export default function AdminSettingsPage() {
         )}
 
       </div>
+
+      {/* Image Preview Modal */}
+      <ImagePreviewModal imageUrl={previewImage} onClose={() => setPreviewImage(null)} />
     </div>
   );
 }

@@ -50,6 +50,7 @@ export type WEBSITE_SETTING_KEYS =
     | 'PAYMENT_BANK_NAME'
     | 'PAYMENT_BANK_ACCOUNT_NAME'
     | 'PAYMENT_BANK_ACCOUNT_NUMBER'
+    | 'PAYMENT_QR_SCAN_IMAGE'
     | 'PAYMENT_TIMEOUT_HOURS'
     | 'PAYMENT_COD_FEE'
     | 'SHIPPING_FLAT_RATE'
@@ -77,15 +78,15 @@ export const WEBSITE_SETTINGS_DEF: WEBSITE_SETTING_DEFINITION[] = [
   {
     key: "WEBSITE_NAME",
     label: "ชื่อเว็บไซต์",
-    description: "ชื่อที่ใช้แสดงบน Header, Title, อีเมล และเอกสารต่าง ๆ",
+    description: "ชื่อที่ใช้แสดงบน Header, Title",
     type: "string",
     group: "general",
-    default: "My Construction Shop"
+    default: "Construction Materials Shop"
   },
   {
     key: "WEBSITE_LOGO_URL",
     label: "โลโก้เว็บไซต์",
-    description: "URL ของ Logo ที่ใช้บนเว็บไซต์และอีเมล",
+    description: "URL ของ Logo ที่ใช้บนเว็บไซต์",
     type: "image",
     group: "general",
     default: ""
@@ -247,6 +248,14 @@ export const WEBSITE_SETTINGS_DEF: WEBSITE_SETTING_DEFINITION[] = [
     label: "เลขที่บัญชี",
     description: "เลขที่บัญชีธนาคารสำหรับโอนเงิน",
     type: "string",
+    group: "payment",
+    default: ""
+  },
+  {
+    key: "PAYMENT_QR_SCAN_IMAGE",
+    label: "รูปภาพ QR",
+    description: "รูปภาพ QR สำหรับการชำระเงิน",
+    type: "image",
     group: "payment",
     default: ""
   },
