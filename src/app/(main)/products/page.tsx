@@ -190,7 +190,7 @@ export default function ProductsPage() {
   useEffect(() => {
     const observer = new IntersectionObserver((entries) => {
       const target = entries[0];
-      if (target.isIntersecting && hasMore && filteredProducts.length < pageData?.total) {
+      if (target.isIntersecting && hasMore ) {
         // console.log(hasMore)
         
         loadMore();
