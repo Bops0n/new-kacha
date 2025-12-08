@@ -212,8 +212,8 @@ export default function UserNavbar() {
                                 <img src={settings.logoURL} alt="Logo" className="w-12 h-12 object-contain rounded-xl" />
                             </div>
                             <div className="flex flex-col">
-                                <span className="text-xl font-bold leading-tight text-base-content">{settings.siteName}</span>
-                                <span className="text-[10px] text-base-content/60 tracking-wider">CONSTRUCTION MATERIALS SHOP</span>
+                                <span className="hidden lg:block text-xl font-bold leading-tight text-base-content">{settings.siteName}</span>
+                                <span className="hidden lg:block text-[10px] text-base-content/60 tracking-wider">CONSTRUCTION MATERIALS SHOP</span>
                             </div>
                         </Link>
 
