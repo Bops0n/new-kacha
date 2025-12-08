@@ -16,6 +16,7 @@ import { useSession } from 'next-auth/react';
 import AccessDeniedPage from '@/app/components/AccessDenied';
 import { useOrderHistory } from '@/app/hooks/useOrderHistory';
 import { ImagePreviewModal } from '@/app/components/ImagePreviewModal';
+import { statusConfig } from '@/app/utils/client';
 
 // --- Configuration ---
 const PAYMENT_TIMEOUT_HOURS = 24;
@@ -30,17 +31,6 @@ const BANK_INFO = {
 };
 
 // Status Config
-const statusConfig: { [key in OrderStatus]: { label: string; color: string; icon: React.ElementType; bgColor: string; textColor: string } } = {
-  waiting_payment: { label: 'รอชำระเงิน', color: 'warning', icon: FiClock, bgColor: 'bg-warning/10', textColor: 'text-warning' },
-  pending: { label: 'รอดำเนินการ', color: 'warning', icon: FiClock, bgColor: 'bg-warning/10', textColor: 'text-warning' },
-  preparing: { label: 'กำลังเตรียม', color: 'info', icon: FiPackage, bgColor: 'bg-info/10', textColor: 'text-info' },
-  shipped: { label: 'จัดส่งแล้ว', color: 'primary', icon: FiTruck, bgColor: 'bg-primary/10', textColor: 'text-primary' },
-  delivered: { label: 'ส่งเรียบร้อย', color: 'success', icon: FiCheckCircle, bgColor: 'bg-success/10', textColor: 'text-success' },
-  refunding: { label: 'กำลังคืนเงิน', color: 'secondary', icon: FiRefreshCw, bgColor: 'bg-secondary/10', textColor: 'text-secondary' },
-  refunded: { label: 'คืนเงินสำเร็จ', color: 'neutral', icon: FiCheckCircle, bgColor: 'bg-neutral/10', textColor: 'text-neutral' },
-  cancelled: { label: 'ยกเลิก', color: 'error', icon: FiXCircle, bgColor: 'bg-error/10', textColor: 'text-error' },
-  req_cancel: { label: 'ขอยกเลิก', color: 'warning', icon: FiFileText, bgColor: 'bg-warning/10', textColor: 'text-warning' },
-};
 
 // --- Component: Payment Info Modal ---
 const PaymentInfoModal = ({ isOpen, onClose, totalAmount }: { isOpen: boolean; onClose: () => void; totalAmount: number }) => {
@@ -127,7 +117,7 @@ const OrderStepIndicator = ({ order, statusConfig }: { order: Order, statusConfi
   const renderIconCircle = (icon: React.ElementType, isCurrent: boolean, isComplete: boolean) => {
       let bgClass = 'bg-base-100 border-base-300 text-base-content/30';
       if (isComplete) bgClass = 'bg-success text-success-content border-success';
-      else if (isCurrent) bgClass = `bg-primary text-primary-content border-primary shadow-lg scale-110 ring-2 ring-primary/30`;
+      else if (isCurrent) bgClass = `${icon === FiCheckCircle ? 'bg-success border-success' : 'bg-primary text-primary-content border-primary'} shadow-lg scale-110 ring-2 ring-primary/30`;
 
       return (
         <div className={`w-10 h-10 rounded-full border-2 flex items-center justify-center transition-all duration-300 relative z-10 ${bgClass}`}>
@@ -141,16 +131,17 @@ const OrderStepIndicator = ({ order, statusConfig }: { order: Order, statusConfi
       <ul className="steps steps-vertical md:steps-horizontal w-full my-8 py-4 text-center px-4 overflow-visible">
         {happyPath.map((step, index) => {
           const statusInfo = statusConfig[step];
+          console.log(step)
           if (!statusInfo) return null; 
           const isComplete = index < happyStepIndex;
           const isCurrent = index === happyStepIndex;
-          const stepColor = isComplete ? 'step-success' : isCurrent ? 'step-primary' : '';
+          const stepColor = isComplete ? 'step-success' : isCurrent ? step === 'delivered' ? 'step-success': 'step-primary' : '';
           return (
             <li key={step} className={`step ${stepColor} overflow-visible`} data-content="">
               <div className="flex flex-col items-center relative">
                 {isCurrent && renderArrow()}
                 {renderIconCircle(statusInfo.icon, isCurrent, isComplete)}
-                <span className={`text-xs sm:text-sm mt-3 font-medium ${isCurrent ? 'text-primary font-bold' : 'text-base-content/70'}`}>
+                <span className={`text-xs sm:text-sm mt-3 font-medium ${isCurrent ? 'text-black font-bold' : 'text-base-content/70'}`}>
                     {statusInfo.label}
                 </span>
               </div>
