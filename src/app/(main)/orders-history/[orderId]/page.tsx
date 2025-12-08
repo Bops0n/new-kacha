@@ -16,25 +16,13 @@ import { useSession } from 'next-auth/react';
 import AccessDeniedPage from '@/app/components/AccessDenied';
 import { useOrderHistory } from '@/app/hooks/useOrderHistory';
 import { ImagePreviewModal } from '@/app/components/ImagePreviewModal';
+import { useWebsiteSettings } from '@/app/providers/WebsiteSettingProvider';
 import { statusConfig } from '@/app/utils/client';
-
-// --- Configuration ---
-const PAYMENT_TIMEOUT_HOURS = 24;
-
-// ข้อมูลบัญชีธนาคาร (สามารถแก้ไขให้ตรงกับของจริงได้ที่นี่)
-const BANK_INFO = {
-  bankName: 'ธนาคารกสิกรไทย (KBANK)',
-  accountName: 'บจก. คชาโฮม จำกัด',
-  accountNumber: '123-4-56789-0',
-  branch: 'สาขาสุขุมวิท',
-  promptPayId: '010555XXXXXXX' // ถ้ามี
-};
-
-// Status Config
 
 // --- Component: Payment Info Modal ---
 const PaymentInfoModal = ({ isOpen, onClose, totalAmount }: { isOpen: boolean; onClose: () => void; totalAmount: number }) => {
     const { showAlert } = useAlert();
+    const settings = useWebsiteSettings();
 
     const handleCopy = (text: string) => {
         navigator.clipboard.writeText(text.replace(/-/g, ''));
@@ -59,18 +47,18 @@ const PaymentInfoModal = ({ isOpen, onClose, totalAmount }: { isOpen: boolean; o
 
                     <div className="card bg-base-100 border border-base-200 shadow-sm">
                         <div className="card-body p-4">
-                            <h4 className="font-bold text-base mb-2">{BANK_INFO.bankName}</h4>
+                            <h4 className="font-bold text-base mb-2">{settings.bankName}</h4>
                             <div className="space-y-1 text-sm">
-                                <p><span className="opacity-70">ชื่อบัญชี:</span> {BANK_INFO.accountName}</p>
-                                <p><span className="opacity-70">สาขา:</span> {BANK_INFO.branch}</p>
+                                <p><span className="opacity-70">ธนาคาร:</span> {settings.paymentBankName}</p>
+                                <p><span className="opacity-70">ชื่อบัญชี:</span> {settings.paymentBankAccountName}</p>
                             </div>
                             <div className="divider my-2"></div>
                             <div className="flex items-center justify-between bg-base-200 p-3 rounded-lg">
-                                <span className="font-mono text-lg font-bold tracking-wider">{BANK_INFO.accountNumber}</span>
+                                <span className="font-mono text-lg font-bold tracking-wider">{settings.paymentBankAccountNumber}</span>
                                 <button 
                                     className="btn btn-xs btn-ghost text-primary tooltip tooltip-left" 
                                     data-tip="คัดลอก"
-                                    onClick={() => handleCopy(BANK_INFO.accountNumber)}
+                                    onClick={() => handleCopy(settings.paymentBankAccountNumber)}
                                 >
                                     <FiCopy /> คัดลอก
                                 </button>
@@ -422,9 +410,9 @@ export default function OrderDetailsPage() {
                             {activeTab === 'payment' ? (
                                 // --- PAYMENT TAB CONTENT ---
                                 <>
-                                    {order.Transaction_Slip ? (
+                                    {order.Transaction_Slip && (
                                         <div 
-                                            className="relative group w-full rounded-xl overflow-hidden border border-base-300 shadow-sm cursor-pointer bg-base-200"
+                                            className="relative group w-full rounded-xl overflow-hidden border border-base-300 shadow-sm cursor-zoom-in bg-base-200"
                                             onClick={() => setPreviewImage(order.Transaction_Slip!)}
                                         >
                                             <img 
@@ -438,86 +426,79 @@ export default function OrderDetailsPage() {
                                                 </span>
                                             </div>
                                         </div>
-                                    ) : (
+                                    )}
+                                    {canUploadSlip && order.Payment_Type === 'bank_transfer' && (
                                         <>
-                                            {canUploadSlip && order.Payment_Type === 'bank_transfer' ? (
-                                                <>
-                                                    <button 
-                                                        onClick={() => setIsPaymentModalOpen(true)}
-                                                        className="btn w-full btn-base-200 text-primary"
-                                                    >
-                                                        ดูช่องทางการชำระเงิน
-                                                    </button>
-                                                    <div
-                                                        onDragOver={(e) => {
-                                                            e.preventDefault();
-                                                            setIsDragging(true);
-                                                        }}
-                                                        onDragLeave={(e) => {
-                                                            e.preventDefault();
-                                                            setIsDragging(false);
-                                                        }}
-                                                        onDrop={(e) => {
-                                                            e.preventDefault();
-                                                            setIsDragging(false);
+                                            <button 
+                                                onClick={() => setIsPaymentModalOpen(true)}
+                                                className={`btn w-full btn-base-200 text-primary ${order.Transaction_Slip ? 'mt-4' : ''}`}
+                                            >
+                                                ดูช่องทางการชำระเงิน
+                                            </button>
+                                            <div
+                                                onDragOver={(e) => {
+                                                    e.preventDefault();
+                                                    setIsDragging(true);
+                                                }}
+                                                onDragLeave={(e) => {
+                                                    e.preventDefault();
+                                                    setIsDragging(false);
+                                                }}
+                                                onDrop={(e) => {
+                                                    e.preventDefault();
+                                                    setIsDragging(false);
 
-                                                            const file = e.dataTransfer.files?.[0];
-                                                            if (file) handleFileChangeManual(file);
-                                                        }}
-                                                        className={`
-                                                            mt-4 w-full h-52 border-2 border-dashed rounded-xl 
-                                                            flex flex-col justify-center items-center cursor-pointer transition
-                                                            ${isDragging ? "bg-primary/10 border-primary" : "bg-base-200 border-base-300 hover:border-primary"}
-                                                        `}
-                                                        onClick={() => {
-                                                            document.getElementById("transfer-slip-upload")?.click();
-                                                        }}
-                                                    >
-                                                        <FiUploadCloud className="w-10 h-10 text-base-content/60 mt-4" />
+                                                    const file = e.dataTransfer.files?.[0];
+                                                    if (file) handleFileChangeManual(file);
+                                                }}
+                                                className={`
+                                                    mt-4 w-full h-52 border-2 border-dashed rounded-xl 
+                                                    flex flex-col justify-center items-center cursor-pointer transition
+                                                    ${isDragging ? "bg-primary/10 border-primary" : "bg-base-200 border-base-300 hover:border-primary"}
+                                                `}
+                                                onClick={() => {
+                                                    document.getElementById("transfer-slip-upload")?.click();
+                                                }}
+                                            >
+                                                <FiUploadCloud className="w-10 h-10 text-base-content/60 mt-4" />
 
-                                                        <p className="mt-2 text-base-content/70 text-center">
-                                                            ยังไม่มีสลิปการโอนเงิน<br/>
-                                                            คลิกเพื่อเลือกไฟล์
-                                                        </p>
-                                                        <p className="text-sm text-base-content/50">หรือวางไฟล์ลงบริเวณนี้</p>
+                                                <p className="mt-2 text-base-content/70 text-center">
+                                                    ยังไม่มีสลิปการโอนเงิน<br/>
+                                                    คลิกเพื่อเลือกไฟล์
+                                                </p>
+                                                <p className="text-sm text-base-content/50">หรือวางไฟล์ลงบริเวณนี้</p>
 
-                                                        <button className="btn btn-sm mt-3 my-4">เลือกไฟล์รูปภาพ</button>
+                                                <button className="btn btn-sm mt-3 my-4">เลือกไฟล์รูปภาพ</button>
 
-                                                        <input
-                                                            id="transfer-slip-upload"
-                                                            type="file"
-                                                            className="hidden"
-                                                            accept="image/png, image/jpeg, image/jpg"
-                                                            onChange={handleFileChange}
-                                                        />
-                                                    </div>
+                                                <input
+                                                    id="transfer-slip-upload"
+                                                    type="file"
+                                                    className="hidden"
+                                                    accept="image/png, image/jpeg, image/jpg"
+                                                    onChange={handleFileChange}
+                                                />
+                                            </div>
 
-                                                    {/* File Info */}
-                                                    {selectedFile && (
-                                                        <div className="text-sm text-center text-success mt-2">
-                                                            ไฟล์ที่เลือก : {selectedFile.name}
-                                                        </div>
-                                                    )}
-
-                                                    <p className="text-xs text-base-content/60 text-center mt-2">
-                                                        รองรับไฟล์ JPG, JPEG, PNG (ขนาดไฟล์สูงสุด 5MB)
-                                                    </p>
-
-                                                    {/* Upload Button */}
-                                                    <button
-                                                        className="btn btn-primary w-full mt-2 flex gap-2 justify-center items-center"
-                                                        disabled={!selectedFile || isUploading}
-                                                        onClick={handleUploadSlip}
-                                                    >
-                                                        {isUploading && <span className="loading loading-spinner"></span>}
-                                                        {isUploading ? "กำลังอัปโหลด..." : "อัปโหลดหลักฐานการโอนเงิน"}
-                                                    </button>
-                                                </>
-                                            ) : (
-                                                <div className="w-full min-h-[150px] flex flex-col items-center justify-center bg-base-200/50 rounded-xl border-2 border-dashed border-base-300 p-6 text-base-content/40">
-                                                    <p className="text-sm text-center mt-9">ชำระเงินปลายทาง</p>
+                                            {/* File Info */}
+                                            {selectedFile && (
+                                                <div className="text-sm text-center text-success mt-2">
+                                                    ไฟล์ที่เลือก : {selectedFile.name}
                                                 </div>
                                             )}
+
+                                            <p className="text-xs text-base-content/60 text-center mt-2">
+                                                รองรับไฟล์ JPG, JPEG, PNG (ขนาดไฟล์สูงสุด 5MB)
+                                            </p>
+
+                                            {/* Upload Button */}
+                                            <button
+                                                className="btn btn-primary w-full mt-2 flex gap-2 justify-center items-center"
+                                                disabled={!selectedFile || isUploading}
+                                                onClick={handleUploadSlip}
+                                            >
+                                                {isUploading && <span className="loading loading-spinner"></span>}
+                                                {isUploading ? "กำลังอัปโหลด..." : "อัปโหลดหลักฐานการโอนเงิน"}
+                                            </button>
                                         </>
                                     )}
                                     
@@ -527,7 +508,7 @@ export default function OrderDetailsPage() {
                                 <div className="w-full animate-fadeIn">
                                     {order.Refund_Slip ? (
                                         <div 
-                                            className="relative group w-full rounded-xl overflow-hidden border border-base-300 shadow-sm cursor-pointer bg-base-200"
+                                            className="relative group w-full rounded-xl overflow-hidden border border-base-300 shadow-sm cursor-zoom-in bg-base-200"
                                             onClick={() => setPreviewImage(order.Refund_Slip!)}
                                         >
                                             <img 

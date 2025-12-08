@@ -5,8 +5,7 @@ import { FiPrinter, FiArrowLeft, FiCalendar, FiDollarSign, FiCheckCircle } from 
 import { formatDateThai, formatDateTimeThai, formatPrice, setCurrentTime } from '@/app/utils/formatters';
 import LoadingSpinner from '@/app/components/LoadingSpinner';
 import { useRouter } from 'next/navigation';
-
-const VAT_RATE = 0.07; 
+import { useWebsiteSettings } from '@/app/providers/WebsiteSettingProvider';
 
 interface ReportOrder {
     Order_ID: number;
@@ -24,7 +23,10 @@ const statusLabels: Record<string, string> = {
 
 export default function SummarySalesReportPage() {
     const router = useRouter();
+    const settings = useWebsiteSettings();
     const today = new Date().toISOString().split('T')[0];
+
+    const VAT_RATE = settings.vatRate / 100;
 
     const getCurDate = ()=>{
         const date = new Date().toLocaleString('th-TH',{dateStyle: 'long', timeStyle: 'medium'})
@@ -171,7 +173,7 @@ export default function SummarySalesReportPage() {
                                             <th>ลูกค้า</th>
                                             <th className="text-center">สถานะ</th>
                                             <th className="text-right text-base-content/70">มูลค่าสินค้า</th>
-                                            <th className="text-right text-base-content/70">VAT (7%)</th>
+                                            <th className="text-right text-base-content/70">VAT ({settings.vatRate}%)</th>
                                             <th className="text-right font-bold">ยอดรวมสุทธิ</th>
                                         </tr>
                                     </thead>
@@ -227,12 +229,12 @@ export default function SummarySalesReportPage() {
                     
                     <div className="flex justify-between items-end text-xs text-gray-600">
                          <div>
-                            <p className="font-bold text-gray-800 text-sm">บริษัท คชาโฮม จำกัด</p>
-                            <p>123/45 ถนนสุขุมวิท แขวงพระโขนง เขตคลองเตย กรุงเทพฯ 10110</p>
+                            <p className="font-bold text-gray-800 text-sm">{settings.companyName}</p>
+                            <p>{settings.companyAddress}</p>
                          </div>
                          <div className="text-right">
-                            <p>โทร: 081-896-2687</p>
-                            <p>เลขประจำตัวผู้เสียภาษี: 010555XXXXXXX</p>
+                            <p>โทร: {settings.contactPhone}</p>
+                            <p>เลขประจำตัวผู้เสียภาษี: {settings.companyTaxId}</p>
                          </div>
                     </div>
                 </div>
@@ -248,7 +250,7 @@ export default function SummarySalesReportPage() {
                         <div className="text-lg font-bold">{formatPrice(summary.totalNet)}</div>
                     </div>
                     <div className="flex-1 text-center border-r border-black">
-                        <div className="text-xs font-bold">ภาษีมูลค่าเพิ่ม (VAT 7%)</div>
+                        <div className="text-xs font-bold">ภาษีมูลค่าเพิ่ม (VAT {settings.vatRate}%)</div>
                         <div className="text-lg font-bold">{formatPrice(summary.totalVat)}</div>
                     </div>
                     <div className="flex-1 text-center">
@@ -265,7 +267,7 @@ export default function SummarySalesReportPage() {
                             <th className="py-1 text-left w-24 font-bold">หมายเลขคำสั่งซื้อ</th>
                             <th className="py-1 text-left font-bold">ลูกค้า</th>
                             <th className="py-1 text-right w-24 font-bold">มูลค่าสินค้า</th>
-                            <th className="py-1 text-right w-24 font-bold">VAT (7%)</th>
+                            <th className="py-1 text-right w-24 font-bold">VAT ({settings.vatRate}%)</th>
                             <th className="py-1 text-right w-28 font-bold">ยอดรวมสุทธิ</th>
                         </tr>
                     </thead>

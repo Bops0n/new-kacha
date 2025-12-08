@@ -8,6 +8,7 @@ import { useRouter } from 'next/navigation';
 // 1. นำเข้า statusTypeLabels จากไฟล์กลาง
 import { statusTypeLabels } from '@/app/utils/client';
 import { OrderStatus } from '@/types';
+import { useWebsiteSettings } from '@/app/providers/WebsiteSettingProvider';
 
 interface ReportOrder {
     Order_ID: number;
@@ -28,6 +29,8 @@ const allStatuses = Object.keys(statusTypeLabels);
 export default function OrdersReportPage() {
     const router = useRouter();
     const today = new Date().toISOString().split('T')[0];
+
+    const settings = useWebsiteSettings();
     
     const [startDate, setStartDate] = useState(today);
     const [endDate, setEndDate] = useState(today);
@@ -334,12 +337,12 @@ export default function OrdersReportPage() {
                     
                     <div className="flex justify-between items-end text-xs text-gray-600">
                          <div>
-                            <p className="font-bold text-gray-800 text-sm">บริษัท คชาโฮม จำกัด</p>
-                            <p>123/45 ถนนสุขุมวิท แขวงพระโขนง เขตคลองเตย กรุงเทพฯ 10110</p>
+                            <p className="font-bold text-gray-800 text-sm">{settings.companyName}</p>
+                            <p>{settings.companyAddress}</p>
                          </div>
                          <div className="text-right">
-                            <p>โทร: 081-896-2687</p>
-                            <p>เลขประจำตัวผู้เสียภาษี: 010555XXXXXXX</p>
+                            <p>โทร: {settings.contactPhone}</p>
+                            <p>เลขประจำตัวผู้เสียภาษี: {settings.companyTaxId}</p>
                          </div>
                     </div>
                 </div>

@@ -8,9 +8,12 @@ import { useRouter } from 'next/navigation';
 import { ProductInventory } from '@/types';
 import { useCategoryData } from '@/app/hooks/useCategoryData';
 import { calculateAvailableStock } from '@/app/utils/calculations';
+import { useWebsiteSettings } from '@/app/providers/WebsiteSettingProvider';
 
 export default function InventoryReportPage() {
     const router = useRouter();
+
+    const settings = useWebsiteSettings();
     
     const { allCategoriesMap, categories, loading: catLoading } = useCategoryData();
 
@@ -301,12 +304,12 @@ export default function InventoryReportPage() {
                     
                     <div className="flex justify-between items-end text-xs text-gray-600">
                          <div>
-                            <p className="font-bold text-gray-800 text-sm">บริษัท คชาโฮม จำกัด</p>
-                            <p>123/45 ถนนสุขุมวิท แขวงพระโขนง เขตคลองเตย กรุงเทพฯ 10110</p>
+                            <p className="font-bold text-gray-800 text-sm">{settings.companyName}</p>
+                            <p>{settings.companyAddress}</p>
                          </div>
                          <div className="text-right">
-                            <p>โทร: 081-896-2687</p>
-                            <p>เลขประจำตัวผู้เสียภาษี: 010555XXXXXXX</p>
+                            <p>โทร: {settings.contactPhone}</p>
+                            <p>เลขประจำตัวผู้เสียภาษี: {settings.companyTaxId}</p>
                          </div>
                     </div>
                 </div>

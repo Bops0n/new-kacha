@@ -86,7 +86,7 @@ export function useProductModal({ onSave }: UseProductModalProps) {
       try {
         const uploadFormData = new FormData();
         uploadFormData.append('file', imageFile);
-        const response = await fetch('/api/admin/upload', { method: 'POST', body: uploadFormData });
+        const response = await fetch('/api/admin/products/upload', { method: 'POST', body: uploadFormData });
         const result = await response.json();
         if (!response.ok) throw new Error(result.message || 'Image upload failed');
         finalFormData.Image_URL = result.imageUrl;

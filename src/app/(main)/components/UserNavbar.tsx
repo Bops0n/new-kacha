@@ -12,6 +12,7 @@ import { useCounter } from '@/app/context/CartCount';
 import { useCategoryData } from '@/app/hooks/useCategoryData';
 import AuthModal from '@/app/(main)/components/AuthModal';
 import { Category, SubCategory, ChildSubCategory } from '@/types';
+import { useWebsiteSettings } from '@/app/providers/WebsiteSettingProvider';
 
 // --- 1. Mobile Menu ---
 const MobileCategoryMenu = ({ categories, subCategories, childSubCategories, closeMobileMenu } : { categories: Category[], subCategories: SubCategory[], childSubCategories: ChildSubCategory[], closeMobileMenu: () => void }) => {
@@ -141,6 +142,8 @@ export default function UserNavbar() {
     const { count: cartItemCount, setCounter } = useCounter();
     const { categories, subCategories, childSubCategories, loading: navLoading } = useCategoryData();
 
+    const settings = useWebsiteSettings();
+
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
@@ -191,10 +194,10 @@ export default function UserNavbar() {
                 {/* Top Bar */}
                 <div className="bg-base-200 text-xs text-base-content/80 border-b border-base-300/50">
                     <div className="container mx-auto px-4 sm:px-6 lg:px-8 flex flex-wrap justify-center sm:justify-between items-center py-1 gap-x-4 gap-y-1">
-                        <span>สำหรับทุกความต้องการในบ้าน: สินค้าที่ใช่, ครบวงจร, ที่เดียวจบ.</span>
+                        <span>{settings.siteDescription}</span>
                         <div className="flex items-center gap-4">
-                            <a href="https://line.me/ti/p/~kacha982" target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 hover:text-primary transition-colors"><FaLine className="text-green-500" /> kacha982</a>
-                            <a href="https://www.facebook.com/KachaHomeTH" target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 hover:text-primary transition-colors"><FaFacebookSquare className="text-blue-600" /> บริษัท คชาโฮม จำกัด</a>
+                            <a href={settings.lineURL} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 hover:text-primary transition-colors"><FaLine className="text-green-500" /> {settings.lineOfficialName}</a>
+                            <a href={settings.facebookURL} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 hover:text-primary transition-colors"><FaFacebookSquare className="text-blue-600" /> {settings.facebookPageName}</a>
                             <Link href="/contact" className="hover:text-primary transition-colors">ติดต่อเรา</Link>
                         </div>
                     </div>
@@ -205,10 +208,11 @@ export default function UserNavbar() {
                     <div className="flex items-center justify-between py-3 gap-4">
                         <Link href="/" className="flex items-center gap-3 flex-shrink-0 group">
                             <div className="w-12 h-12 bg-gradient-to-br from-amber-400 to-amber-500 rounded-xl flex items-center justify-center shadow-md group-hover:scale-105 transition-transform">
-                                <span className="text-white font-bold text-2xl">K</span>
+                                {/* <span className="text-white font-bold text-2xl">K</span> */}
+                                <img src={settings.logoURL} alt="Logo" className="w-12 h-12 object-contain rounded-xl" />
                             </div>
                             <div className="flex flex-col">
-                                <span className="text-xl font-bold leading-tight text-base-content">Kacha Home</span>
+                                <span className="text-xl font-bold leading-tight text-base-content">{settings.siteName}</span>
                                 <span className="text-[10px] text-base-content/60 tracking-wider">CONSTRUCTION MATERIALS</span>
                             </div>
                         </Link>
@@ -301,8 +305,6 @@ export default function UserNavbar() {
                             </li>
                             
                             <li><Link href="/products?discount=true" className="hover:text-primary focus:text-primary border-b-2 border-transparent hover:border-primary rounded-none py-3 transition-all">สินค้าลดราคา</Link></li>
-                            <li><Link href="#" className="hover:text-primary focus:text-primary border-b-2 border-transparent hover:border-primary rounded-none py-3 transition-all">โปรโมชั่น</Link></li>
-                            <li><Link href="#" className="hover:text-primary focus:text-primary border-b-2 border-transparent hover:border-primary rounded-none py-3 transition-all">ข่าวสาร & บทความ</Link></li>
                             
                             <div className="flex-1"></div> {/* Spacer */}
                             
@@ -324,8 +326,6 @@ export default function UserNavbar() {
                         
                         <div className="divider my-1">อื่นๆ</div>
                         <li><Link href="/products?discount=true" onClick={closeMobileMenu}>สินค้าลดราคา</Link></li>
-                        <li><Link href="#" onClick={closeMobileMenu}>โปรโมชั่น</Link></li>
-                        <li><Link href="#" onClick={closeMobileMenu}>ข่าวสาร</Link></li>
                         {(session?.user?.accessLevel != 0 && session?.user.accessLevel !== undefined) && 
                             <li className="mt-2"><Link href="/admin" className="bg-warning text-warning-content hover:bg-warning-focus" onClick={closeMobileMenu}>จัดการระบบ</Link></li>
                         }
