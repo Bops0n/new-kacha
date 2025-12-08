@@ -3,12 +3,20 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "../api/auth/[...nextauth]/route";
 import AdminNavbar from "./components/AdminNavbar";
 import { redirect } from "next/navigation";
+import { Metadata } from "next";
+import { getWebsiteSettings } from "../api/services/website/settingService";
 
-export default async function AdminLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await getWebsiteSettings();
+
+  return {
+    title: settings.siteName.concat(' | ADMIN CONSOLE') || "",
+    keywords: settings.siteKeywords,
+    description: settings.siteDescription || "",
+  };
+}
+
+export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const session = await getServerSession(authOptions);
 
   if (!session) {
