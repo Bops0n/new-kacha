@@ -90,9 +90,9 @@ export default function OrderHistoryPage() {
                             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
                                 <div>
                                     <div className="flex items-center gap-2">
-                                        <h2 className="text-lg font-bold text-primary group-hover:underline decoration-2 underline-offset-2">
-                                            หมายเลขคำสั่งซื้อ: {order.Order_ID}
-                                        </h2>
+                                        <h2 className="text-lg font-bold text-black group-hover:underline decoration-2 underline-offset-2 group-hover:text-primary">
+                                            หมายเลขคำสั่งซื้อ:
+                                            <span className='text-lg font-bold text-primary group-hover:underline decoration-2 underline-offset-2'> {order.Order_ID}</span></h2>
                                     </div>
                                     <p className="text-sm text-base-content/60 mt-1 flex items-center gap-1">
                                         <FiClock className="w-3 h-3" /> สั่งเมื่อ: {new Date(order.Order_Date).toLocaleDateString('th-TH', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
@@ -110,7 +110,7 @@ export default function OrderHistoryPage() {
                             <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 py-4">
                                 <div>
                                     <p className="text-xs text-base-content/50 font-bold uppercase tracking-wider mb-1">ยอดรวมสุทธิ</p>
-                                    <p className="text-xl font-bold text-primary/90">{formatPrice(order.Total_Amount)}</p>
+                                    <p className="text-xl font-bold text-success/90">{formatPrice(order.Total_Amount)}</p>
                                 </div>
                                 <div>
                                     <p className="text-xs text-base-content/50 font-bold uppercase tracking-wider mb-1">ช่องทางชำระเงิน</p>

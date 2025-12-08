@@ -97,15 +97,15 @@ const OrderStepIndicator = ({ order, statusConfig }: { order: Order, statusConfi
 
   const renderArrow = () => (
     <div className="absolute -top-14 left-1/2 transform -translate-x-1/2 flex flex-col items-center animate-bounce z-20 w-max">
-        <span className="text-[10px] font-bold text-primary bg-base-100 px-2 py-0.5 rounded-full shadow-sm mb-1 border border-base-200">อยู่ที่นี่</span>
-        <FiArrowDown className="w-6 h-6 text-primary filter drop-shadow-sm" />
+        <span className="text-[10px] font-bold text-black bg-base-100 px-2 py-0.5 rounded-full shadow-sm mb-1 border border-base-200">อยู่ที่นี่</span>
+        <FiArrowDown className="w-6 h-6 text-black filter drop-shadow-sm" />
     </div>
   );
 
   const renderIconCircle = (icon: React.ElementType, isCurrent: boolean, isComplete: boolean) => {
       let bgClass = 'bg-base-100 border-base-300 text-base-content/30';
       if (isComplete) bgClass = 'bg-success text-success-content border-success';
-      else if (isCurrent) bgClass = `bg-primary text-primary-content border-primary shadow-lg scale-110 ring-2 ring-primary/30`;
+      else if (isCurrent) bgClass = `${icon === FiCheckCircle ? 'bg-success border-success' : 'bg-primary text-primary-content border-primary'} shadow-lg scale-110 ring-2 ring-primary/30`;
 
       return (
         <div className={`w-10 h-10 rounded-full border-2 flex items-center justify-center transition-all duration-300 relative z-10 ${bgClass}`}>
@@ -119,16 +119,17 @@ const OrderStepIndicator = ({ order, statusConfig }: { order: Order, statusConfi
       <ul className="steps steps-vertical md:steps-horizontal w-full my-8 py-4 text-center px-4 overflow-visible">
         {happyPath.map((step, index) => {
           const statusInfo = statusConfig[step];
+          console.log(step)
           if (!statusInfo) return null; 
           const isComplete = index < happyStepIndex;
           const isCurrent = index === happyStepIndex;
-          const stepColor = isComplete ? 'step-success' : isCurrent ? 'step-primary' : '';
+          const stepColor = isComplete ? 'step-success' : isCurrent ? step === 'delivered' ? 'step-success': 'step-primary' : '';
           return (
             <li key={step} className={`step ${stepColor} overflow-visible`} data-content="">
               <div className="flex flex-col items-center relative">
                 {isCurrent && renderArrow()}
                 {renderIconCircle(statusInfo.icon, isCurrent, isComplete)}
-                <span className={`text-xs sm:text-sm mt-3 font-medium ${isCurrent ? 'text-primary font-bold' : 'text-base-content/70'}`}>
+                <span className={`text-xs sm:text-sm mt-3 font-medium ${isCurrent ? 'text-black font-bold' : 'text-base-content/70'}`}>
                     {statusInfo.label}
                 </span>
               </div>
@@ -399,8 +400,8 @@ export default function OrderDetailsPage() {
                         {/* Header Title Change based on activeTab */}
                         <h3 className={`card-title text-lg flex items-center gap-2 mb-4 ${activeTab === 'payment' ? 'text-primary' : 'text-secondary'}`}>
                             {activeTab === 'payment' 
-                                ? <><FiCreditCard className="w-5 h-5" /> หลักฐานการชำระเงิน</>
-                                : <><FiRefreshCw className="w-5 h-5" /> หลักฐานการคืนเงิน</>
+                                ? <><FiCreditCard className="w-5 h-5" /><span className='text-black'>หลักฐานการชำระเงิน</span></>
+                                : <><FiRefreshCw className="w-5 h-5" /> <span className='text-black'>หลักฐานการคืนเงิน</span></>
                             }
                         </h3>
 
@@ -500,6 +501,7 @@ export default function OrderDetailsPage() {
                                             </button>
                                         </>
                                     )}
+                                    
                                 </>
                             ) : (
                                 // --- REFUND TAB CONTENT ---
@@ -552,10 +554,17 @@ export default function OrderDetailsPage() {
                                         <span className="loading loading-spinner loading-xs"></span> ⏳ รอการคืนเงิน
                                     </button>
                                 )}
+                                
                             </div>
                         )}
-
+                                                                    <button 
+                                                    onClick={() => setIsPaymentModalOpen(true)}
+                                                    className="btn btn-sm btn-ghost text-primary mt-4"
+                                                >
+                                                    ดูช่องทางการชำระเงิน
+                                                </button>
                     </div>
+                    
                 </div>
             </div>
         </div>
@@ -616,7 +625,7 @@ export default function OrderDetailsPage() {
                         <div className="flex justify-between text-sm text-error"><span>ส่วนลด</span><span>- {formatPrice(subtotalBeforeDiscount - order.Total_Amount)}</span></div>
                         <div className="flex justify-between text-sm text-success"><span>ค่าจัดส่ง</span><span>ฟรี</span></div>
                         <div className="divider my-1"></div>
-                        <div className="flex justify-between items-center"><span className="font-bold text-lg">ยอดสุทธิ</span><span className="font-extrabold text-2xl text-primary">{formatPrice(order.Total_Amount)}</span></div>
+                        <div className="flex justify-between items-center"><span className="font-bold text-lg">ยอดสุทธิ</span><span className="font-extrabold text-2xl text-success underline-offset-1 underline">{formatPrice(order.Total_Amount)}</span></div>
                     </div>
                 </div>
             </div>
