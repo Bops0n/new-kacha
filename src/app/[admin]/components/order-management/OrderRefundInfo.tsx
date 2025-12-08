@@ -6,16 +6,22 @@ type OrderRefundProps = {
     order: Order;
     selectedFile: File | null;
     isUploading: boolean;
+    isDragging: boolean;
+    setIsDragging: (dragging: boolean) => void;
     handleFileChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
     handleUploadSlip?: () => void;
+    handleFileChangeManual?: (file: File) => void;
 };
 
 export default function OrderRefundInfo({ 
     order,
     selectedFile,
     isUploading,
+    isDragging,
+    setIsDragging = () => {},
     handleFileChange = () => {},
-    handleUploadSlip = () => {}
+    handleUploadSlip = () => {},
+    handleFileChangeManual = () => {}
 }: OrderRefundProps) {
     const [showImageModal, setShowImageModal] = useState(false);
     const [previewImage, setPreviewImage] = useState("");
@@ -114,23 +120,70 @@ export default function OrderRefundInfo({
 
                         {/* Upload Refund Slip */}
                         {canUploadSlip && (
-                            <div className="border-t border-base-300 pt-4 flex flex-col gap-3">
-                                <input
-                                    type="file"
-                                    className="file-input file-input-bordered file-input-primary w-full"
-                                    onChange={handleFileChange}
-                                    accept="image/png, image/jpeg, image/jpg"
-                                />
+                            <div className="mt-4 p-4 rounded-xl border border-base-300 bg-base-100 shadow-sm">
 
-                                <p className="text-[14px] text-center text-base-content/40 mt-1">รองรับนามสกุลไฟล์ .jpg และ .png (ขนาดไฟล์สูงสุด 5MB)</p>
+                                {/* Title */}
+                                <h3 className="font-bold text-lg mb-2">อัปโหลดหลักฐานการคืนเงิน</h3>
+                                <p className="text-xs text-base-content/60 mb-4">
+                                    รองรับไฟล์ JPG, JPEG, PNG (ขนาดไฟล์สูงสุด 5MB)
+                                </p>
 
+                                {/* Drag & Drop Upload Box */}
+                                <div
+                                    onDragOver={(e) => {
+                                        e.preventDefault();
+                                        setIsDragging(true);
+                                    }}
+                                    onDragLeave={(e) => {
+                                        e.preventDefault();
+                                        setIsDragging(false);
+                                    }}
+                                    onDrop={(e) => {
+                                        e.preventDefault();
+                                        setIsDragging(false);
+
+                                        const file = e.dataTransfer.files?.[0];
+                                        if (file) handleFileChangeManual(file);
+                                    }}
+                                    className={`
+                                        w-full h-52 border-2 border-dashed rounded-xl 
+                                        flex flex-col justify-center items-center cursor-pointer transition
+                                        ${isDragging ? "bg-primary/10 border-primary" : "bg-base-200 border-base-300 hover:border-primary"}
+                                    `}
+                                    onClick={() => {
+                                        document.getElementById("refund-slip-upload")?.click();
+                                    }}
+                                >
+                                    <FiUploadCloud className="w-10 h-10 text-base-content/60" />
+
+                                    <p className="mt-2 text-base-content/70">คลิกเพื่อเลือกไฟล์</p>
+                                    <p className="text-sm text-base-content/50">หรือวางไฟล์ลงบริเวณนี้</p>
+
+                                    <button className="btn btn-sm mt-3">เลือกไฟล์รูปภาพ</button>
+
+                                    <input
+                                        id="refund-slip-upload"
+                                        type="file"
+                                        className="hidden"
+                                        accept="image/png, image/jpeg, image/jpg"
+                                        onChange={handleFileChange}
+                                    />
+                                </div>
+
+                                {/* File Info */}
+                                {selectedFile && (
+                                    <div className="mt-3 text-sm text-center text-success">
+                                        ไฟล์ที่เลือก : {selectedFile.name}
+                                    </div>
+                                )}
+
+                                {/* Upload Button */}
                                 <button
-                                    onClick={handleUploadSlip}
+                                    className="btn btn-primary w-full mt-4 flex gap-2 justify-center items-center"
                                     disabled={!selectedFile || isUploading}
-                                    className="btn btn-primary w-full"
+                                    onClick={handleUploadSlip}
                                 >
                                     {isUploading && <span className="loading loading-spinner"></span>}
-                                        <FiUploadCloud />
                                     {isUploading ? "กำลังอัปโหลด..." : "อัปโหลดหลักฐานการคืนเงิน"}
                                 </button>
                             </div>
