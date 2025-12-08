@@ -34,8 +34,8 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-base-200">
       {/* Hero Section */}
-      <div className="relative bg-gradient-to-r from-blue-700 to-blue-500 text-white py-16 md:py-24 overflow-hidden">
-        <div className="absolute inset-0 bg-cover bg-center opacity-30" style={{ backgroundImage: "url('https://placehold.co/1920x1080/0A2342/FFFFFF?text=Construction+Site')" }}></div>
+      <div className="relative bg-gradient-to-r from-slate-700 to-slate-500 text-white py-16 md:py-24 overflow-hidden">
+        <div className="absolute inset-0 bg-cover bg-center opacity-30" style={{ backgroundImage: "url('/bg.png')" }}></div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 flex flex-col items-center text-center">
           <h1 className="text-4xl md:text-6xl font-extrabold leading-tight mb-4 drop-shadow-lg">
             เรื่องบ้าน ต้อง <span className="text-yellow-300">คชาโฮม</span>
@@ -130,7 +130,7 @@ export default function HomePage() {
       )}
 
       {/* Call to Action Section */}
-      <section className="py-16 bg-blue-700 text-white">
+      <section className="py-16 bg-slate-700 text-white">
         <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
           <h2 className="text-3xl md:text-4xl font-bold mb-6">
             ไม่แน่ใจว่าจะเริ่มต้นอย่างไร? ปรึกษาเราได้เลย!
