@@ -25,7 +25,7 @@ export interface UserAccount {
 
 // Address schema
 export interface AddressSchema {
-  Address_ID: number;
+  Address_ID: number | null;
   User_ID: number;
   Address_1: string;
   Address_2: string | null;

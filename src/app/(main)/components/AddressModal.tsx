@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { FiX, FiHome, FiMapPin, FiHash, FiPhone, FiSave, FiAlertCircle } from 'react-icons/fi';
-import { NewAddressForm } from '@/types';
+import { AddressSchema, NewAddressForm } from '@/types';
 import {
   getAllProvinces,
   getDistrictsByProvinceId,
@@ -15,11 +15,11 @@ import {
 interface AddressModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (address: NewAddressForm) => Promise<void> | void;
-  initialData?: Partial<NewAddressForm>;
+  onSave: (address: AddressSchema) => Promise<boolean|undefined> | void;
+  initialData?: Partial<AddressSchema> | null;
 }
 
-const defaultFormData: NewAddressForm = {
+const defaultFormData: AddressSchema = {
   Address_ID: null,
   User_ID: 0,
   Address_1: '',
@@ -33,7 +33,7 @@ const defaultFormData: NewAddressForm = {
 };
 
 export default function AddressModal({ isOpen, onClose, onSave, initialData }: AddressModalProps) {
-  const [formData, setFormData] = useState<NewAddressForm>(defaultFormData);
+  const [formData, setFormData] = useState<AddressSchema>(defaultFormData);
   const [loading, setLoading] = useState(false);
 
   // --- States สำหรับ Dropdown ---
@@ -195,7 +195,7 @@ export default function AddressModal({ isOpen, onClose, onSave, initialData }: A
                         <input 
                         type="tel" 
                         name="Phone" 
-                        value={formData.Phone} 
+                        value={formData.Phone? formData.Phone : '-'} 
                         onChange={handleChange} 
                         placeholder="08X-XXX-XXXX" 
                         className="input input-bordered w-full focus:input-primary bg-base-50" 

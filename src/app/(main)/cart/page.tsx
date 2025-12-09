@@ -5,16 +5,21 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { 
   FiMapPin, FiTruck, FiCreditCard, FiCheckCircle, 
-  FiPlus, FiChevronRight, FiPackage, FiTrash2, FiMinus 
+  FiPlus, FiChevronRight, FiPackage, FiTrash2, FiMinus, 
+  FiShoppingCart
 } from 'react-icons/fi'; // เพิ่ม FiMinus
 import { useSession } from 'next-auth/react';
 import { useCart } from '@/app/hooks/useCart';
 import { formatPrice } from '@/app/utils/formatters';
 import { calculateAvailableStock } from '@/app/utils/calculations'; // [NEW] นำเข้าฟังก์ชันคำนวณสต็อก
 import LoadingSpinner from '@/app/components/LoadingSpinner';
-import AddressSelectionModal from './AddressSelectionModal';
+import AddressSelectionModal from '../components/AddressSelectionModal';
 import { useAlert } from '@/app/context/AlertModalContext';
 import AddressModal from '../components/AddressModal';
+import { useProfilePage } from '@/app/hooks/useProfilePage';
+import { AddressSchema, NewAddressForm } from '@/types';
+import { Address } from 'cluster';
+import { set } from 'zod';
 // import { AddressData } from '@/types'; // หรือ path ที่ถูกต้องของ type
 
 // Payment Methods Config
@@ -28,11 +33,16 @@ export default function CheckoutPage() {
     const { data: session } = useSession();
     const { showAlert } = useAlert();
 
+    const { saveAddress, userAddresses, deleteAddress } = useProfilePage()
+
+    const [addressEditForm, setAddressEditForm] = useState<AddressSchema | null>(null);
+
+
     // 1. เรียกใช้ทุกอย่างจาก useCart Hook
     const { 
         cartItems, 
         loading, 
-        addressList, 
+        // addressList, 
         selectedAddress, 
         paymentMethod, 
         totalPrice,
@@ -41,7 +51,7 @@ export default function CheckoutPage() {
         submitOrder,
         updateItemQuantity, // [NEW] ดึงฟังก์ชันปรับจำนวน
         removeItem,
-        setAddressList        // [NEW] ดึงฟังก์ชันลบสินค้า
+        // setAddressList        // [NEW] ดึงฟังก์ชันลบสินค้า
     } = useCart();
 
     // Modal States (UI Only)
@@ -49,7 +59,7 @@ export default function CheckoutPage() {
     const [isAddAddressOpen, setIsAddAddressOpen] = useState(false);
 
     // ฟังก์ชันบันทึกที่อยู่ใหม่ (คงเดิม)
-    const handleSaveAddress = async (newAddress: AddressData) => {
+    const handleSaveAddress = async (newAddress: AddressSchema) => {
         try {
             const res = await fetch('/api/main/address', {
                 method: 'POST',
@@ -64,7 +74,7 @@ export default function CheckoutPage() {
             // ถ้าไม่มี อาจต้อง reload page หรือเรียก fetchCartAndAddresses ใหม่
             // setIsAddAddressOpen(false); // ปิด modal
             showAlert('เพิ่มที่อยู่เรียบร้อยแล้ว', 'success');
-            setAddressList( (prev) => [...prev, {...newAddress, Address_ID: data.address.Address_ID}])
+            // setAddressList( (prev) => [...prev, {...newAddress, Address_ID: data.address.Address_ID}])
         } catch (error) {
             showAlert('เกิดข้อผิดพลาดในการบันทึกที่อยู่', 'error');
         }
@@ -73,9 +83,33 @@ export default function CheckoutPage() {
     if (loading) return <LoadingSpinner />;
     
     // ถ้าไม่มีของในตะกร้า ดีดกลับ
-    if (cartItems.length === 0) {
-        if (typeof window !== 'undefined') router.push('/cart');
-        return null;
+if (cartItems.length === 0) {
+        return (
+            <div className="min-h-screen bg-base-200/30 flex flex-col items-center justify-center p-4 font-sarabun">
+                <div className="w-full max-w-md bg-base-100 rounded-3xl shadow-2xl p-10 text-center border border-base-200 relative overflow-hidden">
+                    {/* Background decoration */}
+                    <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-primary/50 to-primary"></div>
+                    
+                    <div className="w-28 h-28 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6 animate-pulse">
+                        <FiShoppingCart className="w-12 h-12 text-primary" /> 
+                    </div>
+                    
+                    <h2 className="text-3xl font-bold text-base-content mb-2">ตะกร้าของคุณยังว่างอยู่</h2>
+                    <p className="text-base-content/60 mb-8 text-lg">
+                        ดูเหมือนคุณยังไม่ได้เลือกสินค้าที่ถูกใจ <br/>
+                        ลองแวะไปดูสินค้าใหม่ๆ ของเราสิครับ
+                    </p>
+                    
+                    <button 
+                        onClick={() => router.push('/products')} 
+                        className="btn btn-primary btn-lg w-full rounded-2xl shadow-lg shadow-primary/30 hover:scale-[1.02] transition-transform"
+                    >
+                        <span className="mr-2">ไปเลือกสินค้ากันเลย</span> 
+                        <FiChevronRight />
+                    </button>
+                </div>
+            </div>
+        );
     }
 
     // คำนวณส่วนลด (สำหรับ UI)
@@ -108,7 +142,10 @@ export default function CheckoutPage() {
                                     <span className="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center text-sm">1</span>
                                     ที่อยู่จัดส่ง
                                 </h3>
-                                <button onClick={() => setIsAddAddressOpen(true)} className="btn btn-xs btn-ghost text-primary hover:bg-primary/10">
+                                <button onClick={() => {
+                                    setAddressEditForm(null)
+                                    setIsAddAddressOpen(true)
+                                    }} className="btn btn-xs btn-ghost text-primary hover:bg-primary/10">
                                     <FiPlus /> เพิ่มที่อยู่ใหม่
                                 </button>
                             </div>
@@ -129,22 +166,21 @@ export default function CheckoutPage() {
                                                     </p>
                                                 </div>
                                                 <button onClick={() => {
-                                                    console.log(addressList)
+                                                    // console.log(addressList)
                                                     setIsSelectAddressOpen(true)
                                                     }} className="btn btn-sm btn-outline btn-primary rounded-full px-6">เปลี่ยน</button>
                                             </div>
                                         </div>
                                     </div>
                                 ) : (
-                                    <div 
-                                        className="card-body p-10 items-center justify-center text-center cursor-pointer bg-base-100 hover:bg-base-50 transition-colors" 
-                                        onClick={() => setIsSelectAddressOpen(true)}
+<div 
+                                        className="card-body p-10 items-center justify-center text-center cursor-pointer bg-base-100 hover:bg-base-50 transition-colors border-2 border-dashed border-base-200 hover:border-primary/50 rounded-2xl" 
+                                        onClick={() => setIsAddAddressOpen(true)}
                                     >
-                                        <div className="w-16 h-16 rounded-full bg-base-200 flex items-center justify-center mb-3">
-                                            <FiMapPin className="w-6 h-6 text-base-content/40" />
+                                        <div className="w-16 h-16 rounded-full bg-base-200/50 flex items-center justify-center mb-3 text-primary">
+                                            <FiPlus className="w-8 h-8" />
                                         </div>
-                                        <p className="text-base-content/60 font-medium">ยังไม่ได้เลือกที่อยู่จัดส่ง</p>
-                                        <button className="btn btn-primary btn-sm mt-4 rounded-full px-6">เลือกที่อยู่จากรายการ</button>
+                                        <p className="text-base-content/60 font-medium text-lg">เพิ่มที่อยู่ใหม่</p>
                                     </div>
                                 )}
                             </div>
@@ -331,12 +367,23 @@ export default function CheckoutPage() {
             <AddressSelectionModal 
                 isOpen={isSelectAddressOpen}
                 onClose={() => setIsSelectAddressOpen(false)}
-                addresses={addressList} 
+                addresses={userAddresses} 
                 currentSelectedAddress={selectedAddress} 
                 onSelectAddress={(addr) => {
                     setSelectedAddress(addr);
                     setIsSelectAddressOpen(false);
                 }}
+                onDeleteAddress={deleteAddress}
+                onEditAddress={(addr)=>{
+                    setAddressEditForm(addr)
+                    
+                    
+                    // setSelectedAddress(addr);
+                    // setIsSelectAddressOpen(false);
+                    setIsAddAddressOpen(true)}
+
+                    // setSelectedAddress(userAddresses.find(a: ) => a.)
+                }
                 // ถ้าในอนาคตอยากให้ Modal แสดงรายการสินค้าด้วย ก็ส่ง props ไปได้เหมือนคำตอบก่อนหน้า
                 // แต่ถ้าใช้หน้านี้เป็นหลักแล้ว ไม่ต้องส่งไปก็ได้ครับ
                 // cartItems={cartItems} 
@@ -346,7 +393,18 @@ export default function CheckoutPage() {
             <AddressModal
                 isOpen={isAddAddressOpen}
                 onClose={() => setIsAddAddressOpen(false)}
-                onSave={handleSaveAddress}
+                onSave={async (addr)=>{
+                    if(await saveAddress(addr)){
+                        if (addr.Address_ID === selectedAddress?.Address_ID){
+                            setSelectedAddress(addr)
+                            return true
+                        }
+                    }
+                    return false
+                    
+                }
+            }
+                initialData={addressEditForm}
             /> 
            
         </div>

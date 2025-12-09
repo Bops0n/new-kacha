@@ -60,6 +60,7 @@ export function useProfilePage() {
       
       await updateSession({ user: { ...session?.user, name: updatedData.Full_Name } });
       await fetchData(); // Re-fetch data to get the latest profile
+      
       showAlert('อัปเดตข้อมูลส่วนตัวสำเร็จ', 'success');
       return true;
     } catch (err: any) {
@@ -69,11 +70,13 @@ export function useProfilePage() {
   };
 
   // --- Address Actions ---
-  const saveAddress = async (addressData: NewAddressForm) => {
+  const saveAddress = async (addressData: AddressSchema) => {
     const isEditing = !!addressData.Address_ID;
+    console.log(addressData, isEditing)
+    // return
     const url = isEditing ? `/api/main/address/${addressData.Address_ID}` : '/api/main/address';
     const method = isEditing ? 'PUT' : 'POST';
-
+    console.log(addressData)
     try {
       const response = await fetch(url, {
         method: method,
@@ -83,8 +86,9 @@ export function useProfilePage() {
       const result = await response.json();
       if (!response.ok) throw new Error(result.message);
       
-      await fetchData(); // Re-fetch addresses
+      await fetchData();   // Re-fetch addresses
       showAlert(isEditing ? 'แก้ไขที่อยู่สำเร็จ' : 'เพิ่มที่อยู่สำเร็จ', 'success');
+      window.location.reload();
       return true;
     } catch (err: any) {
       showAlert(err.message, 'error');
@@ -101,6 +105,7 @@ export function useProfilePage() {
             
             await fetchData(); // Re-fetch addresses
             showAlert('ลบที่อยู่สำเร็จ', 'success');
+            window.location.reload();
         } catch (err: any) {
             showAlert(err.message, 'error');
         }
