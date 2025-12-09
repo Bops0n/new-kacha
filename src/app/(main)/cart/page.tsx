@@ -46,6 +46,7 @@ export default function CheckoutPage() {
     const [isSelectAddressOpen, setIsSelectAddressOpen] = useState(false);
     const [isAddAddressOpen, setIsAddAddressOpen] = useState(false);
 
+            showAlert('เกิดข้อผิดพลาดในการบันทึกที่อยู่', 'error');
     // ฟังก์ชันบันทึกที่อยู่ใหม่ (ถ้ามีใช้ในหน้านี้)
     // const handleSaveAddress = ... (ตามโค้ดเดิมของคุณ)
 

@@ -246,7 +246,7 @@ export default function ProductsPage() {
   const emptyPageData: ProductsPageData = { categories: [], subCategories: [], childSubCategories: [], products: [] };
 
   return (
-    <div className="min-h-screen bg-base-200 p-4 lg:p-8 font-sarabun">
+    <div className="min-h-screen bg-base-200 p-4 lg:p-8 font-sarabun lg:block">
       <div className="max-w-7xl mx-auto flex flex-col lg:flex-row gap-6">
         
         {/* Sidebar (Desktop) */}

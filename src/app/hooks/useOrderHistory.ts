@@ -102,6 +102,7 @@ export function useOrderHistory() {
             if (!response.ok) throw new Error(result.message);
             // โหลดข้อมูลใหม่เพื่ออัปเดตสถานะเป็น Delivered
             fetchOrders()
+            
             showAlert('ยืนยันการรับสินค้าเรียบร้อยแล้ว ขอบคุณที่ใช้บริการครับ', 'success');
           } catch (err: any) {
             showAlert(err.message, 'error');
