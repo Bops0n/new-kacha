@@ -2,24 +2,25 @@
 
 import React from 'react';
 import { FiEye, FiXCircle } from 'react-icons/fi';
-import { Order, StatusConfig } from '@/types';
+import { getOrderNextStep, Order, StatusConfig } from '@/types';
 import { formatPrice } from '@/app/utils/formatters';
 import OrderCancelButton from '../components/order-management/OrderCancelButton';
 
 interface OrderRowProps {
   order: Order;
   statusConfig: StatusConfig;
-  btnCancelOrder: boolean;
-  fetchOrders: () => { };
+  fetchOrders: () => Promise<void>;
 }
 
-const OrderRow: React.FC<OrderRowProps> = ({ order, statusConfig, btnCancelOrder, fetchOrders }) => {
+const OrderRow: React.FC<OrderRowProps> = ({ order, statusConfig, fetchOrders }) => {
   const StatusIcon = statusConfig[order.Status]?.icon;
   const statusInfo = statusConfig[order.Status];
 
   const handleClickOpen = () => {
     window.open(`/admin/order-management/${order.Order_ID}`);
   }
+
+  const { btnCancelOrder } = getOrderNextStep(order, 'checkorder');
 
   return (
     <tr className="hover cursor-pointer" onClick={handleClickOpen}>

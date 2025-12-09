@@ -20,8 +20,12 @@ const AddressModal: React.FC<AddressModalProps> = ({ isOpen, onClose, onSave, in
     useEffect(() => { setFormData(initialData); }, [initialData]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-        const { name, value, type, checked } : any = e.target;
-        setFormData(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
+      const target = e.target;
+      const name = target.name;
+      const value = target.value;
+      const checked = (target as HTMLInputElement).checked;
+      const type = target.type;
+      setFormData(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
     };
 
     const handleSubmit = async (e: React.FormEvent) => {

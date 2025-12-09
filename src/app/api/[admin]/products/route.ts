@@ -7,7 +7,7 @@ import { checkRequire } from '@/app/utils/client';
  * GET /api/admin/products
  * ดึงข้อมูลสินค้าทั้งหมดสำหรับ Admin
  */
-export async function GET(req: NextRequest) {
+export async function GET() {
     const auth = await checkStockMgrRequire();
     const isCheck = checkRequire(auth);
     if (isCheck) return isCheck;

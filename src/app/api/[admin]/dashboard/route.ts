@@ -13,8 +13,9 @@ export async function GET() {
     const { rows } = await poolQuery(`SELECT * FROM public."SP_ADMIN_DASHBOARD_SUMMARY_GET"();`);
 
     return NextResponse.json(rows[0], { status: 200 });
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "เกิดข้อผิดพลาดที่ไม่ทราบสาเหตุ";
     logger.error("Error fetching dashboard summary:", { error: error });
-    return NextResponse.json({ message: error.message }, { status: 500 });
+    return NextResponse.json({ message: message }, { status: 500 });
   }
 }

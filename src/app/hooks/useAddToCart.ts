@@ -38,8 +38,9 @@ export function useAddToCart() {
 
       increment();
       showAlert(`เพิ่ม "${product.Name}" (${quantity} ชิ้น) ลงตะกร้าแล้ว!`, 'success');
-    } catch (error: any) {
-      showAlert(error.message, 'error');
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "เกิดข้อผิดพลาดที่ไม่ทราบสาเหตุ";
+      showAlert(message, 'error');
     } finally {
       setIsAdding(false);
     }

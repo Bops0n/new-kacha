@@ -15,7 +15,7 @@ interface AuthModalProps {
 
 export default function AuthModal({ isOpen, onClose, initialTab = 'login' }: AuthModalProps) {
 
-  const { data: session, status, update } = useSession();
+  const { update } = useSession();
   const { showAlert } = useAlert();
 
     const searchParams = useSearchParams();

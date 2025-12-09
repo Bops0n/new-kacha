@@ -2,19 +2,16 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { Order, OrderStatus } from '../../types'; // Adjust path if your types are in a different location
 import { useAlert } from '../context/AlertModalContext';
-import { FiAlertTriangle, FiCheckCircle, FiClock, FiFileText, FiInfo, FiPackage, FiRefreshCw, FiTruck, FiXCircle } from 'react-icons/fi';
+import { FiAlertTriangle, FiCheckCircle, FiClock, FiInfo, FiRefreshCw, FiTruck } from 'react-icons/fi';
 import { statusConfig, statusTypeLabels } from '../utils/client';
 import { useWebsiteSettings } from '../providers/WebsiteSettingProvider';
-import { boolean } from 'zod';
 
 
 export function useOrderHistory() {
-  const { data: session, status } = useSession();
-  const router = useRouter();
+  const { status } = useSession();
   const { showAlert } = useAlert();
 
   const settings = useWebsiteSettings();
@@ -22,7 +19,6 @@ export function useOrderHistory() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [isConfirming, setIsConfirming] = useState<boolean>()
 
   const getOrderStatusNote = useCallback((order: Order | null) => {
     if (!order) return null;
@@ -85,15 +81,15 @@ export function useOrderHistory() {
 
     const config = statusConfig[Status] || statusConfig.pending;
     return { icon: config.icon, color: config.textColor, bgColor: config.bgColor, borderColor: 'border-base-200', title: config.label, message: `สถานะปัจจุบัน: ${config.label}` };
-  }, []);
-  const handleConfirmReceive = (e: React.MouseEvent<HTMLButtonElement>, orderId : number, fetchOrderDetails?: () => {}) => {
+  }, [settings.paymentTimeoutHours]);
+  
+  const handleConfirmReceive = (e: React.MouseEvent<HTMLButtonElement>, orderId : number, fetchOrderDetails?: () => Promise<void>) => {
     e.preventDefault(); // ป้องกันการทำงาน Default ของปุ่ม (เช่น การ Submit Form)
     showAlert(
       'คุณได้รับสินค้าและตรวจสอบความถูกต้องเรียบร้อยแล้วใช่หรือไม่?', // Message
       'info', // Type
       'ยืนยันการรับสินค้า', // Title
       async () => { // onConfirm Callback
-        setIsConfirming(true);
         try {
           // เรียก API ยืนยันรับของ
           const response = await fetch(`/api/main/orders/${orderId}/receive`, {
@@ -105,10 +101,9 @@ export function useOrderHistory() {
           await fetchOrders()
           if (fetchOrderDetails) await fetchOrderDetails();
           showAlert('ยืนยันการรับสินค้าเรียบร้อยแล้ว ขอบคุณที่ใช้บริการครับ', 'success');
-        } catch (err: any) {
-          showAlert(err.message, 'error');
-        } finally {
-          setIsConfirming(false);
+        } catch (error: unknown) {
+          const message = error instanceof Error ? error.message : "เกิดข้อผิดพลาดที่ไม่ทราบสาเหตุ";
+          showAlert(message, 'error');
         }
       }
     );
@@ -137,13 +132,14 @@ export function useOrderHistory() {
 
       const data = await response.json();
       setOrders(data.orders || []);
-    } catch (err: any) {
-      setError(err.message);
-      showAlert(err.message, 'error');
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "เกิดข้อผิดพลาดที่ไม่ทราบสาเหตุ";
+      setError(message);
+      showAlert(message, 'error');
     } finally {
       setLoading(false);
     }
-  }, [status, router, showAlert]);
+  }, [showAlert]);
 
   const getCancelTarget = useCallback((order: Order | null) => {
     if (!order) return null;

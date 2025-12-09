@@ -9,9 +9,6 @@ import {
   FiTruck,
   FiCheckCircle,
   FiXCircle,
-  FiInfo,
-  FiRefreshCw,
-  FiFileText,
   FiAlertCircle
 } from 'react-icons/fi';
 import { useOrderHistory } from '../../hooks/useOrderHistory';

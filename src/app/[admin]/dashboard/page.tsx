@@ -42,7 +42,7 @@ export default function DashboardPage() {
   }, []);
 
   if (loading) return <LoadingSpinner />;
-  if (!session || !session.user.Dashboard) return <AccessDeniedPage url="/admin" />;
+  if (!session || !session.user?.Dashboard) return <AccessDeniedPage url="/admin" />;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 p-4 sm:p-6">

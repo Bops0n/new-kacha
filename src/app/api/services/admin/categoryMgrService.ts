@@ -46,7 +46,7 @@ export async function deleteCategory(type: CategoryType, payload: { id: number }
 
     try {
         const { rowCount } = await poolQuery(`SELECT public."SP_ADMIN_CATEGORY_DEL"($1, $2)`, [type, payload.id]);
-        return rowCount > 0;
+        return rowCount !== null && rowCount > 0;
     } catch (error) {
         logger.error("Call to category delete failed:", { error: error });
         throw error;

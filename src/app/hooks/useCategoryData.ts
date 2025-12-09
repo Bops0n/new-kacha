@@ -33,8 +33,9 @@ export function useCategoryData() {
       }
       const fetchedData = await response.json();
       setData(fetchedData);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "เกิดข้อผิดพลาดที่ไม่ทราบสาเหตุ";
+      setError(message);
     } finally {
       setLoading(false);
     }

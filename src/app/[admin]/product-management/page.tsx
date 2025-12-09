@@ -17,7 +17,7 @@ import {
 
 import { useProductManagement } from '@/app/hooks/admin/useProductManagement';
 import { useProductModal } from '@/app/hooks/admin/useProductModal';
-import { ProductFormData, ProductInventory, StockStatus } from '@/types';
+import { Category, ChildSubCategory, FullCategoryPath, ProductFormData, ProductInventory, StockStatus, SubCategory } from '@/types';
 import LoadingSpinner from '@/app/components/LoadingSpinner';
 import { formatPrice } from '@/app/utils/formatters';
 import { calculateAvailableStock } from '@/app/utils/calculations';
@@ -27,6 +27,7 @@ import Pagination from '@/app/components/Pagination';
 import AccessDeniedPage from '@/app/components/AccessDenied';
 import { useSession } from 'next-auth/react';
 import { ImagePreviewModal } from '@/app/components/ImagePreviewModal';
+import Image from 'next/image';
 
 // --- Presentational Modal Component ---
 const ProductModal = ({ 
@@ -45,10 +46,10 @@ const ProductModal = ({
     handleImageChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
     isUploading: boolean;
     imagePreviewUrl: string;
-    categories: any[];
-    subCategories: any[];
-    childSubCategories: any[];
-    allCategoriesMap: Map<number, any>;
+    categories: Category[];
+    subCategories: SubCategory[];
+    childSubCategories: ChildSubCategory[];
+    allCategoriesMap: Map<number, FullCategoryPath>;
     getProductStockStatus: (product: ProductInventory | ProductFormData | null) => StockStatus;
     addStock: (productId: number, amountToAdd: number) => Promise<boolean>;
     setPreviewImage: (image: string) => void;
@@ -73,7 +74,7 @@ const ProductModal = ({
         }
     };
 
-    const InfoRow = ({ label, value }: { label: string; value: any }) => (
+    const InfoRow = ({ label, value }: { label: string; value: string | undefined | null }) => (
         <div>
             <p className="font-medium opacity-70">{label}</p>
             <p className="mt-1">{value ?? "-"}</p>
@@ -87,7 +88,7 @@ const ProductModal = ({
         className = ""
     }: {
         title: string;
-        value: any;
+        value: string | number;
         desc?: string;
         className?: string;
     }) => (
@@ -97,7 +98,6 @@ const ProductModal = ({
             {desc && <p className="stat-desc text-xs mt-1 opacity-70">{desc}</p>}
         </div>
     );
-        
 
     return (
         <dialog className="modal modal-open">
@@ -123,9 +123,11 @@ const ProductModal = ({
                                     <div className="space-y-4">
 
                                         <div className='relative group w-full rounded-xl overflow-hidden border border-base-300 cursor-zoom-in hover:shadow-xl transition'>
-                                            <img
+                                            <Image
                                                 src={imagePreviewUrl}
-                                                alt={product?.Name}
+                                                alt={product?.Name || 'Product Name'}
+                                                width={512}
+                                                height={512}
                                                 className="w-full h-auto max-h-60 object-contain transition-transform duration-300 group-hover:scale-105"
                                                 onClick={() => setPreviewImage(imagePreviewUrl)}
                                             />
@@ -355,11 +357,13 @@ const ProductModal = ({
                                         </h3>
 
                                         <div className='relative group w-full rounded-xl overflow-hidden border border-base-300 cursor-zoom-in hover:shadow-xl transition'>
-                                            <img
+                                            <Image
                                                 src={product?.Image_URL || 'https://placehold.co/500x350?text=NO+IMAGE'}
-                                                alt={product?.Name}
+                                                alt={product?.Name || 'Product Name'}
+                                                width={512}
+                                                height={512}
                                                 className="w-full h-auto max-h-60 object-contain transition-transform duration-300 group-hover:scale-105"
-                                                onClick={() => setPreviewImage(product?.Image_URL!)}
+                                                onClick={() => setPreviewImage(product?.Image_URL || 'https://placehold.co/500x350?text=NO+IMAGE')}
                                             />
 
                                             {/* Zoom Icon */}
@@ -461,7 +465,7 @@ const ProductModal = ({
 
 // --- Main Page Component ---
 export default function ProductManagementPage() {
-    const { data: session, status, update } = useSession();
+    const { data: session } = useSession();
     const { loading, error, data, filteredProducts, allCategoriesMap, filters, setFilters, actions } = useProductManagement();
     const { openModal, modalProps } = useProductModal({ onSave: actions.saveProduct });
 
@@ -489,17 +493,19 @@ export default function ProductManagementPage() {
         ? `${allCategoriesMap.get(childId as number)?.Category_Name} > ${allCategoriesMap.get(childId as number)?.Sub_Category_Name} > ${allCategoriesMap.get(childId as number)?.Child_Name}` 
         : 'N/A';
 
+    const { getProductStockStatus } = actions;
+
     const stats = useMemo(() => ({
         total: data.products.length,
-        inStock: data.products.filter(p => actions.getProductStockStatus(p) === 'in_stock').length,
-        lowStock: data.products.filter(p => actions.getProductStockStatus(p) === 'low_stock').length,
-        outOfStock: data.products.filter(p => actions.getProductStockStatus(p) === 'out_of_stock').length,
+        inStock: data.products.filter(p => getProductStockStatus(p) === 'in_stock').length,
+        lowStock: data.products.filter(p => getProductStockStatus(p) === 'low_stock').length,
+        outOfStock: data.products.filter(p => getProductStockStatus(p) === 'out_of_stock').length,
         visible: data.products.filter(p => p.Visibility).length
-    }), [data.products, actions.getProductStockStatus]);
+    }), [data.products, getProductStockStatus]);
 
     if (loading) return <LoadingSpinner />;
     if (error) return <div className="text-center p-8 text-error">Error: {error}</div>;
-    if (!session || !session.user.Stock_Mgr) return <AccessDeniedPage url="/admin"/>;
+    if (!session || !session.user?.Stock_Mgr) return <AccessDeniedPage url="/admin"/>;
   
     return (
     <div className="min-h-screen bg-base-200 p-4">

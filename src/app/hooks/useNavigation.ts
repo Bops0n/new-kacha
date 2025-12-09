@@ -27,8 +27,9 @@ export function useNavigation() {
         }
         const data = await response.json();
         setNavData(data);
-      } catch (err: any) {
-        setError(err.message);
+      } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : "เกิดข้อผิดพลาดที่ไม่ทราบสาเหตุ";
+        setError(message);
       } finally {
         setLoading(false);
       }

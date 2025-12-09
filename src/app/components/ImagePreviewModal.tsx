@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { FiX } from "react-icons/fi";
 
 export const ImagePreviewModal = ({ imageUrl, onClose }: { imageUrl: string | null, onClose: () => void }) => {
@@ -8,9 +9,11 @@ export const ImagePreviewModal = ({ imageUrl, onClose }: { imageUrl: string | nu
                 <button className="absolute top-4 right-4 btn btn-circle btn-ghost text-white bg-black/20 hover:bg-red-500 z-20" onClick={onClose}>
                     <FiX className="w-8 h-8" />
                 </button>
-                <img 
+                <Image 
                     src={imageUrl} 
                     alt="Preview" 
+                    width={512}
+                    height={512}
                     className="max-w-full max-h-[90vh] rounded-lg shadow-2xl object-contain"
                     onClick={(e) => e.stopPropagation()} 
                 />

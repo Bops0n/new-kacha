@@ -38,10 +38,11 @@ export async function GET(request: NextRequest) {
             timestamp: new Date().toISOString(),
         });
 
-    } catch (error: any) {
+    } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : "เกิดข้อผิดพลาดที่ไม่ทราบสาเหตุ";
         logger.error('[Auto-Cancel] Error:', { error });
         return NextResponse.json(
-            { success: false, message: 'Failed to execute auto-cancel task', error: error.message },
+            { success: false, message: 'Failed to execute auto-cancel task', error: message },
             { status: 500 }
         );
     }

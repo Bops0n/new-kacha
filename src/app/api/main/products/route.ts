@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getAllCategories } from '../../services/user/userServices'; // ตรวจสอบ path นี้ให้ตรงกับโปรเจกต์จริงของคุณ
 import { poolQuery } from '@/app/api/lib/db';
 import { logger } from '@/server/logger';
+import { ProductInventory } from '@/types';
 
 export async function GET(request: NextRequest) {
   try {
@@ -41,14 +42,13 @@ export async function GET(request: NextRequest) {
     const totalItems = rows.length > 0 ? parseInt(rows[0].Total_Rows) : 0;
 
     // ลบ Total_Rows ออกจาก Object สินค้า เพื่อไม่ให้ข้อมูลซ้ำซ้อน
-    const products = rows.map((row: any) => {
-        const { Total_Rows, ...productData } = row;
+    const products = rows.map((row: ProductInventory) => {
+        const { ...productData } = row;
         return productData;
     });
 
     // คำนวณว่ามีหน้าถัดไปหรือไม่
-      const hasMore = (page * limit) < totalItems;
-      console.log(hasMore)
+    const hasMore = (page * limit) < totalItems;
 
     return NextResponse.json({
       products: products,
@@ -62,10 +62,11 @@ export async function GET(request: NextRequest) {
 
     });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "เกิดข้อผิดพลาดที่ไม่ทราบสาเหตุ";
     logger.error('API Error fetching products:', { error: error });
     return NextResponse.json(
-      { message: 'เกิดข้อผิดพลาดภายในเซิร์ฟเวอร์' },
+      { message: message },
       { status: 500 }
     );
   }

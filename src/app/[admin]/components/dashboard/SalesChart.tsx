@@ -11,15 +11,13 @@ import {
   CartesianGrid,
 } from "recharts";
 import { CardBoard, CardHeader, CardContent } from "./CardBoard";
-import { SalesData } from "@/types/dashboard";
+import { PEROID_TYPE, SalesData } from "@/types/dashboard";
 import { FiBarChart2 } from "react-icons/fi";
 import { motion, AnimatePresence } from "framer-motion";
 
 export function SalesChart() {
   const [data, setData] = useState<SalesData[]>([]);
-  const [period, setPeriod] = useState<
-    "daily" | "weekly" | "monthly" | "quarterly" | "yearly"
-  >("weekly");
+  const [period, setPeriod] = useState<PEROID_TYPE>("weekly");
 
   useEffect(() => {
     async function fetchData() {
@@ -68,7 +66,7 @@ export function SalesChart() {
             <motion.button
               key={p.key}
               whileTap={{ scale: 0.95 }}
-              onClick={() => setPeriod(p.key as any)}
+              onClick={() => setPeriod(p.key as PEROID_TYPE)}
               className={`relative flex-shrink-0 px-4 py-1.5 rounded-full text-sm font-medium transition-all ${
                 p.key === period
                   ? "text-white"
@@ -119,7 +117,7 @@ export function SalesChart() {
                   border: "1px solid #e5e7eb",
                   borderRadius: "0.75rem",
                 }}
-                formatter={(value: any, name: any) => {
+                formatter={(value: number, name: string) => {
                   if (name === "ค่าเบี่ยงเบน") {
                     const sign = value >= 0 ? "+" : "";
                     return [`${sign}${value}%`, "เบี่ยงเบนจากเฉลี่ย"];

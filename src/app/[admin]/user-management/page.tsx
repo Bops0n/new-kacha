@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, use } from 'react';
+import { useState, useEffect } from 'react';
 import {
   FiSearch,
   FiPlus,
@@ -14,7 +14,7 @@ import AddressModal from './modal/AddressModal'; // <-- นำเข้า Addre
 import { useAlert } from '@/app/context/AlertModalContext';
 import Pagination from '@/app/components/Pagination';
 import { Role } from '@/types/';
-import { AddressSchema, NewAddressForm, UserAccount, UserEditForm, UserSchema } from '@/types';
+import { AddressSchema, NewAddressForm, UserAccount, UserEditForm } from '@/types';
 import LoadingSpinner from '@/app/components/LoadingSpinner';
 import { useSession } from 'next-auth/react';
 import AccessDeniedPage from '@/app/components/AccessDenied';
@@ -227,7 +227,7 @@ export default function UserManagement() {
 
         const data = await response.json();
 
-        if (session && editFormData.User_ID === Number(session.user.id)) {
+        if (session && editFormData.User_ID === Number(session.user?.id)) {
           await update({
             user: {
               ...session.user,
@@ -239,8 +239,9 @@ export default function UserManagement() {
 
         showAlert(data.message, 'success');
       }
-      catch (error : any) {
-        showAlert(error.message, 'error');
+      catch (error : unknown) {
+        const message = error instanceof Error ? error.message : "เกิดข้อผิดพลาดที่ไม่ทราบสาเหตุ";
+        showAlert(message, 'error');
         return;
       }
       
@@ -261,8 +262,9 @@ export default function UserManagement() {
           setEditFormData(prevFormData => ({ ...prevFormData, User_ID: newID }));
 
           showAlert(data.message, 'success');
-        } catch (error : any) {
-          showAlert(error.message, 'error');
+        } catch (error : unknown) {
+          const message = error instanceof Error ? error.message : "เกิดข้อผิดพลาดที่ไม่ทราบสาเหตุ";
+          showAlert(message, 'error');
           return;
         }
     }
@@ -297,9 +299,8 @@ export default function UserManagement() {
     const response = await fetch(`../api/admin/user/deleteUser?id=${userId}`,{
       method : 'DELETE',
     })
-    const result = await response.json()
+    await response.json()
     setShowUserModal(false);
-    
   };
 
   // --- Address Actions within User Modal ---
@@ -417,7 +418,7 @@ export default function UserManagement() {
       if (selectedUser) {
 
 
-        const result = await fetch(`../api/admin/user/deleteAddress?id=${addressId}`,{
+        await fetch(`../api/admin/user/deleteAddress?id=${addressId}`,{
           method:'DELETE'
         })
 
@@ -434,23 +435,39 @@ export default function UserManagement() {
 
   // --- Form Change Handlers ---
   const handleUserFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value, type, checked } : any = e.target;
+    const target = e.target;
+    const name = target.name;
+
+    let newValue: string | boolean = target.value;
+
+    if (target instanceof HTMLInputElement && target.type === "checkbox") {
+      newValue = target.checked;
+    }
+
     setEditFormData(prev => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : value
+      [name]: newValue
     }));
   };
 
   const handleAddressFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value, type, checked } :any = e.target;
+    const target = e.target;
+    const name = target.name;
+
+    let newValue: string | boolean = target.value;
+
+    if (target instanceof HTMLInputElement && target.type === "checkbox") {
+      newValue = target.checked;
+    }
+
     setNewAddressForm(prev => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : value
+      [name]: newValue
     }));
   };
 
   if (loading) return <LoadingSpinner />;
-  if (!session || !session.user.User_Mgr) return <AccessDeniedPage url="/admin"/>;
+  if (!session || !session.user?.User_Mgr) return <AccessDeniedPage url="/admin"/>;
 
   return (
     <div className="min-h-screen bg-base-200 p-4">
@@ -626,7 +643,6 @@ export default function UserManagement() {
           handleAddAddressClick={handleAddAddressClick}
           handleEditAddressClick={handleEditAddressClick}
           deleteAddress={deleteAddress}
-          setShowAddAddressModal={setShowAddAddressModal}
           roles={roles}
         />
 

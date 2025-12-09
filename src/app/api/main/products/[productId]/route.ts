@@ -2,10 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getProductDetail } from '@/app/api/services/user/userServices';
 import { logger } from '@/server/logger';
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { productId: number } }
-) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ productId: number }> }) {
   const { productId } = await params;
 
   if (!productId || isNaN(Number(productId))) {

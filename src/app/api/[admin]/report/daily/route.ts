@@ -22,8 +22,9 @@ export async function GET(request: NextRequest) {
     try {
         const { rows } = await poolQuery('SELECT * FROM public."SP_ADMIN_REPORT_SUMMARY_SALES_REPORT_GET"($1, $2)', [startDate, endDate]);
         return NextResponse.json({ orders: rows });
-    } catch (error: any) {
-        logger.error("Report API Error:", { error });
-        return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 });
+    } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : "เกิดข้อผิดพลาดที่ไม่ทราบสาเหตุ";
+        logger.error("Report API Error:", { error: error });
+        return NextResponse.json({ message: message }, { status: 500 });
     }
 }

@@ -1,8 +1,8 @@
 'use client';
 
 import React from 'react';
-import { AlertModalProps, AlertModalType } from '@/types';
-import { FiInfo, FiCheckCircle, FiAlertTriangle, FiXCircle, FiImage } from 'react-icons/fi';
+import { AlertModalProps } from '@/types';
+import { FiInfo, FiCheckCircle, FiAlertTriangle, FiXCircle } from 'react-icons/fi';
 
 /**
  * A reusable Alert Modal component, styled with DaisyUI and Tailwind CSS.

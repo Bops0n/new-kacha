@@ -21,9 +21,10 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ message: 'เพิ่มหมวดหมู่ล้มเหลว!' }, { status: 500 });
         }
         return NextResponse.json({ message: 'เพิ่มหมวดหมู่สำเร็จ', data: newData }, { status: 201 });
-    } catch (error: any) {
+    } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : "เกิดข้อผิดพลาดที่ไม่ทราบสาเหตุ";
         logger.error("API POST Error:", { error: error });
-        return NextResponse.json({ message: error.message || 'API Error' }, { status: 500 });
+        return NextResponse.json({ message: message || 'API Error' }, { status: 500 });
     }
 }
 
@@ -43,9 +44,10 @@ export async function PATCH(req: NextRequest) {
             return NextResponse.json({ message: 'อัปเดตหมวดหมู่ล้มเหลว!' }, { status: 500 });
         }
         return NextResponse.json({ message: 'อัปเดตหมวดหมู่สำเร็จ', data: updatedData });
-    } catch (error: any) {
+    } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : "เกิดข้อผิดพลาดที่ไม่ทราบสาเหตุ";
         logger.error("API PATCH Error:", { error: error });
-        return NextResponse.json({ message: error.message || 'API Error' }, { status: 500 });
+        return NextResponse.json({ message: message || 'API Error' }, { status: 500 });
     }
 }
 
@@ -74,8 +76,9 @@ export async function DELETE(req: NextRequest) {
         }
 
         return NextResponse.json({ message: 'ลบหมวดหมู่สำเร็จ' });
-    } catch (error: any) {
+    } catch (error: unknown) {
+            const message = error instanceof Error ? error.message : "เกิดข้อผิดพลาดที่ไม่ทราบสาเหตุ";
         logger.error("API DELETE Error:", { error: error });
-        return NextResponse.json({ message: error.message || 'API Error' }, { status: 500 });
+        return NextResponse.json({ message: message || 'API Error' }, { status: 500 });
     }
 }

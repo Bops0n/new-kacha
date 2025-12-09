@@ -1,15 +1,13 @@
-'use client'; // Client Component
+'use client';
 
+import { useAlert } from '@/app/context/AlertModalContext';
+import { AddressSchema, AlertModalProps, NewAddressForm } from '@/types';
 import React, { useState } from 'react';
 import { FiX, FiSave } from 'react-icons/fi';
-import { Address, NewAddressForm } from '../../../types'; // ต้องปรับ Path ให้ถูกต้องตามโครงสร้างโปรเจกต์ของคุณ
-import { AlertModalProps } from '@/types/types';
-
-// กำหนด Props สำหรับ AddressModal
 interface AddressModalProps {
   showModal: boolean;
   onClose: () => void;
-  addressToEdit: Address | null;
+  addressToEdit: AddressSchema | null;
   newAddressForm: NewAddressForm;
   handleAddressFormChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
   saveAddress: () => void;
@@ -24,31 +22,25 @@ const AddressModal: React.FC<AddressModalProps> = ({
   handleAddressFormChange,
   saveAddress,
 }) => {
+  const { showAlert } = useAlert();
+  
+    const handleSave = () => {
+      if (!newAddressForm.Address_1 || !newAddressForm.District || !newAddressForm.Province || !newAddressForm.Zip_Code || !newAddressForm.Sub_District || !newAddressForm.Phone) {
+        showAlert('กรุณากรอกข้อมูลที่อยู่ให้ครบถ้วน');
+        return;
+      }
+      saveAddress();
+    };
+  
+    const [alert, setAlert] = useState<AlertModalProps>({
+      isOpen: false,
+      message: '',
+      type: 'success',
+      onClose: () => {
+        setAlert({ ...alert, isOpen: false });
+    }})
+
   if (!showModal) return null;
-
-  // แทนที่ alert ด้วย Alert Component ของคุณเองใน Production
-  const showAlert = (message: string) => {
-    // Implement your custom alert modal here instead of window.alert
-    // For now, using a placeholder:
-    // alert(message);
-  };
-
-  const handleSave = () => {
-    if (!newAddressForm.Address_1 || !newAddressForm.District || !newAddressForm.Province || !newAddressForm.Zip_Code || !newAddressForm.Sub_District || !newAddressForm.Phone) {
-      showAlert('กรุณากรอกข้อมูลที่อยู่ให้ครบถ้วน');
-      return;
-    }
-    saveAddress();
-  };
-
-  const [alert, setAlert] = useState<AlertModalProps>({
-    isOpen: false,
-    message: '',
-    type: 'success',
-    onClose: () => {
-      setAlert({ ...alert, isOpen: false });
-  }})
-
 
   return (
     <div className="modal modal-open">

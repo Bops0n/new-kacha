@@ -6,6 +6,7 @@ import { FiTruck, FiAward, FiDollarSign, FiHeadphones } from 'react-icons/fi';
 import ProductDisplayCard from './components/ProductDisplayCard';
 import { CategoryTopSelling, ProductInventory } from '@/types';
 import LoadingSpinner from '../components/LoadingSpinner';
+import Image from 'next/image';
 
 export default function HomePage() {
   const [loading, setLoading] = useState(true);
@@ -21,10 +22,7 @@ export default function HomePage() {
         const { Top_Categories, Recommended_Products } = await result.json();
         setCategories(Top_Categories);
         setProducts(Recommended_Products);
-      } catch (err) {
-        
-      }
-      finally {
+      } finally {
         setLoading(false); 
       }
     }
@@ -94,9 +92,11 @@ export default function HomePage() {
                 {categories && categories.map((category, index) => (
                   <Link href={category.Category_Path} key={index} className="card bg-base-100 shadow-xl image-full group transition-transform transform hover:scale-105 duration-300">
                     <figure>
-                      <img
+                      <Image
                         src={category.Image}
                         alt={category.Name}
+                        width={512}
+                        height={512}
                         className="w-full h-full object-cover group-hover:brightness-75 transition-all duration-300"
                         onError={(e) => { e.currentTarget.src = 'https://placehold.co/300x200/CCCCCC/666666?text=ไม่มีรูป'; }}
                       />

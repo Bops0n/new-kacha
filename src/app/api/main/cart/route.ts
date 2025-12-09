@@ -12,7 +12,7 @@ import { logger } from '@/server/logger';
  * @returns {NextResponse} - JSON response containing cart items or an error message.
  * Authorization: Only allows a user to retrieve their own cart items.
  */
-export async function GET(request: Request) {
+export async function GET() {
     const auth = await authenticateRequest();
     const isCheck = checkRequire(auth);
     if (isCheck) return isCheck;
@@ -20,13 +20,13 @@ export async function GET(request: Request) {
     try {
         const result = await getCartByUID(Number(auth.userId));
 
-        const cartItems: CartDetailSchema[] = result.map((row: any) => ({
+        const cartItems: CartDetailSchema[] = result.map((row: CartDetailSchema) => ({
             Product_ID: row.Product_ID,
             Name: row.Name,
             Brand: row.Brand,
             Unit: row.Unit,
-            Sale_Price: parseFloat(row.Sale_Price),
-            Discount_Price: row.Discount_Price ? parseFloat(row.Discount_Price) : null,
+            Sale_Price: row.Sale_Price,
+            Discount_Price: row.Discount_Price ? row.Discount_Price : null,
             Image_URL: row.Image_URL,
             Quantity: row.Quantity,
             Total_Sales: row.Total_Sales,
@@ -66,9 +66,10 @@ export async function POST(request: Request) {
         }
 
         return NextResponse.json({ message: 'อัปเดตตะกร้าสินค้าสำเร็จ', error: false }, { status: 200 });
-    } catch (error) {
+    } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : "เกิดข้อผิดพลาดที่ไม่ทราบสาเหตุ";
         logger.error('Error adding/updating cart item:', { error: error });
-        return NextResponse.json({ message: `${error.message}`, error: true }, { status: 500 });
+        return NextResponse.json({ message: message, error: true }, { status: 500 });
     }
 }
 

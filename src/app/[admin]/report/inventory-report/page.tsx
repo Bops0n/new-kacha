@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { FiPrinter, FiArrowLeft, FiFilter, FiBox, FiAlertTriangle, FiXCircle, FiCheckCircle, FiSearch, FiDollarSign } from 'react-icons/fi';
+import { FiPrinter, FiArrowLeft, FiBox, FiAlertTriangle, FiSearch } from 'react-icons/fi';
 import { formatDateTimeThai, formatPrice } from '@/app/utils/formatters';
 import LoadingSpinner from '@/app/components/LoadingSpinner';
 import { useRouter } from 'next/navigation';
@@ -19,9 +19,11 @@ export default function InventoryReportPage() {
 
     const [products, setProducts] = useState<ProductInventory[]>([]);
     const [loading, setLoading] = useState(false);
+
+    type STOCK_FILTER_TYPE = "all" | "in_stock" | "low_stock" | "out_of_stock";
     
     const [searchTerm, setSearchTerm] = useState('');
-    const [stockFilter, setStockFilter] = useState<'all' | 'in_stock' | 'low_stock' | 'out_of_stock'>('all');
+    const [stockFilter, setStockFilter] = useState<STOCK_FILTER_TYPE>('all');
     const [categoryFilter, setCategoryFilter] = useState<string>('all');
 
     const fetchReport = async () => {
@@ -206,7 +208,7 @@ export default function InventoryReportPage() {
 
                         <div className="form-control w-full max-w-xs">
                             <label className="label py-1"><span className="label-text">สถานะสต็อก</span></label>
-                            <select className="select select-bordered" value={stockFilter} onChange={(e) => setStockFilter(e.target.value as any)}>
+                            <select className="select select-bordered" value={stockFilter} onChange={(e) => setStockFilter(e.target.value as STOCK_FILTER_TYPE)}>
                                 <option value="all">ทั้งหมด</option>
                                 <option value="in_stock">ปกติ (In Stock)</option>
                                 <option value="low_stock">ใกล้หมด (Low Stock)</option>

@@ -9,6 +9,7 @@ import LoadingSpinner from "@/app/components/LoadingSpinner"; // Adjusted path
 import { formatPrice } from "@/app/utils/formatters"; // Adjusted path
 import { CartDetailSchema as CartProduct } from '@/types';
 import { calculateAvailableStock } from '@/app/utils/calculations';
+import Image from 'next/image';
 
 // UI-only component for displaying a single cart item
 interface CartItemProps {
@@ -20,11 +21,11 @@ interface CartItemProps {
 const CartItem: React.FC<CartItemProps> = ({ item, onUpdateQuantity, onRemove }) => {
     return (
         <div className="flex items-center bg-base-100 p-4 rounded-lg shadow-sm border border-base-300 relative">
-            <img
+            <Image
                 src={item.Image_URL || 'https://placehold.co/100x100?text=No+Image'}
                 alt={item.Name}
-                width={100}
-                height={100}
+                width={512}
+                height={512}
                 className="w-24 h-24 object-contain rounded-md flex-shrink-0 mr-4"
             />
             <div className="flex-grow grid grid-cols-1 md:grid-cols-2 gap-2 items-center">
@@ -50,7 +51,7 @@ const CartItem: React.FC<CartItemProps> = ({ item, onUpdateQuantity, onRemove })
                         >
                             <FiPlusCircle />
                         </button>
-                        <span className="text-sm text-base-content/60 ml-2">(คงเหลือ: {calculateAvailableStock(item as any)})</span>
+                        <span className="text-sm text-base-content/60 ml-2">(คงเหลือ: {calculateAvailableStock(item)})</span>
                     </div>
                     <div className="font-bold text-xl text-primary text-right md:text-left">
                         {formatPrice(item.Sale_Price * item.Cart_Quantity)}

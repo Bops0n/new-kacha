@@ -4,10 +4,7 @@ import { checkRequire } from '@/app/utils/client';
 import { confirmReceiveOrder } from '@/app/api/services/user/orderService';
 import { logger } from '@/server/logger';
 
-export async function PATCH(
-    request: NextRequest,
-    { params }: { params: { orderId: string } }
-) {
+export async function PATCH(request: NextRequest, { params }: { params: Promise<{ orderId: string }> }) {
     // 1. ตรวจสอบตัวตน
     const auth = await authenticateRequest();
     const isCheck = checkRequire(auth);
@@ -26,8 +23,9 @@ export async function PATCH(
 
         return NextResponse.json({ message: Message }, { status: Status_Code });
 
-    } catch (error: any) {
-        logger.error('API Error confirm receive:', error);
-        return NextResponse.json({ message: 'เกิดข้อผิดพลาดภายในเซิร์ฟเวอร์' }, { status: 500 });
+    } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : "เกิดข้อผิดพลาดที่ไม่ทราบสาเหตุ";
+        logger.error('API Error confirm receive:', { error: error });
+        return NextResponse.json({ message: message }, { status: 500 });
     }
 }

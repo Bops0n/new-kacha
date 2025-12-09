@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { FiX, FiMapPin, FiCheckCircle, FiPlus } from 'react-icons/fi';
+import { FiMapPin, FiCheckCircle, FiPlus } from 'react-icons/fi';
 import { AddressSchema } from '../../../types/user.types'; // Adjust path
 import Link from 'next/link';
 

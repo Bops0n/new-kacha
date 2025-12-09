@@ -22,7 +22,7 @@ export async function addProduct(productData: Partial<ProductInventory>, UserID:
  */
 export async function updateProduct(productId: number, UserID: number, productData: Partial<ProductInventory>): Promise<boolean> {
   const { rowCount } = await poolQuery(`SELECT * FROM "SP_ADMIN_PRODUCT_UPD"($1, $2, $3)`, [productId, UserID, JSON.stringify(productData)]);
-  return rowCount > 0;
+  return rowCount !== null && rowCount > 0;
 }
 
 /**
@@ -30,7 +30,7 @@ export async function updateProduct(productId: number, UserID: number, productDa
  */
 export async function deleteProduct(productId: number, UserID: number): Promise<boolean> {
   const { rowCount } = await poolQuery(`SELECT * FROM "SP_ADMIN_PRODUCT_DEL"($1, $2)`, [productId, UserID]);
-  return rowCount > 0;
+  return rowCount !== null && rowCount > 0;
 }
 
 export async function getProductDetailByID(productId: number[]) {
@@ -42,6 +42,6 @@ export async function increaseProductQtyInStock(productId: number, increaseQty: 
   const { rows, rowCount } = await poolQuery(`SELECT * FROM "SP_ADMIN_PRODUCT_STOCK_INC"($1, $2)`, [productId, increaseQty]);
   return { 
     data: rows[0], 
-    result: rowCount > 0 
+    result: rowCount !== null && rowCount > 0 
   };
 }

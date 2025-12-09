@@ -28,8 +28,9 @@ export function useProductDetail(productId: string) {
       setProduct(data.Product);
       setRelatedProducts(data.Related_Products || []);
       setCategoryPath(data.Category_Path || null);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "เกิดข้อผิดพลาดที่ไม่ทราบสาเหตุ";
+      setError(message);
     } finally {
       setLoading(false);
     }

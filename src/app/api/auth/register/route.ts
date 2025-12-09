@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { RegisterSchema } from "../utils";
 import { signUp } from "../../services/auth/authService";
+import { REGISTER_PARSE_DATA } from "@/types/auth.types";
 
 export async function POST(req: NextRequest) {
     const json = await req.json().catch(() => null);
@@ -29,7 +30,7 @@ export async function POST(req: NextRequest) {
         );
     }
 
-    const { username, email, password } : any = parsed.data;
+    const { username, email, password } : REGISTER_PARSE_DATA = parsed.data;
 
     const result = await signUp(username, email, password);
     

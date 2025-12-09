@@ -12,7 +12,7 @@ import { logger } from '@/server/logger';
  * GET /api/main/orders/[orderId]
  * Retrieves detailed information for a specific order for the authenticated user.
  */
-export async function GET(request: NextRequest, { params }: { params: { orderId: number } }) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ orderId: number }> }) {
     const auth = await authenticateRequest();
     const isCheck = checkRequire(auth);
     if (isCheck) return isCheck;
@@ -31,12 +31,13 @@ export async function GET(request: NextRequest, { params }: { params: { orderId:
         }
         return NextResponse.json({ order, error: false });
 
-    } catch (error: any) {
-        if (error.message === 'Access denied') {
+    } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : "เกิดข้อผิดพลาดที่ไม่ทราบสาเหตุ";
+        if (message === 'Access denied') {
             return NextResponse.json({ message: 'คุณไม่มีสิทธิ์เข้าถึงคำสั่งซื้อนี้' }, { status: 403 });
         }
         logger.error('Error fetching order details:', { error: error });
-        return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 });
+        return NextResponse.json({ message: message }, { status: 500 });
     }
 }
 
@@ -44,7 +45,7 @@ export async function GET(request: NextRequest, { params }: { params: { orderId:
  * PATCH /api/main/orders/[orderId]
  * Updates the transfer slip image URL for a specific order.
  */
-export async function PATCH(request: NextRequest, { params }: { params: { orderId: number } }) {
+export async function PATCH(request: NextRequest, { params }: { params: Promise<{ orderId: number }> }) {
     const auth = await authenticateRequest();
     const isCheck = checkRequire(auth);
     if (isCheck) return isCheck;
@@ -95,7 +96,7 @@ export async function PATCH(request: NextRequest, { params }: { params: { orderI
     }
 }
 
-export async function DELETE(request: NextRequest, { params }: { params: { orderId: number } }) {
+export async function DELETE(request: NextRequest, { params }: { params: Promise<{ orderId: number }> }) {
     const auth = await authenticateRequest();
     const isCheck = checkRequire(auth);
     if (isCheck) return isCheck;
@@ -117,8 +118,9 @@ export async function DELETE(request: NextRequest, { params }: { params: { order
 
         return NextResponse.json({ message: 'ยกเลิกคำสั่งซื้อสำเร็จ' });
 
-    } catch (error) {
-        logger.error('API Error cancelling order:', error);
-        return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 });
+    } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : "เกิดข้อผิดพลาดที่ไม่ทราบสาเหตุ";
+        logger.error('API Error cancelling order:', { error: error });
+        return NextResponse.json({ message: message }, { status: 500 });
     }
 }

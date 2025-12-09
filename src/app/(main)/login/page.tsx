@@ -1,17 +1,16 @@
 'use client'; // This component needs to be a Client Component for interactivity
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import { FiMail, FiLock, FiUser, FiCheckCircle } from 'react-icons/fi'; // Icons for inputs
 import { signIn, useSession } from 'next-auth/react';
-import { redirect } from 'next/navigation';
 import { useAlert } from '@/app/context/AlertModalContext';
 import { useSearchParams, useRouter } from "next/navigation";
 import LoadingSpinner from '@/app/components/LoadingSpinner';
 
 export default function AuthPage() {
 
-  const { data: session, status, update } = useSession();
+  const { status, update } = useSession();
   const { showAlert } = useAlert();
 
   const searchParams = useSearchParams();

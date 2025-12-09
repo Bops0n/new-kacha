@@ -1,34 +1,35 @@
 "use client";
 
 import Pagination from "@/app/components/Pagination";
-import { useEffect, useState } from "react";
+import { CONTACT_TYPE, ContactInfo } from "@/types/contact.types";
+import { useCallback, useEffect, useState } from "react";
 import { FiEye, FiSearch } from "react-icons/fi";
 
 export default function AdminMessagesPage() {
-  const [messages, setMessages] = useState([]);
+  const [messages, setMessages] = useState<ContactInfo[]>([]);
 
-  const [filteredMessages, setFilteredMessages] = useState([]);
+  const [filteredMessages, setFilteredMessages] = useState<ContactInfo[]>([]);
   const [total, setTotal] = useState(0);
 
   const [page, setPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState<number>(10);
 
-  const [filter, setFilter] = useState<"all" | "read" | "unread">("all");
+  const [filter, setFilter] = useState<CONTACT_TYPE>("all");
   const [search, setSearch] = useState("");
 
-  const [selectedMessage, setSelectedMessage] = useState<any>(null);
+  const [selectedMessage, setSelectedMessage] = useState<ContactInfo | null>(null);
 
-  async function loadMessages() {
+  const loadMessages = useCallback(async () => {
     const res = await fetch(
-      `/api/admin/contact-messages?page=${page}&limit=${itemsPerPage}&filter=${filter}`
-    );
-    const data = await res.json();
+        `/api/admin/contact-messages?page=${page}&limit=${itemsPerPage}&filter=${filter}`
+      );
+      const data = await res.json();
 
-    setMessages(data);
-    if (data.length > 0) {
-      setTotal(Number(data[0].Total_Count));
-    }
-  }
+      setMessages(data);
+      if (data.length > 0) {
+        setTotal(Number(data[0].Total_Count));
+      }
+  }, [filter, page, itemsPerPage]);
 
   async function markRead(messageId: number, isRead: boolean) {
     await fetch(`/api/admin/contact-messages/mark-read`, {
@@ -37,12 +38,12 @@ export default function AdminMessagesPage() {
       headers: { "Content-Type": "application/json" },
     });
 
-    loadMessages();
+    await loadMessages();
   }
 
   useEffect(() => {
     loadMessages();
-  }, [page, filter, itemsPerPage]);
+  }, [page, filter, itemsPerPage, loadMessages]);
 
   // 🔍 SEARCH FILTER LOGIC (ค้นหาจากทุก field)
   useEffect(() => {
@@ -53,7 +54,7 @@ export default function AdminMessagesPage() {
       return;
     }
 
-    const filtered = messages.filter((m: any) => {
+    const filtered = messages.filter((m: ContactInfo) => {
       const text =
         `${m.Name} ${m.Email} ${m.Phone ?? ""} ${m.Subject} ${m.Message}`.toLowerCase();
 
@@ -103,7 +104,7 @@ export default function AdminMessagesPage() {
                 value={filter}
                 onChange={(e) => {
                   setPage(1);
-                  setFilter(e.target.value as any);
+                  setFilter(e.target.value as CONTACT_TYPE);
                 }}
               >
                 <option value="all">ทั้งหมด</option>
@@ -143,7 +144,7 @@ export default function AdminMessagesPage() {
             </thead>
 
             <tbody>
-              {filteredMessages.map((m: any) => (
+              {filteredMessages.map((m: ContactInfo) => (
                 <tr key={m.Message_ID} className={!m.Is_Read ? "bg-yellow-50" : ""}>
                   <td>{m.Created_At}</td>
                   <td>{m.Name}</td>

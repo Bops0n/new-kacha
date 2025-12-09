@@ -4,6 +4,8 @@ import type { NextRequest } from "next/server";
 import { getToken } from "next-auth/jwt";
 
 type Guard = (req: NextRequest) => Promise<NextResponse | null> | NextResponse | null;
+type HTTP_METHOD = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
+
 
 function redirectToLogin(req: NextRequest) {
   const url = new URL("/login", req.url);
@@ -48,16 +50,17 @@ export const requireRole =
   };
 
 export const requireMethods =
-  (map: Record<string, ("GET" | "POST" | "PUT" | "PATCH" | "DELETE")[]>) =>
+  (map: Record<string, HTTP_METHOD[]>) =>
   (req: NextRequest) => {
     const path = new URL(req.url).pathname;
+    const method = req.method as HTTP_METHOD;
     for (const [prefix, methods] of Object.entries(map)) {
-      if (path.startsWith(prefix) && !methods.includes(req.method as any)) {
+      if (path.startsWith(prefix) && !methods.includes(method)) {
         return new NextResponse(null, { status: 405 });
       }
     }
     return null;
-  };
+};
 
 const guards: Guard[] = [
   requireAuth({ allow: ["/", "/login", "/api/main", "/api/main/cart/"] }),

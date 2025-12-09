@@ -4,7 +4,7 @@ import { getUserProfileById, updateUserProfile } from '../../services/user/userS
 import { checkRequire } from '@/app/utils/client';
 import { logger } from '@/server/logger';
 
-export async function GET(req: NextRequest) {
+export async function GET() {
     const auth = await authenticateRequest();
     const isCheck = checkRequire(auth);
     if (isCheck) return isCheck;
@@ -13,9 +13,10 @@ export async function GET(req: NextRequest) {
         const userProfile = await getUserProfileById(Number(auth.userId));
         if (!userProfile) return NextResponse.json({ message: 'ไม่พบผู้ใช้' }, { status: 404 });
         return NextResponse.json({ user: userProfile });
-    } catch (err: any) {
-        logger.error("API GET Error:", { error: err });
-        return NextResponse.json({ message: 'Server Error' }, { status: 500 });
+    } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : "เกิดข้อผิดพลาดที่ไม่ทราบสาเหตุ";
+        logger.error("API GET Error:", { error: error });
+        return NextResponse.json({ message: message }, { status: 500 });
     }
 }
 

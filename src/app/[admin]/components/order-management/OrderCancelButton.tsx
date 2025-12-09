@@ -90,7 +90,7 @@ export default function OrderCancelButton({ order, onlyIcon, onSuccess }: {
     setButtonText(btnDisable ? 'ไม่สามารถยกเลิกได้' : v_isNoPaymentChecked ? 'ดำเนินการตรวจสอบหลักฐาน' : 'ยืนยัน');
     setNoPaymentChecked(v_isNoPaymentChecked);
     setIsRefunding(v_isRefunding);
-  }, [order]);
+  }, [order, btnDisable, isCancelled]);
 
   async function submitCancel() {
     if (!reason.trim()) {
@@ -157,7 +157,6 @@ export default function OrderCancelButton({ order, onlyIcon, onSuccess }: {
   }
 
   const currentStatus = statusTypeLabels[order.Status];
-  const pending = statusTypeLabels['pending'];
   const refunding = statusTypeLabels['refunding'];
   const cancelled = statusTypeLabels['cancelled'];
   
@@ -165,14 +164,14 @@ export default function OrderCancelButton({ order, onlyIcon, onSuccess }: {
 
   const modalId = `cancelOrderModal_${order.Order_ID}`;
 
-  function showModal(type: boolean) {
-    if (type) {
-      setError(null);
-      (document.getElementById(modalId) as any).showModal();
-    } else {
-      setError(null);
-      (document.getElementById(modalId) as any).close();
-    }
+  function showModal(open: boolean) {
+    const modal = document.getElementById(modalId) as HTMLDialogElement | null;
+    if (!modal) return;
+
+    setError(null);
+
+    if (open) modal.showModal();
+    else modal.close();
   }
 
   return (
@@ -255,7 +254,7 @@ export default function OrderCancelButton({ order, onlyIcon, onSuccess }: {
                           <FiInfo className="w-5 h-5 mt-1 text-info" />
                           <div className="text-sm text-base-content/80 space-y-1">
                             <p>
-                                หลังจากกด <span className="font-semibold">"{lbButtonText}"</span>{" "}
+                                หลังจากกด <span className="font-semibold">{'"'}{lbButtonText}{'"'}</span>{" "}
                                 {isRefunding &&
                                   <>
                                     หากคำสั่งซื้อได้รับการชำระเงินและตรวจสอบแล้ว ระบบจะเปลี่ยนสถานะคำสั่งซื้อเป็น{" "}
@@ -324,7 +323,7 @@ export default function OrderCancelButton({ order, onlyIcon, onSuccess }: {
                           <div className="text-sm text-base-content/80 space-y-1">
                             <p>
                                 ยังไม่ได้ตรวจสอบหลักฐานการชำระเงิน กรุณากดปุ่ม{" "}
-                                <span className="font-semibold">"{lbButtonText}"</span>{" "}
+                                <span className="font-semibold">{'"'}{lbButtonText}{'"'}</span>{" "}
                                 เพื่อดำเนินการต่อ
                             </p>
                           </div>

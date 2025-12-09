@@ -20,13 +20,14 @@ export async function PATCH(req: NextRequest) {
             body.Order_ID, JSON.stringify(body), auth.userId
         ]);
 
-        if (rowCount > 0) {
+        if (rowCount && rowCount > 0) {
             return NextResponse.json({ message: 'Shipping Update Success.' });
         }
-    } catch (error: any) {
+    } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : "เกิดข้อผิดพลาดที่ไม่ทราบสาเหตุ";
         logger.error("Shipping Update Error:", { error: error });
         return NextResponse.json(
-            { error: error.message || "Server Error" },
+            { message: message || "Server Error" },
             { status: 500 }
         );
     }

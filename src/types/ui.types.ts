@@ -1,6 +1,5 @@
 // types/ui.types.ts
 import React from 'react';
-import { OrderStatus } from './order.types';
 
 // --- UI Component Props ---
 
@@ -33,6 +32,7 @@ export interface StatusConfig {
     color: string; // Tailwind/DaisyUI color class
     icon: React.ElementType;
     bgColor: string;
+    textColor?: string;
   };
 }
 

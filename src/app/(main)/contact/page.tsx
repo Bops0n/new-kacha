@@ -19,7 +19,7 @@ export default function ContactPage() {
     message: "",
   });
 
-  function handleChange(e: any) {
+  function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) {
     const { name, value } = e.target;
     setFormData((p) => ({ ...p, [name]: value }));
   }

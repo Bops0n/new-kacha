@@ -103,7 +103,7 @@ export default function OrderShippedInfo({ isAllValid, order, lbButtonText }: Or
                                 <FiInfo className="w-5 h-5 mt-1 text-info" />
                                 <div className="text-sm text-base-content/80 space-y-1">
                                 <p>
-                                    หลังจากกด <span className="font-semibold">"{lbButtonText}"</span>{" "}
+                                    หลังจากกด <span className="font-semibold">{'"'}{lbButtonText}{'"'}</span>{" "}
                                     ระบบจะเปลี่ยนสถานะคำสั่งซื้อเป็น{" "}
                                     <span className={`badge ${shipped.color }`}>
                                         <shipped.icon className="inline-block w-4 h-4 mr-1" />
@@ -120,7 +120,7 @@ export default function OrderShippedInfo({ isAllValid, order, lbButtonText }: Or
 
                             <div className="mt-4 text-xs text-base-content/60">
                                 * หากต้องการแก้ไขข้อมูลการจัดส่ง ให้กลับไปที่ขั้นตอน{" "}
-                                <span className="font-semibold">"กรอกข้อมูลการจัดส่ง"</span> ก่อนยืนยัน
+                                <span className="font-semibold">{'"'}กรอกข้อมูลการจัดส่ง{'"'}</span> ก่อนยืนยัน
                             </div>
                         </div>
                     </div>

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { ProductInventory, Category, SubCategory, ChildSubCategory, FullCategoryPath, ProductsPageData } from '../../types';
+import { ProductInventory, Category, SubCategory, ChildSubCategory, FullCategoryPath } from '../../types';
 
 export function useProductsPage() {
   const searchParams = useSearchParams();
@@ -79,13 +79,14 @@ export function useProductsPage() {
       // เช็คว่ามีหน้าต่อไปไหมจาก API
       setHasMore(data.hasMore);
 
-    } catch (err: any) {
-      setError(err.message);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "เกิดข้อผิดพลาดที่ไม่ทราบสาเหตุ";
+      setError(message);
     } finally {
       setLoading(false);
       isFetchingRef.current = false;
     }
-  }, [searchParams, products.length]); // Dependency ที่สำคัญคือ products.length
+  }, [searchParams, products.length, total]); // Dependency ที่สำคัญคือ products.length
 
   // Effect: เมื่อ URL Params เปลี่ยน (เช่น ค้นหา, เปลี่ยนหมวด) -> ให้โหลดใหม่ (Reset)
   useEffect(() => {

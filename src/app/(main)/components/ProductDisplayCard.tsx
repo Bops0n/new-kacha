@@ -16,27 +16,6 @@ interface ProductDisplayCardProps {
   product: ProductInventory;
 }
 
-// --- Component เสริม: สำหรับแสดงรูปขนาดเต็ม (Zoom) ---
-const FullImageModal = ({ src, alt, onClose }: { src: string, alt: string, onClose: () => void }) => {
-  return (
-    <div className="fixed inset-0 z-[60] bg-black/90 flex items-center justify-center p-4 animate-fadeIn" onClick={onClose}>
-        <div className="relative w-full max-w-5xl h-full max-h-screen flex items-center justify-center">
-            <button className="absolute top-4 right-4 btn btn-circle btn-ghost text-white bg-black/50 hover:bg-red-500 border-none z-50">
-                <FiX className="w-6 h-6" />
-            </button>
-            <div className="relative w-full h-full" onClick={(e) => e.stopPropagation()}>
-                 <Image
-                    src={src}
-                    alt={alt}
-                    fill
-                    className="object-contain"
-                 />
-            </div>
-        </div>
-    </div>
-  );
-};
-
 // --- Modal หลัก: เลือกจำนวนสินค้า ---
 const AddToCartQuantityModal: React.FC<{
   isOpen: boolean;
@@ -93,7 +72,8 @@ const AddToCartQuantityModal: React.FC<{
                         <Image
                             src={product.Image_URL || 'https://placehold.co/400x400?text=No+Image'}
                             alt={product.Name}
-                            fill
+                            width={512}
+                            height={512}
                             className="object-contain rounded-lg hover:scale-105 transition-transform duration-300"
                         />
                         <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/10 rounded-xl">
@@ -205,8 +185,9 @@ export default function ProductDisplayCard({ product }: ProductDisplayCardProps)
 
       showAlert(`เพิ่ม ${productToAdd.Name} (${quantityToAdd} ชิ้น) ลงในรถเข็นแล้ว!`, 'success');
       increment(); // เพิ่มจำนวนสินค้าใน Navbar
-    } catch (error: any) {
-      showAlert(error.message, 'error');
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "เกิดข้อผิดพลาดที่ไม่ทราบสาเหตุ";
+      showAlert(message, 'error');
     }
   };
 
@@ -225,7 +206,8 @@ export default function ProductDisplayCard({ product }: ProductDisplayCardProps)
           <Image
             src={product.Image_URL || 'https://placehold.co/400x300?text=No+Image'}
             alt={product.Name}
-            layout="fill"
+            width={512}
+            height={512}
             className="object-contain transition-transform duration-500 group-hover:scale-110 p-2"
           />
           {product.Discount_Price !== null && product.Discount_Price < product.Sale_Price && (

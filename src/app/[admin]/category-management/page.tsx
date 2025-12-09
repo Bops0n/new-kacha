@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useMemo, useEffect } from 'react';
-import { FiSearch, FiPlus, FiTag, FiEye, FiEdit, FiTrash2, FiX, FiSave } from 'react-icons/fi';
+import { FiSearch, FiPlus, FiTag, FiEdit, FiTrash2, FiX, FiSave } from 'react-icons/fi';
 import { useCategoryManagement } from '@/app/hooks/admin/useCategoryManagement';
 import { CategoryDisplayItem, CategoryFormData, Category, SubCategory, ModalMode } from '@/types';
 import LoadingSpinner from '@/app/components/LoadingSpinner';
@@ -155,7 +155,7 @@ const CategoryModal: React.FC<{
 
 // --- Main Page Component ---
 export default function CategoryManagementPage() {
-    const { data: session, status } = useSession();
+    const { data: session } = useSession();
     const { loading, error, data, filteredItems, filters, setFilters, actions, modalState, modalActions } = useCategoryManagement();
 
     const [currentPage, setCurrentPage] = useState(1);
@@ -173,7 +173,7 @@ export default function CategoryManagementPage() {
     if (loading) return <LoadingSpinner />;
     if (error) return <div className="text-center p-8 text-error"><h3>เกิดข้อผิดพลาด:</h3><p>{error}</p></div>;
 
-    if (!session || !session.user.Stock_Mgr) return <AccessDeniedPage url="/admin"/>;
+    if (!session || !session.user?.Stock_Mgr) return <AccessDeniedPage url="/admin"/>;
 
     return (
         <div className="min-h-screen bg-base-200 p-4">
@@ -203,7 +203,7 @@ export default function CategoryManagementPage() {
                         <input type="text" placeholder="ค้นหาด้วยชื่อหรือ ID..." value={filters.searchTerm} onChange={e => setFilters({...filters, searchTerm: e.target.value})} className="input input-bordered w-full pl-10" />
                     </div>
                 </div>
-                <select value={filters.typeFilter} onChange={e => setFilters({...filters, typeFilter: e.target.value as any})} className="select select-bordered w-full">
+                <select value={filters.typeFilter} onChange={e => setFilters({...filters, typeFilter: e.target.value as string})} className="select select-bordered w-full">
                     <option value="all">ทุกระดับ</option>
                     <option value="main">หมวดหมู่หลัก</option>
                     <option value="sub">หมวดหมู่รอง</option>

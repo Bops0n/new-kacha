@@ -19,10 +19,11 @@ export async function GET(req: NextRequest) {
             addresses: result
         });
 
-    } catch (dbError: any) {
-        logger.error("Error fetching addresses from database:", { error: dbError });
+    } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : "เกิดข้อผิดพลาดที่ไม่ทราบสาเหตุ";
+        logger.error("Error fetching addresses from database:", { error: error });
         return NextResponse.json(
-            { message: "Failed to fetch addresses from database", error: dbError.message },
+            { message: "Failed to fetch addresses from database", error: message },
             { status: 500 }
         );
     }

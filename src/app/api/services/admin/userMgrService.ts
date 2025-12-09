@@ -13,11 +13,11 @@ export async function addUser(user: Omit<UserAccount, 'User_ID'>, createBy: numb
 
 export async function deleteUser(userId: number, deleteBy: number) {
     const { rowCount } = await poolQuery(`SELECT * FROM "SP_ADMIN_USER_DEL"($1, $2)`, [userId, deleteBy]);
-    return rowCount > 0;
+    return rowCount !== null && rowCount > 0;
 }
 
 export async function updateUser(userId: number, userData: Partial<UserAccount>, updateBy: number) {
     const { rowCount } = await poolQuery(`SELECT * FROM "SP_ADMIN_USER_UPD"($1, $2, $3)`, 
         [userId, JSON.stringify(userData), updateBy]);
-    return rowCount > 0;
+    return rowCount !== null && rowCount > 0;
 }

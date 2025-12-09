@@ -5,7 +5,7 @@ import { addRole, deleteRole, getRoles, updateRule } from "../../services/admin/
 import { Role } from "@/types";
 import { logger } from "@/server/logger";
 
-export async function GET(req: NextRequest) {
+export async function GET() {
     // const auth = await checkSystemAdminRequire();
     // const isCheck = checkRequire(auth);
     // if (isCheck) return isCheck;
@@ -24,7 +24,7 @@ export async function POST(req: NextRequest) {
     const isCheck = checkRequire(auth);
     if (isCheck) return isCheck;
     
-    let newRole: Role = await req.json();
+    const newRole: Role = await req.json();
     
     const result = await addRole(newRole, Number(auth.userId));
 
@@ -101,10 +101,11 @@ export async function DELETE(req: NextRequest) {
             { status: 200 }
         );
 
-    } catch (dbError: any) {
-        logger.error("Error deleting role from database:", { error: dbError } );
+    } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : "เกิดข้อผิดพลาดที่ไม่ทราบสาเหตุ";
+        logger.error("Error deleting role from database:", { error: error } );
         return NextResponse.json(
-            { message: "Failed to delete role.", error: dbError.message },
+            { message: message, error: error },
             { status: 500 }
         );
     }

@@ -1,6 +1,5 @@
 import { poolQuery } from '@/app/api/lib/db';
-import { Order } from '@/types';
-import { mapDbRowsToOrders } from '@/app/utils/server';
+import { mapDbRowsToOrders, Order } from '@/types';
 import { checkRequire } from '@/app/utils/client';
 import { authenticateRequest } from '../../auth/utils';
 
@@ -24,10 +23,10 @@ export async function getOrders(orderId: number | null): Promise<Order[]> {
  * @param payload ข้อมูลที่ต้องการอัปเดต, ต้องมี Order_ID
  * @returns ข้อมูล Order ที่ถูกอัปเดตแล้ว
  */
-export async function updateOrder(payload: Partial<Order>): Promise<Order> {
+export async function updateOrder(payload: Partial<Order>): Promise<Order | null> {
     const auth = await authenticateRequest();
     const isCheck = checkRequire(auth);
-    if (isCheck) return isCheck;
+    if (isCheck) return null;
 
     const { Order_ID, Status, ...otherFields } = payload;
 
@@ -35,7 +34,7 @@ export async function updateOrder(payload: Partial<Order>): Promise<Order> {
         throw new Error("Order_ID is required for an update.");
     }
 
-    const fieldsToUpdate: { [key: string]: any } = {};
+    const fieldsToUpdate: { [key: string]: unknown } = {};
     if (Status) fieldsToUpdate.Status = Status;
     Object.assign(fieldsToUpdate, otherFields);
 
@@ -49,7 +48,7 @@ export async function updateOrder(payload: Partial<Order>): Promise<Order> {
     return orderUpdateResult.rows[0];
 }
 
-export async function uploadRefundSlip(imageURL: string, orderId: number, userId: number) {
+export async function uploadRefundSlip(imageURL: string, orderId: number, userId: number) : Promise<boolean> {
   const { rowCount } = await poolQuery(`SELECT * FROM "SP_ADMIN_ORDER_REFUND_SLIP_UPD"($1, $2, $3)`, [imageURL, orderId, userId]);
-  return rowCount > 0;
+  return rowCount !== null && rowCount > 0;
 }

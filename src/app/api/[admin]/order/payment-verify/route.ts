@@ -35,10 +35,11 @@ export async function POST(req: NextRequest) {
             message: result.Message,
         });
 
-    } catch (error: any) {
-        logger.error("Payment Verify Error:", error);
+    } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : "เกิดข้อผิดพลาดที่ไม่ทราบสาเหตุ";
+        logger.error("Payment Verify Error:", { error: error });
         return NextResponse.json(
-            { error: error.message || "Server Error" },
+            { error: message || "Server Error" },
             { status: 500 }
         );
     }

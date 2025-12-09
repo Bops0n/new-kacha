@@ -13,6 +13,7 @@ import { useCategoryData } from '@/app/hooks/useCategoryData';
 import AuthModal from '@/app/(main)/components/AuthModal';
 import { Category, SubCategory, ChildSubCategory } from '@/types';
 import { useWebsiteSettings } from '@/app/providers/WebsiteSettingProvider';
+import Image from 'next/image';
 
 // --- 1. Mobile Menu ---
 const MobileCategoryMenu = ({ categories, subCategories, childSubCategories, closeMobileMenu } : { categories: Category[], subCategories: SubCategory[], childSubCategories: ChildSubCategory[], closeMobileMenu: () => void }) => {
@@ -209,7 +210,13 @@ export default function UserNavbar() {
                         <Link href="/" className="flex items-center gap-3 flex-shrink-0 group">
                             <div className="w-12 h-12 bg-gradient-to-br from-amber-400 to-amber-500 rounded-xl flex items-center justify-center shadow-md group-hover:scale-105 transition-transform">
                                 {/* <span className="text-white font-bold text-2xl">K</span> */}
-                                <img src={settings.logoURL} alt="Logo" className="w-12 h-12 object-contain rounded-xl" />
+                                <Image 
+                                    src={settings.logoURL} 
+                                    alt="Logo" 
+                                    width={512}
+                                    height={512}
+                                    className="w-full h-full object-contain rounded-xl"
+                                />
                             </div>
                             <div className="flex flex-col">
                                 <span className="hidden lg:block text-xl font-bold leading-tight text-base-content">{settings.siteName}</span>
@@ -308,7 +315,7 @@ export default function UserNavbar() {
                             
                             <div className="flex-1"></div> {/* Spacer */}
                             
-                            {(session?.user?.accessLevel != 0 && session?.user.accessLevel !== undefined) && (
+                            {(session?.user?.accessLevel != 0 && session?.user?.accessLevel !== undefined) && (
                                 <li><Link href="/admin" className="text-warning font-bold hover:bg-warning/10 border-b-2 border-transparent hover:border-warning rounded-none py-3">จัดการระบบ (Admin)</Link></li>
                             )}
                         </ul>
@@ -326,7 +333,7 @@ export default function UserNavbar() {
                         
                         <div className="divider my-1">อื่นๆ</div>
                         <li><Link href="/products?discount=true" onClick={closeMobileMenu}>สินค้าลดราคา</Link></li>
-                        {(session?.user?.accessLevel != 0 && session?.user.accessLevel !== undefined) && 
+                        {(session?.user?.accessLevel != 0 && session?.user?.accessLevel !== undefined) && 
                             <li className="mt-2"><Link href="/admin" className="bg-warning text-warning-content hover:bg-warning-focus" onClick={closeMobileMenu}>จัดการระบบ</Link></li>
                         }
                     </ul>

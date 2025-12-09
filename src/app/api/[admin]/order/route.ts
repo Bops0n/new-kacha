@@ -18,9 +18,10 @@ export async function GET(req: NextRequest) {
         const orderId = req.nextUrl.searchParams.get('id');
         const orders = await getOrders(orderId ? Number(orderId) : null);
         return NextResponse.json({ orders });
-    } catch (error: any) {
+    } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : "เกิดข้อผิดพลาดที่ไม่ทราบสาเหตุ";
         logger.error("API GET Error:", { error: error });
-        return NextResponse.json({ message: error.message || "Failed to fetch orders" }, { status: 500 });
+        return NextResponse.json({ message: message || "Failed to fetch orders" }, { status: 500 });
     }
 }
 
@@ -36,9 +37,13 @@ export async function PATCH(req: NextRequest) {
     try {
         const payload: Partial<Order> = await req.json();
         const updatedOrder = await updateOrder(payload);
-        return NextResponse.json({ message: `Order ID ${updatedOrder.Order_ID} updated successfully.`, data: updatedOrder });
-    } catch (error: any) {
+        if (updatedOrder) {
+            return NextResponse.json({ message: `Order ID ${updatedOrder.Order_ID} updated successfully.`, data: updatedOrder });
+        }
+        return NextResponse.json({ message: "Failed to update order" }, { status: 500 });
+    } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : "เกิดข้อผิดพลาดที่ไม่ทราบสาเหตุ";
         logger.error("API PATCH Error:", { error: error });
-        return NextResponse.json({ message: error.message || "Failed to update order" }, { status: error.message.includes('not found') ? 404 : 500 });
+        return NextResponse.json({ message: message || "Failed to update order" }, { status: message.includes('not found') ? 404 : 500 });
     }
 }

@@ -51,10 +51,11 @@ export async function PATCH(req: NextRequest) {
             { message: `User ID ${userIdToUpdate} updated successfully.`, status: 200 }
         );
 
-    } catch (dbError: any) {
-        logger.error("Error update user failed", { error: dbError });
+    } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : "เกิดข้อผิดพลาดที่ไม่ทราบสาเหตุ";
+        logger.error("Error update user failed", { error: error });
         return NextResponse.json(
-            { message: dbError.message },
+            { message: message },
             { status: 500 }
         );
     }

@@ -8,7 +8,7 @@ import {
   FiRefreshCw, FiTrash2, FiAlertTriangle, FiCreditCard,
   FiArrowDown, FiZoomIn, FiCopy
 } from 'react-icons/fi';
-import { Order, OrderStatus } from '@/types';
+import { Order, OrderStatus, StatusConfig } from '@/types';
 import { useAlert } from '@/app/context/AlertModalContext';
 import { formatPrice } from '@/app/utils/formatters';
 import LoadingSpinner from '@/app/components/LoadingSpinner';
@@ -18,6 +18,7 @@ import { useOrderHistory } from '@/app/hooks/useOrderHistory';
 import { ImagePreviewModal } from '@/app/components/ImagePreviewModal';
 import { useWebsiteSettings } from '@/app/providers/WebsiteSettingProvider';
 import { statusConfig } from '@/app/utils/client';
+import Image from 'next/image';
 
 // --- Component: Payment Info Modal ---
 const PaymentInfoModal = (
@@ -53,8 +54,11 @@ const PaymentInfoModal = (
                             className="relative group w-full max-w-full aspect-square rounded-2xl overflow-hidden border border-base-200 shadow-sm bg-white cursor-zoom-in h-full"
                             onClick={() => setPreviewImage(settings.paymentQRScanImage)}
                         >
-                            <img
+                            <Image
                                 src={settings.paymentQRScanImage}
+                                alt='Payment QR Scan'
+                                width={512}
+                                height={512}
                                 className="w-full h-full object-contain p-4 transition-transform duration-500 group-hover:scale-110"
                             />
                             <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition duration-300 flex items-center justify-center pointer-events-none">
@@ -73,7 +77,7 @@ const PaymentInfoModal = (
                         </div>
                         <div className="card bg-base-100 border border-base-200 shadow-sm flex-grow">
                         <div className="card-body p-4">
-                            <h4 className="font-bold text-base mb-2">{settings.bankName}</h4>
+                            <h4 className="font-bold text-base mb-2">{settings.companyName}</h4>
 
                             <div className="text-sm space-y-1">
                                 <p><span className="opacity-70">ธนาคาร:</span> {settings.paymentBankName}</p>
@@ -124,7 +128,7 @@ const PaymentInfoModal = (
 };
 
 // --- StepIndicator Component ---
-const OrderStepIndicator = ({ order, statusConfig }: { order: Order, statusConfig: any }) => {
+const OrderStepIndicator = ({ order, statusConfig }: { order: Order, statusConfig: StatusConfig }) => {
   const currentStatus = order.Status;
   
   const happyPath: OrderStatus[] = (order.Payment_Type === 'bank_transfer')
@@ -272,7 +276,12 @@ export default function OrderDetailsPage() {
       // ถ้ามี Refund Slip ให้ Auto switch ไป Tab Refund
       if (data.order.Refund_Slip) setActiveTab('refund');
 
-    } catch (err: any) { setError(err.message); } finally { setLoading(false); }
+    } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : "เกิดข้อผิดพลาดที่ไม่ทราบสาเหตุ";
+        setError(message); 
+    } finally { 
+        setLoading(false); 
+    }
   }, [orderId]);
 
   useEffect(() => { fetchOrderDetails(); }, [fetchOrderDetails]);
@@ -302,7 +311,12 @@ export default function OrderDetailsPage() {
       await fetchOrderDetails();
       setSelectedFile(null);
       showAlert('อัปโหลดสลิปสำเร็จ!', 'success');
-    } catch (err: any) { showAlert(err.message, 'error'); } finally { setIsUploading(false); }
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "เกิดข้อผิดพลาดที่ไม่ทราบสาเหตุ"; 
+      showAlert(message, 'error'); 
+    } finally { 
+        setIsUploading(false); 
+    }
   };
 
     function handleFileChangeManual(file: File) {
@@ -337,8 +351,9 @@ export default function OrderDetailsPage() {
       await fetchOrderDetails();
       setIsCancelModalOpen(false);
       showAlert('ดำเนินการสำเร็จ', 'success');
-    } catch (err: any) {
-      showAlert(err.message, 'error');
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "เกิดข้อผิดพลาดที่ไม่ทราบสาเหตุ";
+      showAlert(message, 'error');
     } finally {
       setIsCancelling(false);
     }
@@ -367,7 +382,7 @@ export default function OrderDetailsPage() {
   if (loading) return <LoadingSpinner />;
   if (error) return <div className="container mx-auto p-4 text-center text-error"><h1 className="text-2xl font-bold mb-4">เกิดข้อผิดพลาด</h1><p>{error}</p><button onClick={() => router.back()} className="btn btn-primary mt-4">กลับ</button></div>;
   if (!order) return <div className="text-center p-8">ไม่พบข้อมูลคำสั่งซื้อ</div>;
-  if (order.User_ID !== Number(session?.user.id)) return <AccessDeniedPage url="/"/>
+  if (order.User_ID !== Number(session?.user?.id)) return <AccessDeniedPage url="/"/>
 
   const canUploadSlip = order.Payment_Type === 'bank_transfer' && (order.Status === 'waiting_payment' || (order.Status === 'pending' && order.Is_Payment_Checked === false));
   const canCancel = ['waiting_payment', 'pending'].includes(order.Status);
@@ -453,9 +468,11 @@ export default function OrderDetailsPage() {
                                             className="relative group w-full rounded-xl overflow-hidden border border-base-300 shadow-sm cursor-zoom-in bg-base-200"
                                             onClick={() => setPreviewImage(order.Transaction_Slip!)}
                                         >
-                                            <img 
+                                            <Image 
                                                 src={order.Transaction_Slip} 
                                                 alt="Transfer Slip" 
+                                                width={512}
+                                                height={512}
                                                 className="w-full h-auto max-h-60 object-contain transition-transform duration-300 group-hover:scale-105" 
                                             />
                                             <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center backdrop-blur-[1px]">
@@ -548,9 +565,11 @@ export default function OrderDetailsPage() {
                                             className="relative group w-full rounded-xl overflow-hidden border border-base-300 shadow-sm cursor-zoom-in bg-base-200"
                                             onClick={() => setPreviewImage(order.Refund_Slip!)}
                                         >
-                                            <img 
+                                            <Image 
                                                 src={order.Refund_Slip} 
                                                 alt="Refund Slip" 
+                                                width={512}
+                                                height={512}
                                                 className="w-full h-auto max-h-60 object-contain transition-transform duration-300 group-hover:scale-105" 
                                             />
                                             <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center backdrop-blur-[1px]">
@@ -623,7 +642,12 @@ export default function OrderDetailsPage() {
                                             <div className="flex items-center gap-4">
                                                 <div className="avatar">
                                                     <div className="mask mask-squircle w-12 h-12 bg-base-200 border border-base-200">
-                                                        <img src={product.Product_Image_URL || 'https://placehold.co/100x100?text=No+Image'} alt={product.Product_Name} />
+                                                        <Image 
+                                                            src={product.Product_Image_URL || 'https://placehold.co/100x100?text=No+Image'} 
+                                                            alt={product.Product_Name} 
+                                                            width={512}
+                                                            height={512}
+                                                        />
                                                     </div>
                                                 </div>
                                                 <div>

@@ -1,6 +1,7 @@
 import React from 'react';
 import { FiTag, FiBox, FiDollarSign, FiEye, FiTrash2 } from 'react-icons/fi';
 import { ProductInventory, ModalMode } from '@/types'; // <--- 1. แก้ไขการ import Type
+import Image from 'next/image';
 
 interface ProductCardProps {
   product: ProductInventory;
@@ -29,9 +30,11 @@ const ProductCard: React.FC<ProductCardProps> = ({
           {/* Product Image */}
           <div className="avatar">
             <div className="mask mask-squircle w-16 h-16">
-              <img
+              <Image
                 src={product.Image_URL || 'https://placehold.co/64x64/EEEEEE/333333?text=No+Img'}
                 alt={product.Name}
+                width={512}
+                height={512}
                 onError={(e) => {
                   e.currentTarget.onerror = null;
                   e.currentTarget.src = 'https://placehold.co/64x64/CCCCCC/666666?text=Img+Error';

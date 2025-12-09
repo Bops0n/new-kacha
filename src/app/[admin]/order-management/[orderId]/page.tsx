@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useCallback, useEffect, useState } from 'react';
-import { Order, SimpleProductDetail } from '@/types';
-import { redirect, useParams, useRouter, useSearchParams } from 'next/navigation';
+import { getOrderNextStep, Order, OrderShipping, SimpleProductDetail } from '@/types';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { STEP_TYPE, StepFlowBar } from '@/app/[admin]/components/order-management/StepFlowComponent';
 import { useAlert } from '@/app/context/AlertModalContext';
 import { OrderNavigation } from '@/app/[admin]/components/order-management/OrderNavigation';
@@ -52,7 +52,7 @@ export default function OrderStepPage() {
     const [isSaved, setIsSaved] = useState(false);
     const [btnCancelOrder, setBtnCancelOrder] = useState(false);
 
-    const [form, setForm] = useState({
+    const [form, setForm] = useState<OrderShipping>({
         Shipping_Method: "",
         Shipping_Provider: "",
         Shipping_Date: "",
@@ -73,7 +73,7 @@ export default function OrderStepPage() {
 
     const [isReadOnly, setIsReadOnly] = useState<boolean>(false);
 
-      const [previewImage, setPreviewImage] = useState<string | null>(null);
+    const [previewImage, setPreviewImage] = useState<string | null>(null);
 
     const fetchOrderData = useCallback(async () => {
         async function load() {
@@ -86,8 +86,27 @@ export default function OrderStepPage() {
                 const order = orders[0];
                 if (order) {
                     setOrder(order);
+
                     // await loadNextStep(order.Order_ID);
-                    loadNextStep(order);
+
+                    const { 
+                        btnNextEnable, 
+                        lbButtonText, 
+                        BackStep, 
+                        NextStep, 
+                        btnSpecial, 
+                        isSaved, 
+                        btnCancelOrder 
+                    } = getOrderNextStep(order, controller);
+
+                    setBtnNextEnable(btnNextEnable);
+                    setButtonText(lbButtonText);
+                    setBackStep(BackStep);
+                    setNextStep(NextStep);
+                    setBtnSpecial(btnSpecial);
+                    setIsSaved(isSaved);
+                    setBtnCancelOrder(btnCancelOrder);
+
                     if (IsCheckOrder || IsSummary || IsRefunding) {
                         await loadProductDetails(order);   
                     }
@@ -129,120 +148,7 @@ export default function OrderStepPage() {
         //     }
         // }
 
-        function loadNextStep(order: Order) {
-            if (IsRefunding) {
-                if (order.Status === 'refunding') {
-                    setBtnNextEnable(order.Refund_Slip !== null && order.Is_Refunded);
-                    setButtonText('ยืนยันการคืนเงิน');
-                    setBackStep(`/admin/order-management/${order.Order_ID}?controller=checkorder`);
-                    setNextStep(`/admin/order-management/${order.Order_ID}?controller=refunding`);
-                    setBtnSpecial(false);
-                    setIsSaved(true);
-                    setBtnCancelOrder(false);
-                    return;
-                }
-
-                setBtnNextEnable(true);
-                setButtonText('จัดการคำสั่งซื้อ');
-                setBackStep(`/admin/order-management`);
-                setNextStep(null);
-                setBtnSpecial(false);
-                setIsSaved(false);
-                setBtnCancelOrder(false);
-                return;
-            }
-
-            if (IsReqCancel && order.Status === 'req_cancel') {
-                setBtnNextEnable(true);
-                setButtonText('จัดการคำสั่งซื้อ');
-                setBackStep(`/admin/order-management`);
-                setNextStep(null);
-                setBtnSpecial(true);
-                setIsSaved(false);
-                setBtnCancelOrder(false);
-                return;
-            }
-
-            const v_isRefunding = order.Status === 'refunding' && order.Is_Cancelled;
-
-            if ((order.Status === 'cancelled' || order.Status === 'refunding' || order.Status === 'refunded') || order.Is_Cancelled) {
-                setBtnNextEnable(v_isRefunding);
-                setButtonText(v_isRefunding ? 'ดำเนินการคืนเงิน' : 'คำสั่งซื้อถูกยกเลิก');
-                setBackStep('/admin/order-management');
-                setNextStep(v_isRefunding ? `/admin/order-management/${order.Order_ID}?controller=refunding` : `/admin/order-management/${order.Order_ID}?controller=checkorder`);
-                setBtnSpecial(false);
-                setIsSaved(false);
-                setBtnCancelOrder(false);
-                return;
-            }
-
-            const v_btnCancel = order.Status !== 'shipped' && order.Status !== 'delivered';
-
-            if (IsCheckOrder) {
-                const v_isPaymentChecked = order.Payment_Type === 'bank_transfer' && order.Status === 'pending' && order.Transaction_Slip !== null && order.Transaction_Status === 'pending';
-
-                setBtnNextEnable(true);
-                setButtonText(!order.Is_Confirmed && ((!v_isPaymentChecked && order.Status !== 'waiting_payment') || order.Payment_Type === 'cash_on_delivery') ? 'ยืนยันคำสั่งซื้อ' : 'ถัดไป');
-                setBackStep('/admin/order-management');
-                setNextStep(`/admin/order-management/${order.Order_ID}?controller=shipping`);
-                setBtnSpecial(v_isPaymentChecked);
-                setIsSaved(!order.Is_Confirmed && order.Status === 'pending' && (order.Payment_Type === 'cash_on_delivery' || order.Transaction_Status === 'confirmed'));
-                setBtnCancelOrder(v_btnCancel);
-                return;
-            }
-
-            if (IsShipping) {
-                setBtnNextEnable(true);
-                setButtonText('ถัดไป');
-                setBackStep(`/admin/order-management/${order.Order_ID}?controller=checkorder`);
-                setNextStep(`/admin/order-management/${order.Order_ID}?controller=summary`);
-                setBtnSpecial(false);
-                setIsSaved(true);
-                setBtnCancelOrder(v_btnCancel);
-                return;
-            }
-
-            if (IsSummary) {
-                setBtnNextEnable(true);
-                setButtonText('ถัดไป');
-                setBackStep(`/admin/order-management/${order.Order_ID}?controller=shipping`);
-                setNextStep(`/admin/order-management/${order.Order_ID}?controller=shipped`);
-                setBtnSpecial(false);
-                setIsSaved(false);
-                setBtnCancelOrder(v_btnCancel);
-                return;
-            }
-
-            if (IsShipped) {
-                if (order.Status === 'preparing') {
-                    setBtnNextEnable(true);
-                    setButtonText('ยืนยันการจัดส่ง');
-                    setBackStep(`/admin/order-management/${order.Order_ID}?controller=summary`);
-                    setNextStep(`/admin/order-management/${order.Order_ID}?controller=shipped`);
-                    setBtnSpecial(false);
-                    setIsSaved(true);
-                    setBtnCancelOrder(v_btnCancel);
-                    return;
-                }
-
-                setBtnNextEnable(true);
-                setButtonText('จัดการคำสั่งซื้อ');
-                setBackStep(`/admin/order-management/${order.Order_ID}?controller=summary`);
-                setNextStep(null);
-                setBtnSpecial(false);
-                setIsSaved(false);
-                setBtnCancelOrder(v_btnCancel);
-                return;
-            }
-
-            setBtnNextEnable(true);
-            setButtonText('จัดการคำสั่งซื้อ');
-            setBackStep(`/admin/order-management`);
-            setNextStep(null);
-            setBtnSpecial(false);
-            setIsSaved(false);
-            setBtnCancelOrder(false);
-        }
+        
 
         async function loadProductDetails(order: Order) {
             if (!order || order.Products.length < 1) return;
@@ -261,7 +167,7 @@ export default function OrderStepPage() {
 
         load();
 
-    }, [orderId, controller]);
+    }, [orderId, controller, IsCheckOrder, IsRefunding, IsShipping, IsSummary]);
 
     async function onSaved(): Promise<boolean> {
         if (!onValidate()) return false;
@@ -277,8 +183,9 @@ export default function OrderStepPage() {
                 const result = await response.json();
                 if (!response.ok) throw new Error(result.message);
                 return true;
-                } catch (err: any) {
-                showAlert(err.message, 'error');
+            } catch (error: unknown) {
+                const message = error instanceof Error ? error.message : "เกิดข้อผิดพลาดที่ไม่ทราบสาเหตุ";
+                showAlert(message, 'error');
             }
         } else if (IsShipping) {
             if (isReadOnly) return false;
@@ -292,8 +199,9 @@ export default function OrderStepPage() {
                 const result = await response.json();
                 if (!response.ok) throw new Error(result.message);
                 return true;
-            } catch (err: any) {
-                showAlert(err.message, 'error');
+            } catch (error: unknown) {
+                const message = error instanceof Error ? error.message : "เกิดข้อผิดพลาดที่ไม่ทราบสาเหตุ";
+                showAlert(message, 'error');
             }
         } else if (IsShipped || IsRefunding) {
             try {
@@ -309,8 +217,9 @@ export default function OrderStepPage() {
                 const result = await response.json();
                 if (!response.ok) throw new Error(result.message);
                 return true;
-            } catch (err: any) {
-                showAlert(err.message, 'error');
+            } catch (error: unknown) {
+                const message = error instanceof Error ? error.message : "เกิดข้อผิดพลาดที่ไม่ทราบสาเหตุ";
+                showAlert(message, 'error');
             }
         }
         return false;
@@ -319,7 +228,7 @@ export default function OrderStepPage() {
     const handleFormChange = useCallback((e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value, type } = e.target;
         const checked = (e.target as HTMLInputElement).checked;
-        let finalValue: any = value;
+        let finalValue: string | number | boolean | null = value;
 
         if (type === 'checkbox') finalValue = checked;
         else if (type === 'number') finalValue = value === '' ? null : Number(value);
@@ -336,32 +245,34 @@ export default function OrderStepPage() {
     
     const handleUploadSlip = async () => {
         if (!order || !selectedFile) {
-          showAlert('กรุณาเลือกไฟล์ก่อน', 'warning');
-          return;
+            showAlert('กรุณาเลือกไฟล์ก่อน', 'warning');
+            return;
         }
         
         setIsUploading(true);
         try {
-          const formData = new FormData();
-          formData.append('transferSlip', selectedFile);
-    
-          const response = await fetch(`/api/admin/order/refund-slip/${order.Order_ID}`, {
-            method: 'PATCH',
-            body: formData,
-          });
-    
-          const result = await response.json();
-          if (!response.ok) {
-            throw new Error(result.message || 'ไม่สามารถอัปโหลดหลักฐานได้');
-          }
-    
-          await fetchOrderData(); // Re-fetch เพื่อแสดงข้อมูลล่าสุด
-          setSelectedFile(null);
-          showAlert('อัปโหลดหลักฐานสำเร็จ!', 'success');
-        } catch (err: any) {
-          showAlert(err.message, 'error', 'เกิดข้อผิดพลาด');
+            const formData = new FormData();
+            formData.append('transferSlip', selectedFile);
+        
+            const response = await fetch(`/api/admin/order/refund-slip/${order.Order_ID}`, {
+                method: 'PATCH',
+                body: formData,
+            });
+        
+            const result = await response.json();
+            if (!response.ok) {
+                throw new Error(result.message || 'ไม่สามารถอัปโหลดหลักฐานได้');
+            }
+        
+            await fetchOrderData(); // Re-fetch เพื่อแสดงข้อมูลล่าสุด
+            
+            setSelectedFile(null);
+            showAlert('อัปโหลดหลักฐานสำเร็จ!', 'success');
+        } catch (error: unknown) {
+            const message = error instanceof Error ? error.message : "เกิดข้อผิดพลาดที่ไม่ทราบสาเหตุ";
+            showAlert(message, 'error', 'เกิดข้อผิดพลาด');
         } finally {
-          setIsUploading(false);
+            setIsUploading(false);
         }
     };
 
@@ -429,8 +340,7 @@ export default function OrderStepPage() {
         }
 
         replace(url);
-    }, [order, controller]);
-
+    }, [order, controller, replace]);
 
     useEffect(() => {
         fetchOrderData();
@@ -486,7 +396,6 @@ export default function OrderStepPage() {
                             btnSpecial={btnSpecial}
                             isReqCancel={IsReqCancel}
                             fetchOrderData={fetchOrderData}
-                            previewImage={previewImage}
                             setPreviewImage={setPreviewImage}
                         />
                     }
@@ -518,7 +427,6 @@ export default function OrderStepPage() {
                             handleFileChange={handleFileChange}
                             handleUploadSlip={handleUploadSlip}
                             handleFileChangeManual={handleFileChangeManual}
-                            previewImage={previewImage}
                             setPreviewImage={setPreviewImage}
                         />
                     }

@@ -5,12 +5,12 @@ import { authenticateRequest } from '@/app/api/auth/utils';
 import { checkRequire } from '@/app/utils/client';
 import { logger } from '@/server/logger';
 
-export async function PUT(request: NextRequest, context: { params: { addressId: string } }) {
+export async function PUT(request: NextRequest, { params }: { params: Promise<{ addressId: string }> }) {
   const auth = await authenticateRequest();
   const isCheck = checkRequire(auth);
   if (isCheck) return isCheck;
 
-  const { addressId } = await context.params;
+  const { addressId } = await params;
   const parseId = parseInt(addressId);
 
   if (isNaN(parseId)) {
@@ -43,13 +43,13 @@ export async function PUT(request: NextRequest, context: { params: { addressId: 
  * DELETE /api/address/[addressId]
  * Deletes an address by its ID, ensuring it belongs to the authenticated user.
  */
-export async function DELETE(request: NextRequest, context: { params: { addressId: string } }) {
+export async function DELETE(request: NextRequest, { params }: { params: Promise<{ addressId: string }> }) {
   const auth = await authenticateRequest();
   const isCheck = checkRequire(auth);
   if (isCheck) return isCheck;
 
   // Get addressId from URL params
-  const { addressId } = await context.params;
+  const { addressId } = await params;
   const parseId = parseInt(addressId);
 
   if (isNaN(parseId)) {
@@ -77,12 +77,12 @@ export async function DELETE(request: NextRequest, context: { params: { addressI
  * Partially updates an existing address for the authenticated user.
  * Designed for operations like setting Is_Default.
  */
-export async function PATCH(request: NextRequest, context: { params: { addressId: string } }) {
+export async function PATCH(request: NextRequest, { params }: { params: Promise<{ addressId: string }> }) {
   const auth = await authenticateRequest();
   const isCheck = checkRequire(auth);
   if (isCheck) return isCheck;
 
-  const { addressId } = await context.params;
+  const { addressId } = await params;
   const parseId = parseInt(addressId);
 
   if (isNaN(parseId)) {
