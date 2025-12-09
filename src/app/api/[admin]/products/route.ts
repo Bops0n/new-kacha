@@ -58,11 +58,11 @@ export async function PATCH(req: NextRequest) {
             return NextResponse.json({ message: "Product_ID is required for update" }, { status: 400 });
         }
 
-        const updatedProduct = await productService.updateProduct(body.Product_ID, Number(auth.userId), body);
-        if (!updatedProduct) {
+        const result = await productService.updateProduct(body.Product_ID, Number(auth.userId), body);
+        if (!result) {
             return NextResponse.json({ message: `ไม่พบสินค้า ID: ${body.Product_ID}` }, { status: 404 });
         }
-        return NextResponse.json({ message: 'อัปเดตสินค้าสำเร็จ', product: updatedProduct });
+        return NextResponse.json({ message: 'อัปเดตสินค้าสำเร็จ' });
     } catch (error) {
         return NextResponse.json({ message: "Server Error", error: (error as Error).message }, { status: 500 });
     }
