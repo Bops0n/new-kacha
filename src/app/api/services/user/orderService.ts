@@ -16,5 +16,5 @@ export async function confirmReceiveOrder(orderId: number, userId: number) {
         `SELECT * FROM "SP_USER_ORDER_CONFIRM_RECEIVE_UPD"($1, $2)`,
         [orderId, userId]
     );
-    return rows[0]?.Status_Code === 200;
+    return rows[0];
 }
