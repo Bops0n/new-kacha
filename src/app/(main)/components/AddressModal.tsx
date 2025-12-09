@@ -15,7 +15,7 @@ import {
 interface AddressModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (address: AddressSchema) => Promise<boolean|undefined> | void;
+  onSave: (address: AddressSchema) => Promise<boolean|undefined|void> | void;
   initialData?: Partial<AddressSchema> | null;
 }
 

@@ -67,7 +67,7 @@ export async function POST(request: Request) {
 
         return NextResponse.json({ message: 'อัปเดตตะกร้าสินค้าสำเร็จ', error: false }, { status: 200 });
     } catch (error) {
-        logger.error('Error adding/updating cart item:', { error: error });
+        logger.error('Error adding/updating cart item:', { error : error });
         return NextResponse.json({ message: `${error.message}`, error: true }, { status: 500 });
     }
 }

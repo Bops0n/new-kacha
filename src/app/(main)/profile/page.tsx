@@ -64,7 +64,7 @@ export default function ProfilePage() {
     setIsAddressModalOpen(true);
   };
 
-  const handleAddressModalSave = async (data: NewAddressForm) => {
+  const handleAddressModalSave = async (data: AddressSchema) => {
     const success = await saveAddress(data);
     if (!success) throw new Error("บันทึกข้อมูลไม่สำเร็จ");
   };
@@ -213,7 +213,7 @@ export default function ProfilePage() {
                                     <div className="card-actions justify-between items-center pt-3 border-t border-base-200/50">
                                         {!address.Is_Default ? (
                                             <button 
-                                                onClick={() => setDefaultAddress(address.Address_ID)} 
+                                                onClick={() =>  address.Address_ID && setDefaultAddress(address.Address_ID)} 
                                                 className="btn btn-ghost btn-xs text-base-content/50 hover:text-primary gap-1 pl-0"
                                             >
                                                 <FiCheckCircle /> ตั้งเป็นค่าเริ่มต้น
@@ -228,7 +228,7 @@ export default function ProfilePage() {
                                             <button onClick={() => openEditAddressModal(address)} className="btn btn-ghost btn-xs btn-square text-info hover:bg-info/10 tooltip" data-tip="แก้ไข">
                                                 <FiEdit3 />
                                             </button>
-                                            <button onClick={() => deleteAddress(address.Address_ID)} className="btn btn-ghost btn-xs btn-square text-error hover:bg-error/10 tooltip" data-tip="ลบ">
+                                            <button onClick={() => address.Address_ID && deleteAddress(address.Address_ID)} className="btn btn-ghost btn-xs btn-square text-error hover:bg-error/10 tooltip" data-tip="ลบ">
                                                 <FiTrash2 />
                                             </button>
                                         </div>
