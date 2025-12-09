@@ -20,9 +20,9 @@ export async function addProduct(productData: Partial<ProductInventory>, UserID:
 /**
  * อัปเดตข้อมูลสินค้าที่มีอยู่
  */
-export async function updateProduct(productId: number, UserID: number, productData: Partial<ProductInventory>): Promise<ProductInventory | null> {
-  const { rows } = await poolQuery(`SELECT * FROM "SP_ADMIN_PRODUCT_UPD"($1, $2, $3)`, [productId, UserID, JSON.stringify(productData)]);
-  return rows[0] || null;
+export async function updateProduct(productId: number, UserID: number, productData: Partial<ProductInventory>): Promise<boolean> {
+  const { rowCount } = await poolQuery(`SELECT * FROM "SP_ADMIN_PRODUCT_UPD"($1, $2, $3)`, [productId, UserID, JSON.stringify(productData)]);
+  return rowCount > 0;
 }
 
 /**

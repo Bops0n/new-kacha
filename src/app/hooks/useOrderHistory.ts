@@ -7,8 +7,9 @@ import { useSession } from 'next-auth/react';
 import { Order, OrderStatus } from '../../types'; // Adjust path if your types are in a different location
 import { useAlert } from '../context/AlertModalContext';
 import { FiAlertTriangle, FiCheckCircle, FiClock, FiFileText, FiInfo, FiPackage, FiRefreshCw, FiTruck, FiXCircle } from 'react-icons/fi';
-import { statusConfig } from '../utils/client';
+import { statusConfig, statusTypeLabels } from '../utils/client';
 import { useWebsiteSettings } from '../providers/WebsiteSettingProvider';
+import { boolean } from 'zod';
 
 
 export function useOrderHistory() {
@@ -85,33 +86,33 @@ export function useOrderHistory() {
     const config = statusConfig[Status] || statusConfig.pending;
     return { icon: config.icon, color: config.textColor, bgColor: config.bgColor, borderColor: 'border-base-200', title: config.label, message: `สถานะปัจจุบัน: ${config.label}` };
   }, []);
-  const handleConfirmReceive = (e: React.MouseEvent<HTMLButtonElement>, orderId : number) => {
+  const handleConfirmReceive = (e: React.MouseEvent<HTMLButtonElement>, orderId : number, fetchOrderDetails?: () => {}) => {
     e.preventDefault(); // ป้องกันการทำงาน Default ของปุ่ม (เช่น การ Submit Form)
-      showAlert(
-        'คุณได้รับสินค้าและตรวจสอบความถูกต้องเรียบร้อยแล้วใช่หรือไม่?', // Message
-        'info', // Type
-        'ยืนยันการรับสินค้า', // Title
-        async () => { // onConfirm Callback
-          setIsConfirming(true);
-          try {
-            // เรียก API ยืนยันรับของ
-            const response = await fetch(`/api/main/orders/${orderId}/receive`, {
-              method: 'PATCH',
-            });
-            const result = await response.json();
-            if (!response.ok) throw new Error(result.message);
-            // โหลดข้อมูลใหม่เพื่ออัปเดตสถานะเป็น Delivered
-            fetchOrders()
-            
-            showAlert('ยืนยันการรับสินค้าเรียบร้อยแล้ว ขอบคุณที่ใช้บริการครับ', 'success');
-          } catch (err: any) {
-            showAlert(err.message, 'error');
-          } finally {
-            setIsConfirming(false);
-          }
+    showAlert(
+      'คุณได้รับสินค้าและตรวจสอบความถูกต้องเรียบร้อยแล้วใช่หรือไม่?', // Message
+      'info', // Type
+      'ยืนยันการรับสินค้า', // Title
+      async () => { // onConfirm Callback
+        setIsConfirming(true);
+        try {
+          // เรียก API ยืนยันรับของ
+          const response = await fetch(`/api/main/orders/${orderId}/receive`, {
+            method: 'PATCH',
+          });
+          const result = await response.json();
+          if (!response.ok) throw new Error(result.message);
+          // โหลดข้อมูลใหม่เพื่ออัปเดตสถานะเป็น Delivered
+          await fetchOrders()
+          if (fetchOrderDetails) await fetchOrderDetails();
+          showAlert('ยืนยันการรับสินค้าเรียบร้อยแล้ว ขอบคุณที่ใช้บริการครับ', 'success');
+        } catch (err: any) {
+          showAlert(err.message, 'error');
+        } finally {
+          setIsConfirming(false);
         }
-      );
-    };
+      }
+    );
+  };
   const fetchOrders = useCallback(async () => {
     // Wait until session is loaded
     // if (status === 'loading') {
@@ -149,13 +150,17 @@ export function useOrderHistory() {
     const hasSlip = !!order.Transaction_Slip;
     const isChecked = order.Is_Payment_Checked;
 
+    const refunding = statusTypeLabels['refunding']
+    const req_cancel = statusTypeLabels['req_cancel']
+    const cancelled = statusTypeLabels['cancelled']
+
     if (hasSlip && isChecked) {
-        return { targetStatus: 'refunding' as OrderStatus, description: 'เนื่องจากมีการยืนยันชำระเงินแล้ว ระบบจะเปลี่ยนสถานะเป็น "รอคืนเงิน" เพื่อให้เจ้าหน้าที่ตรวจสอบและดำเนินการคืนเงิน' };
+        return { targetStatus: 'refunding' as OrderStatus, description: `เนื่องจากมีการยืนยันชำระเงินแล้ว ระบบจะเปลี่ยนสถานะเป็น "${refunding.label}" เพื่อให้เจ้าหน้าที่ตรวจสอบและดำเนินการคืนเงิน` };
     }
     if (hasSlip && !isChecked && order.Transaction_Status !== 'rejected') {
-        return { targetStatus: 'req_cancel' as OrderStatus, description: 'เนื่องจากมีการแนบสลิปแล้วแต่ยังไม่ได้รับการตรวจสอบ ระบบจะเปลี่ยนสถานะเป็น "ขอยกเลิก" เพื่อให้เจ้าหน้าที่รับทราบ' };
+        return { targetStatus: 'req_cancel' as OrderStatus, description: `เนื่องจากมีการแนบสลิปแล้วแต่ยังไม่ได้รับการตรวจสอบ ระบบจะเปลี่ยนสถานะเป็น "${req_cancel.label}" เพื่อให้เจ้าหน้าที่รับทราบ` };
     }
-    return { targetStatus: 'cancelled' as OrderStatus, description: 'รายการจะถูกเปลี่ยนสถานะเป็น "ยกเลิก" ทันที' };
+    return { targetStatus: 'cancelled' as OrderStatus, description: `รายการจะถูกเปลี่ยนสถานะเป็น "${cancelled.label}" ทันที` };
   }, []);
 
   useEffect(() => {

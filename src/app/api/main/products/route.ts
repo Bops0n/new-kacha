@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
     // 2. เรียก Stored Procedure ที่ทำ Pagination ไว้ (SP_USER_PRODUCT_SEARCH)
     // ลำดับพารามิเตอร์: Search, Cat, Sub, Child, IsDiscount, Page, PageSize
     const { rows } = await poolQuery(
-        `SELECT * FROM public."SP_USER_PRODUCT_SEARCH"($1, $2, $3, $4, $5, $6, $7)`,
+        `SELECT * FROM public."SP_USER_PRODUCT_SEARCH_GET"($1, $2, $3, $4, $5, $6, $7)`,
         [search, categoryId, subCategoryId, childCategoryId, isDiscount, page, limit]
     );
 

@@ -279,8 +279,7 @@ export default function OrderDetailsPage() {
 
   const handleConfirmReceive = async (e: React.MouseEvent<HTMLButtonElement>) => {
       setIsConfirming(true);
-      await confirmReceiveHook(e, orderId);
-      await fetchOrderDetails();
+      await confirmReceiveHook(e, orderId, fetchOrderDetails)
       setIsConfirming(false);
   }
 
@@ -371,7 +370,7 @@ export default function OrderDetailsPage() {
   if (order.User_ID !== Number(session?.user.id)) return <AccessDeniedPage url="/"/>
 
   const canUploadSlip = order.Payment_Type === 'bank_transfer' && (order.Status === 'waiting_payment' || (order.Status === 'pending' && order.Is_Payment_Checked === false));
-  const canCancel = ['waiting_payment', 'pending', 'preparing'].includes(order.Status);
+  const canCancel = ['waiting_payment', 'pending'].includes(order.Status);
   const subtotalBeforeDiscount = order.Products.reduce((sum, product) => sum + (product.Product_Sale_Price * product.Quantity), 0);
 
   // Check if we should show the switch buttons
@@ -540,7 +539,6 @@ export default function OrderDetailsPage() {
                                             </button>
                                         </>
                                     )}
-                                    
                                 </>
                             ) : (
                                 // --- REFUND TAB CONTENT ---
@@ -703,7 +701,7 @@ export default function OrderDetailsPage() {
                             <div className="flex-1">
                                 <h3 className={`font-bold text-sm ${targetStatusInfo.config.color}`}>ผลการดำเนินการ</h3>
                                 <p className="text-xs opacity-80 mt-1">{targetStatusInfo.description}</p>
-                                <div className={`badge ${targetStatusInfo.config.color.replace('text-', 'badge-')} gap-1 mt-2 border-none text-white`}>สถานะใหม่: {targetStatusInfo.config.label}</div>
+                                <div className={`badge ${targetStatusInfo.config.color.replace('text-', 'badge-')} gap-1 mt-2 border-none ${targetStatusInfo.config.textColor}`}>สถานะใหม่ : {targetStatusInfo.config.label}</div>
                             </div>
                         </div>
                     )}

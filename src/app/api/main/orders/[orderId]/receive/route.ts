@@ -22,13 +22,9 @@ export async function PATCH(
 
     try {
         // 2. เรียก Service ยืนยันรับของ
-        const success = await confirmReceiveOrder(parseId, Number(auth.userId));
+        const { Status_Code, Message } = await confirmReceiveOrder(parseId, Number(auth.userId));
 
-        if (!success) {
-            return NextResponse.json({ message: 'ไม่สามารถยืนยันรับสินค้าได้ (คำสั่งซื้ออาจไม่ได้อยู่ในสถานะจัดส่ง หรือไม่ใช่ของคุณ)' }, { status: 400 });
-        }
-
-        return NextResponse.json({ message: 'ยืนยันรับสินค้าสำเร็จ' });
+        return NextResponse.json({ message: Message }, { status: Status_Code });
 
     } catch (error: any) {
         logger.error('API Error confirm receive:', error);
