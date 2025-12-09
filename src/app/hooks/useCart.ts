@@ -188,5 +188,7 @@ export function useCart() {
     updateItemQuantity,
     removeItem,
     submitOrder,
+    fetchCartAndAddresses,
+    setAddressList,
   };
 }

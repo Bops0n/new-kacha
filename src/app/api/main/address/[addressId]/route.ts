@@ -108,4 +108,7 @@ export async function PATCH(request: NextRequest, context: { params: { addressId
       { status: 404 }
     );
   }
+
+  return NextResponse.json({ message: 'Address updated successfully', error: false }, { status: 200 });
+
 }

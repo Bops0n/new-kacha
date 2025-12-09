@@ -1,118 +1,49 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { FiEdit, FiSave, FiX, FiUser, FiMail, FiPhone, FiMapPin, FiHash, FiHome, FiPlus, FiTrash2, FiStar } from 'react-icons/fi';
-import { useProfilePage } from '@/app/hooks/useProfilePage'; // << 1. Import Hook
+import { 
+  FiEdit3, FiSave, FiX, FiUser, FiMail, FiPhone, 
+  FiMapPin, FiPlus, FiTrash2, FiStar, FiCheckCircle, FiBox 
+} from 'react-icons/fi';
+import { useSession } from 'next-auth/react';
+import { useProfilePage } from '@/app/hooks/useProfilePage';
 import { UserSchema, AddressSchema, NewAddressForm } from '@/types';
 import LoadingSpinner from '@/app/components/LoadingSpinner';
-import { useSession } from 'next-auth/react';
+import AddressModal from '@/app/(main)/components/AddressModal';
 
-// --- Address Form Modal Component ---
-interface AddressModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSave: (data: NewAddressForm) => Promise<boolean>;
-  initialData: NewAddressForm;
-}
-const AddressModal: React.FC<AddressModalProps> = ({ isOpen, onClose, onSave, initialData }) => {
-    const [formData, setFormData] = useState(initialData);
-
-    useEffect(() => { setFormData(initialData); }, [initialData]);
-
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-        const { name, value, type, checked } : any = e.target;
-        setFormData(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
-    };
-
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        const success = await onSave(formData);
-        if (success) onClose();
-    };
-
-    if (!isOpen) return null;
-    return (
-        <div className="modal modal-open flex items-center justify-center bg-black bg-opacity-50 z-50">
-            <div className="modal-box w-full max-w-xl bg-base-100 rounded-lg shadow-xl p-0">
-                <button onClick={onClose} className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2 z-10">✕</button>
-                <div className="p-8">
-                    <h2 className="text-2xl font-bold text-base-content text-center mb-6">
-                        {initialData.Address_ID ? 'แก้ไขที่อยู่' : 'เพิ่มที่อยู่ใหม่'}
-                    </h2>
-                    <form onSubmit={handleSubmit} className="space-y-4">
-                        <div className="form-control">
-                            <label className="label"><span className="label-text flex items-center gap-2"><FiHome />ที่อยู่ (บรรทัด 1)</span></label>
-                            <input type="text" name="Address_1" value={formData.Address_1} onChange={handleChange} placeholder="เลขที่, หมู่, ถนน" className="input input-bordered w-full" required />
-                        </div>
-                        <div className="form-control">
-                            <label className="label"><span className="label-text flex items-center gap-2"><FiHome />ที่อยู่ (บรรทัด 2 - ไม่บังคับ)</span></label>
-                            <input type="text" name="Address_2" value={formData.Address_2 || ''} onChange={handleChange} placeholder="อาคาร, ชั้น, ห้อง" className="input input-bordered w-full" />
-                        </div>
-                        <div className="form-control">
-                            <label className="label"><span className="label-text flex items-center gap-2"><FiMapPin />แขวง/ตำบล</span></label>
-                            <input type="text" name="Sub_District" value={formData.Sub_District} onChange={handleChange} placeholder="แขวง/ตำบล" className="input input-bordered w-full" required />
-                        </div>
-                        <div className="form-control">
-                            <label className="label"><span className="label-text flex items-center gap-2"><FiMapPin />เขต/อำเภอ</span></label>
-                            <input type="text" name="District" value={formData.District} onChange={handleChange} placeholder="เขต/อำเภอ" className="input input-bordered w-full" required />
-                        </div>
-                        <div className="form-control">
-                            <label className="label"><span className="label-text flex items-center gap-2"><FiMapPin />จังหวัด</span></label>
-                            <input type="text" name="Province" value={formData.Province} onChange={handleChange} placeholder="จังหวัด" className="input input-bordered w-full" required />
-                        </div>
-                        <div className="form-control">
-                            <label className="label"><span className="label-text flex items-center gap-2"><FiHash />รหัสไปรษณีย์</span></label>
-                            <input type="text" name="Zip_Code" value={formData.Zip_Code} onChange={handleChange} placeholder="รหัสไปรษณีย์" className="input input-bordered w-full" required maxLength={5} />
-                        </div>
-                        <div className="form-control">
-                            <label className="label"><span className="label-text flex items-center gap-2"><FiPhone />เบอร์โทรศัพท์</span></label>
-                            <input type="tel" name="Phone" value={formData.Phone} onChange={handleChange} placeholder="08X-XXX-XXXX" className="input input-bordered w-full" required maxLength={10} />
-                        </div>
-                        <div className="form-control">
-                            <label className="label cursor-pointer gap-2"><input type="checkbox" name="Is_Default" checked={formData.Is_Default} onChange={handleChange} className="checkbox checkbox-primary" /><span className="label-text">ตั้งเป็นที่อยู่เริ่มต้น</span></label>
-                        </div>
-                        <div className="modal-action mt-6">
-                            <button type="button" onClick={onClose} className="btn btn-ghost">ยกเลิก</button>
-                            <button type="submit" className="btn btn-primary">บันทึก</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    );
-};
-
-
-// --- Main Profile Page Component ---
 export default function ProfilePage() {
-  // 2. เรียกใช้ Hook เพื่อดึง State และฟังก์ชันทั้งหมด
-  const { loading, userProfile, userAddresses, updateUserProfile, saveAddress, deleteAddress, setDefaultAddress } = useProfilePage();
+  const { 
+    loading, 
+    userProfile, 
+    userAddresses, 
+    updateUserProfile, 
+    saveAddress, 
+    deleteAddress, 
+    setDefaultAddress 
+  } = useProfilePage();
 
   const { data: session, update } = useSession();
 
-  // State สำหรับจัดการ UI ภายในหน้านี้เท่านั้น
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [profileFormData, setProfileFormData] = useState<Partial<UserSchema>>({});
+  
   const [isAddressModalOpen, setIsAddressModalOpen] = useState(false);
-  const [addressInitialData, setAddressInitialData] = useState<NewAddressForm | null>(null);
+  const [addressInitialData, setAddressInitialData] = useState<Partial<NewAddressForm>>({});
 
-  // เมื่อข้อมูล userProfile จาก hook เปลี่ยน ให้อัปเดต state ของ form
   useEffect(() => {
     if (userProfile) {
-      setProfileFormData({ Full_Name: userProfile.Full_Name, Email: userProfile.Email, Phone: userProfile.Phone });
+      setProfileFormData({ 
+        Full_Name: userProfile.Full_Name, 
+        Email: userProfile.Email, 
+        Phone: userProfile.Phone 
+      });
     }
   }, [userProfile]);
   
-  // --- Handlers for UI events ---
   const handleProfileSave = async () => {
     const success = await updateUserProfile(profileFormData);
     if (success && session) {
-      await update({
-        user: {
-          ...session.user,
-          name: profileFormData.Full_Name
-        },
-      });
+      await update({ user: { ...session.user, name: profileFormData.Full_Name } });
       setIsEditingProfile(false);
     }
   };
@@ -120,8 +51,10 @@ export default function ProfilePage() {
   const openNewAddressModal = () => {
     if (!userProfile) return;
     setAddressInitialData({
-      Address_ID: null, User_ID: userProfile.User_ID, Address_1: '', Address_2: '',
-      Sub_District: '', District: '', Province: '', Zip_Code: '', Is_Default: false, Phone: userProfile.Phone || ''
+      Address_ID: null, 
+      User_ID: userProfile.User_ID, 
+      Address_1: '', Address_2: '', Sub_District: '', District: '', Province: '', Zip_Code: '', 
+      Is_Default: false, Phone: userProfile.Phone || ''
     });
     setIsAddressModalOpen(true);
   };
@@ -130,95 +63,192 @@ export default function ProfilePage() {
     setAddressInitialData({ ...address, Address_2: address.Address_2 || '', Phone: address.Phone || '' });
     setIsAddressModalOpen(true);
   };
+
+  const handleAddressModalSave = async (data: NewAddressForm) => {
+    const success = await saveAddress(data);
+    if (!success) throw new Error("บันทึกข้อมูลไม่สำเร็จ");
+  };
   
   if (loading) return <LoadingSpinner />;
-  if (!userProfile) return <div className="text-center p-8">ไม่สามารถโหลดข้อมูลผู้ใช้ได้</div>;
+  if (!userProfile) return <div className="flex h-[50vh] items-center justify-center text-base-content/60">ไม่สามารถโหลดข้อมูลผู้ใช้ได้</div>;
 
-  // 3. ส่วน JSX ทั้งหมดจะใช้ State และเรียกฟังก์ชันจาก Hook และ UI State
   return (
-    <div className="min-h-screen bg-base-200 flex items-center justify-center p-4">
-      <div className="w-full max-w-4xl bg-base-100 rounded-lg shadow-xl p-8 flex flex-col lg:flex-row gap-8">
+    <div className="min-h-screen bg-base-200/50 py-10 px-4 font-sarabun">
+      <div className="max-w-6xl mx-auto space-y-8">
         
-        {/* --- User Profile Section (UI เดิม) --- */}
-        <div className="flex-1 pb-8 border-b lg:border-b-0 lg:border-r lg:pr-8">
-          <div className="flex justify-between items-center mb-6">
-            <h1 className="text-3xl font-bold text-base-content">ข้อมูลส่วนตัว</h1>
-            {!isEditingProfile ? (
-              <button onClick={() => setIsEditingProfile(true)} className="btn btn-primary btn-sm"><FiEdit className="mr-2" />แก้ไขข้อมูล</button>
-            ) : (
-              <div className="flex gap-2">
-                <button onClick={() => setIsEditingProfile(false)} className="btn btn-ghost btn-sm"><FiX className="mr-2" />ยกเลิก</button>
-                <button onClick={handleProfileSave} className="btn btn-success btn-sm"><FiSave className="mr-2" />บันทึก</button>
-              </div>
-            )}
-          </div>
-          <form onSubmit={(e) => { e.preventDefault(); handleProfileSave(); }} className="space-y-4">
-            <div className="form-control">
-              <label className="label"><span className="label-text flex items-center gap-2"><FiUser />ชื่อผู้ใช้งาน</span></label>
-              <p className="font-semibold ml-1 text-lg">{userProfile.Username}</p>
+        {/* --- Header Section --- */}
+        <div className="flex flex-col md:flex-row items-center md:items-end gap-6 mb-4 px-2">
+            <div className="relative">
+                <div className="w-24 h-24 md:w-32 md:h-32 rounded-full bg-gradient-to-br from-primary to-primary-focus flex items-center justify-center text-primary-content shadow-xl ring-4 ring-base-100">
+                    <FiUser className="w-10 h-10 md:w-14 md:h-14" />
+                </div>
+                <div className="absolute bottom-0 right-0 bg-base-100 rounded-full p-1 shadow-md">
+                    <div className="bg-success w-4 h-4 md:w-5 md:h-5 rounded-full border-2 border-base-100"></div>
+                </div>
             </div>
-            <div className="form-control">
-              <label className="label"><span className="label-text flex items-center gap-2"><FiUser />ชื่อ-นามสกุล</span></label>
-              {isEditingProfile ? (<input type="text" value={profileFormData.Full_Name || ''} onChange={(e) => setProfileFormData(p => ({...p, Full_Name: e.target.value}))} className="input input-bordered w-full" />) : (<p className="font-semibold ml-1 text-lg">{userProfile.Full_Name}</p>)}
+            <div className="text-center md:text-left flex-1">
+                <h1 className="text-3xl md:text-4xl font-extrabold text-base-content tracking-tight">{userProfile.Full_Name}</h1>
+                <p className="text-base-content/60 font-medium flex items-center justify-center md:justify-start gap-2 mt-1">
+                    @{userProfile.Username} <span className="w-1 h-1 bg-base-300 rounded-full"></span> {userProfile.Email}
+                </p>
             </div>
-            <div className="form-control">
-              <label className="label"><span className="label-text flex items-center gap-2"><FiMail />อีเมล</span></label>
-              {isEditingProfile ? (<input type="email" value={profileFormData.Email || ''} onChange={(e) => setProfileFormData(p => ({...p, Email: e.target.value}))} className="input input-bordered w-full" />) : (<p className="font-semibold ml-1 text-lg">{userProfile.Email}</p>)}
-            </div>
-            <div className="form-control">
-              <label className="label"><span className="label-text flex items-center gap-2"><FiPhone />เบอร์โทรศัพท์</span></label>
-              {isEditingProfile ? (<input type="tel" value={profileFormData.Phone || ''} onChange={(e) => setProfileFormData(p => ({...p, Phone: e.target.value}))} className="input input-bordered w-full" />) : (<p className="font-semibold ml-1 text-lg">{userProfile.Phone}</p>)}
-            </div>
-          </form>
         </div>
 
-        {/* --- Address Management Section (UI เดิม) --- */}
-        <div className="flex-1 pt-8 lg:pt-0">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-bold text-base-content">ที่อยู่สำหรับจัดส่ง</h2>
-            <button onClick={openNewAddressModal} className="btn btn-secondary btn-sm"><FiPlus className="mr-2" />เพิ่มที่อยู่ใหม่</button>
-          </div>
-          <div className="space-y-4 max-h-96 overflow-y-auto">
-            {userAddresses.length === 0 ? (<p className="text-center py-6 text-base-content/60">คุณยังไม่มีที่อยู่สำหรับจัดส่ง</p>) : 
-            userAddresses.map(address => (
-              <div key={address.Address_ID} className={`card border rounded-lg p-6 shadow-sm ${address.Is_Default ? 'border-primary bg-primary/10' : 'border-base-300 bg-base-200'}`}>
-                <div className="flex justify-between items-start mb-2">
-                    <h3 className="text-lg font-semibold text-base-content flex items-center gap-2">
-                      <FiMapPin className={`w-5 h-5 ${address.Is_Default ? 'text-primary' : 'text-base-content/70'}`} />
-                      {address.Is_Default && <span className="badge badge-primary text-primary-content">เริ่มต้น</span>}
-                    </h3>
-                    <div className="flex gap-2">
-                      <button onClick={() => openEditAddressModal(address)} className="btn btn-ghost btn-xs"><FiEdit /></button>
-                      <button onClick={() => deleteAddress(address.Address_ID)} className="btn btn-ghost btn-xs text-error"><FiTrash2 /></button>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            
+            {/* --- Left Column: Profile Card --- */}
+            <div className="lg:col-span-4 space-y-6">
+                <div className="card bg-base-100 shadow-xl border border-base-200 overflow-hidden">
+                    <div className="card-body p-6">
+                        <div className="flex justify-between items-center mb-6 pb-4 border-b border-base-200">
+                            <h2 className="text-lg font-bold flex items-center gap-2">
+                                <FiUser className="text-primary" /> ข้อมูลส่วนตัว
+                            </h2>
+                            {!isEditingProfile ? (
+                                <button onClick={() => setIsEditingProfile(true)} className="btn btn-ghost btn-sm btn-circle text-primary tooltip tooltip-left" data-tip="แก้ไข">
+                                    <FiEdit3 className="w-5 h-5" />
+                                </button>
+                            ) : (
+                                <div className="flex gap-2">
+                                    <button onClick={() => setIsEditingProfile(false)} className="btn btn-ghost btn-xs">ยกเลิก</button>
+                                    <button onClick={handleProfileSave} className="btn btn-primary btn-xs">บันทึก</button>
+                                </div>
+                            )}
+                        </div>
+
+                        <form onSubmit={(e) => { e.preventDefault(); handleProfileSave(); }} className="space-y-5">
+                            <div className="form-control">
+                                <label className="label py-1"><span className="label-text text-xs font-bold uppercase text-base-content/50">ชื่อ-นามสกุล</span></label>
+                                {isEditingProfile ? (
+                                    <input type="text" value={profileFormData.Full_Name || ''} onChange={(e) => setProfileFormData(p => ({...p, Full_Name: e.target.value}))} className="input input-bordered input-sm w-full focus:input-primary" />
+                                ) : (
+                                    <p className="font-medium text-base-content">{userProfile.Full_Name}</p>
+                                )}
+                            </div>
+
+                            <div className="form-control">
+                                <label className="label py-1"><span className="label-text text-xs font-bold uppercase text-base-content/50">อีเมล</span></label>
+                                {isEditingProfile ? (
+                                    <input type="email" value={profileFormData.Email || ''} onChange={(e) => setProfileFormData(p => ({...p, Email: e.target.value}))} className="input input-bordered input-sm w-full focus:input-primary" />
+                                ) : (
+                                    <p className="font-medium text-base-content flex items-center gap-2"><FiMail className="opacity-50"/> {userProfile.Email}</p>
+                                )}
+                            </div>
+
+                            <div className="form-control">
+                                <label className="label py-1"><span className="label-text text-xs font-bold uppercase text-base-content/50">เบอร์โทรศัพท์</span></label>
+                                {isEditingProfile ? (
+                                    <input type="tel" value={profileFormData.Phone || ''} onChange={(e) => setProfileFormData(p => ({...p, Phone: e.target.value}))} className="input input-bordered input-sm w-full focus:input-primary" />
+                                ) : (
+                                    <p className="font-medium text-base-content flex items-center gap-2"><FiPhone className="opacity-50"/> {userProfile.Phone || '-'}</p>
+                                )}
+                            </div>
+                        </form>
                     </div>
                 </div>
-                <p className="text-base-content/90">
-                  {address.Address_1} {address.Address_2 && `, ${address.Address_2}`}<br />
-                  {`แขวง/ตำบล ${address.Sub_District}, เขต/อำเภอ ${address.District}`}<br />
-                  {`จังหวัด ${address.Province}, ${address.Zip_Code}`}<br />
-                  โทรศัพท์: {address.Phone}
-                </p>
-                {!address.Is_Default && (
-                  <div className="text-right mt-4">
-                    <button onClick={() => setDefaultAddress(address.Address_ID)} className="btn btn-sm btn-outline btn-primary">
-                      <FiStar className="mr-2"/>ตั้งเป็นที่อยู่เริ่มต้น
-                    </button>
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
 
-      {isAddressModalOpen && addressInitialData && (
-          <AddressModal
+                {/* Optional: Stats Card or other info could go here */}
+            </div>
+
+            {/* --- Right Column: Address Management --- */}
+            <div className="lg:col-span-8 space-y-6">
+                <div className="flex flex-wrap justify-between items-end gap-4">
+                    <div>
+                        <h2 className="text-2xl font-bold text-base-content flex items-center gap-2">
+                            <FiMapPin className="text-primary" /> ที่อยู่สำหรับจัดส่ง
+                        </h2>
+                        <p className="text-sm text-base-content/60 mt-1">จัดการที่อยู่สำหรับการจัดส่งสินค้าของคุณ</p>
+                    </div>
+                    <button onClick={openNewAddressModal} className="btn btn-primary shadow-lg shadow-primary/20 hover:-translate-y-0.5 transition-transform">
+                        <FiPlus className="w-5 h-5" /> เพิ่มที่อยู่ใหม่
+                    </button>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {userAddresses.length === 0 ? (
+                        <div className="col-span-full flex flex-col items-center justify-center py-16 border-2 border-dashed border-base-300 rounded-2xl bg-base-50/50 text-base-content/50">
+                            <div className="w-16 h-16 bg-base-200 rounded-full flex items-center justify-center mb-4">
+                                <FiBox className="w-8 h-8 opacity-50" />
+                            </div>
+                            <p className="text-lg font-medium">คุณยังไม่มีที่อยู่สำหรับจัดส่ง</p>
+                            <p className="text-sm">เพิ่มที่อยู่ใหม่เพื่อความสะดวกรวดเร็วในการสั่งซื้อ</p>
+                        </div>
+                    ) : (
+                        userAddresses.map(address => (
+                            <div 
+                                key={address.Address_ID} 
+                                className={`card relative group transition-all duration-300 hover:-translate-y-1 overflow-hidden
+                                    ${address.Is_Default 
+                                        ? 'bg-base-100 border-2 border-primary shadow-lg shadow-primary/10' 
+                                        : 'bg-base-100 border border-base-200 hover:shadow-lg hover:border-base-300'
+                                    }`}
+                            >
+                                {address.Is_Default && (
+                                    <div className="absolute top-0 right-0 bg-primary text-primary-content text-xs font-bold px-3 py-1 rounded-bl-lg z-10 flex items-center gap-1 shadow-sm">
+                                        <FiStar className="fill-current" /> ค่าเริ่มต้น
+                                    </div>
+                                )}
+                                
+                                <div className="card-body p-5">
+                                    <div className="flex items-start justify-between mb-2">
+                                        <div className="flex items-center gap-2">
+                                            <div className={`p-2 rounded-lg ${address.Is_Default ? 'bg-primary/10 text-primary' : 'bg-base-200 text-base-content/60'}`}>
+                                                <FiMapPin className="w-5 h-5" />
+                                            </div>
+                                            <span className="font-bold text-lg text-base-content line-clamp-1">
+                                                {address.District}
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <div className="text-sm text-base-content/70 space-y-1 mb-4 h-20 overflow-hidden">
+                                        <p className="font-medium text-base-content line-clamp-1">{address.Address_1} {address.Address_2}</p>
+                                        <p>{address.Sub_District}, {address.District}</p>
+                                        <p>{address.Province}, {address.Zip_Code}</p>
+                                        <div className="flex items-center gap-2 pt-1 text-base-content/90">
+                                            <FiPhone className="w-3 h-3" /> {address.Phone}
+                                        </div>
+                                    </div>
+
+                                    <div className="card-actions justify-between items-center pt-3 border-t border-base-200/50">
+                                        {!address.Is_Default ? (
+                                            <button 
+                                                onClick={() => setDefaultAddress(address.Address_ID)} 
+                                                className="btn btn-ghost btn-xs text-base-content/50 hover:text-primary gap-1 pl-0"
+                                            >
+                                                <FiCheckCircle /> ตั้งเป็นค่าเริ่มต้น
+                                            </button>
+                                        ) : (
+                                            <span className="text-xs text-primary font-medium flex items-center gap-1">
+                                                <FiCheckCircle /> ใช้เป็นที่อยู่หลักแล้ว
+                                            </span>
+                                        )}
+
+                                        <div className="flex gap-2">
+                                            <button onClick={() => openEditAddressModal(address)} className="btn btn-ghost btn-xs btn-square text-info hover:bg-info/10 tooltip" data-tip="แก้ไข">
+                                                <FiEdit3 />
+                                            </button>
+                                            <button onClick={() => deleteAddress(address.Address_ID)} className="btn btn-ghost btn-xs btn-square text-error hover:bg-error/10 tooltip" data-tip="ลบ">
+                                                <FiTrash2 />
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        ))
+                    )}
+                </div>
+            </div>
+
+        </div>
+
+        <AddressModal
             isOpen={isAddressModalOpen}
             onClose={() => setIsAddressModalOpen(false)}
-            onSave={saveAddress}
+            onSave={handleAddressModalSave}
             initialData={addressInitialData}
-          />
-      )}
+        />
+      </div>
     </div>
   );
 }
