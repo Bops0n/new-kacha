@@ -138,7 +138,7 @@ export default function CartPage() {
                         <div className="w-full lg:max-w-lg mx-auto bg-base-100 p-6 rounded-lg shadow-md border border-base-300">
                             <h2 className="text-2xl font-bold mb-4">สรุปคำสั่งซื้อ</h2>
                             <div className="space-y-3 mb-6">
-                                <div className="flex justify-between"><span>ราคารวม ({cartItems.length} ชิ้น):</span><span className="font-bold">{formatPrice(totalPrice)}</span></div>
+                                <div className="flex justify-between"><span>ราคารวม ({cartItems.length} รายการ):</span><span className="font-bold">{formatPrice(totalPrice)}</span></div>
                                 <div className="flex justify-between"><span>ค่าจัดส่ง:</span><span className="font-bold text-success">ฟรี</span></div>
                             </div>
                             <div className="divider my-4"></div>

@@ -318,7 +318,7 @@ export default function OrderCancelButton({ order, onlyIcon, onSuccess }: {
                           <FiInfo className="w-5 h-5 mt-1 text-info" />
                           <div className="text-sm text-base-content/80 space-y-1">
                             <p>
-                                ยังไม่ได้มีการตรวจสอบหลักฐานการชำระเงิน กรุณากดปุ่ม{" "}
+                                ยังไม่ได้ตรวจสอบหลักฐานการชำระเงิน กรุณากดปุ่ม{" "}
                                 <span className="font-semibold">"{lbButtonText}"</span>{" "}
                                 เพื่อดำเนินการต่อ
                             </p>
