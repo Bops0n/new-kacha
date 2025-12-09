@@ -63,7 +63,12 @@ export default function OrderCancelButton({ order, onlyIcon, onSuccess }: {
 
     const v_lock = order.Status === 'shipped' || order.Status === 'delivered';
 
-    const v_isRefunding = !isCOD && order.Transaction_Slip !== null && order.Is_Payment_Checked && order.Transaction_Status === 'confirmed' && order.Status === 'preparing' && order.Is_Confirmed;
+    const v_isRefunding = !isCOD && 
+      order.Transaction_Slip !== null && 
+      order.Is_Payment_Checked && 
+      order.Transaction_Status === 'confirmed' /*&& 
+      order.Status === 'preparing' && 
+      order.Is_Confirmed*/;
 
     if (v_isRefunding) {
       setHref(`/admin/order-management/${order.Order_ID}?controller=refunding`);
@@ -175,7 +180,7 @@ export default function OrderCancelButton({ order, onlyIcon, onSuccess }: {
       {/* ปุ่มหลัก */}
       {!onlyIcon ? (
           <button
-            className="btn btn-warning"
+            className="btn btn-error"
             onClick={(e) => {
               e.stopPropagation();
               showModal(true);

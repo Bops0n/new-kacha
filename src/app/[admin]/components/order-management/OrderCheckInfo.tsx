@@ -3,7 +3,6 @@ import { Order, OrderProductDetail, SimpleProductDetail } from "@/types";
 import { FiAlertTriangle, FiArchive, FiCreditCard, FiImage, FiShoppingBag, FiZoomIn } from "react-icons/fi";
 import { useAlert } from "@/app/context/AlertModalContext";
 import { calculateAvailableStock } from "@/app/utils/calculations";
-import { useState } from "react";
 import { statusTypeLabels } from "@/app/utils/client";
 
 const OrderItemDetail: React.FC<{ orderProduct: OrderProductDetail; liveProduct: SimpleProductDetail; }> = ({ orderProduct, liveProduct }) => {
@@ -48,11 +47,11 @@ const OrderItemDetail: React.FC<{ orderProduct: OrderProductDetail; liveProduct:
           )}
         </div>
 
-        {isStockInsufficient && (
+        {/* {isStockInsufficient && (
           <div className="badge badge-error gap-1 mt-2">
             <FiAlertTriangle className="w-3 h-3" /> สินค้าไม่พอ
           </div>
-        )}
+        )} */}
       </div>
 
       <div className="flex-shrink-0 text-right pr-4">
