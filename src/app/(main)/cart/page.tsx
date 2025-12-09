@@ -51,6 +51,7 @@ export default function CheckoutPage() {
         submitOrder,
         updateItemQuantity, // [NEW] ดึงฟังก์ชันปรับจำนวน
         removeItem,
+        fetchCartAndAddresses
         // setAddressList        // [NEW] ดึงฟังก์ชันลบสินค้า
     } = useCart();
 
@@ -59,26 +60,6 @@ export default function CheckoutPage() {
     const [isAddAddressOpen, setIsAddAddressOpen] = useState(false);
 
     // ฟังก์ชันบันทึกที่อยู่ใหม่ (คงเดิม)
-    const handleSaveAddress = async (newAddress: AddressSchema) => {
-        try {
-            const res = await fetch('/api/main/address', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(newAddress),
-            });
-            if (!res.ok) throw new Error('บันทึกที่อยู่ไม่สำเร็จ');
-            
-            const data = await res.json();
-
-            // ใน useCart ควรมี logic การ refresh หรือถ้าใช้ SWR/React Query มันจะ auto refresh
-            // ถ้าไม่มี อาจต้อง reload page หรือเรียก fetchCartAndAddresses ใหม่
-            // setIsAddAddressOpen(false); // ปิด modal
-            showAlert('เพิ่มที่อยู่เรียบร้อยแล้ว', 'success');
-            // setAddressList( (prev) => [...prev, {...newAddress, Address_ID: data.address.Address_ID}])
-        } catch (error) {
-            showAlert('เกิดข้อผิดพลาดในการบันทึกที่อยู่', 'error');
-        }
-    };
 
     if (loading) return <LoadingSpinner />;
     
@@ -373,7 +354,11 @@ if (cartItems.length === 0) {
                     setSelectedAddress(addr);
                     setIsSelectAddressOpen(false);
                 }}
-                onDeleteAddress={deleteAddress}
+                onDeleteAddress={(addr)=>{
+                    deleteAddress(addr)
+                    fetchCartAndAddresses()
+                }
+                }
                 onEditAddress={(addr)=>{
                     setAddressEditForm(addr)
                     
@@ -400,6 +385,8 @@ if (cartItems.length === 0) {
                             return true
                         }
                     }
+                    fetchCartAndAddresses()
+
                     return false
                     
                 }

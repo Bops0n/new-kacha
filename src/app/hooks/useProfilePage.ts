@@ -88,7 +88,7 @@ export function useProfilePage() {
       
       await fetchData();   // Re-fetch addresses
       showAlert(isEditing ? 'แก้ไขที่อยู่สำเร็จ' : 'เพิ่มที่อยู่สำเร็จ', 'success');
-      window.location.reload();
+      // window.location.reload();
       return true;
     } catch (err: any) {
       showAlert(err.message, 'error');
