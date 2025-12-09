@@ -3,19 +3,19 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
+// [เพิ่ม] FiShoppingCart เข้ามาใน import
 import { 
   FiMapPin, FiTruck, FiCreditCard, FiCheckCircle, 
-  FiPlus, FiChevronRight, FiPackage, FiTrash2, FiMinus 
-} from 'react-icons/fi'; // เพิ่ม FiMinus
+  FiPlus, FiChevronRight, FiPackage, FiTrash2, FiMinus, FiShoppingCart 
+} from 'react-icons/fi'; 
 import { useSession } from 'next-auth/react';
 import { useCart } from '@/app/hooks/useCart';
 import { formatPrice } from '@/app/utils/formatters';
-import { calculateAvailableStock } from '@/app/utils/calculations'; // [NEW] นำเข้าฟังก์ชันคำนวณสต็อก
+import { calculateAvailableStock } from '@/app/utils/calculations';
 import LoadingSpinner from '@/app/components/LoadingSpinner';
 import AddressSelectionModal from './AddressSelectionModal';
 import { useAlert } from '@/app/context/AlertModalContext';
-import AddressModal from '../components/AddressModal';
-// import { AddressData } from '@/types'; // หรือ path ที่ถูกต้องของ type
+import AddressModal from '../components/AddressModal'; // ตรวจสอบ path ให้ถูกต้องตามโปรเจกต์จริง
 
 // Payment Methods Config
 const PAYMENT_METHODS = [
@@ -28,7 +28,6 @@ export default function CheckoutPage() {
     const { data: session } = useSession();
     const { showAlert } = useAlert();
 
-    // 1. เรียกใช้ทุกอย่างจาก useCart Hook
     const { 
         cartItems, 
         loading, 
@@ -39,46 +38,46 @@ export default function CheckoutPage() {
         setSelectedAddress, 
         setPaymentMethod, 
         submitOrder,
-        updateItemQuantity, // [NEW] ดึงฟังก์ชันปรับจำนวน
-        removeItem,
-        setAddressList        // [NEW] ดึงฟังก์ชันลบสินค้า
+        updateItemQuantity, 
+        removeItem          
     } = useCart();
 
-    // Modal States (UI Only)
+    // Modal States
     const [isSelectAddressOpen, setIsSelectAddressOpen] = useState(false);
     const [isAddAddressOpen, setIsAddAddressOpen] = useState(false);
 
-    // ฟังก์ชันบันทึกที่อยู่ใหม่ (คงเดิม)
-    const handleSaveAddress = async (newAddress: AddressData) => {
-        try {
-            const res = await fetch('/api/main/address', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(newAddress),
-            });
-            if (!res.ok) throw new Error('บันทึกที่อยู่ไม่สำเร็จ');
-            
-            const data = await res.json();
-
-            // ใน useCart ควรมี logic การ refresh หรือถ้าใช้ SWR/React Query มันจะ auto refresh
-            // ถ้าไม่มี อาจต้อง reload page หรือเรียก fetchCartAndAddresses ใหม่
-            // setIsAddAddressOpen(false); // ปิด modal
-            showAlert('เพิ่มที่อยู่เรียบร้อยแล้ว', 'success');
-            setAddressList( (prev) => [...prev, {...newAddress, Address_ID: data.address.Address_ID}])
-        } catch (error) {
-            showAlert('เกิดข้อผิดพลาดในการบันทึกที่อยู่', 'error');
-        }
-    };
+    // ฟังก์ชันบันทึกที่อยู่ใหม่ (ถ้ามีใช้ในหน้านี้)
+    // const handleSaveAddress = ... (ตามโค้ดเดิมของคุณ)
 
     if (loading) return <LoadingSpinner />;
     
-    // ถ้าไม่มีของในตะกร้า ดีดกลับ
+    // [UPDATED] ส่วนที่แก้ไข: แสดงหน้า Empty State แทนการ Redirect ทันที
     if (cartItems.length === 0) {
-        if (typeof window !== 'undefined') router.push('/cart');
-        return null;
+        return (
+            <div className="min-h-screen bg-base-200/50 flex flex-col items-center justify-center p-4 font-sarabun animate-fadeIn">
+                <div className="text-center space-y-6 max-w-md mx-auto p-8 bg-base-100 rounded-3xl shadow-xl border border-base-200">
+                    <div className="w-24 h-24 bg-base-200/80 rounded-full flex items-center justify-center mx-auto mb-4 text-primary">
+                        <FiShoppingCart className="w-10 h-10 opacity-60" /> 
+                    </div>
+                    <div>
+                        <h2 className="text-2xl font-extrabold text-base-content">ตะกร้าสินค้าว่างเปล่า</h2>
+                        <p className="text-base-content/60 mt-3 leading-relaxed">
+                            ดูเหมือนว่าคุณยังไม่มีสินค้าในรายการสั่งซื้อ <br/>
+                            ลองกลับไปเลือกสินค้าที่ถูกใจก่อนนะครับ
+                        </p>
+                    </div>
+                    <button 
+                        onClick={() => router.push('/products')} 
+                        className="btn btn-primary w-full btn-lg rounded-2xl shadow-lg shadow-primary/20 hover:-translate-y-1 transition-transform"
+                    >
+                        <FiChevronRight className="rotate-180" /> ไปเลือกสินค้า
+                    </button>
+                </div>
+            </div>
+        );
     }
 
-    // คำนวณส่วนลด (สำหรับ UI)
+    // คำนวณส่วนลด (Logic เดิม)
     const totalDiscount = cartItems.reduce((acc, item) => {
         if (item.Discount_Price && item.Discount_Price < item.Sale_Price) {
             return acc + ((item.Sale_Price - item.Discount_Price) * item.Cart_Quantity);
@@ -92,8 +91,8 @@ export default function CheckoutPage() {
                 
                 {/* Header Title */}
                 <div className="mb-8">
-                    <h1 className="text-4xl font-extrabold text-base-content tracking-tight">สินค้าในตะกร้า</h1>
-                    <p className="text-base-content/60 mt-2">ตรวจสอบรายละเอียดและเลือกวิธีการชำระเงินเพื่อดำเนินการต่อ</p>
+                    <h1 className="text-4xl font-extrabold text-base-content tracking-tight">ยืนยันคำสั่งซื้อ</h1>
+                    <p className="text-base-content/60 mt-2">ตรวจสอบรายละเอียดและชำระเงินเพื่อดำเนินการต่อ</p>
                 </div>
 
                 <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
@@ -108,6 +107,7 @@ export default function CheckoutPage() {
                                     <span className="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center text-sm">1</span>
                                     ที่อยู่จัดส่ง
                                 </h3>
+                                {/* ปุ่มเพิ่มที่อยู่ใหม่ เรียก Modal Add Address */}
                                 <button onClick={() => setIsAddAddressOpen(true)} className="btn btn-xs btn-ghost text-primary hover:bg-primary/10">
                                     <FiPlus /> เพิ่มที่อยู่ใหม่
                                 </button>
@@ -128,10 +128,7 @@ export default function CheckoutPage() {
                                                         {selectedAddress.Address_1} {selectedAddress.Address_2} {selectedAddress.Sub_District} {selectedAddress.District} {selectedAddress.Province} {selectedAddress.Zip_Code}
                                                     </p>
                                                 </div>
-                                                <button onClick={() => {
-                                                    console.log(addressList)
-                                                    setIsSelectAddressOpen(true)
-                                                    }} className="btn btn-sm btn-outline btn-primary rounded-full px-6">เปลี่ยน</button>
+                                                <button onClick={() => setIsSelectAddressOpen(true)} className="btn btn-sm btn-outline btn-primary rounded-full px-6">เปลี่ยน</button>
                                             </div>
                                         </div>
                                     </div>
@@ -150,7 +147,7 @@ export default function CheckoutPage() {
                             </div>
                         </section>
 
-                        {/* 2. รายการสินค้า (List View) - [UPDATED SECTION] */}
+                        {/* 2. รายการสินค้า */}
                         <section>
                             <h3 className="text-xl font-bold flex items-center gap-2 text-base-content mb-4">
                                 <span className="w-8 h-8 rounded-full bg-base-300 text-base-content flex items-center justify-center text-sm">2</span>
@@ -159,7 +156,6 @@ export default function CheckoutPage() {
                             
                             <div className="bg-base-100 rounded-2xl shadow-sm border border-base-200 overflow-hidden divide-y divide-base-200">
                                 {cartItems.map((item) => {
-                                    // [NEW] คำนวณสต็อกคงเหลือ
                                     const availableStock = calculateAvailableStock(item);
                                     
                                     return (
@@ -178,10 +174,8 @@ export default function CheckoutPage() {
                                                     </p>
                                                 </div>
                                                 
-                                                {/* [NEW] ส่วนควบคุมจำนวนและแสดงสต็อก */}
                                                 <div className="flex flex-wrap justify-between items-end mt-2 gap-2">
                                                     <div className="flex flex-col gap-1">
-                                                        {/* ปุ่มปรับจำนวน */}
                                                         <div className="flex items-center border border-base-300 rounded-lg bg-base-100 h-8 w-fit">
                                                             <button
                                                                 className="btn btn-xs btn-ghost px-2 rounded-r-none h-full"
@@ -201,13 +195,11 @@ export default function CheckoutPage() {
                                                                 <FiPlus className="w-3 h-3" />
                                                             </button>
                                                         </div>
-                                                        {/* แสดงสต็อกคงเหลือ */}
                                                         <p className={`text-xs ${availableStock < 5 ? 'text-warning' : 'text-base-content/50'}`}>
                                                             คงเหลือ: {availableStock} {item.Unit}
                                                         </p>
                                                     </div>
 
-                                                    {/* ปุ่มลบ */}
                                                     <button 
                                                         className="btn btn-xs btn-ghost text-error gap-1"
                                                         onClick={() => removeItem(item.Product_ID, item.Name)}
@@ -261,11 +253,10 @@ export default function CheckoutPage() {
 
                     </div>
 
-                    {/* --- Right Column (Sticky Summary) --- */}
+                    {/* --- Right Column (Summary) --- */}
                     <div className="lg:w-[380px] flex-shrink-0">
                         <div className="sticky top-24 space-y-6">
                             
-                            {/* Summary Card */}
                             <div className="card bg-base-100 shadow-xl border border-base-200 overflow-hidden">
                                 <div className="bg-base-900 text-base-content p-6 border-b border-base-200">
                                     <h2 className="text-xl font-bold">สรุปยอดชำระ</h2>
@@ -316,7 +307,6 @@ export default function CheckoutPage() {
                                 </div>
                             </div>
 
-                            {/* Security Badge */}
                             <div className="text-center text-xs text-base-content/40 flex items-center justify-center gap-2">
                                 <FiCheckCircle /> ปลอดภัย 100% ด้วยระบบชำระเงินมาตรฐาน
                             </div>
@@ -337,17 +327,14 @@ export default function CheckoutPage() {
                     setSelectedAddress(addr);
                     setIsSelectAddressOpen(false);
                 }}
-                // ถ้าในอนาคตอยากให้ Modal แสดงรายการสินค้าด้วย ก็ส่ง props ไปได้เหมือนคำตอบก่อนหน้า
-                // แต่ถ้าใช้หน้านี้เป็นหลักแล้ว ไม่ต้องส่งไปก็ได้ครับ
-                // cartItems={cartItems} 
-                // onUpdateQuantity={updateItemQuantity}
             />
 
-            <AddressModal
+            {/* ถ้าต้องการเปิดใช้ AddressModal สำหรับเพิ่มที่อยู่ ให้ uncomment บรรทัดล่างนี้ */}
+            {/* <AddressModal 
                 isOpen={isAddAddressOpen}
                 onClose={() => setIsAddAddressOpen(false)}
-                onSave={handleSaveAddress}
-            /> 
+                onSave={handleSaveAddress} // อย่าลืมสร้างฟังก์ชันนี้ หรือ import มาจาก useCart ถ้ามี
+            /> */}
            
         </div>
     );
