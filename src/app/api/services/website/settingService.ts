@@ -1,5 +1,5 @@
 import { poolQuery } from "../../lib/db";
-import { getCachedSetting, getSettingDefinition, isSettingsInitialized, setAllSettingsCache, updateCachedSetting, WEBSITE_SETTING_GROUP, WEBSITE_SETTING_KEYS, WEBSITE_SETTING_TYPE, WEBSITE_SETTINGS_DEF } from "@/app/utils/setting";
+import { getCachedSetting, getSettingDefinition, isSettingsInitialized, setAllSettingsCache, updateCachedSetting, WEBSITE_SETTING_DEFINITION, WEBSITE_SETTING_GROUP, WEBSITE_SETTING_KEYS, WEBSITE_SETTING_TYPE, WEBSITE_SETTINGS_DEF } from "@/app/utils/setting";
 
 export async function getSettingFromDB(key: WEBSITE_SETTING_KEYS): Promise<string | null> {
     const { rows } = await poolQuery(`SELECT * FROM master."SP_MASTER_WEBSITE_SETTING_GET"($1)`, [key]);
@@ -9,12 +9,12 @@ export async function getSettingFromDB(key: WEBSITE_SETTING_KEYS): Promise<strin
 export async function setSettingToDB(key: WEBSITE_SETTING_KEYS, value: string, type: WEBSITE_SETTING_TYPE, group: WEBSITE_SETTING_GROUP, userId: number): Promise<boolean> {
     const { rowCount } = await poolQuery(`SELECT * FROM master."SP_MASTER_WEBSITE_SETTING_UPD"($1, $2, $3, $4, $5)`, 
       [key, value, type, group, userId]);
-    return rowCount > 0;
+    return rowCount !== null && rowCount > 0;
 }
 
 export async function loadAllSettingsFromDB() {
     const { rows } = await poolQuery(`SELECT * FROM master."SP_MASTER_WEBSITE_SETTING_GET"()`);
-    return rows.map(({ KEY, VALUE }: any) => ({ key: KEY, value: VALUE }));
+    return rows.map(({ KEY, VALUE }: { KEY: WEBSITE_SETTING_KEYS, VALUE: string }) => ({ key: KEY, value: VALUE }));
 }
 
 export async function getSettingHistory(key: WEBSITE_SETTING_KEYS, limit: number = 20) {
@@ -47,7 +47,7 @@ export async function getSettingRaw(key: WEBSITE_SETTING_KEYS): Promise<string> 
 }
 
 /** แปลงค่าตาม TYPE (string/number/boolean/json) */
-function parseByType(raw: string, type: WEBSITE_SETTING_TYPE): any {
+function parseByType(raw: string, type: WEBSITE_SETTING_TYPE): number | boolean | null | string {
   switch (type) {
     case "number":
       return Number(raw);
@@ -73,7 +73,7 @@ export async function getSettingTyped<T = unknown>(key: WEBSITE_SETTING_KEYS): P
 }
 
 /** ใช้ในที่ที่อยากได้ object รวม settings ทั้งหมดแบบ typed บางส่วน */
-export async function getWebsiteSettings() {
+export async function getWebsiteSettings(): Promise<WEBSITE_SETTING_DEFINITION> {
   return {
     // ---------------------
     // GENERAL
@@ -170,7 +170,7 @@ export async function getAllSettingsForAdmin() {
     const all = await loadAllSettingsFromDB();
     setAllSettingsCache(all);
     return WEBSITE_SETTINGS_DEF.map(def => {
-        const entry = all.find(({ key } : any) => key === def.key);
+        const entry = all.find(({ key } : { key: WEBSITE_SETTING_KEYS }) => key === def.key);
         return {
             ...def,
             value: entry?.value ?? def.default

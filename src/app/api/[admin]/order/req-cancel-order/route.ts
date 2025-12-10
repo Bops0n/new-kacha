@@ -23,10 +23,11 @@ export async function PATCH(req: NextRequest) {
         const result = rows[0];
 
         return NextResponse.json(result);
-    } catch (error: any) {
+    } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : "เกิดข้อผิดพลาดที่ไม่ทราบสาเหตุ";
         logger.error("Cancel Order Error:", { error: error });
         return NextResponse.json(
-            { error: error.message || "Server Error" },
+            { error: message || "Server Error" },
             { status: 500 }
         );
     }

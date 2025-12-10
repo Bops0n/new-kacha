@@ -1,14 +1,12 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { useAlert } from '@/app/context/AlertModalContext';
 import { UserSchema, AddressSchema, NewAddressForm } from '@/types';
 
 export function useProfilePage() {
   const { data: session, status: sessionStatus, update: updateSession } = useSession();
-  const router = useRouter();
   const { showAlert } = useAlert();
 
   const [userProfile, setUserProfile] = useState<UserSchema | null>(null);
@@ -36,12 +34,13 @@ export function useProfilePage() {
       
       setUserProfile(profileData.user);
       setUserAddresses(addressesData.addresses || []);
-    } catch (err: any) {
-      showAlert(err.message, 'error', 'เกิดข้อผิดพลาด');
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "เกิดข้อผิดพลาดที่ไม่ทราบสาเหตุ";
+      showAlert(message, 'error', 'เกิดข้อผิดพลาด');
     } finally {
       setLoading(false);
     }
-  }, [sessionStatus, router, showAlert]);
+  }, [showAlert]);
 
   useEffect(() => {
     fetchData();
@@ -63,8 +62,9 @@ export function useProfilePage() {
       
       showAlert('อัปเดตข้อมูลส่วนตัวสำเร็จ', 'success');
       return true;
-    } catch (err: any) {
-      showAlert(err.message, 'error');
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "เกิดข้อผิดพลาดที่ไม่ทราบสาเหตุ";
+      showAlert(message, 'error');
       return false;
     }
   };
@@ -90,8 +90,9 @@ export function useProfilePage() {
       showAlert(isEditing ? 'แก้ไขที่อยู่สำเร็จ' : 'เพิ่มที่อยู่สำเร็จ', 'success');
       // window.location.reload();
       return true;
-    } catch (err: any) {
-      showAlert(err.message, 'error');
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "เกิดข้อผิดพลาดที่ไม่ทราบสาเหตุ";
+      showAlert(message, 'error');
       return false;
     }
   };
@@ -105,9 +106,9 @@ export function useProfilePage() {
             
             await fetchData(); // Re-fetch addresses
             showAlert('ลบที่อยู่สำเร็จ', 'success');
-            window.location.reload();
-        } catch (err: any) {
-            showAlert(err.message, 'error');
+        } catch (error: unknown) {
+          const message = error instanceof Error ? error.message : "เกิดข้อผิดพลาดที่ไม่ทราบสาเหตุ";
+            showAlert(message, 'error');
         }
     });
   };
@@ -124,8 +125,9 @@ export function useProfilePage() {
 
         await fetchData(); // Re-fetch to update default status on all addresses
         showAlert('ตั้งเป็นที่อยู่เริ่มต้นสำเร็จ', 'success');
-    } catch (err: any) {
-        showAlert(err.message, 'error');
+    } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : "เกิดข้อผิดพลาดที่ไม่ทราบสาเหตุ";
+        showAlert(message, 'error');
     }
   };
 

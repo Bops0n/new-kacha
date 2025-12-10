@@ -4,7 +4,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { FiPackage, FiTruck, FiCheckCircle, FiXCircle, FiClock, FiRefreshCw, FiSearch } from 'react-icons/fi';
 
 import { useOrderManagement } from '@/app/hooks/admin/useOrderManagement';
-import { OrderStatus } from '@/types';
+import { OrderStatus, TransferSlipStatusFilter } from '@/types';
 import LoadingSpinner from '@/app/components/LoadingSpinner';
 import Pagination from '@/app/components/Pagination';
 import OrderRow from './OrderRow';
@@ -24,7 +24,6 @@ export default function OrderManagementPage() {
     filteredOrders, 
     filters, 
     setFilters,
-    bulkSteps,
     fetchOrders
   } = useOrderManagement();
 
@@ -36,10 +35,12 @@ export default function OrderManagementPage() {
     };
     document.addEventListener("visibilitychange", onVisible);
     return () => document.removeEventListener("visibilitychange", onVisible);
-  }, []);
+  }, [fetchOrders]);
 
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(10);
+  // const [itemsPerPage, setItemsPerPage] = useState(10);
+
+  const itemsPerPage = 10;
 
   const paginatedOrders = useMemo(() => {
     return filteredOrders.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
@@ -70,7 +71,7 @@ export default function OrderManagementPage() {
   if (loading) return <LoadingSpinner />;
   if (error) return <div className="text-center p-8 text-error"><h3>เกิดข้อผิดพลาด:</h3><p>{error}</p></div>;
 
-  if (!session || !session.user.Order_Mgr) return <AccessDeniedPage url="/admin"/>;
+  if (!session || !session.user?.Order_Mgr) return <AccessDeniedPage url="/admin"/>;
 
   return (
     <div className="min-h-screen bg-base-200 p-4">
@@ -103,11 +104,11 @@ export default function OrderManagementPage() {
                         <input type="text" placeholder="ค้นหาด้วยรหัส, ชื่อลูกค้า, Tracking Number..." value={filters.searchTerm} onChange={e => setFilters(f => ({...f, searchTerm: e.target.value}))} className="input input-bordered w-full flex-1 pl-10" />
                     </div>
                 </div>
-                <select value={filters.statusFilter} onChange={e => { setFilters(f => ({...f, statusFilter: e.target.value as any})); setCurrentPage(1); }} className="select select-bordered w-full md:w-auto">
+                <select value={filters.statusFilter} onChange={e => { setFilters(f => ({...f, statusFilter: e.target.value as OrderStatus | 'all'})); setCurrentPage(1); }} className="select select-bordered w-full md:w-auto">
                     <option value="all">สถานะทั้งหมด</option>
                     {Object.keys(statusTypeLabels).map(key => <option key={key} value={key}>{statusTypeLabels[key as OrderStatus].label}</option>)}
                 </select>
-                <select value={filters.transferSlipFilter} onChange={e => { setFilters(f => ({...f, transferSlipFilter: e.target.value as any})); setCurrentPage(1); }} className="select select-bordered w-full md:w-auto">
+                <select value={filters.transferSlipFilter} onChange={e => { setFilters(f => ({...f, transferSlipFilter: e.target.value as TransferSlipStatusFilter})); setCurrentPage(1); }} className="select select-bordered w-full md:w-auto">
                     <option value="all">สถานะสลิปทั้งหมด</option>
                     <option value="has_slip">แนบสลิปแล้ว</option>
                     <option value="no_slip">ยังไม่แนบสลิป</option>
@@ -120,7 +121,7 @@ export default function OrderManagementPage() {
                 <table className="table table-zebra w-full">
                     <thead><tr><th>หมายเลขคำสั่งซื้อ</th><th>ลูกค้า</th><th>สินค้า</th><th>ยอดรวม</th><th>สถานะ</th><th>วันที่สั่ง</th><th>จัดการ</th></tr></thead>
                     <tbody>
-                        {paginatedOrders.map(order => <OrderRow key={order.Order_ID} order={order} statusConfig={statusTypeLabels} btnCancelOrder={bulkSteps[order.Order_ID]?.btnCancelOrder ?? false} fetchOrders={fetchOrders} />)}
+                        {paginatedOrders.map(order => <OrderRow key={order.Order_ID} order={order} statusConfig={statusTypeLabels} fetchOrders={fetchOrders} />)}
                     </tbody>
                 </table>
             </div>

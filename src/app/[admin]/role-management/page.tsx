@@ -95,11 +95,12 @@ function RoleModal({ isOpen, onClose, isEditing, onSaved, form, handleRoleFormCh
                 Report: !!form.Report,
                 Dashboard: !!form.Dashboard,
             };
-            const { role } : any = isEditing ? await apiUpdateRole(payload) : await apiCreateRole(payload);
+            const role = isEditing ? await apiUpdateRole(payload) : await apiCreateRole(payload);
             onSaved(role);
             onClose();
-        } catch (e: any) {
-            setError(e?.message ?? "บันทึกไม่สำเร็จ");
+        } catch (error: unknown) {
+            const message = error instanceof Error ? error.message : "เกิดข้อผิดพลาดที่ไม่ทราบสาเหตุ";
+            setError(message);
         } finally {
             setSaving(false);
         }
@@ -160,7 +161,7 @@ function RoleModal({ isOpen, onClose, isEditing, onSaved, form, handleRoleFormCh
 }
 
 export default function RoleManagementPage() {
-    const { data: session, status, update } = useSession();
+    const { data: session, update } = useSession();
     const [roles, setRoles] = useState<Role[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -183,10 +184,11 @@ export default function RoleManagementPage() {
         try {
             setLoading(true); 
             setError(null);
-            const { roles } : any = await apiGetRoles();
+            const roles = await apiGetRoles();
             setRoles(Array.isArray(roles) ? roles : []);
-        } catch (e: any) {
-            setError(e?.message ?? "โหลดข้อมูลไม่สำเร็จ");
+        } catch (error: unknown) {
+            const message = error instanceof Error ? error.message : "เกิดข้อผิดพลาดที่ไม่ทราบสาเหตุ";
+            setError(message);
             setRoles([]);
         } finally {
             setLoading(false);
@@ -240,15 +242,20 @@ export default function RoleManagementPage() {
     }
     
     const handleRoleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-        const { name, value, type, checked } : any = e.target;
+        const target = e.target;
+        const name = target.name;
+        const value = target.value;
+        const checked = (target as HTMLInputElement).checked;
+        const type = target.type;
+
         setForm(prev => ({
-        ...prev,
-        [name]: type === 'checkbox' ? checked : value
+            ...prev,
+            [name]: type === "checkbox" ? checked : value
         }));
     };
     
     function onSaved(saved: Role) {
-        if (session && saved.Role == session.user.accessLevel) {
+        if (session && saved.Role == session.user?.accessLevel) {
             update({
                 user: {
                     ...session.user,
@@ -265,7 +272,7 @@ export default function RoleManagementPage() {
     }
 
     if (loading) return <LoadingSpinner />;
-    if (!session || !session.user.Sys_Admin) return <AccessDeniedPage url="/admin"/>;
+    if (!session || !session.user?.Sys_Admin) return <AccessDeniedPage url="/admin"/>;
 
     return (
     <div className="min-h-screen bg-base-200 p-4">

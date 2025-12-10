@@ -1,4 +1,4 @@
-import { getSettingFromDB, setSettingToDB } from "../api/services/website/settingService";
+import { getSettingFromDB } from "../api/services/website/settingService";
 
 const settingsCache = new Map<WEBSITE_SETTING_KEYS, string>();
 let settingsInitialized = false;
@@ -62,7 +62,7 @@ export type WEBSITE_SETTING_TYPE = "string" | "number" | "boolean" | "json" | "i
 
 export type WEBSITE_SETTING_GROUP = "general" | "order" | "payment" | "system";
 
-export interface WEBSITE_SETTING_DEFINITION {
+export interface WEBSITE_SETTING_INFO {
     key: WEBSITE_SETTING_KEYS;
     label: string;
     description?: string;
@@ -71,7 +71,7 @@ export interface WEBSITE_SETTING_DEFINITION {
     default: string;
 }
 
-export const WEBSITE_SETTINGS_DEF: WEBSITE_SETTING_DEFINITION[] = [
+export const WEBSITE_SETTINGS_DEF: WEBSITE_SETTING_INFO[] = [
   // --------------------
   // GENERAL
   // --------------------
@@ -317,8 +317,61 @@ export const WEBSITE_SETTINGS_DEF: WEBSITE_SETTING_DEFINITION[] = [
   // }
 ];
 
+export interface WEBSITE_SETTING_DEFINITION {
+  // ---------------------
+  // GENERAL
+  // ---------------------
+  siteName: string;
+  logoURL: string;
+  siteDescription: string;
+  siteKeywords: string;
 
-export function getSettingDefinition(key: WEBSITE_SETTING_KEYS): WEBSITE_SETTING_DEFINITION {
+  // ---------------------
+  // CONTACT
+  // ---------------------
+  contactEmail: string;
+  contactPhone: string;
+  contactAddress: string;
+  contactMapEmbedURL: string;
+
+  // ---------------------
+  // SOCIAL
+  // ---------------------
+  facebookURL: string;
+  facebookPageName: string;
+  lineURL: string;
+  lineOfficialName: string;
+
+  // ---------------------
+  // COMPANY INFO
+  // ---------------------
+  companyName: string;
+  companyAddress: string;
+  companyTaxId: string;
+  vatRate: number;
+
+  // ---------------------
+  // PAYMENT SETTINGS
+  // ---------------------
+  paymentBankName: string;
+  paymentBankAccountName: string;
+  paymentBankAccountNumber: string;
+  paymentQRScanImage: string;
+  paymentTimeoutHours: number;
+
+  // ---------------------
+  // SHIPPING SETTINGS (ถ้าคุณเปิดใช้งานภายหลัง)
+  // shippingFlatRate?: number;
+  // shippingFreeThreshold?: number;
+
+  // ---------------------
+  // SYSTEM (ถ้าคุณเปิดใช้งานภายหลัง)
+  // maintenanceMode?: boolean;
+  // maintenanceMessage?: string;
+}
+
+
+export function getSettingDefinition(key: WEBSITE_SETTING_KEYS): WEBSITE_SETTING_INFO {
   const def = WEBSITE_SETTINGS_DEF.find(d => d.key === key);
   if (!def) throw new Error(`Unknown website setting key: ${key}`);
   return def;

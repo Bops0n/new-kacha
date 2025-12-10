@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { useSession } from 'next-auth/react';
 import { useAlert } from '@/app/context/AlertModalContext';
 import { useCounter } from '@/app/context/CartCount';
 import { AddressSchema, CartDetailSchema } from '@/types';
@@ -16,7 +15,6 @@ import { calculateAvailableStock } from '@/app/utils/calculations';
  * - จัดการการสร้างคำสั่งซื้อ
  */
 export function useCart() {
-  const { data: session, status } = useSession();
   const router = useRouter();
   const { showAlert } = useAlert();
   const { setCounter, decrement } = useCounter();
@@ -56,13 +54,14 @@ export function useCart() {
       if (addressData.addresses.length > 0) {
         setSelectedAddress(addressData.addresses.find((addr : AddressSchema) => addr.Is_Default) || addressData.addresses[0]);
       }
-    } catch (err: any) {
-      setError(err.message);
-      showAlert(err.message, 'error');
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "เกิดข้อผิดพลาดที่ไม่ทราบสาเหตุ";
+      setError(message);
+      showAlert(message, 'error');
     } finally {
       setLoading(false);
     }
-  }, [status, router, setCounter, showAlert]);
+  }, [setCounter, showAlert]);
 
   useEffect(() => {
     fetchCartAndAddresses();
@@ -89,8 +88,9 @@ export function useCart() {
             setCartItems(prev => prev.filter(item => item.Product_ID !== productId));
             decrement();
             showAlert(`ลบ ${productName} ออกจากตะกร้าแล้ว`, 'success');
-        } catch (err: any) {
-            showAlert(err.message, 'error');
+        } catch (error: unknown) {
+            const message = error instanceof Error ? error.message : "เกิดข้อผิดพลาดที่ไม่ทราบสาเหตุ";
+            showAlert(message, 'error');
         }
     });
   }, [decrement, showAlert]);
@@ -108,18 +108,18 @@ export function useCart() {
     if (newQuantity > availableStock) {
         showAlert(`สินค้ามีในสต็อกเพียง ${availableStock} ชิ้น`, 'warning');
         try {
-        const response = await fetch('/api/main/cart', {
-            method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ productId, newQuantity :availableStock }),
-        });
-        if (!response.ok) throw new Error('ไม่สามารถอัปเดตจำนวนสินค้าได้');
-        setCartItems(prevItems => prevItems.map(i => i.Product_ID === productId ? { ...i, Cart_Quantity: availableStock } : i));
-      } catch (err: any) {
-        showAlert(err.message, 'error');
-    }
-
-        return ;
+          const response = await fetch('/api/main/cart', {
+              method: 'PATCH',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ productId, newQuantity :availableStock }),
+          });
+          if (!response.ok) throw new Error('ไม่สามารถอัปเดตจำนวนสินค้าได้');
+          setCartItems(prevItems => prevItems.map(i => i.Product_ID === productId ? { ...i, Cart_Quantity: availableStock } : i));
+        } catch (error: unknown) {
+          const message = error instanceof Error ? error.message : "เกิดข้อผิดพลาดที่ไม่ทราบสาเหตุ";
+          showAlert(message, 'error');
+        }
+        return;
     }
 
     try {
@@ -131,8 +131,9 @@ export function useCart() {
         if (!response.ok) throw new Error('ไม่สามารถอัปเดตจำนวนสินค้าได้');
         
         setCartItems(prevItems => prevItems.map(i => i.Product_ID === productId ? { ...i, Cart_Quantity: newQuantity } : i));
-    } catch (err: any) {
-        showAlert(err.message, 'error');
+    } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : "เกิดข้อผิดพลาดที่ไม่ทราบสาเหตุ";
+        showAlert(message, 'error');
     }
   }, [cartItems, showAlert, removeItem]);
 
@@ -169,8 +170,9 @@ export function useCart() {
             showAlert('สั่งซื้อสำเร็จ!\nกำลังนำคุณไปยังหน้ารายละเอียดคำสั่งซื้อ...', 'success', 'สำเร็จ', () => {
                 router.push(`/orders-history/${orderId}`);
             });
-        } catch (err: any) {
-            showAlert(err.message, 'error');
+        } catch (error: unknown) {
+            const message = error instanceof Error ? error.message : "เกิดข้อผิดพลาดที่ไม่ทราบสาเหตุ";
+            showAlert(message, 'error');
         }
     });
   }, [selectedAddress, cartItems, paymentMethod, totalPrice, router, showAlert, setCounter]);

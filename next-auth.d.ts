@@ -1,32 +1,43 @@
-// next-auth.d.ts
-// นี่คือไฟล์ Type Declaration สำหรับ NextAuth.js
-// เพื่อให้ TypeScript รู้จัก Properties เพิ่มเติมที่เราใส่เข้าไปใน Session และ JWT
-
 import { DefaultSession, DefaultJWT } from "next-auth";
 
-// 1. ขยาย Type ของ Session interface
-//    เพื่อให้ TypeScript รู้จัก properties 'id' และ 'accessLevel' ใน session.user
 declare module "next-auth" {
   interface Session {
-    user: {
-      id?: string;         // เพิ่ม 'id' (อาจเป็น string หรือ number ขึ้นอยู่กับ ID ผู้ใช้จริง)
-      accessLevel?: number; // เพิ่ม 'accessLevel' (เช่น '0', '1', 'admin')
-      Sys_Admin?: boolean;
-      User_Mgr?: boolean;
-      Stock_Mgr?: boolean;
-      Order_Mgr?: boolean;
-      Report?: boolean;
-      Dashboard?: boolean;
-    } & DefaultSession["user"]; // รวม properties เดิมของ DefaultSession.user (name, email, image)
+    rememberMe: boolean;
+    shortExp?: number;
+    user: (DefaultSession["user"] & {
+      id: number | string;
+      name: string;
+      email: string;
+      accessLevel: number;
+
+      Sys_Admin: boolean;
+      User_Mgr: boolean;
+      Stock_Mgr: boolean;
+      Order_Mgr: boolean;
+      Report: boolean;
+      Dashboard: boolean;
+    }) | null;
+  }
+
+  interface User {
+    id: number | string;
+    name: string;
+    email: string;
+    rememberMe?: boolean;
+    accessLevel?: number;
   }
 }
 
-// 2. ขยาย Type ของ JWT interface
-//    เพื่อให้ TypeScript รู้จัก properties 'id' และ 'accessLevel' ใน JWT token
 declare module "next-auth/jwt" {
   interface JWT extends DefaultJWT {
-    id?: string;          // เพิ่ม 'id' ลงใน JWT token
-    accessLevel?: number; // เพิ่ม 'accessLevel' ลงใน JWT token
+    id?: number | string;
+    name?: string;
+    email?: string;
+
+    rememberMe?: boolean;
+    shortExp?: number;
+    accessLevel?: number;
+
     Sys_Admin?: boolean;
     User_Mgr?: boolean;
     Stock_Mgr?: boolean;

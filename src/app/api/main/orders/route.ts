@@ -1,16 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { authenticateRequest } from '@/app/api/auth/utils';
-import { Order, PlaceOrderRequestBody } from '@/types';
+import { mapDbRowsToOrders, Order, PlaceOrderRequestBody } from '@/types';
 import { checkRequire } from '@/app/utils/client';
 import { addOrderTransaction, getOrderByUID } from '../../services/user/userServices';
-import { mapDbRowsToOrders } from '@/app/utils/server';
 import { logger } from '@/server/logger';
 
 /**
  * GET /api/main/orders
  * ดึงข้อมูลคำสั่งซื้อทั้งหมดสำหรับผู้ใช้ที่ login อยู่
  */
-export async function GET(request: NextRequest) {
+export async function GET() {
     const auth = await authenticateRequest();
     const isCheck = checkRequire(auth);
     if (isCheck) return isCheck;

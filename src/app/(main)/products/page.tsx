@@ -7,7 +7,6 @@ import { FiBox, FiFilter, FiX, FiChevronRight } from 'react-icons/fi';
 import { useProductsPage } from '@/app/hooks/useProductsPage';
 import ProductDisplayCard from '../components/ProductDisplayCard';
 import LoadingSpinner from '../../components/LoadingSpinner';
-import { formatPrice } from '../../utils/formatters';
 import { ProductsPageData } from '@/types';
 
 // --- 1. Component แสดงโครงสร้างหมวดหมู่ (Recursive/Accordion) ---
@@ -188,27 +187,34 @@ export default function ProductsPage() {
 
   // Intersection Observer สำหรับ Infinite Scroll
   useEffect(() => {
-    const observer = new IntersectionObserver((entries) => {
-      const target = entries[0];
-      if (target.isIntersecting && hasMore ) {
-        // console.log(hasMore)
-        
-        loadMore();
-      }
-    }, {
-      root: null,
-      rootMargin: "20px",
-      threshold: 1.0
-    });
+    const loader = loaderRef.current;  // ← เก็บ snapshot ของ ref
 
-    if (loaderRef.current) {
-      observer.observe(loaderRef.current);
-    }
+    if (!loader) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const target = entries[0];
+        if (
+          target.isIntersecting &&
+          hasMore &&
+          filteredProducts.length < (pageData?.total || 0)
+        ) {
+          loadMore();
+        }
+      },
+      {
+        root: null,
+        rootMargin: "20px",
+        threshold: 1.0,
+      }
+    );
+
+    observer.observe(loader);
 
     return () => {
-      if (loaderRef.current) observer.unobserve(loaderRef.current);
-    }
-  }, [loadMore, hasMore]);
+      observer.unobserve(loader);  // ใช้ snapshot เดิม → ถูกต้อง
+    };
+  }, [loadMore, hasMore, filteredProducts.length, pageData?.total]);
 
   // Helper หาชื่อหน้า
   const getPageTitle = () => {

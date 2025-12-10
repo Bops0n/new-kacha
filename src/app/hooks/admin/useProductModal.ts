@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { ProductInventory, ModalMode, ProductFormData } from '@/types';
+import { ModalMode, ProductFormData } from '@/types';
 import { useCategoryData } from '../useCategoryData';
 
 interface UseProductModalProps {
@@ -27,7 +27,7 @@ export function useProductModal({ onSave }: UseProductModalProps) {
       });
       setImageFile(null);
     }
-  }, [selectedProduct, isModalOpen]);
+  }, [selectedProduct, isModalOpen, childSubCategories]);
 
 
   const openModal = useCallback((product: ProductFormData | null, mode: ModalMode) => {
@@ -38,7 +38,7 @@ export function useProductModal({ onSave }: UseProductModalProps) {
     });
     setModalMode(mode);
     setIsModalOpen(true);
-  }, []);
+  }, [childSubCategories]);
 
   const closeModal = useCallback(() => {
     setIsModalOpen(false);
@@ -54,18 +54,15 @@ export function useProductModal({ onSave }: UseProductModalProps) {
   const handleFormChange = useCallback((e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
     const checked = (e.target as HTMLInputElement).checked;
-    let finalValue: any = value;
+    let finalValue: string | number | boolean | null = value;
 
     if (type === 'checkbox') finalValue = checked;
     else if (type === 'number' || e.target.tagName === 'SELECT') finalValue = value === '' ? null : Number(value);
 
-            if (name === 'Selected_Category_ID') { 
-                setFormData(prev => ({...prev, Selected_Sub_Category_ID : null, Child_ID : null }))
-                return
-            }
-            // if (filterName === 'subCategoryFilter') { newFilters.childCategoryFilter = 'all'; }
-            // return newFilters;
-    
+    if (name === 'Selected_Category_ID') { 
+        setFormData(prev => ({...prev, Selected_Sub_Category_ID : null, Child_ID : null }))
+        return
+    }
     
     setFormData(prev => ({ ...prev, [name]: finalValue }));
   }, []);
@@ -80,7 +77,7 @@ export function useProductModal({ onSave }: UseProductModalProps) {
     e.preventDefault();
     setIsUploading(true);
 
-    let finalFormData = { ...formData };
+    const finalFormData = { ...formData };
 
     if (imageFile) {
       try {
@@ -90,7 +87,7 @@ export function useProductModal({ onSave }: UseProductModalProps) {
         const result = await response.json();
         if (!response.ok) throw new Error(result.message || 'Image upload failed');
         finalFormData.Image_URL = result.imageUrl;
-      } catch (error) {
+      } catch {
         alert('เกิดข้อผิดพลาดในการอัปโหลดรูปภาพ');
         setIsUploading(false);
         return;

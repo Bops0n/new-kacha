@@ -9,7 +9,6 @@ export function useOrderManagement() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [bulkSteps, setBulkSteps] = useState<Record<number, any>>({});
 
   const [filters, setFilters] = useState({
     searchTerm: '',
@@ -28,41 +27,41 @@ export function useOrderManagement() {
       }
       const data = await response.json();
       setOrders(data.orders || []);
-    } catch (err: any) {
-      setError(err.message);
-      showAlert(err.message, 'error');
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "เกิดข้อผิดพลาดที่ไม่ทราบสาเหตุ";
+      setError(message);
+      showAlert(message, 'error');
     } finally {
       setLoading(false);
     }
   }, [showAlert]);
 
-  async function loadBulk() {
-    if (orders.length === 0) return;
+  // const loadBulk = useCallback(async () => {
+  //   if (orders.length === 0) return;
 
-    const list = orders.map(o => o.Order_ID);
-    const res = await fetch("/api/admin/order/next-step/bulk", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ list })
-    });
-    const data = await res.json();
+  //   const list = orders.map(o => o.Order_ID);
+  //   const res = await fetch("/api/admin/order/next-step/bulk", {
+  //     method: "POST",
+  //     headers: { "Content-Type": "application/json" },
+  //     body: JSON.stringify({ list })
+  //   });
+  //   const data = await res.json();
 
-    const map: Record<number, any> = {};
-    data.forEach((item: any) => {
-      map[item.Order_ID] = item;
-    });
+  //   const map: Record<number, unknown> = {};
+  //   data.forEach((item: { Order_ID: number }) => {
+  //     map[item.Order_ID] = item;
+  //   });
 
-    setBulkSteps(map);
-  }
-  
+  //   setBulkSteps(map);
+  // }, []);
 
   useEffect(() => {
     fetchOrders();
   }, [fetchOrders]);
 
-  useEffect(() => {
-    loadBulk();
-  }, [orders]);
+  // useEffect(() => {
+  //   loadBulk();
+  // }, [orders]);
 
   const filteredOrders = useMemo(() => {
     return orders.filter(order => {
@@ -90,7 +89,6 @@ export function useOrderManagement() {
     filteredOrders,
     filters,
     setFilters,
-    bulkSteps,
     fetchOrders
   };
 }

@@ -8,3 +8,5 @@ export interface ContactInfo {
     Is_Read: boolean;
     Created_At: string;
 }
+
+export type CONTACT_TYPE = "all" | "read" | "unread";

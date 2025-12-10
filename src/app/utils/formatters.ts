@@ -1,7 +1,5 @@
 // lib/formatters.ts
 
-import { SetStateAction } from "react";
-
 /**
  * จัดรูปแบบตัวเลขเป็นสกุลเงินบาท (THB)
  * @param price - ตัวเลขที่ต้องการจัดรูปแบบ

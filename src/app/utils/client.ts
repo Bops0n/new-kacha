@@ -1,16 +1,13 @@
-import { OrderStatus, PaymentConfig, StatusConfig } from "@/types";
+import { PaymentConfig, StatusConfig } from "@/types";
+import { AUTH_CHECK } from "@/types/auth.types";
 import { NextResponse } from "next/server";
 import { BsBank, BsCash } from "react-icons/bs";
 import { FiCheckCircle, FiClock, FiFileText, FiPackage, FiRefreshCw, FiTruck, FiXCircle } from "react-icons/fi";
 import { MdOutlinePendingActions } from "react-icons/md";
 
-export const checkRequire = (auth : any) => {
-    if (!auth.authenticated) {
-        return auth.response;
-    }
-    if (auth.accessLevel < 0) {
-        return NextResponse.json({ message: 'Forbidden' }, { status: 403 });
-    }
+export const checkRequire = (auth: AUTH_CHECK) => {
+    if (!auth.authenticated) return auth.response;
+    if (auth.accessLevel < 0) return NextResponse.json({ message: 'Forbidden' }, { status: 403 });
     return null;
 };
 
@@ -26,7 +23,7 @@ export const statusTypeLabels: StatusConfig = {
     cancelled: { label: "ยกเลิก", color: "text-red-700", icon: FiXCircle, bgColor: "bg-red-50" },
 };
 
-export const statusConfig: { [key in OrderStatus]: { label: string; color: string; icon: React.ElementType; bgColor: string; textColor: string } } = {
+export const statusConfig: StatusConfig = {
   waiting_payment: { label: 'รอชำระเงิน', color: 'warning', icon: FiClock, bgColor: 'bg-warning/10', textColor: 'text-warning' },
   pending: { label: 'รอดำเนินการ', color: 'warning', icon: FiClock, bgColor: 'bg-warning/10', textColor: 'text-warning' },
   preparing: { label: 'กำลังเตรียมสินค้า', color: 'info', icon: FiPackage, bgColor: 'bg-info/10', textColor: 'text-info' },

@@ -20,7 +20,7 @@ export async function updateRule(roleLevel: number, role: Partial<Role>, updateB
 
 export async function deleteRole(roleLevel: number, deleteBy: number) {
     const { rowCount } = await poolQuery(`SELECT * FROM master."SP_MASTER_ACCESS_LEVEL_DEL"($1, $2)`, [roleLevel, deleteBy]);
-    return rowCount > 0;
+    return rowCount !== null && rowCount > 0;
 }
 
 export async function getRoleByLevel(roleLevel: number) : Promise<Role> {

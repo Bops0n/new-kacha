@@ -7,7 +7,7 @@ import { logger } from "@/server/logger";
 import { uploadRefundSlip } from "@/app/api/services/admin/orderMgrService";
 import { v4 as uuidv4 } from 'uuid';
 
-export async function PATCH(request: NextRequest, { params }: { params: { orderId: number } }) {
+export async function PATCH(request: NextRequest, { params }: { params: Promise<{ orderId: number }> }) {
     const auth = await checkOrderMgrRequire();
     const isCheck = checkRequire(auth);
     if (isCheck) return isCheck;
@@ -49,8 +49,9 @@ export async function PATCH(request: NextRequest, { params }: { params: { orderI
 
         return NextResponse.json({ message: 'อัปโหลดหลักฐานสำเร็จ', imageUrl });
 
-    } catch (error) {
-        logger.error('Error uploading refund slip:', error);
-        return NextResponse.json({ message: 'เกิดข้อผิดพลาดในการอัปโหลดหลักฐาน' }, { status: 500 });
+    } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : "เกิดข้อผิดพลาดที่ไม่ทราบสาเหตุ";
+        logger.error('Error uploading refund slip:', { error: error });
+        return NextResponse.json({ message: message }, { status: 500 });
     }
 }

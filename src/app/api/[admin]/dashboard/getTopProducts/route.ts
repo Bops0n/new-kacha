@@ -13,8 +13,9 @@ export async function GET() {
     const { rows } = await poolQuery(`SELECT * FROM public."SP_ADMIN_DASHBOARD_TOP_PRODUCTS_GET"();`);
 
     return NextResponse.json({ Products: rows });
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "เกิดข้อผิดพลาดที่ไม่ทราบสาเหตุ";
     logger.error("Error fetching top products:", { error: error });
-    return NextResponse.json({ message: error.message }, { status: 500 });
+    return NextResponse.json({ message: message }, { status: 500 });
   }
 }

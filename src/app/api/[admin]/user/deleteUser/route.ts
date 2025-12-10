@@ -40,10 +40,11 @@ export async function DELETE(req: NextRequest) {
             { status: 200 }
         );
 
-    } catch (dbError: any) {
-        logger.error("Error deleting user from database:", { error: dbError });
+    } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : "เกิดข้อผิดพลาดที่ไม่ทราบสาเหตุ";
+        logger.error("Error deleting user from database:", { error: error });
         return NextResponse.json(
-            { message: "Failed to delete user.", error: dbError.message },
+            { message: message, error: error },
             { status: 500 }
         );
     }

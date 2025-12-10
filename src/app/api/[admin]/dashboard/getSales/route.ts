@@ -24,8 +24,9 @@ export async function GET(request: Request) {
     }));
 
     return NextResponse.json({ Data });
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "เกิดข้อผิดพลาดที่ไม่ทราบสาเหตุ";
     logger.error("Error fetching sales data:", { error: error });
-    return NextResponse.json({ message: error.message }, { status: 500 });
+    return NextResponse.json({ message: message }, { status: 500 });
   }
 }

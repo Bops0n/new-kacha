@@ -7,7 +7,7 @@ export default function ReportPage() {
     const { data: session, status } = useSession();
 
     if (status == "loading") return <LoadingSpinner />;
-    if (!session || !session.user.Report) return <AccessDeniedPage url="/admin"/>;
+    if (!session || !session.user?.Report) return <AccessDeniedPage url="/admin"/>;
 
     return(
         <div className="min-h-screen bg-base-200 p-4">

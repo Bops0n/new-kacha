@@ -4,7 +4,7 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { WEBSITE_SETTING_DEFINITION } from "../utils/setting";
 import LoadingSpinner from "../components/LoadingSpinner";
 
-const WebsiteSettingsContext = createContext<any>(null);
+const WebsiteSettingsContext = createContext<WEBSITE_SETTING_DEFINITION | null>(null);
 
 export function WebsiteSettingsProvider({ children }: { children: React.ReactNode }) {
   const [settings, setSettings] = useState<WEBSITE_SETTING_DEFINITION | null>(null);
@@ -25,5 +25,7 @@ export function WebsiteSettingsProvider({ children }: { children: React.ReactNod
 }
 
 export function useWebsiteSettings() {
-  return useContext(WebsiteSettingsContext);
+  const ctx = useContext(WebsiteSettingsContext);
+  if (!ctx) throw new Error("useWebsiteSettings must be used within WebsiteSettingsProvider");
+  return ctx;
 }

@@ -5,6 +5,7 @@ import LoadingSpinner from "@/app/components/LoadingSpinner";
 import { LowStock } from "@/types/dashboard";
 import { motion } from "framer-motion";
 import { FiAlertTriangle } from "react-icons/fi";
+import Image from "next/image";
 
 export function LowStockProducts() {
   const [items, setItems] = useState<LowStock[]>([]);
@@ -70,9 +71,11 @@ export function LowStockProducts() {
                 {/* Product Info */}
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-3">
-                    <img
+                    <Image
                       src={item.Image_URL || "https://placehold.co/48x48?text=No+Img"}
                       alt={item.Product_Name}
+                      width={512}
+                      height={512}
                       className="w-12 h-12 rounded-lg object-cover border border-gray-200"
                     />
                     <div>

@@ -2,6 +2,7 @@
 
 import { ImagePreviewModal } from "@/app/components/ImagePreviewModal";
 import { WEBSITE_SETTING_GROUP, WEBSITE_SETTING_TYPE } from "@/app/utils/setting";
+import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
 import { FiZoomIn } from "react-icons/fi";
 
@@ -73,8 +74,9 @@ export default function AdminSettingsPage() {
         const t = await res.text();
         throw new Error(t || "บันทึกไม่สำเร็จ");
       }
-    } catch (err: any) {
-      setError(err.message ?? "เกิดข้อผิดพลาด");
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "เกิดข้อผิดพลาดที่ไม่ทราบสาเหตุ";
+      setError(message);
     } finally {
       setSavingKey(null);
     }
@@ -163,9 +165,11 @@ export default function AdminSettingsPage() {
                           className="relative group w-full max-w-md aspect-square rounded-2xl overflow-hidden border border-base-200 shadow-sm bg-white cursor-zoom-in"
                           onClick={() => setPreviewImage(item.value || 'https://placehold.co/600x400?text=No+Image')}
                         >
-                          <img
+                          <Image
                             src={item.value || 'https://placehold.co/600x400?text=No+Image'}
                             alt={item.label}
+                            width={512}
+                            height={512}
                             className="w-full h-full object-contain p-4 transition-transform duration-500 group-hover:scale-110"
                           />
                           

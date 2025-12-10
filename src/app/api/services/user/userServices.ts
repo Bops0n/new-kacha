@@ -21,7 +21,7 @@ export async function updateUserProfile(userId: number, data: Partial<UserSchema
   delete data.User_ID;
   
   const { rowCount } = await poolQuery(`SELECT * FROM "SP_USER_ACCOUNT_UPD"($1, $2)`, [userId, JSON.stringify(data)]);
-  return rowCount > 0;
+  return rowCount !== null && rowCount > 0;
 }
 
 
@@ -53,12 +53,12 @@ export async function addNewAddress(userId: number, addressData: Omit<AddressSch
  */
 export async function updateAddress(addressId: number, userId: number, addressData: Partial<AddressSchema>): Promise<boolean> {
     const { rowCount } = await poolQuery(`SELECT * FROM "SP_USER_ADDRESS_UPD"($1, $2, $3)`, [addressId, userId, JSON.stringify(addressData)]);
-    return rowCount > 0;
+    return rowCount !== null && rowCount > 0;
 }
 
-export async function deleteAddress(addressID: number): Promise<boolean>{
+export async function deleteAddress(addressID: number): Promise<boolean> {
   const { rowCount } = await poolQuery(`SELECT * FROM "SP_USER_ADDRESS_DEL"($1)`, [addressID]);
-  return rowCount > 0;
+  return rowCount !== null && rowCount > 0;
 }
 
 export async function getAllProducts() {
@@ -83,22 +83,22 @@ export async function getCartByUID(userId: number) {
 
 export async function addCartProduct(userId: number, productId: number, qty: number) {
   const { rowCount } = await poolQuery(`SELECT * FROM "SP_USER_CART_INS"($1, $2, $3)`, [userId, productId, qty]);
-  return rowCount > 0;
+  return rowCount !== null && rowCount > 0;
 }
 
 export async function deleteCartProduct(userId: number, productId: number) {
   const { rowCount } = await poolQuery(`SELECT * FROM "SP_USER_CART_DEL"($1, $2)`, [userId, productId]);
-  return rowCount > 0;
+  return rowCount !== null && rowCount > 0;
 }
 
 export async function updateCartProduct(userId: number, productId: number, qty: number) {
   const { rowCount } = await poolQuery(`SELECT * FROM "SP_USER_CART_UPD"($1, $2, $3)`, [userId, productId, qty]);
-  return rowCount > 0;
+  return rowCount !== null && rowCount > 0;
 }
 
 export async function uploadTransactionSlip(imageURL: string, orderId: number) {
   const { rowCount } = await poolQuery(`SELECT * FROM "SP_USER_ORDER_TRANS_SLIP_UPD"($1, $2)`, [imageURL, orderId]);
-  return rowCount > 0;
+  return rowCount !== null && rowCount > 0;
 }
 
 export async function getProductDetail(productId: number) {

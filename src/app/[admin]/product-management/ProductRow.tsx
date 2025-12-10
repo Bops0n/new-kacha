@@ -2,6 +2,7 @@ import React from 'react';
 import { FiCheckCircle, FiEye, FiEyeOff, FiTrash2 } from 'react-icons/fi'; // Changed FiEdit to FiEye, removed FiEdit from import
 import { ProductInventory } from '@/types'; // Correct path to types
 import { ModalMode } from '@/types';
+import Image from 'next/image';
 
 interface ProductRowProps {
   product: ProductInventory;
@@ -31,9 +32,11 @@ const ProductRow: React.FC<ProductRowProps> = ({
       <td>
         <div className="avatar">
           <div className="mask mask-squircle w-12 h-12">
-            <img
+            <Image
               src={product.Image_URL || 'https://placehold.co/48x48/EEEEEE/333333?text=No+Img'}
               alt={product.Name}
+              width={512}
+              height={512}
               onError={(e) => {
                 e.currentTarget.onerror = null;
                 e.currentTarget.src = 'https://placehold.co/48x48/CCCCCC/666666?text=Img+Error';

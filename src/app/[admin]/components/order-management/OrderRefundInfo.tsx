@@ -1,4 +1,5 @@
 import { Order } from "@/types";
+import Image from "next/image";
 import { FiCreditCard, FiUploadCloud, FiZoomIn } from "react-icons/fi";
 
 type OrderRefundProps = {
@@ -10,7 +11,6 @@ type OrderRefundProps = {
     handleFileChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
     handleUploadSlip?: () => void;
     handleFileChangeManual?: (file: File) => void;
-    previewImage: string | null;
     setPreviewImage: (url: string | null) => void;
 };
 
@@ -23,7 +23,6 @@ export default function OrderRefundInfo({
     handleFileChange = () => {},
     handleUploadSlip = () => {},
     handleFileChangeManual = () => {},
-    previewImage,
     setPreviewImage = () => {}
 }: OrderRefundProps) {
     const canUploadSlip = order.Payment_Type === 'bank_transfer' && order.Status === 'refunding' && !order.Refund_Slip;
@@ -51,9 +50,11 @@ export default function OrderRefundInfo({
                         >
                             {order.Transaction_Slip ? (
                             <>
-                                <img
+                                <Image
                                     src={order.Transaction_Slip}
                                     alt="Transaction Slip"
+                                    width={512}
+                                    height={512}
                                     className="max-w-full max-h-[25rem] rounded-xl object-contain shadow-md transition-transform group-hover:scale-[1.05]"
                                 />
 
@@ -91,9 +92,11 @@ export default function OrderRefundInfo({
                         >
                             {order.Refund_Slip ? (
                             <>
-                                <img
+                                <Image
                                     src={order.Refund_Slip}
                                     alt="Refund Slip"
+                                    width={512}
+                                    height={512}
                                     className="max-w-full max-h-[25rem] rounded-xl object-contain shadow-md transition-transform group-hover:scale-[1.05]"
                                 />
 

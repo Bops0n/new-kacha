@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useAlert } from '@/app/context/AlertModalContext';
 import { useCategoryData } from '@/app/hooks/useCategoryData';
-import { CategoryDisplayItem, CategoryFormData, ModalMode, Category, SubCategory, ChildSubCategory } from '@/types';
+import { CategoryDisplayItem, CategoryFormData, ModalMode } from '@/types';
 
 /**
  * Hook สำหรับจัดการ State และ Logic ทั้งหมดของหน้า Category Management
@@ -84,8 +84,9 @@ export function useCategoryManagement() {
         showAlert(result.message, 'success');
         closeModal();
         refetch(); // สั่งให้ useCategoryData ดึงข้อมูลใหม่ทั้งหมด
-    } catch (err: any) {
-        showAlert(err.message, 'error');
+    } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : "เกิดข้อผิดพลาดที่ไม่ทราบสาเหตุ";
+        showAlert(message, 'error');
     }
   }, [showAlert, closeModal, refetch]);
 
@@ -100,8 +101,9 @@ export function useCategoryManagement() {
 
             showAlert(result.message, 'success');
             refetch(); // สั่งให้ useCategoryData ดึงข้อมูลใหม่ทั้งหมด
-        } catch (err: any) {
-            showAlert(err.message, 'error');
+        } catch (error: unknown) {
+            const message = error instanceof Error ? error.message : "เกิดข้อผิดพลาดที่ไม่ทราบสาเหตุ";
+            showAlert(message, 'error');
         }
     });
   }, [showAlert, refetch]);

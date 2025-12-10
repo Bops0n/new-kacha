@@ -1,10 +1,10 @@
-import { Order } from "@/types";
+import { Order, OrderShipping } from "@/types";
 import { MdOutlineLocalShipping } from "react-icons/md";
 
 type OrderShippingProps = {
     IsReadOnly: boolean;
     order: Order;
-    form: any;
+    form: OrderShipping;
     handleFormChange?: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
 };
 

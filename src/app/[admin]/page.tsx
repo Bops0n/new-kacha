@@ -11,7 +11,7 @@ export default function AdminPage() {
     }
 
     
-    if (!session) {
+    if (!session || !session.user) {
         redirect("/");
     }
 

@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { FiPlus, FiMinus, FiShoppingCart, FiPhone, FiX, FiZoomIn } from 'react-icons/fi';
+import { FiPlus, FiMinus, FiShoppingCart, FiPhone, FiZoomIn } from 'react-icons/fi';
 import { FaLine } from 'react-icons/fa';
 import { useParams } from 'next/navigation';
 import { formatPrice } from '@/app/utils/formatters';
@@ -14,6 +14,7 @@ import { calculateAvailableStock } from '@/app/utils/calculations';
 import ProductDisplayCard from '../../components/ProductDisplayCard';
 import { ImagePreviewModal } from '@/app/components/ImagePreviewModal';
 import { useWebsiteSettings } from '@/app/providers/WebsiteSettingProvider';
+import Image from 'next/image';
 
 // --- Component: Breadcrumbs ---
 const Breadcrumbs = ({ path }: { path: FullCategoryPath | null }) => {
@@ -78,9 +79,11 @@ export default function ProductDetailPage() {
                   className="relative group w-full max-w-md aspect-square rounded-2xl overflow-hidden border border-base-200 shadow-sm bg-white cursor-zoom-in"
                   onClick={() => setPreviewImage(product.Image_URL || 'https://placehold.co/600x400?text=No+Image')}
                >
-                  <img
+                  <Image
                     src={product.Image_URL || 'https://placehold.co/600x400?text=No+Image'}
                     alt={product.Name}
+                    width={512}
+                    height={512}
                     className="w-full h-full object-contain p-4 transition-transform duration-500 group-hover:scale-110"
                   />
                   
@@ -177,8 +180,6 @@ export default function ProductDetailPage() {
               <h2 className="text-2xl font-bold text-base-content mb-8 text-center">สินค้าที่เกี่ยวข้อง</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 {relatedProducts.map(related => {
-                  const relatedHasDiscount = related.Discount_Price !== null && related.Discount_Price < related.Sale_Price;
-                  const relatedDisplayPrice = relatedHasDiscount ? related.Discount_Price : related.Sale_Price;
                   return (
                     <ProductDisplayCard product={related} key={related.Product_ID} ></ProductDisplayCard>
                   );

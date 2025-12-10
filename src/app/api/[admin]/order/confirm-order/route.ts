@@ -16,13 +16,14 @@ export async function PATCH(req: NextRequest) {
             Order_ID, auth.userId
         ]);
 
-        if (rowCount > 0) {
+        if (rowCount !== null && rowCount > 0) {
             return NextResponse.json({ message: 'Confirm Order Success.' });
         }
-    } catch (error: any) {
+    } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : "เกิดข้อผิดพลาดที่ไม่ทราบสาเหตุ";
         logger.error("Confirm Order Error:", { error: error });
         return NextResponse.json(
-            { error: error.message || "Server Error" },
+            { error: message || "Server Error" },
             { status: 500 }
         );
     }

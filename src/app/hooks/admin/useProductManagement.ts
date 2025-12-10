@@ -41,9 +41,10 @@ export function useProductManagement() {
       if (!productsRes.ok) throw new Error('ไม่สามารถดึงข้อมูลสินค้าได้');
       const productsData = await productsRes.json();
       setProducts(productsData.products || []);
-    } catch (err: any) {
-      setError(err.message);
-      showAlert(err.message, 'error');
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "เกิดข้อผิดพลาดที่ไม่ทราบสาเหตุ";
+      setError(message);
+      showAlert(message, 'error');
     } finally {
       setLoading(false);
     }
@@ -83,8 +84,9 @@ export function useProductManagement() {
       showAlert(result.message, 'success');
       await fetchProducts();
       return true;
-    } catch (err: any) {
-      showAlert(err.message, 'error');
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "เกิดข้อผิดพลาดที่ไม่ทราบสาเหตุ";
+      showAlert(message, 'error');
       return false;
     }
   }, [fetchProducts, showAlert]);
@@ -97,8 +99,9 @@ export function useProductManagement() {
             if (!response.ok) throw new Error(result.message);
             showAlert(result.message, 'success');
             await fetchProducts();
-        } catch (err: any) {
-            showAlert(err.message, 'error');
+        } catch (error: unknown) {
+            const message = error instanceof Error ? error.message : "เกิดข้อผิดพลาดที่ไม่ทราบสาเหตุ";
+            showAlert(message, 'error');
         }
     });
   }, [fetchProducts, showAlert]);
@@ -119,8 +122,9 @@ export function useProductManagement() {
       showAlert(result.message, 'success');
       await fetchProducts(); // Refresh product list
       return true;
-    } catch (err: any) {
-      showAlert(err.message, 'error');
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "เกิดข้อผิดพลาดที่ไม่ทราบสาเหตุ";
+      showAlert(message, 'error');
       return false;
     }
   }, [fetchProducts, showAlert]);

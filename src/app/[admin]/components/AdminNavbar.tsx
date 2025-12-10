@@ -27,7 +27,7 @@ export default function AdminNavbar() {
     }
 
     // ถ้าไม่ใช่ Admin หรือไม่มีสิทธิ์ ไม่แสดง Navbar
-    if (!session || session.user.accessLevel === 0) {
+    if (!session || !session.user || session.user.accessLevel === 0) {
         return null;
     }
 

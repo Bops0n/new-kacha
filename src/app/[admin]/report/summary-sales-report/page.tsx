@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { FiPrinter, FiArrowLeft, FiCalendar, FiDollarSign, FiCheckCircle } from 'react-icons/fi';
-import { formatDateThai, formatDateTimeThai, formatPrice, setCurrentTime } from '@/app/utils/formatters';
+import { FiPrinter, FiArrowLeft, FiDollarSign, FiCheckCircle } from 'react-icons/fi';
+import { formatDateThai, formatPrice } from '@/app/utils/formatters';
 import LoadingSpinner from '@/app/components/LoadingSpinner';
 import { useRouter } from 'next/navigation';
 import { useWebsiteSettings } from '@/app/providers/WebsiteSettingProvider';
@@ -77,7 +77,7 @@ export default function SummarySalesReportPage() {
             totalNet,
             totalVat
         };
-    }, [salesOrders]);
+    }, [salesOrders, VAT_RATE]);
 
     const handlePrint = () => {
         setPrintDate(getCurDate)

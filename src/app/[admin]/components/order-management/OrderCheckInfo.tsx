@@ -1,9 +1,10 @@
 import { formatPrice } from "@/app/utils/formatters";
 import { Order, OrderProductDetail, SimpleProductDetail } from "@/types";
-import { FiAlertTriangle, FiArchive, FiCreditCard, FiImage, FiShoppingBag, FiZoomIn } from "react-icons/fi";
+import { FiArchive, FiCreditCard, FiImage, FiShoppingBag, FiZoomIn } from "react-icons/fi";
 import { useAlert } from "@/app/context/AlertModalContext";
 import { calculateAvailableStock } from "@/app/utils/calculations";
 import { statusTypeLabels } from "@/app/utils/client";
+import Image from "next/image";
 
 const OrderItemDetail: React.FC<{ orderProduct: OrderProductDetail; liveProduct: SimpleProductDetail; }> = ({ orderProduct, liveProduct }) => {
   const name = liveProduct?.Name || orderProduct.Product_Name;
@@ -20,7 +21,13 @@ const OrderItemDetail: React.FC<{ orderProduct: OrderProductDetail; liveProduct:
         <div className="avatar w-20 h-20">
           <div className="w-20 rounded-lg bg-base-200 flex items-center justify-center">
             {imageUrl ? (
-              <img src={imageUrl} alt={name} className="w-full h-full object-contain" />
+              <Image 
+                src={imageUrl} 
+                alt={name} 
+                width={512}
+                height={512}
+                className="w-full h-full object-contain" 
+              />
             ) : (
               <FiImage className="w-10 h-10 text-base-content/30" />
             )}
@@ -78,7 +85,6 @@ type OrderCheckProps = {
     btnSpecial: boolean;
     isReqCancel: boolean;
     fetchOrderData?: () => void;
-    previewImage: string | null;
     setPreviewImage: (url: string | null) => void;
 };
 
@@ -88,7 +94,6 @@ export default function OrderCheckInfo({
     btnSpecial,
     isReqCancel,
     fetchOrderData = () => {},
-    previewImage,
     setPreviewImage = () => {}
 }: OrderCheckProps) {
     const { showAlert } = useAlert();
@@ -162,9 +167,11 @@ export default function OrderCheckInfo({
                     >
                       {order.Transaction_Slip ? (
                       <>
-                          <img
+                          <Image
                             src={order.Transaction_Slip}
                             alt="Transaction Slip"
+                            width={512}
+                            height={512}
                             className="max-w-full max-h-[25rem] rounded-xl object-contain shadow-md transition-transform group-hover:scale-[1.05]"
                             onClick={() => {
                                 setPreviewImage(order.Transaction_Slip!);
@@ -211,12 +218,12 @@ export default function OrderCheckInfo({
                             {isReqCancel ? (
                               <p className="text-sm text-base-content/80">
                                 <br/>
-                                1. หากกดปุ่ม 'ปฏิเสธ' สถานะคำสั่งซื้อจะถูกเปลี่ยนเป็น
+                                1. หากกดปุ่ม {"'"}ปฏิเสธ{"'"} สถานะคำสั่งซื้อจะถูกเปลี่ยนเป็น
                                 <span className={`badge ${cancelled.color }`}>
                                   <cancelled.icon className="inline-block w-4 h-4 mr-1" />
                                   {cancelled.label}
                                 </span><br/><br/>
-                                2. หากกดปุ่ม 'ยืนยัน' ระบบจะเปลี่ยนสถานะเป็น{" "}
+                                2. หากกดปุ่ม {"'"}ยืนยัน{"'"} ระบบจะเปลี่ยนสถานะเป็น{" "}
                                 <span className={`badge ${refunding.color }`}>
                                     <refunding.icon className="inline-block w-4 h-4 mr-1" />
                                     {refunding.label}
@@ -295,9 +302,11 @@ export default function OrderCheckInfo({
                 >                    
                   {order.Refund_Slip ? (
                     <>
-                        <img
+                        <Image
                             src={order.Refund_Slip}
                             alt="Refund Slip"
+                            width={512}
+                            height={512}
                             className="max-w-full max-h-[25rem] rounded-xl object-contain shadow-md transition-transform group-hover:scale-[1.05]"
                         />
 

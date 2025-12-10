@@ -4,12 +4,6 @@ import React from 'react';
 import {
   FiEdit,
   FiTrash2,
-  FiUser,
-  FiMail,
-  FiPhone,
-  FiKey,
-  FiHome,
-  FiMapPin,
   FiX,
   FiSave,
   FiPlus
@@ -31,8 +25,6 @@ interface UserModalProps {
   handleAddAddressClick: () => void;
   handleEditAddressClick: (address: AddressSchema) => void;
   deleteAddress: (addressId: number, userId: number) => void;
-  // Props ที่เกี่ยวข้องกับ AddressModal ที่ถูกเปิดจาก UserModal
-  setShowAddAddressModal: (show: boolean) => void;
   roles: Role[];
 }
 
@@ -50,7 +42,6 @@ const UserModal: React.FC<UserModalProps> = ({
   handleAddAddressClick,
   handleEditAddressClick,
   deleteAddress,
-  setShowAddAddressModal,
   roles
 }) => {
   if (!showModal) return null;
@@ -149,7 +140,7 @@ const UserModal: React.FC<UserModalProps> = ({
             <div className="bg-base-200 rounded-lg p-4 max-h-96 overflow-y-auto">
               {editFormData.Addresses.length > 0 ? (
                 <div className="space-y-4">
-                  {editFormData.Addresses.map((address, index) => (
+                  {editFormData.Addresses.map((address) => (
                     <div key={`${address.User_ID}-${address.Address_ID}`} className="border border-base-300 rounded-lg p-3 relative">
                       {address.Is_Default && (
                         <span className="badge badge-info absolute top-2 right-2">ค่าเริ่มต้น</span>

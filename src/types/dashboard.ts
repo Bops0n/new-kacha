@@ -31,3 +31,5 @@ export interface LowStock {
   Image_URL: string;
   Stock_Percent: number;
 }
+
+export type PEROID_TYPE = "daily" | "weekly" | "monthly" | "quarterly" | "yearly";
