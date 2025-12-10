@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { FiX, FiHome, FiMapPin, FiHash, FiPhone, FiSave, FiAlertCircle } from 'react-icons/fi';
-import { AddressSchema, NewAddressForm } from '@/types';
+import { AddressSchema } from '@/types';
 import {
   getAllProvinces,
   getDistrictsByProvinceId,

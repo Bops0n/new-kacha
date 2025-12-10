@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
 import { useAlert } from '@/app/context/AlertModalContext';
-import { UserSchema, AddressSchema, NewAddressForm } from '@/types';
+import { UserSchema, AddressSchema } from '@/types';
 
 export function useProfilePage() {
   const { data: session, status: sessionStatus, update: updateSession } = useSession();

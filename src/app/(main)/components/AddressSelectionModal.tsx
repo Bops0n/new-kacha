@@ -1,9 +1,8 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { FiX, FiMapPin, FiCheckCircle, FiPlus, FiEdit, FiTrash2 } from 'react-icons/fi'; // [NEW] เพิ่มไอคอน
+import { FiMapPin, FiCheckCircle, FiPlus, FiEdit, FiTrash2 } from 'react-icons/fi'; // [NEW] เพิ่มไอคอน
 import { AddressSchema } from '../../../types/user.types'; // ตรวจสอบ path ให้ถูกต้อง
-import Link from 'next/link';
 
 interface AddressSelectionModalProps {
   isOpen: boolean;
