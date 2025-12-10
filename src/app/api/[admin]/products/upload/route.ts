@@ -20,19 +20,29 @@ export async function POST(req: NextRequest) {
         }
 
         const buffer = Buffer.from(await file.arrayBuffer());
-        const fileExtension = path.extname(file.name);
-        const uniqueFilename = `${uuidv4()}${fileExtension}`;
+        const filename = `${uuidv4()}${path.extname(file.name)}`;
 
-        const uploadDir = path.join(process.cwd(), 'public', 'uploads', 'products');
-        const relativePath = `/uploads/products/${uniqueFilename}`;
+        if (process.env.APP_ENV === 'local') {
+            const uploadDir = path.join(process.cwd(), 'public', `${process.env.UPLOAD_PATH}`, 'products');
+            await mkdir(uploadDir, { recursive: true });
 
-        await mkdir(uploadDir, { recursive: true });
+            const filePath = path.join(uploadDir, filename);
+            await writeFile(filePath, buffer);
+        } else {
+            const uploadPath = process.env.UPLOAD_PATH;
+            if (uploadPath) {
+                const filePath = path.join(uploadPath, 'products', filename);
+                await writeFile(filePath, buffer);
+            } else {
+                return NextResponse.json({ message: 'ไม่สามารถอัปโหลดไฟล์ได้!' }, { status: 500 });
+            }
+        }
 
-        await writeFile(path.join(uploadDir, uniqueFilename), buffer);
+        const imageUrl = `${process.env.APP_ENV !== 'local' ? process.env.CDN_URL : process.env.UPLOAD_PATH}/products/${filename}`;
 
         return NextResponse.json({ 
             message: 'File uploaded successfully.', 
-            imageUrl: relativePath 
+            imageUrl: imageUrl 
         }, { status: 201 });
 
     } catch (error) {

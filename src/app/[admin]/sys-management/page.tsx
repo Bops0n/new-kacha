@@ -200,7 +200,7 @@ export default function AdminSettingsPage() {
 
                           // ส่งชื่อไฟล์เก่าไป API เพื่อลบ
                           if (item.value) {
-                            formData.append("oldFile", item.value.replace("/uploads/", ""));
+                            formData.append("oldFile", item.value);
                           }
 
                           const res = await fetch("/api/admin/settings/upload", {
