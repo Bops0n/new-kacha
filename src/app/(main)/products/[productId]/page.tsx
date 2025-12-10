@@ -35,6 +35,7 @@ export default function ProductDetailPage() {
   const params = useParams();
   const productId = params.productId as string;
   const settings = useWebsiteSettings();
+  // address
   
   const { product, relatedProducts, categoryPath, loading, error } = useProductDetail(productId);
   const { addToCart, isAdding } = useAddToCart();

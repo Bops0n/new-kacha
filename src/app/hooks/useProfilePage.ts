@@ -59,6 +59,7 @@ export function useProfilePage() {
       
       await updateSession({ user: { ...session?.user, name: updatedData.Full_Name } });
       await fetchData(); // Re-fetch data to get the latest profile
+      
       showAlert('อัปเดตข้อมูลส่วนตัวสำเร็จ', 'success');
       return true;
     } catch (error: unknown) {
@@ -69,11 +70,13 @@ export function useProfilePage() {
   };
 
   // --- Address Actions ---
-  const saveAddress = async (addressData: NewAddressForm) => {
+  const saveAddress = async (addressData: AddressSchema) => {
     const isEditing = !!addressData.Address_ID;
+    console.log(addressData, isEditing)
+    // return
     const url = isEditing ? `/api/main/address/${addressData.Address_ID}` : '/api/main/address';
     const method = isEditing ? 'PUT' : 'POST';
-
+    console.log(addressData)
     try {
       const response = await fetch(url, {
         method: method,
@@ -83,8 +86,9 @@ export function useProfilePage() {
       const result = await response.json();
       if (!response.ok) throw new Error(result.message);
       
-      await fetchData(); // Re-fetch addresses
+      await fetchData();   // Re-fetch addresses
       showAlert(isEditing ? 'แก้ไขที่อยู่สำเร็จ' : 'เพิ่มที่อยู่สำเร็จ', 'success');
+      // window.location.reload();
       return true;
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : "เกิดข้อผิดพลาดที่ไม่ทราบสาเหตุ";
@@ -93,21 +97,42 @@ export function useProfilePage() {
     }
   };
   
-  const deleteAddress = async (addressId: number) => {
-    showAlert('คุณแน่ใจหรือไม่ที่จะลบที่อยู่นี้?', 'warning', 'ยืนยันการลบ', async () => {
+const deleteAddress = (addressId: number, refresh?: () => void): Promise<boolean> => {
+  return new Promise<boolean>((resolve) => {
+    showAlert(
+      'คุณแน่ใจหรือไม่ที่จะลบที่อยู่นี้?',
+      'warning',
+      'ยืนยันการลบ',
+      // --- ส่วน callback ทำงานเมื่อกด "ตกลง" ---
+      async () => {
         try {
-            const response = await fetch(`/api/main/address/${addressId}`, { method: 'DELETE' });
-            const result = await response.json();
-            if (!response.ok) throw new Error(result.message);
-            
-            await fetchData(); // Re-fetch addresses
-            showAlert('ลบที่อยู่สำเร็จ', 'success');
+          const response = await fetch(`/api/main/address/${addressId}`, { method: 'DELETE' });
+          const result = await response.json();
+
+          if (!response.ok) throw new Error(result.message);
+
+          // ลบสำเร็จ
+          showAlert('ลบที่อยู่สำเร็จ', 'success');
+          await fetchData();
+          await refresh?.();
+          
+          // ส่งค่า true กลับไปบอกคนเรียกใช้ว่า "สำเร็จ"
+          resolve(true); 
+          
         } catch (error: unknown) {
           const message = error instanceof Error ? error.message : "เกิดข้อผิดพลาดที่ไม่ทราบสาเหตุ";
-            showAlert(message, 'error');
+          showAlert(message, 'error');
+          
+          // ส่งค่า false กลับไปบอกคนเรียกใช้ว่า "ล้มเหลว"
+          resolve(false);
         }
-    });
-  };
+      }
+      // หมายเหตุ: ถ้า showAlert ของคุณไม่มี onCancel callback
+      // และผู้ใช้กด "ยกเลิก" หรือปิด Modal, Promise นี้อาจจะค้าง (Pending) ได้
+      // แต่ในบริบทนี้มักจะไม่ส่งผลเสียร้ายแรงครับ
+    );
+  });
+};
 
   const setDefaultAddress = async (addressId: number) => {
     try {

@@ -5,7 +5,7 @@ import { createContext, useContext } from 'react';
 
 // Define the shape of the context value
 interface AlertContextType {
-  showAlert: (message: string, type?: AlertModalType, title?: string, onConfirm?: () => void) => void;
+  showAlert: (message: string, type?: AlertModalType, title?: string, onConfirm?: () => void, onClose?: () => void) => void
   hideAlert: () => void;
 }
   

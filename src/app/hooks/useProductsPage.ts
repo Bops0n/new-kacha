@@ -71,7 +71,7 @@ export function useProductsPage() {
         return [...prev, ...newProducts];
       });
       } else {
-      if (data.total) setTotal(data.total);
+      data.total? setTotal(data.total): setTotal(0);
         setProducts(data.products);
         window.scrollTo(0, 0); // เลื่อนขึ้นบนสุดเฉพาะตอนโหลดใหม่ (Filter/Search)
       }

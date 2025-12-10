@@ -27,15 +27,17 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
       { status: 400 }
     );
   }
-
+  
   const result = await updateAddress(parseId, Number(auth.userId), updatedAddressData);
-
+  
   if (!result) {
     return NextResponse.json(
       { message: 'Address not found or does not belong to the authenticated user', error: true },
       { status: 404 }
     );
   }
+  
+  return NextResponse.json({ message: 'Address deleted successfully', error: false }, { status: 200 });
 }
 
 
@@ -108,4 +110,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
       { status: 404 }
     );
   }
+
+  return NextResponse.json({ message: 'Address updated successfully', error: false }, { status: 200 });
+
 }
