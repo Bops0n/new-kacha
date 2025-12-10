@@ -59,19 +59,35 @@ export default function AddressSelectionModal({
         <div className="p-8">
           <h2 className="text-2xl font-bold text-base-content text-center mb-6">เลือกที่อยู่จัดส่ง</h2>
 
-          <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
+<div className="space-y-4 max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
             {addresses.length === 0 ? (
-              <div className="text-center py-6 text-base-content/70">
-                <p>คุณยังไม่มีที่อยู่จัดส่ง กรุณาเพิ่มที่อยู่ใหม่</p>
-                {/* ปุ่มนี้อาจจะเปลี่ยนไปเรียก Modal เพิ่มที่อยู่แทน Link ได้ถ้าต้องการ */}
+              <div className="flex flex-col items-center justify-center py-10 px-4 border-2 border-dashed border-base-200 rounded-2xl bg-base-50/30 hover:bg-base-50 hover:border-primary/40 transition-all duration-300 group cursor-pointer"
+                   onClick={() => {
+                       // เรียก Logic เปิด Modal เพิ่มที่อยู่ (แบบเดียวกับปุ่ม)
+                       // onEditAddress(null); // หรือ setIsAddAddressOpen(true) แล้วแต่ Logic ที่ส่งมา
+                   }}
+              >
+                {/* Icon Wrapper with Animation */}
+                <div className="w-20 h-20 bg-base-100 rounded-full flex items-center justify-center shadow-sm mb-4 group-hover:scale-110 group-hover:shadow-md transition-all duration-300">
+                   <FiMapPin className="w-8 h-8 text-base-content/20 group-hover:text-primary transition-colors duration-300" />
+                </div>
+                
+                {/* Text Content */}
+                <h3 className="text-lg font-bold text-base-content/80 mb-1">ยังไม่มีรายการที่อยู่</h3>
+                <p className="text-sm text-base-content/50 text-center mb-6 max-w-xs leading-relaxed">
+                   กรุณาเพิ่มที่อยู่สำหรับการจัดส่งสินค้าของคุณ <br/>เพื่อความสะดวกรวดเร็วในการสั่งซื้อ
+                </p>
+
+                {/* Button */}
                 <button 
-                    className="btn btn-secondary btn-sm mt-4"
-                    onClick={() => {
-                        // ถ้าอยากให้ปุ่มนี้เปิด Modal เพิ่มที่อยู่ ให้เรียก prop function แทน Link
-                        // แต่ถ้าใช้ Link ก็จะเป็นการเปลี่ยนหน้า
-                    }}
+                  className="btn btn-primary btn-sm rounded-full px-6 shadow-lg shadow-primary/20 hover:shadow-primary/40 hover:-translate-y-0.5 transition-all"
+                  onClick={(e) => {
+                      e.stopPropagation(); // หยุดไม่ให้ Click Event ของ div ด้านบนทำงานซ้ำ
+                      // ใส่ Logic เปิด Modal เพิ่มที่อยู่ตรงนี้
+                      // เช่น onEditAddress(null) หรือ callback ที่ส่งมาจาก parent
+                  }}
                 >
-                  <FiPlus className="w-4 h-4 mr-2" /> เพิ่มที่อยู่ใหม่
+                  <FiPlus className="w-4 h-4 mr-1" /> เพิ่มที่อยู่ใหม่
                 </button>
               </div>
             ) : (

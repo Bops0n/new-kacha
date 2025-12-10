@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { 
@@ -154,15 +154,25 @@ if (cartItems.length === 0) {
                                         </div>
                                     </div>
                                 ) : (
-<div 
-                                        className="card-body p-10 items-center justify-center text-center cursor-pointer bg-base-100 hover:bg-base-50 transition-colors border-2 border-dashed border-base-200 hover:border-primary/50 rounded-2xl" 
-                                        onClick={() => setIsAddAddressOpen(true)}
-                                    >
-                                        <div className="w-16 h-16 rounded-full bg-base-200/50 flex items-center justify-center mb-3 text-primary">
-                                            <FiPlus className="w-8 h-8" />
-                                        </div>
-                                        <p className="text-base-content/60 font-medium text-lg">เพิ่มที่อยู่ใหม่</p>
-                                    </div>
+<div className="flex flex-col items-center justify-center py-10 px-4 border-2 border-dashed border-base-200 rounded-2xl bg-base-50/30 hover:bg-base-50 hover:border-primary/40 transition-all duration-300 group cursor-pointer"
+                   onClick={() => {
+                       // เรียก Logic เปิด Modal เพิ่มที่อยู่ (แบบเดียวกับปุ่ม)
+                       // onEditAddress(null); // หรือ setIsAddAddressOpen(true) แล้วแต่ Logic ที่ส่งมา
+                       setAddressEditForm(null)
+                       setIsAddAddressOpen(true);
+                   }}
+              >
+                {/* Icon Wrapper with Animation */}
+                <div className="w-20 h-20 bg-base-100 rounded-full flex items-center justify-center shadow-sm mb-4 group-hover:scale-110 group-hover:shadow-md transition-all duration-300">
+                   <FiMapPin className="w-8 h-8 text-base-content/20 group-hover:text-primary transition-colors duration-300" />
+                </div>
+                
+                {/* Text Content */}
+                <h3 className="text-lg font-bold text-base-content/80 mb-1">ยังไม่มีรายการที่อยู่</h3>
+                <p className="text-sm text-base-content/50 text-center mb-6 max-w-xs leading-relaxed">
+                   กรุณาเพิ่มที่อยู่สำหรับการจัดส่งสินค้าของคุณ
+                </p>
+              </div>
                                 )}
                             </div>
                         </section>
@@ -351,14 +361,40 @@ if (cartItems.length === 0) {
                 addresses={userAddresses} 
                 currentSelectedAddress={selectedAddress} 
                 onSelectAddress={(addr) => {
+                    console.log(userAddresses)
                     setSelectedAddress(addr);
                     setIsSelectAddressOpen(false);
                 }}
-                onDeleteAddress={(addr)=>{
-                    deleteAddress(addr)
-                    fetchCartAndAddresses()
+onDeleteAddress={async (addressId: number) => { 
+        // 1. เช็คก่อนว่า User กำลังลบ "ที่อยู่ที่เลือกอยู่" หรือไม่?
+        const isDeletingSelected = selectedAddress?.Address_ID === addressId;
+
+        // 2. เรียกฟังก์ชันลบจาก Hook
+        const success = await deleteAddress(addressId, async () => {
+            // Callback นี้ทำงานหลังลบเสร็จใน Hook
+            await fetchCartAndAddresses(); 
+        });
+
+        if (success) {
+            // 3. ถ้าลบตัวที่เลือกอยู่ เราต้องเปลี่ยน selectedAddress ทันที
+            if (isDeletingSelected) {
+                // กรองเอาตัวที่เพิ่งลบออกไปจาก List (ใช้ userAddresses เดิมที่มีอยู่มาคำนวณ)
+                const remainingAddresses = userAddresses.filter(addr => addr.Address_ID !== addressId);
+
+                if (remainingAddresses.length > 0) {
+                    // หาตัวที่เป็น Default ในรายการที่เหลือ หรือเลือกตัวแรก
+                    const newSelected = remainingAddresses.find(addr => addr.Is_Default) || remainingAddresses[0];
+                    setSelectedAddress(newSelected);
+                } else {
+                    // ถ้าไม่เหลือที่อยู่เลย
+                    setSelectedAddress(undefined);
                 }
-                }
+            }
+            
+            // 4. โหลดข้อมูลจริงอีกรอบเพื่อความชัวร์ (Sync DB)
+            await fetchCartAndAddresses();
+        }
+    }}
                 onEditAddress={(addr)=>{
                     setAddressEditForm(addr)
                     
