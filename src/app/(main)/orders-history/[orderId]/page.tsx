@@ -516,11 +516,18 @@ export default function OrderDetailsPage() {
                                                 ) : (
                                                     /* Otherwise, show the appropriate uploader */
                                                     order.Transaction_Slip ? (
-                                                        <div className="form-control w-full">
-                                                            <label className="label pt-0">
-                                                                <span className="label-text text-base-content/70">เปลี่ยนสลิป:</span>
-                                                            </label>
-                                                            <input type="file" id="transfer-slip-upload-small" onChange={handleFileChange} className="file-input file-input-bordered file-input-sm w-full" accept="image/png, image/jpeg, image/jpg" />
+                                                        <div className="relative group w-full">
+                                                            <input 
+                                                                type="file" 
+                                                                id="transfer-slip-upload-small" 
+                                                                onChange={handleFileChange} 
+                                                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" 
+                                                                accept="image/png, image/jpeg, image/jpg" 
+                                                            />
+                                                            <div className="btn btn-outline btn-primary btn-sm w-full flex items-center justify-center gap-2 group-hover:bg-primary group-hover:text-white group-hover:shadow-md transition-all duration-200">
+                                                                <FiUploadCloud className="w-4 h-4" />
+                                                                <span>เปลี่ยนรูปสลิป</span>
+                                                            </div>
                                                         </div>
                                                     ) : (
                                                         <div
