@@ -33,7 +33,7 @@ export default function HomePage() {
     <div className="min-h-screen bg-base-200">
       {/* Hero Section */}
       <div className="relative bg-gradient-to-r from-slate-700 to-slate-500 text-white py-16 md:py-24 overflow-hidden">
-        <div className="absolute inset-0 bg-cover bg-center opacity-30" style={{ backgroundImage: "url('/bg.png')" }}></div>
+        <div className="absolute inset-0 bg-cover bg-center opacity-30" style={{ backgroundImage: "url('/images/kacha-background.jpg')" }}></div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 flex flex-col items-center text-center">
           <h1 className="text-4xl md:text-6xl font-extrabold leading-tight mb-4 drop-shadow-lg">
             เรื่องบ้าน ต้อง <span className="text-yellow-300">คชาโฮม</span>
