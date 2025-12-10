@@ -1,11 +1,11 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { 
   FiMapPin, FiTruck, FiCreditCard, FiCheckCircle, 
-  FiPlus, FiChevronRight, FiPackage, FiTrash2, FiMinus, 
+  FiPlus, FiChevronRight, FiTrash2, FiMinus, 
   FiShoppingCart
 } from 'react-icons/fi'; // เพิ่ม FiMinus
 import { useSession } from 'next-auth/react';
@@ -14,13 +14,9 @@ import { formatPrice } from '@/app/utils/formatters';
 import { calculateAvailableStock } from '@/app/utils/calculations'; // [NEW] นำเข้าฟังก์ชันคำนวณสต็อก
 import LoadingSpinner from '@/app/components/LoadingSpinner';
 import AddressSelectionModal from '../components/AddressSelectionModal';
-import { useAlert } from '@/app/context/AlertModalContext';
 import AddressModal from '../components/AddressModal';
 import { useProfilePage } from '@/app/hooks/useProfilePage';
-import { AddressSchema, NewAddressForm } from '@/types';
-import { Address } from 'cluster';
-import { set } from 'zod';
-// import { AddressData } from '@/types'; // หรือ path ที่ถูกต้องของ type
+import { AddressSchema } from '@/types';
 
 // Payment Methods Config
 const PAYMENT_METHODS = [
@@ -31,7 +27,6 @@ const PAYMENT_METHODS = [
 export default function CheckoutPage() {
     const router = useRouter();
     const { data: session } = useSession();
-    const { showAlert } = useAlert();
 
     const { saveAddress, userAddresses, deleteAddress } = useProfilePage()
 

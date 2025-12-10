@@ -3,7 +3,7 @@ import { authenticateRequest } from '@/app/api/auth/utils';
 import { cancelOrder, getOrderById } from '@/app/api/services/user/orderService';
 import { v4 as uuidv4 } from 'uuid';
 import path from 'path';
-import fs from 'fs/promises';
+import { writeFile, mkdir } from 'fs/promises';
 import { checkRequire } from '@/app/utils/client';
 import { uploadTransactionSlip } from '@/app/api/services/user/userServices';
 import { logger } from '@/server/logger';
@@ -71,16 +71,25 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
             return NextResponse.json({ message: 'ไฟล์ไม่ใช่รูปภาพ' }, { status: 400 });
         }
         
-        // Logic to save file and update DB URL
-        // This part is confirmed to use the correct column name "Transfer_Slip_Image_URL"
         const buffer = Buffer.from(await transferSlipFile.arrayBuffer());
         const filename = `slip-${orderId}-${uuidv4()}${path.extname(transferSlipFile.name)}`;
-        const uploadDir = path.join(process.cwd(), 'public', 'uploads', 'slips');
-        await fs.mkdir(uploadDir, { recursive: true });
-        const filePath = path.join(uploadDir, filename);
-        const imageUrl = `/uploads/slips/${filename}`;
 
-        await fs.writeFile(filePath, buffer);
+        if (process.env.APP_ENV === 'local') {
+            const uploadDir = path.join(process.cwd(), 'public', `${process.env.UPLOAD_PATH}`, 'slips');
+            await mkdir(uploadDir, { recursive: true });
+
+            const filePath = path.join(uploadDir, filename);
+            await writeFile(filePath, buffer);
+        } else {
+            const uploadPath = process.env.UPLOAD_PATH;
+            if (uploadPath) {
+                const filePath = path.join(uploadPath, 'slips', filename);
+                await writeFile(filePath, buffer);
+            } else {
+                return NextResponse.json({ message: 'ไม่สามารถอัปโหลดไฟล์ได้!' }, { status: 500 });
+            }
+        }
+        const imageUrl = `${process.env.APP_ENV !== 'local' ? process.env.CDN_URL : process.env.UPLOAD_PATH}/slips/${filename}`;
 
         const result = await uploadTransactionSlip(imageUrl, orderId);
 

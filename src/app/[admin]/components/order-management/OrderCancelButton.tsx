@@ -26,21 +26,6 @@ export default function OrderCancelButton({ order, onlyIcon, onSuccess }: {
   const [href, setHref] = useState<string | null>(null);
 
   const fetchOrderData = useCallback(async () => {
-    // async function loadNextStep(orderId: number) {
-    //     const response = await fetch(`/api/admin/order/req-cancel-step?orderId=${orderId}`);
-    //     const result = await response.json();
-    //     if (result && result.length > 0) {
-    //         const data = result[0];
-    //         setBtnDisable(data.btnDisable);
-    //         setButtonText(data.lbButtonText);
-    //         setNoPaymentChecked(data.isNoPaymentChecked);
-    //         setIsRefunding(data.isRefunding);
-    //         setIsCancelled(data.isCancelled);
-    //         setHref(data.Href);
-    //     }
-    // }
-
-    // await loadNextStep(order.Order_ID);
 
     const isCOD = order.Payment_Type === 'cash_on_delivery';
 

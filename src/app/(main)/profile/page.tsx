@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { 
-  FiEdit3, FiSave, FiX, FiUser, FiMail, FiPhone, 
+  FiEdit3, FiUser, FiMail, FiPhone, 
   FiMapPin, FiPlus, FiTrash2, FiStar, FiCheckCircle, FiBox 
 } from 'react-icons/fi';
 import { useSession } from 'next-auth/react';

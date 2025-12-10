@@ -3,64 +3,14 @@ import AccessDeniedPage from "@/app/components/AccessDenied";
 import LoadingSpinner from "@/app/components/LoadingSpinner";
 import { Role } from "@/types";
 import { useSession } from "next-auth/react";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { FaBox, FaCheck, FaWarehouse } from "react-icons/fa";
 import { FaX } from "react-icons/fa6";
 import { FiShield, FiPlus, FiEdit, FiTrash2, FiRefreshCw, FiSave, FiX, FiUser, FiSettings } from "react-icons/fi";
 import { MdDashboard } from "react-icons/md";
 import { TbReport } from "react-icons/tb";
 
-async function apiGetRoles(): Promise<Role[]> {
-    const result = await fetch("/api/master/role", { 
-        cache: "no-store" 
-    });
-    if (!result.ok) {
-        const body = await result.json();
-        throw new Error(body.error || `HTTP Error ${result.status}`);
-    }
-    return result.json();
-}
-
-async function apiCreateRole(payload: Partial<Role>): Promise<Role> {
-    const result = await fetch("/api/master/role", { 
-        method: "POST", 
-        headers: { "Content-Type": "application/json" }, 
-        body: JSON.stringify(payload) 
-    });
-    if (!result.ok) {
-        const body = await result.json();
-        throw new Error(body.error || `HTTP Error ${result.status}`);
-    }
-    return result.json();
-}
-
-async function apiUpdateRole(payload: Partial<Role>): Promise<Role> {
-    const result = await fetch(`/api/master/role`, { 
-        method: "PUT", 
-        headers: { "Content-Type": "application/json" }, 
-        body: JSON.stringify(payload) 
-    });
-    if (!result.ok) {
-        const body = await result.json();
-        throw new Error(body.error || `HTTP Error ${result.status}`);
-    }
-    return result.json();
-}
-
-async function apiDeleteRole(id: number): Promise<{ ok: true }>{
-    const res = await fetch(`/api/master/role`, { 
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" }, 
-        body: JSON.stringify(id)
-    });
-    if (!res.ok) {
-        const body = await res.json();
-        throw new Error(body.error || `HTTP Error ${res.status}`);
-    }
-    return { ok: true };
-}
-
-function RoleModal({ isOpen, onClose, isEditing, onSaved, form, handleRoleFormChange, removeRole }: {
+function RoleModal({ isOpen, onClose, isEditing, onSaved, form, handleRoleFormChange, removeRole, apiUpdateRole, apiCreateRole }: {
   isOpen: boolean;
   onClose: () => void;
   isEditing: boolean;
@@ -68,6 +18,8 @@ function RoleModal({ isOpen, onClose, isEditing, onSaved, form, handleRoleFormCh
   form: Partial<Role>;
   handleRoleFormChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
   removeRole: (role: number) => void;
+  apiUpdateRole: (role: Partial<Role>) => Promise<Role>;
+  apiCreateRole: (role: Partial<Role>) => Promise<Role>;
 }) {
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -180,12 +132,62 @@ export default function RoleManagementPage() {
         Dashboard: true,
     });
 
-    async function load() {
+    async function apiGetRoles() {
+        const result = await fetch("/api/master/role", { 
+            cache: "no-store" 
+        });
+        if (!result.ok) {
+            const body = await result.json();
+            throw new Error(body.error || `HTTP Error ${result.status}`);
+        }
+        const response = await result.json();
+        setRoles(response.roles);
+    }
+
+    async function apiCreateRole(payload: Partial<Role>): Promise<Role> {
+        const result = await fetch("/api/master/role", { 
+            method: "POST", 
+            headers: { "Content-Type": "application/json" }, 
+            body: JSON.stringify(payload) 
+        });
+        if (!result.ok) {
+            const body = await result.json();
+            throw new Error(body.error || `HTTP Error ${result.status}`);
+        }
+        return result.json();
+    }
+
+    async function apiUpdateRole(payload: Partial<Role>): Promise<Role> {
+        const result = await fetch(`/api/master/role`, { 
+            method: "PUT", 
+            headers: { "Content-Type": "application/json" }, 
+            body: JSON.stringify(payload) 
+        });
+        if (!result.ok) {
+            const body = await result.json();
+            throw new Error(body.error || `HTTP Error ${result.status}`);
+        }
+        return result.json();
+    }
+
+    async function apiDeleteRole(id: number): Promise<{ ok: true }>{
+        const res = await fetch(`/api/master/role`, { 
+            method: "DELETE",
+            headers: { "Content-Type": "application/json" }, 
+            body: JSON.stringify(id)
+        });
+        if (!res.ok) {
+            const body = await res.json();
+            throw new Error(body.error || `HTTP Error ${res.status}`);
+        }
+        return { ok: true };
+    }
+
+    const fetchRoles = useCallback(async () => {
         try {
             setLoading(true); 
             setError(null);
-            const roles = await apiGetRoles();
-            setRoles(Array.isArray(roles) ? roles : []);
+            await apiGetRoles();
         } catch (error: unknown) {
             const message = error instanceof Error ? error.message : "เกิดข้อผิดพลาดที่ไม่ทราบสาเหตุ";
             setError(message);
@@ -193,11 +195,11 @@ export default function RoleManagementPage() {
         } finally {
             setLoading(false);
         }
-    }
+    }, []);
 
     useEffect(() => { 
-        load(); 
-    }, []);
+        fetchRoles(); 
+    }, [fetchRoles]);
 
     function openCreate() { 
         setForm({ 
@@ -275,123 +277,133 @@ export default function RoleManagementPage() {
     if (!session || !session.user?.Sys_Admin) return <AccessDeniedPage url="/admin"/>;
 
     return (
-    <div className="min-h-screen bg-base-200 p-4">
-        <div className="max-w-7xl mx-auto">
-            <div className="bg-base-100 rounded-lg shadow-sm p-6 mb-6">
-                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                    <div>
-                        <h1 className="text-3xl font-bold text-base-content">จัดการบทบาท</h1>
-                        <p className="text-base-content/70 mt-1">จัดการและติดตามข้อมูลบทบาท</p>
-                    </div>
-                    <div className="flex flex-col sm:flex-row gap-2">
-                        <button className="btn btn-outline" onClick={load} disabled={loading}><FiRefreshCw/> โหลดใหม่</button>
-                        <button className="btn btn-primary w-full sm:w-auto" onClick={openCreate}>
-                            <FiPlus className="w-4 h-4" />
-                            เพิ่มบทบาท
-                        </button>
-                    </div>
-                </div>
-            </div>
-            <div className="flex flex-col gap-4">
-                <div className="space-y-4">
-                    {error && <div className="alert alert-error">{error}</div>}
-
-                    {/* Role Table - Desktop View */}
-                    <div className="hidden md:block bg-base-100 rounded-lg shadow-sm overflow-hidden">
-                        <div className="overflow-x-auto">
-                            <table className="table table-zebra w-full">
-                                <thead className="bg-base-200">
-                                    <tr>
-                                        <th>ระดับ</th>
-                                        <th>ชื่อ</th>
-                                        <th>ระบบ</th>
-                                        <th>สมาชิก</th>
-                                        <th>คลังสินค้า</th>
-                                        <th>คำสั่งซื้อ</th>
-                                        <th>รายงาน</th>
-                                        <th>แดชบอร์ด</th>
-                                        <th>จัดการ</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                {roles.length === 0 ? (
-                                    <tr><td colSpan={8} className="text-center p-8 text-base-content/70">ไม่มีข้อมูล</td></tr>
-                                ) : (
-                                    roles.map(r => (
-                                    <tr key={r.Role} className="">
-                                        <td>{r.Role}</td>
-                                        <td className="font-medium">{r.Name}</td>
-                                        <td>{r.Sys_Admin ? <FaCheck/> : <FaX/>}</td>
-                                        <td>{r.User_Mgr ? <FaCheck/> : <FaX/>}</td>
-                                        <td>{r.Stock_Mgr ? <FaCheck/> : <FaX/>}</td>
-                                        <td>{r.Order_Mgr ? <FaCheck/> : <FaX/>}</td>
-                                        <td>{r.Report ? <FaCheck/> : <FaX/>}</td>
-                                        <td>{r.Dashboard ? <FaCheck/> :<FaX/>}</td>
-                                        <td>
-                                        <div className="flex gap-2">
-                                            <button className="btn btn-sm btn-ghost btn-square" onClick={()=>openEdit(r)}><FiEdit className="w-4 h-4"/></button>
-                                            <button className="btn btn-sm btn-ghost btn-square text-error" onClick={()=>removeRole(r.Role)}><FiTrash2 className="w-4 h-4"/></button>
-                                        </div>
-                                        </td>
-                                    </tr>
-                                    ))
-                                )}
-                                </tbody>
-                            </table>
+        <div className="min-h-screen bg-base-200 p-4">
+            <div className="max-w-7xl mx-auto">
+                <div className="bg-base-100 rounded-lg shadow-sm p-6 mb-6">
+                    <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                        <div>
+                            <h1 className="text-3xl font-bold text-base-content">จัดการบทบาท</h1>
+                            <p className="text-base-content/70 mt-1">จัดการและติดตามข้อมูลบทบาท</p>
+                        </div>
+                        <div className="flex flex-col sm:flex-row gap-2">
+                            <button className="btn btn-outline" onClick={fetchRoles} disabled={loading}><FiRefreshCw/> โหลดใหม่</button>
+                            <button className="btn btn-primary w-full sm:w-auto" onClick={openCreate}>
+                                <FiPlus className="w-4 h-4" />
+                                เพิ่มบทบาท
+                            </button>
                         </div>
                     </div>
+                </div>
+                <div className="flex flex-col gap-4">
+                    <div className="space-y-4">
+                        {error && <div className="alert alert-error">{error}</div>}
 
-                    {/* Role Table - Mobile View */}
-                    <div className="block md:hidden bg-base-100 rounded-lg shadow-sm p-4">
-                        {roles.length === 0 ? ( 
-                            <p className="text-base-content/70">ไม่มีข้อมูล</p>
-                        ) : (
-                            roles.map(r => (
-                            <div key={r.Role} className="card bg-base-200 shadow-sm cursor-pointer" onClick={() => openEdit(r)}>
-                                <div className="card-body p-4">
-                                    <h2 className="card-title text-primary text-xl mb-2 flex items-center">
-                                        <FiUser className="w-5 h-5 mr-2" /> {r.Name} # {r.Role}
-                                    </h2>
-                                    <p className="text-sm flex items-center gap-1">
-                                        <FiSettings className="w-3 h-3" /> <strong>ระบบ :</strong> {r.Sys_Admin ? <FaCheck/> : <FaX/>}
-                                    </p>
-                                    <p className="text-sm flex items-center gap-1">
-                                        <FiUser className="w-3 h-3" /> <strong>สมาชิก :</strong> {r.User_Mgr ? <FaCheck/> : <FaX/>}
-                                    </p>
-                                    <p className="text-sm flex items-center gap-1">
-                                        <FaWarehouse className="w-3 h-3" /> <strong>คลังสินค้า :</strong> {r.Stock_Mgr ? <FaCheck/> : <FaX/>}
-                                    </p>
-                                    <p className="text-sm flex items-center gap-1">
-                                        <FaBox className="w-3 h-3" /> <strong>คำสั่งซื้อ :</strong> {r.Order_Mgr ? <FaCheck/> : <FaX/>}
-                                    </p>
-                                    <p className="text-sm flex items-center gap-1">
-                                        <TbReport className="w-3 h-3" /> <strong>รายงาน :</strong> {r.Report ? <FaCheck/> : <FaX/>}
-                                    </p>
-                                    <p className="text-sm flex items-center gap-1">
-                                        <MdDashboard className="w-3 h-3" /> <strong>แดชบอร์ด :</strong> {r.Dashboard ? <FaCheck/> : <FaX/>}
-                                    </p>
-                                    <div className="card-actions justify-end mt-4">
-                                        {/* Button to open modal in edit mode directly (optional, but good for direct access) */}
-                                        <button
-                                            className="btn btn-sm btn-outline"
-                                            onClick={(e) => {
-                                            e.stopPropagation(); // Prevent card click from also triggering
-                                            openEdit(r); // Open modal in view mode
-                                            }}
-                                        >
-                                        <FiEdit className="w-4 h-4" /> แก้ไข
-                                        </button>
+                        {/* Role Table - Desktop View */}
+                        <div className="hidden md:block bg-base-100 rounded-lg shadow-sm overflow-hidden">
+                            <div className="overflow-x-auto">
+                                <table className="table table-zebra w-full">
+                                    <thead className="bg-base-200">
+                                        <tr>
+                                            <th>ระดับ</th>
+                                            <th>ชื่อ</th>
+                                            <th>ระบบ</th>
+                                            <th>สมาชิก</th>
+                                            <th>คลังสินค้า</th>
+                                            <th>คำสั่งซื้อ</th>
+                                            <th>รายงาน</th>
+                                            <th>แดชบอร์ด</th>
+                                            <th>จัดการ</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                    {roles.length === 0 ? (
+                                        <tr><td colSpan={8} className="text-center p-8 text-base-content/70">ไม่มีข้อมูล</td></tr>
+                                    ) : (
+                                        roles.map(r => (
+                                        <tr key={r.Role} className="">
+                                            <td>{r.Role}</td>
+                                            <td className="font-medium">{r.Name}</td>
+                                            <td>{r.Sys_Admin ? <FaCheck/> : <FaX/>}</td>
+                                            <td>{r.User_Mgr ? <FaCheck/> : <FaX/>}</td>
+                                            <td>{r.Stock_Mgr ? <FaCheck/> : <FaX/>}</td>
+                                            <td>{r.Order_Mgr ? <FaCheck/> : <FaX/>}</td>
+                                            <td>{r.Report ? <FaCheck/> : <FaX/>}</td>
+                                            <td>{r.Dashboard ? <FaCheck/> :<FaX/>}</td>
+                                            <td>
+                                            <div className="flex gap-2">
+                                                <button className="btn btn-sm btn-ghost btn-square" onClick={()=>openEdit(r)}><FiEdit className="w-4 h-4"/></button>
+                                                <button className="btn btn-sm btn-ghost btn-square text-error" onClick={()=>removeRole(r.Role)}><FiTrash2 className="w-4 h-4"/></button>
+                                            </div>
+                                            </td>
+                                        </tr>
+                                        ))
+                                    )}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        {/* Role Table - Mobile View */}
+                        <div className="block md:hidden bg-base-100 rounded-lg shadow-sm p-4">
+                            {roles.length === 0 ? ( 
+                                <p className="text-base-content/70">ไม่มีข้อมูล</p>
+                            ) : (
+                                roles.map(r => (
+                                <div key={r.Role} className="card bg-base-200 shadow-sm cursor-pointer" onClick={() => openEdit(r)}>
+                                    <div className="card-body p-4">
+                                        <h2 className="card-title text-primary text-xl mb-2 flex items-center">
+                                            <FiUser className="w-5 h-5 mr-2" /> {r.Name} # {r.Role}
+                                        </h2>
+                                        <p className="text-sm flex items-center gap-1">
+                                            <FiSettings className="w-3 h-3" /> <strong>ระบบ :</strong> {r.Sys_Admin ? <FaCheck/> : <FaX/>}
+                                        </p>
+                                        <p className="text-sm flex items-center gap-1">
+                                            <FiUser className="w-3 h-3" /> <strong>สมาชิก :</strong> {r.User_Mgr ? <FaCheck/> : <FaX/>}
+                                        </p>
+                                        <p className="text-sm flex items-center gap-1">
+                                            <FaWarehouse className="w-3 h-3" /> <strong>คลังสินค้า :</strong> {r.Stock_Mgr ? <FaCheck/> : <FaX/>}
+                                        </p>
+                                        <p className="text-sm flex items-center gap-1">
+                                            <FaBox className="w-3 h-3" /> <strong>คำสั่งซื้อ :</strong> {r.Order_Mgr ? <FaCheck/> : <FaX/>}
+                                        </p>
+                                        <p className="text-sm flex items-center gap-1">
+                                            <TbReport className="w-3 h-3" /> <strong>รายงาน :</strong> {r.Report ? <FaCheck/> : <FaX/>}
+                                        </p>
+                                        <p className="text-sm flex items-center gap-1">
+                                            <MdDashboard className="w-3 h-3" /> <strong>แดชบอร์ด :</strong> {r.Dashboard ? <FaCheck/> : <FaX/>}
+                                        </p>
+                                        <div className="card-actions justify-end mt-4">
+                                            {/* Button to open modal in edit mode directly (optional, but good for direct access) */}
+                                            <button
+                                                className="btn btn-sm btn-outline"
+                                                onClick={(e) => {
+                                                e.stopPropagation(); // Prevent card click from also triggering
+                                                openEdit(r); // Open modal in view mode
+                                                }}
+                                            >
+                                            <FiEdit className="w-4 h-4" /> แก้ไข
+                                            </button>
+                                        </div>
                                     </div>
-                                </div>
-                            </div>))
-                        )}
+                                </div>))
+                            )}
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
 
-        {/* Modal */}
-        <RoleModal isOpen={modalOpen} onClose={()=>setModalOpen(false)} isEditing={isEditing} onSaved={onSaved} form={form} handleRoleFormChange={handleRoleFormChange} removeRole={removeRole}/>
-    </div>
+            {/* Modal */}
+            <RoleModal 
+                isOpen={modalOpen} 
+                onClose={()=>setModalOpen(false)} 
+                isEditing={isEditing} 
+                onSaved={onSaved} 
+                form={form} 
+                handleRoleFormChange={handleRoleFormChange} 
+                removeRole={removeRole}
+                apiCreateRole={apiCreateRole}
+                apiUpdateRole={apiUpdateRole}
+            />
+        </div>
     );
 }

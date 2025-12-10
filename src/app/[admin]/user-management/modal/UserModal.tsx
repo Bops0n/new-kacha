@@ -159,7 +159,10 @@ const UserModal: React.FC<UserModalProps> = ({
                           </button>
                           <button
                             className="btn btn-ghost btn-xs btn-square text-error"
-                            onClick={() => confirmDeleteAddress(address.Address_ID, address.User_ID)}
+                            onClick={() => {
+                              if (address.Address_ID !== null) {
+                                confirmDeleteAddress(address.Address_ID, address.User_ID)}}
+                              }
                             title="ลบที่อยู่"
                           >
                             <FiTrash2 className="w-3 h-3" />

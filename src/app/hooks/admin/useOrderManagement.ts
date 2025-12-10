@@ -36,32 +36,9 @@ export function useOrderManagement() {
     }
   }, [showAlert]);
 
-  // const loadBulk = useCallback(async () => {
-  //   if (orders.length === 0) return;
-
-  //   const list = orders.map(o => o.Order_ID);
-  //   const res = await fetch("/api/admin/order/next-step/bulk", {
-  //     method: "POST",
-  //     headers: { "Content-Type": "application/json" },
-  //     body: JSON.stringify({ list })
-  //   });
-  //   const data = await res.json();
-
-  //   const map: Record<number, unknown> = {};
-  //   data.forEach((item: { Order_ID: number }) => {
-  //     map[item.Order_ID] = item;
-  //   });
-
-  //   setBulkSteps(map);
-  // }, []);
-
   useEffect(() => {
     fetchOrders();
   }, [fetchOrders]);
-
-  // useEffect(() => {
-  //   loadBulk();
-  // }, [orders]);
 
   const filteredOrders = useMemo(() => {
     return orders.filter(order => {

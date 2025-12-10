@@ -19,7 +19,7 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const session = await getServerSession(authOptions);
 
-  if (!session || !session.user) redirect("/api/auth/signin");
+  if (!session || !session.user) redirect("/login");
   
   if (session.user.accessLevel != 0) {
     return (
@@ -32,5 +32,5 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     )
   }
 
-  redirect("/api/auth/signin");
+  redirect("/login");
 }
