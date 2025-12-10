@@ -174,7 +174,7 @@ export default function AuthModal({ isOpen, onClose, initialTab = 'login' }: Aut
                   <span className="label-text text-base-content">อีเมล / ชื่อผู้ใช้</span>
                 </label>
                 <div className="relative">
-                  <FiMail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-base-content/60" />
+                  <FiMail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-base-content/60 z-10" />
                   <input
                     type="text"
                     name="usernameOremail"
@@ -192,7 +192,7 @@ export default function AuthModal({ isOpen, onClose, initialTab = 'login' }: Aut
                   <span className="label-text text-base-content">รหัสผ่าน</span>
                 </label>
                 <div className="relative">
-                  <FiLock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-base-content/60" />
+                  <FiLock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-base-content/60 z-10" />
                   <input
                     type="password"
                     name="password"
@@ -258,7 +258,7 @@ export default function AuthModal({ isOpen, onClose, initialTab = 'login' }: Aut
                   <span className="label-text text-base-content">ชื่อผู้ใช้</span>
                 </label>
                 <div className="relative">
-                  <FiUser className="absolute left-3 top-1/2 transform -translate-y-1/2 text-base-content/60" />
+                  <FiUser className="absolute left-3 top-1/2 transform -translate-y-1/2 text-base-content/60 z-10" />
                   <input
                     type="text"
                     name="username"
@@ -276,7 +276,7 @@ export default function AuthModal({ isOpen, onClose, initialTab = 'login' }: Aut
                   <span className="label-text text-base-content">อีเมล</span>
                 </label>
                 <div className="relative">
-                  <FiMail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-base-content/60" />
+                  <FiMail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-base-content/60 z-10" />
                   <input
                     type="email"
                     name="email"
@@ -294,7 +294,7 @@ export default function AuthModal({ isOpen, onClose, initialTab = 'login' }: Aut
                   <span className="label-text text-base-content">รหัสผ่าน</span>
                 </label>
                 <div className="relative">
-                  <FiLock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-base-content/60" />
+                  <FiLock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-base-content/60 z-10" />
                   <input
                     type="password"
                     name="password"
@@ -312,7 +312,7 @@ export default function AuthModal({ isOpen, onClose, initialTab = 'login' }: Aut
                   <span className="label-text text-base-content">ยืนยันรหัสผ่าน</span>
                 </label>
                 <div className="relative">
-                  <FiCheckCircle className="absolute left-3 top-1/2 transform -translate-y-1/2 text-base-content/60" />
+                  <FiCheckCircle className="absolute left-3 top-1/2 transform -translate-y-1/2 text-base-content/60 z-10" />
                   <input
                     type="password"
                     name="confirmPassword"
