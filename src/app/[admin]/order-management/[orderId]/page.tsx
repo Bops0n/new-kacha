@@ -133,23 +133,6 @@ export default function OrderStepPage() {
             }
         }
 
-        // async function loadNextStep(orderId: number) {
-        //     const response = await fetch(`/api/admin/order/next-step?controller=${controller}&orderId=${orderId}`);
-        //     const result = await response.json();
-        //     if (result && result.length > 0) {
-        //         const data = result[0];
-        //         setBtnNextEnable(data.btnNextEnable);
-        //         setButtonText(data.lbButtonText);
-        //         setBackStep(data.BackStep);
-        //         setNextStep(data.NextStep);
-        //         setBtnSpecial(data.btnSpecial);
-        //         setIsSaved(data.isSaved);
-        //         setBtnCancelOrder(data.btnCancelOrder);
-        //     }
-        // }
-
-        
-
         async function loadProductDetails(order: Order) {
             if (!order || order.Products.length < 1) return;
 
