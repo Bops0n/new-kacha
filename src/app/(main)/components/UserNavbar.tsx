@@ -292,11 +292,12 @@ export default function UserNavbar() {
                     <div className="container mx-auto">
                         <ul className="menu menu-horizontal px-1 text-sm font-medium w-full">
                             <li><Link href="/" className="hover:text-primary focus:text-primary border-b-2 border-transparent hover:border-primary rounded-none py-3 transition-all">หน้าแรก</Link></li>
+                            <li><Link href="/products" className="hover:text-primary focus:text-primary border-b-2 border-transparent hover:border-primary rounded-none py-3 transition-all">สินค้าทั้งหมด</Link></li>
                             
                             {/* --- Mega Menu Trigger --- */}
                             <li className="dropdown dropdown-hover group">
                                 <label tabIndex={0} className="flex items-center gap-1 cursor-pointer py-3 hover:text-primary focus:text-primary group-hover:text-primary border-b-2 border-transparent hover:border-primary rounded-none transition-all">
-                                    <FiGrid className="w-4 h-4" /> สินค้าทั้งหมด <GoTriangleDown />
+                                    <FiGrid className="w-4 h-4" /> หมวดหมู่สินค้า <GoTriangleDown />
                                 </label>
                                 {/* --- Mega Menu Content --- */}
                                 {navLoading ? (
