@@ -4,6 +4,7 @@ import React from 'react';
 import { FiPackage, FiDollarSign, FiCalendar, FiEye } from 'react-icons/fi';
 import { Order, StatusConfig } from '@/types';
 import { formatPrice } from '@/app/utils/formatters';
+import { useRouter } from 'next/navigation';
 
 interface OrderCardProps {
   order: Order;
@@ -14,12 +15,10 @@ const OrderCard: React.FC<OrderCardProps> = ({ order, statusTypeLabels }) => {
   const StatusIcon = statusTypeLabels[order.Status]?.icon;
   const statusInfo = statusTypeLabels[order.Status];
 
+  const { replace } = useRouter();
+
   const handleClickOpen = () => {
-    if (order.Status === 'refunding' || order.Status === 'refunded') {
-      window.open(`/admin/order-management/${order.Order_ID}/refunding`);
-    } else {
-      window.open(`/admin/order-management/${order.Order_ID}/checkorder`);
-    }
+    replace(`/admin/order-management/${order.Order_ID}`);
   }
 
   return (

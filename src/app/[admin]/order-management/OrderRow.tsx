@@ -5,6 +5,7 @@ import { FiEye, FiXCircle } from 'react-icons/fi';
 import { getOrderNextStep, Order, StatusConfig } from '@/types';
 import { formatPrice } from '@/app/utils/formatters';
 import OrderCancelButton from '../components/order-management/OrderCancelButton';
+import { useRouter } from 'next/navigation';
 
 interface OrderRowProps {
   order: Order;
@@ -16,8 +17,10 @@ const OrderRow: React.FC<OrderRowProps> = ({ order, statusConfig, fetchOrders })
   const StatusIcon = statusConfig[order.Status]?.icon;
   const statusInfo = statusConfig[order.Status];
 
+  const { replace } = useRouter();
+
   const handleClickOpen = () => {
-    window.open(`/admin/order-management/${order.Order_ID}`);
+    replace(`/admin/order-management/${order.Order_ID}`);
   }
 
   const { btnCancelOrder } = getOrderNextStep(order, 'checkorder');
