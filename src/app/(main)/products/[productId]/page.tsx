@@ -15,6 +15,7 @@ import ProductDisplayCard from '../../components/ProductDisplayCard';
 import { ImagePreviewModal } from '@/app/components/ImagePreviewModal';
 import { useWebsiteSettings } from '@/app/providers/WebsiteSettingProvider';
 import Image from 'next/image';
+import { useAlert } from '@/app/context/AlertModalContext';
 
 // --- Component: Breadcrumbs ---
 const Breadcrumbs = ({ path }: { path: FullCategoryPath | null }) => {
@@ -39,6 +40,7 @@ export default function ProductDetailPage() {
   
   const { product, relatedProducts, categoryPath, loading, error } = useProductDetail(productId);
   const { addToCart, isAdding } = useAddToCart();
+  const { showAlert } = useAlert()
 
   const [quantity, setQuantity] = useState(1);
   // State สำหรับ Modal ดูรูป
@@ -53,9 +55,12 @@ export default function ProductDetailPage() {
   };
 
   const handleAddToCartClick = () => {
-    if (product) {
-      addToCart(product, quantity);
-    }
+    showAlert(`ต้องการเพิ่ม ${product?.Name} ลงในตะกร้าจำนวน ${quantity}/${product?.Unit}?`, 'info','เพิ่มสินค้าลงตะกร้า', ()=>{
+      if (product) {
+        // showAlerts
+        addToCart(product, quantity);
+      }
+    })
   };
 
   if (loading) return <LoadingSpinner />;
