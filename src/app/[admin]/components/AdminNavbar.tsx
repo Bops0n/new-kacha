@@ -8,7 +8,8 @@ import {
   FaWarehouse, FaBox, FaUserCog, FaChartLine 
 } from 'react-icons/fa';
 import { 
-  FiLogOut, FiUser, FiMenu, FiX, FiShield 
+  FiLogOut, FiUser, FiMenu, FiX, FiShield, 
+  FiHome
 } from "react-icons/fi";
 import { MdDashboard, MdCategory, MdInventory } from "react-icons/md";
 import { TbReportAnalytics } from "react-icons/tb";
@@ -212,37 +213,98 @@ export default function AdminNavbar() {
             </nav>
 
             {/* Mobile Navigation Menu (Drawer style) */}
-            <div className={`lg:hidden bg-base-100 border-t border-base-200 overflow-hidden transition-all duration-300 ease-in-out ${isMenuOpen ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0'}`}>
-                <ul className="menu p-4 text-base-content space-y-1">
+{/* --- Mobile Menu (Dropdown / Accordion) --- */}
+            <div 
+                className={`
+                    lg:hidden bg-base-100 border-t border-base-200 absolute w-full left-0 z-50 shadow-xl overflow-hidden transition-all duration-300 ease-in-out
+                    ${isMenuOpen ? 'max-h-screen opacity-100 translate-y-0' : 'max-h-0 opacity-0 -translate-y-2'}
+                `}
+            >
+                {/* User Info Header (Mobile) */}
+                <div className="p-4 bg-base-200/50 flex items-center gap-3 border-b border-base-200">
+                    <div className="avatar placeholder">
+                        <div className="bg-primary text-primary-content rounded-full w-10">
+                            <span className="text-lg">{session.user.name?.charAt(0) || 'A'}</span>
+                        </div>
+                    </div>
+                    <div>
+                        <p className="font-bold text-sm">แอดมิน: {session.user.name}</p>
+                        <p className="text-xs text-base-content/60">{session.user.email}</p>
+                    </div>
+                </div>
+
+                <ul className="menu p-3 text-base-content gap-1 max-h-[80vh] w-full overflow-y-auto">
+                    
+                    {/* === MAIN DASHBOARD === */}
                     {session.user.Dashboard && (
-                        <li><Link href="/admin/dashboard" onClick={closeMobileMenu} className={isActive('/admin/dashboard') ? 'active' : ''}><MdDashboard/> แดชบอร์ด</Link></li>
+                        <li className=''>
+                            <Link 
+                                href="/admin/dashboard" 
+                                onClick={closeMobileMenu} 
+                                className={`font-semibold ${isActive('/admin/dashboard') ? 'active bg-primary text-white' : ''}`}
+                            >
+                                <MdDashboard className="w-5 h-5"/> แดชบอร์ด
+                            </Link>
+                        </li>
                     )}
                     
+                    {/* === MANAGEMENT SECTION === */}
+                    <li className="menu-title mt-2 text-xs uppercase opacity-50">การจัดการ</li>
+
                     {session.user.User_Mgr && (
-                        <li><Link href="/admin/user-management" onClick={closeMobileMenu} className={isActive('/admin/user-management') ? 'active' : ''}><FaUserCog/> จัดการสมาชิก</Link></li>
+                        <li>
+                            <Link 
+                                href="/admin/user-management" 
+                                onClick={closeMobileMenu} 
+                                className={isActive('/admin/user-management') ? 'active' : ''}
+                            >
+                                <FaUserCog className="w-5 h-5"/> จัดการสมาชิก
+                            </Link>
+                        </li>
                     )}
 
                     {session.user.Stock_Mgr && (
                         <li>
                             <details open={isActive('/admin/product-management') || isActive('/admin/category-management')}>
-                                <summary><FaWarehouse/> คลังสินค้า</summary>
-                                <ul>
-                                    <li><Link href="/admin/product-management" onClick={closeMobileMenu} className={isActive('/admin/product-management') ? 'active' : ''}>จัดการสินค้า</Link></li>
-                                    <li><Link href="/admin/category-management" onClick={closeMobileMenu} className={isActive('/admin/category-management') ? 'active' : ''}>จัดการหมวดหมู่</Link></li>
+                                <summary className="font-semibold group">
+                                    <FaWarehouse className="w-5 h-5"/> คลังสินค้า
+                                </summary>
+                                <ul className="before:!hidden pl-4 mt-1 border-l-2 border-base-200 ml-2">
+                                    <li>
+                                        <Link href="/admin/product-management" onClick={closeMobileMenu} className={isActive('/admin/product-management') ? 'active' : ''}>
+                                            จัดการสินค้า
+                                        </Link>
+                                    </li>
+                                    <li>
+                                        <Link href="/admin/category-management" onClick={closeMobileMenu} className={isActive('/admin/category-management') ? 'active' : ''}>
+                                            จัดการหมวดหมู่
+                                        </Link>
+                                    </li>
                                 </ul>
                             </details>
                         </li>
                     )}
 
                     {session.user.Order_Mgr && (
-                        <li><Link href="/admin/order-management" onClick={closeMobileMenu} className={isActive('/admin/order-management') ? 'active' : ''}><FaBox/> จัดการคำสั่งซื้อ</Link></li>
+                        <li>
+                            <Link 
+                                href="/admin/order-management" 
+                                onClick={closeMobileMenu} 
+                                className={isActive('/admin/order-management') ? 'active' : ''}
+                            >
+                                <FaBox className="w-5 h-5"/> จัดการคำสั่งซื้อ
+                            </Link>
+                        </li>
                     )}
 
+                    {/* === REPORTS SECTION === */}
                     {session.user.Report && (
                         <li>
                             <details open={isActive('/admin/report')}>
-                                <summary><TbReportAnalytics/> รายงาน</summary>
-                                <ul>
+                                <summary className="font-semibold group">
+                                    <TbReportAnalytics className="w-5 h-5"/> รายงาน
+                                </summary>
+                                <ul className="before:!hidden pl-4 mt-1 border-l-2 border-base-200 ml-2">
                                     <li><Link href="/admin/report/order-report" onClick={closeMobileMenu}>สรุปคำสั่งซื้อ</Link></li>
                                     <li><Link href="/admin/report/summary-sales-report" onClick={closeMobileMenu}>สรุปยอดขาย</Link></li>
                                     <li><Link href="/admin/report/inventory-report" onClick={closeMobileMenu}>สินค้าคงคลัง</Link></li>
@@ -251,11 +313,42 @@ export default function AdminNavbar() {
                         </li>
                     )}
 
+                    {/* === SYSTEM SECTION === */}
                     {session.user.Sys_Admin && (
-                        <li className="mt-2 border-t border-base-200 pt-2">
-                            <Link href="/admin/role-management" onClick={closeMobileMenu} className="text-warning hover:bg-warning/10"><FiShield/> ตั้งค่าบทบาท</Link>
-                        </li>
+                        <>
+                            <li className="menu-title mt-2 text-xs uppercase opacity-50">ระบบ</li>
+                            <li>
+                                <Link 
+                                    href="/admin/role-management" 
+                                    onClick={closeMobileMenu} 
+                                    className="text-warning hover:bg-warning/10"
+                                >
+                                    <FiShield className="w-5 h-5"/> ตั้งค่าบทบาท
+                                </Link>
+                            </li>
+                        </>
                     )}
+
+                    {/* === ACTIONS === */}
+                    <div className="divider my-2"></div>
+                    
+                    {/* ปุ่มกลับหน้าร้านค้า */}
+                    <li>
+                        <Link 
+                            href="/" 
+                            onClick={closeMobileMenu} 
+                            className="bg-base-200 hover:bg-base-300 font-semibold text-center justify-center gap-2"
+                        >
+                            <FiHome className="w-5 h-5"/> กลับไปหน้าร้านค้า
+                        </Link>
+                    </li>
+                    
+                    {/* ปุ่มออกจากระบบ */}
+                    <li>
+                        <button onClick={() => signOut()} className="text-error hover:bg-error/10 justify-center">
+                            ออกจากระบบ
+                        </button>
+                    </li>
                 </ul>
             </div>
         </header>
