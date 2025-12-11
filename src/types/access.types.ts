@@ -1,5 +1,5 @@
-export type Role = {
-    Role: number;
+export type AccessInfo = {
+    Level: number;
     Name: string;
     Sys_Admin: boolean;
     User_Mgr: boolean;

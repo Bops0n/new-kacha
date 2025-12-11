@@ -8,7 +8,7 @@ import {
   FiSave,
   FiPlus
 } from 'react-icons/fi';
-import { AddressSchema, Role, UserEditForm, UserSchema } from '@/types';
+import { AddressSchema, AccessInfo, UserEditForm, UserSchema } from '@/types';
 
 // กำหนด Props สำหรับ UserModal
 interface UserModalProps {
@@ -21,11 +21,11 @@ interface UserModalProps {
   handleUserFormChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
   saveUserDetails: () => void;
   deleteUser: (userId: number) => void;
-  getAccessLevelLabel: (roles: Role[], level: number) => string;
+  getAccessLevelLabel: (accesses: AccessInfo[], level: number) => string;
   handleAddAddressClick: () => void;
   handleEditAddressClick: (address: AddressSchema) => void;
   deleteAddress: (addressId: number, userId: number) => void;
-  roles: Role[];
+  accesses: AccessInfo[];
 }
 
 const UserModal: React.FC<UserModalProps> = ({
@@ -42,7 +42,7 @@ const UserModal: React.FC<UserModalProps> = ({
   handleAddAddressClick,
   handleEditAddressClick,
   deleteAddress,
-  roles
+  accesses
 }) => {
   if (!showModal) return null;
 
@@ -106,8 +106,8 @@ const UserModal: React.FC<UserModalProps> = ({
                   <div className="form-control mb-2">
                     <label className="label"><span className="label-text">ระดับการเข้าถึง</span></label>
                     <select name="Access_Level" className="select select-bordered w-full" value={editFormData.Access_Level} onChange={handleUserFormChange}>
-                      {roles.map((r : Role) => (
-                        <option key={r.Role} value={r.Role}>{r.Name}</option>
+                      {accesses.map((access : AccessInfo) => (
+                        <option key={access.Level} value={access.Level}>{access.Name}</option>
                       ))}
                     </select>
                   </div>
@@ -120,7 +120,7 @@ const UserModal: React.FC<UserModalProps> = ({
                     <p><strong>ชื่อเต็ม:</strong> {selectedUser.Full_Name}</p><br/>
                     <p><strong>อีเมล:</strong> {selectedUser.Email || '-'}</p><br/>
                     <p><strong>เบอร์โทร:</strong> {selectedUser.Phone || '-'}</p><br/>
-                    <p><strong>ระดับการเข้าถึง:</strong> {getAccessLevelLabel(roles, selectedUser.Access_Level)}</p>
+                    <p><strong>ระดับการเข้าถึง:</strong> {getAccessLevelLabel(accesses, selectedUser.Access_Level)}</p>
                   </>
                 )
               )}

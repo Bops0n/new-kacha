@@ -32,15 +32,15 @@ export const requireAuth =
     return null;
   };
 
-export const requireRole =
+export const requireAccess =
   (policy: Record<string, number[]>) =>
   async (req: NextRequest) => {
     const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
-    const role = token?.accessLevel as number;
+    const level = token?.accessLevel as number;
     const path = new URL(req.url).pathname;
     for (const [prefix, allowed] of Object.entries(policy)) {
       if (path.startsWith(prefix)) {
-        if (!role || !allowed.includes(role)) {
+        if (!level || !allowed.includes(level)) {
           return NextResponse.redirect(new URL("/403", req.url));
         }
         break;
@@ -64,7 +64,7 @@ export const requireMethods =
 
 const guards: Guard[] = [
   requireAuth({ allow: ["/", "/login", "/api/main", "/api/main/cart/"] }),
-  requireRole({ "/admin": [1, 2, 3, 4, 999] }),
+  requireAccess({ "/admin": [1, 2, 3, 4, 999] }),
   requireMethods({ 
     "/api/admin": ["GET", "POST", "PATCH", "PUT", "DELETE"], 
     "/api/master": ["GET", "POST", "PATCH", "PUT", "DELETE"]

@@ -200,11 +200,11 @@ export default function AdminNavbar() {
                             </li>
                         )}
                         
-                        {/* 8. Roles Settings */}
+                        {/* 8. Access Level Settings */}
                         {session.user.Sys_Admin && (
                             <li>
-                                <Link href="/admin/role-management" className={`text-warning hover:bg-warning/10 ${isActive('/admin/role-management') ? 'font-bold bg-warning/10' : ''}`}>
-                                    <FiShield className="w-4 h-4" /> ตั้งค่าบทบาท
+                                <Link href="/admin/access-management" className={`text-warning hover:bg-warning/10 ${isActive('/admin/access-management') ? 'font-bold bg-warning/10' : ''}`}>
+                                    <FiShield className="w-4 h-4" /> ตั้งค่าระดับการเข้าถึง
                                 </Link>
                             </li>
                         )}
@@ -319,11 +319,11 @@ export default function AdminNavbar() {
                             <li className="menu-title mt-2 text-xs uppercase opacity-50">ระบบ</li>
                             <li>
                                 <Link 
-                                    href="/admin/role-management" 
+                                    href="/admin/access-management" 
                                     onClick={closeMobileMenu} 
                                     className="text-warning hover:bg-warning/10"
                                 >
-                                    <FiShield className="w-5 h-5"/> ตั้งค่าบทบาท
+                                    <FiShield className="w-5 h-5"/> ตั้งค่าระดับการเข้าถึง
                                 </Link>
                             </li>
                         </>

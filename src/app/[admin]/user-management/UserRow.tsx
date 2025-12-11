@@ -1,17 +1,17 @@
 import React from 'react';
 import { FiEdit, FiTrash2 } from 'react-icons/fi'; // Removed FiEye
-import { Role, UserAccount } from '@/types';
+import { AccessInfo, UserAccount } from '@/types';
 
 interface UserRowProps {
   user: UserAccount;
-  role: Role | undefined;
+  access: AccessInfo | undefined;
   openUserModal: (user: UserAccount) => void; // Changed from viewUserDetails
   deleteUser: (userId: number) => void;
 }
 
 const UserRow: React.FC<UserRowProps> = ({
   user,
-  role,
+  access,
   openUserModal, // Renamed prop
   deleteUser,
 }) => {
@@ -25,17 +25,17 @@ const UserRow: React.FC<UserRowProps> = ({
       <td>{user.Phone || '-'}</td>
       <td>
         <span className={`badge ${(
-          !role ? 'badge-error' : 
-          role.Sys_Admin ? 'badge-primary' : 
-          role.User_Mgr ? 'badge-secondary' : 
-          role.Stock_Mgr ? 'badge-accent' : 
-          role.Order_Mgr ? 'badge-info' : 
-          role.Report ? 'badge-success' : 
-          role.Dashboard ? 'badge-warning' : 
+          !access ? 'badge-error' : 
+          access.Sys_Admin ? 'badge-primary' : 
+          access.User_Mgr ? 'badge-secondary' : 
+          access.Stock_Mgr ? 'badge-accent' : 
+          access.Order_Mgr ? 'badge-info' : 
+          access.Report ? 'badge-success' : 
+          access.Dashboard ? 'badge-warning' : 
           'badge-neutral'
           )}`}>
           {(
-            !role ? 'ไม่ระบุ' : role.Name
+            !access ? 'ไม่ระบุ' : access.Name
             )}
         </span>
       </td>

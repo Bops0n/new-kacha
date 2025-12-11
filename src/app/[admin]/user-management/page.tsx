@@ -13,7 +13,7 @@ import UserModal from './modal/UserModal'; // <-- นำเข้า UserModal
 import AddressModal from '@/app/(main)/components/AddressModal'; // <-- นำเข้า AddressModal
 import { useAlert } from '@/app/context/AlertModalContext';
 import Pagination from '@/app/components/Pagination';
-import { Role } from '@/types/';
+import { AccessInfo } from '@/types/';
 import { AddressSchema, UserAccount, UserEditForm } from '@/types';
 import LoadingSpinner from '@/app/components/LoadingSpinner';
 import { useSession } from 'next-auth/react';
@@ -21,17 +21,14 @@ import AccessDeniedPage from '@/app/components/AccessDenied';
 
 // Helper function to map access level char to readable string
 
-const getAccessLevel = (roles: Role[], level: number): Role | undefined => {
-  return roles.find(x => x.Role == level);
+const getAccessLevel = (accesses: AccessInfo[], level: number): AccessInfo | undefined => {
+  return accesses.find(x => x.Level == level);
 };
 
-const getAccessLevelLabel = (roles: Role[], level: number): string => {
-  const role = getAccessLevel(roles, level);
-  if (role) {
-    return role.Name;
-  } else {
-    return "ไม่ระบุ";
-  }
+const getAccessLevelLabel = (accesses: AccessInfo[], level: number): string => {
+  const access = getAccessLevel(accesses, level);
+  if (!access) return "ไม่ระบุ";
+  return access.Name;
 };
 
 export default function UserManagement() {
@@ -40,7 +37,7 @@ export default function UserManagement() {
 
   const [loading, setLoading] = useState(true);
   const [users, setUsers] = useState<UserAccount[]>([]);
-  const [roles, setRoles] = useState<Role[]>([]);
+  const [accesses, setAccesses] = useState<AccessInfo[]>([]);
   const [filteredUsers, setFilteredUsers] = useState<UserAccount[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [accessLevelFilter, setAccessLevelFilter] = useState<number | 'all'>('all');
@@ -86,15 +83,15 @@ export default function UserManagement() {
         }
     }
 
-    async function apiGetRoles() {
-      const result = await fetch("/api/master/role", { 
+    async function apiGetAccesses() {
+      const result = await fetch("/api/master/access", { 
           cache: "no-store" 
       });
       const response = await result.json();
-      setRoles(response.roles);
+      setAccesses(response.accesses);
     }
 
-    apiGetRoles();
+    apiGetAccesses();
     apiGetUsers();
   },[])
 
@@ -464,8 +461,8 @@ export default function UserManagement() {
                 onChange={(e) => setAccessLevelFilter(e.target.value as number | 'all')}
               >
                 <option value="all">ระดับการเข้าถึงทั้งหมด</option>
-                {roles.map((r : Role) => (
-                  <option key={r.Role} value={r.Role}>{r.Name}</option>
+                {accesses.map((access : AccessInfo) => (
+                  <option key={access.Level} value={access.Level}>{access.Name}</option>
                 ))}
               </select>
             </div>
@@ -507,7 +504,7 @@ export default function UserManagement() {
                     user={user}
                     openUserModal={openUserModal}
                     deleteUser={deleteUser}
-                    role={getAccessLevel(roles, user.Access_Level)}
+                    access={getAccessLevel(accesses, user.Access_Level)}
                   />
                 ))}
               </tbody>
@@ -523,7 +520,7 @@ export default function UserManagement() {
                 <UserCard
                   key={user.User_ID}
                   user={user}
-                  role={getAccessLevel(roles, user.Access_Level)}
+                  access={getAccessLevel(accesses, user.Access_Level)}
                   openUserModal={openUserModal}
                 />
               ))}
@@ -597,7 +594,7 @@ export default function UserManagement() {
           handleAddAddressClick={handleAddAddressClick}
           handleEditAddressClick={handleEditAddressClick}
           deleteAddress={deleteAddress}
-          roles={roles}
+          accesses={accesses}
         />
 
         {/* Render AddressModal */}

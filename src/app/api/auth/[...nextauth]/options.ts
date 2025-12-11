@@ -1,6 +1,6 @@
 import { AuthOptions, Session, User } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-import { getRoleByLevel } from "../../services/admin/roleMgrService";
+import { getAccessByLevel } from "../../services/admin/accessMgrService";
 import { signIn } from "../../services/auth/authService";
 import { logger } from "@/server/logger";
 import { JWT } from "next-auth/jwt";
@@ -35,7 +35,7 @@ export const authOptions : AuthOptions = {
 
           switch (result.Status_Code) {
             case 200:
-              const role = await getRoleByLevel(result.Access_Level);
+              const access = await getAccessByLevel(result.Access_Level);
 
               return {
                 id: result.User_ID,
@@ -43,12 +43,12 @@ export const authOptions : AuthOptions = {
                 email: result.Email,
                 accessLevel: result.Access_Level as number,
 
-                Sys_Admin: role ? role.Sys_Admin : false,
-                User_Mgr: role ? role.User_Mgr : false,
-                Stock_Mgr: role ? role.Stock_Mgr : false,
-                Order_Mgr: role ? role.Order_Mgr : false,
-                Report: role ? role.Report : false,
-                Dashboard: role ? role.Dashboard : false,
+                Sys_Admin: access ? access.Sys_Admin : false,
+                User_Mgr: access ? access.User_Mgr : false,
+                Stock_Mgr: access ? access.Stock_Mgr : false,
+                Order_Mgr: access ? access.Order_Mgr : false,
+                Report: access ? access.Report : false,
+                Dashboard: access ? access.Dashboard : false,
 
                 rememberMe: credentials.rememberMe === "true",
                 message: result.Message,
@@ -88,15 +88,15 @@ export const authOptions : AuthOptions = {
         if (user.accessLevel !== undefined) {
           token.accessLevel = user.accessLevel as number;
 
-          const role = await getRoleByLevel(token.accessLevel);
+          const access = await getAccessByLevel(token.accessLevel);
 
-          if (role) {
-            token.Sys_Admin = role.Sys_Admin;
-            token.User_Mgr = role.User_Mgr;
-            token.Stock_Mgr = role.Stock_Mgr;
-            token.Order_Mgr = role.Order_Mgr;
-            token.Report = role.Report;
-            token.Dashboard = role.Dashboard;
+          if (access) {
+            token.Sys_Admin = access.Sys_Admin;
+            token.User_Mgr = access.User_Mgr;
+            token.Stock_Mgr = access.Stock_Mgr;
+            token.Order_Mgr = access.Order_Mgr;
+            token.Report = access.Report;
+            token.Dashboard = access.Dashboard;
           }
         }
       }
@@ -111,15 +111,15 @@ export const authOptions : AuthOptions = {
 
         token.accessLevel = session.user.accessLevel;
 
-        const role = await getRoleByLevel(token.accessLevel);
+        const access = await getAccessByLevel(token.accessLevel);
 
-        if (role) {
-          token.Sys_Admin = role.Sys_Admin;
-          token.User_Mgr = role.User_Mgr;
-          token.Stock_Mgr = role.Stock_Mgr;
-          token.Order_Mgr = role.Order_Mgr;
-          token.Report = role.Report;
-          token.Dashboard = role.Dashboard;
+        if (access) {
+          token.Sys_Admin = access.Sys_Admin;
+          token.User_Mgr = access.User_Mgr;
+          token.Stock_Mgr = access.Stock_Mgr;
+          token.Order_Mgr = access.Order_Mgr;
+          token.Report = access.Report;
+          token.Dashboard = access.Dashboard;
         }
 
         token.name = session.user.name;

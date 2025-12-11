@@ -1,8 +1,8 @@
 import { checkRequire } from "@/app/utils/client";
 import { NextRequest, NextResponse } from "next/server";
 import { checkSystemAdminRequire } from "../../auth/utils";
-import { addRole, deleteRole, getRoles, updateRule } from "../../services/admin/roleMgrService";
-import { Role } from "@/types";
+import { addAccess, deleteAccess, getAccesses, updateAccess } from "../../services/admin/accessMgrService";
+import { AccessInfo } from "@/types";
 import { logger } from "@/server/logger";
 
 export async function GET() {
@@ -10,12 +10,12 @@ export async function GET() {
     // const isCheck = checkRequire(auth);
     // if (isCheck) return isCheck;
     
-    const result = await getRoles();
+    const result = await getAccesses();
 
     return NextResponse.json({
-        message: "All roles fetched successfully",
+        message: "All accesses fetched successfully",
         status: 200,
-        roles: result 
+        accesses: result 
     });
 }
 
@@ -23,15 +23,24 @@ export async function POST(req: NextRequest) {
     const auth = await checkSystemAdminRequire();
     const isCheck = checkRequire(auth);
     if (isCheck) return isCheck;
-    
-    const newRole: Role = await req.json();
-    
-    const result = await addRole(newRole, Number(auth.userId));
 
-    return NextResponse.json(
-        { message: "Role added successfully.", role: result, status: 200 },
-        { status: 200 }
-    );
+    try {
+        const newAccess: AccessInfo = await req.json();
+    
+        const result = await addAccess(newAccess, Number(auth.userId));
+
+        return NextResponse.json(
+            { message: "Access added successfully.", access: result, status: 200 },
+            { status: 200 }
+        );
+    } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : "เกิดข้อผิดพลาดที่ไม่ทราบสาเหตุ";
+        logger.error("Error adding access from database:", { error: error } );
+        return NextResponse.json(
+            { message: message, error: error },
+            { status: 500 }
+        );
+    }
 }
 
 export async function PUT(req: NextRequest) {
@@ -39,7 +48,7 @@ export async function PUT(req: NextRequest) {
     const isCheck = checkRequire(auth);
     if (isCheck) return isCheck;
 
-    let data: Partial<Role>;
+    let data: AccessInfo;
     try {
         data = await req.json();
     } catch (error) {
@@ -50,26 +59,26 @@ export async function PUT(req: NextRequest) {
         );
     }
 
-    if (typeof data.Role === 'undefined' || data.Role === null) {
+    if (typeof data.Level === 'undefined' || data.Level === null) {
         return NextResponse.json(
-            { message: "Role is required in the request body for updating an role." },
+            { message: "Level is required in the request body for updating an access." },
             { status: 400 }
         );
     }
 
-    const roleToUpdate = data.Role;
+    const accessToUpdate = data.Level;
 
-    const result = await updateRule(roleToUpdate, data, Number(auth.userId));
+    const result = await updateAccess(accessToUpdate, data, Number(auth.userId));
 
     if (!result) {
         return NextResponse.json(
-            { message: `Role ${roleToUpdate} update failed.` },
+            { message: `Access ${accessToUpdate} update failed.` },
             { status: 500 }
         );
     }
 
     return NextResponse.json(
-        { message: `Role ${roleToUpdate} updated successfully.`, role: result, status: 200 }
+        { message: `Access ${accessToUpdate} updated successfully.`, access: result, status: 200 }
     );
 }
 
@@ -82,28 +91,28 @@ export async function DELETE(req: NextRequest) {
 
     if (!data) {
         return NextResponse.json(
-            { message: "Role is required as a query parameter for deleting a role." },
+            { message: "Level is required as a query parameter for deleting a access." },
             { status: 400 }
         );
     }
 
     try {
-        const result = await deleteRole(data, Number(auth.userId));
+        const result = await deleteAccess(data, Number(auth.userId));
 
         if (!result) {
             return NextResponse.json(
-                { message: `Role ${data} not found.`, status: 404 },
+                { message: `Access ${data} not found.`, status: 404 },
                 { status: 404 }
             );
         }
         return NextResponse.json(
-            { message: `Role ${data} deleted successfully.`, status: 200 },
+            { message: `Access ${data} deleted successfully.`, status: 200 },
             { status: 200 }
         );
 
     } catch (error: unknown) {
         const message = error instanceof Error ? error.message : "เกิดข้อผิดพลาดที่ไม่ทราบสาเหตุ";
-        logger.error("Error deleting role from database:", { error: error } );
+        logger.error("Error deleting access from database:", { error: error } );
         return NextResponse.json(
             { message: message, error: error },
             { status: 500 }

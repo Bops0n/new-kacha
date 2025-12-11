@@ -43,7 +43,7 @@ export async function authenticateRequest(): Promise<AUTH_CHECK> {
     logger.error("Access level not found in session.");
     return {
       authenticated: false,
-      response: errorResponse("ข้อมูลสิทธิ์การเข้าถึงไม่ถูกต้อง!", 500),
+      response: errorResponse("ข้อมูลระดับการเข้าถึงไม่ถูกต้อง!", 500),
       userId: null,
       accessLevel: -1,
       session: null,
@@ -60,8 +60,8 @@ export async function authenticateRequest(): Promise<AUTH_CHECK> {
   };
 }
 
-export async function checkRoleRequire(
-  roleKey: keyof typeof roleMap
+export async function checkAccessRequire(
+  accessKey: keyof typeof accessMap
 ): Promise<AUTH_CHECK> {
   const auth = await authenticateRequest();
 
@@ -75,15 +75,15 @@ export async function checkRoleRequire(
     };
   }
 
-  const roleValue = auth.session.user?.[roleKey];
+  const accessValue = auth.session.user?.[accessKey];
 
-  logger.debug(`UID: ${auth.userId} Role Value (${roleKey}) = ${roleValue}`);
+  logger.debug(`UID: ${auth.userId} Access Value (${accessKey}) = ${accessValue}`);
 
-  if (!roleValue) {
+  if (!accessValue) {
     return {
       authenticated: false,
       response: NextResponse.json(
-        { message: "ข้อมูลสิทธิ์การเข้าถึงไม่ถูกต้อง!", error: true },
+        { message: "ข้อมูลระดับการเข้าถึงไม่ถูกต้อง!", error: true },
         { status: 403 }
       ),
       userId: null,
@@ -101,7 +101,7 @@ export async function checkRoleRequire(
   };
 }
 
-export const roleMap = {
+export const accessMap = {
     Sys_Admin: "checkSystemAdminRequire",
     User_Mgr: "checkUserMgrRequire",
     Stock_Mgr: "checkStockMgrRequire",
@@ -110,12 +110,12 @@ export const roleMap = {
     Dashboard: "checkDashboardRequire",
 };
 
-export const checkSystemAdminRequire = () => checkRoleRequire("Sys_Admin");
-export const checkUserMgrRequire = () => checkRoleRequire("User_Mgr");
-export const checkStockMgrRequire = () => checkRoleRequire("Stock_Mgr");
-export const checkOrderMgrRequire = () => checkRoleRequire("Order_Mgr");
-export const checkReportRequire = () => checkRoleRequire("Report");
-export const checkDashboardRequire = () => checkRoleRequire("Dashboard");
+export const checkSystemAdminRequire = () => checkAccessRequire("Sys_Admin");
+export const checkUserMgrRequire = () => checkAccessRequire("User_Mgr");
+export const checkStockMgrRequire = () => checkAccessRequire("Stock_Mgr");
+export const checkOrderMgrRequire = () => checkAccessRequire("Order_Mgr");
+export const checkReportRequire = () => checkAccessRequire("Report");
+export const checkDashboardRequire = () => checkAccessRequire("Dashboard");
 
 export const RegisterSchema = z.object({
     username: z.string().min(3).max(32).regex(/^[a-zA-Z0-9_\.]+$/),

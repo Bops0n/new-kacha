@@ -1,16 +1,16 @@
 import React from 'react';
 import { FiUser, FiMail, FiPhone, FiKey, FiEdit } from 'react-icons/fi'; // Removed FiEye, added FiEdit
-import { Role, UserAccount } from '@/types';
+import { AccessInfo, UserAccount } from '@/types';
 
 interface UserCardProps {
   user: UserAccount;
-  role: Role | undefined;
+  access: AccessInfo | undefined;
   openUserModal: (user: UserAccount) => void; // Changed from viewUserDetails
 }
 
 const UserCard: React.FC<UserCardProps> = ({
   user,
-  role,
+  access,
   openUserModal, // Renamed prop
 }) => {
   return (
@@ -32,17 +32,17 @@ const UserCard: React.FC<UserCardProps> = ({
         <p className="text-sm flex items-center gap-1">
           <FiKey className="w-3 h-3" /> <strong>ระดับ:</strong>{' '}
           <span className={`badge ${(
-            !role ? 'badge-error' : 
-            role.Sys_Admin ? 'badge-primary' : 
-            role.User_Mgr ? 'badge-secondary' : 
-            role.Stock_Mgr ? 'badge-accent' : 
-            role.Order_Mgr ? 'badge-info' : 
-            role.Report ? 'badge-success' : 
-            role.Dashboard ? 'badge-warning' : 
+            !access ? 'badge-error' : 
+            access.Sys_Admin ? 'badge-primary' : 
+            access.User_Mgr ? 'badge-secondary' : 
+            access.Stock_Mgr ? 'badge-accent' : 
+            access.Order_Mgr ? 'badge-info' : 
+            access.Report ? 'badge-success' : 
+            access.Dashboard ? 'badge-warning' : 
             'badge-neutral'
             )} ml-1`}>
             {(
-            !role ? 'ไม่ระบุ' : role.Name
+            !access ? 'ไม่ระบุ' : access.Name
             )}
           </span>
         </p>
