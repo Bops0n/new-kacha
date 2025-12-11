@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { poolQuery } from '@/app/api/lib/db'; // เรียกใช้ตัวเชื่อมต่อ Database ของเรา
 import { logger } from '@/server/logger';     // เรียกใช้ Logger
+import { getWebsiteSettings } from '../../services/website/settingService';
 
 // บังคับให้ Route นี้เป็น Dynamic เสมอ (ไม่แคชผลลัพธ์) เพื่อให้ตรวจสอบเวลาปัจจุบันได้ถูกต้อง
 export const dynamic = 'force-dynamic';
@@ -14,12 +15,12 @@ export async function GET(request: NextRequest) {
     }
 
     try {
-        // กำหนดเวลาตัดรอบ (เช่น ต้องโอนภายใน 24 ชั่วโมง)
-        const HOURS_LIMIT = 24;
+        const settings = await getWebsiteSettings();
+        const HOURS_LIMIT = settings.paymentTimeoutHours;
 
         // 2. เรียก SQL Function เพื่อทำการยกเลิกออเดอร์ที่หมดอายุ
         const { rows } = await poolQuery(
-            `SELECT * FROM public."SP_SYSTEM_AUTO_CANCEL_EXPIRED_ORDERS"($1)`,
+            `SELECT * FROM public."SP_SYSTEM_AUTO_CANCEL_EXPIRED_ORDERS_GET"($1)`,
             [HOURS_LIMIT]
         );
 
