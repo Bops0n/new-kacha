@@ -142,7 +142,6 @@ if (cartItems.length === 0) {
                                                     </p>
                                                 </div>
                                                 <button onClick={() => {
-                                                    // console.log(addressList)
                                                     setIsSelectAddressOpen(true)
                                                     }} className="btn btn-sm btn-outline btn-primary rounded-full px-6">เปลี่ยน</button>
                                             </div>
@@ -356,7 +355,6 @@ if (cartItems.length === 0) {
                 addresses={userAddresses} 
                 currentSelectedAddress={selectedAddress} 
                 onSelectAddress={(addr) => {
-                    console.log(userAddresses)
                     setSelectedAddress(addr);
                     setIsSelectAddressOpen(false);
                 }}

@@ -289,7 +289,6 @@ export default function UserManagement() {
       const response = await fetch(`../api/admin/user/deleteUser?id=${userId}`,{
         method : 'DELETE',
       })
-      console.log(response)
       if (response.ok){
         showAlert('ลบผู้ใช้สำเร็จ','info')
       }
@@ -333,7 +332,6 @@ export default function UserManagement() {
           method: 'PATCH',
           body : JSON.stringify(newOrUpdatedAddress)
         });
-        console.log(newOrUpdatedAddress)
 
         if (!response.ok) {
           const body = await response.json();

@@ -58,8 +58,8 @@ export default function AdminNavbar() {
                             <span className="text-white font-bold text-2xl">A</span>
                         </div>
                         <div className="flex flex-col">
-                            <span className="text-xl font-bold leading-tight text-base-content">Kacha Admin</span>
-                            <span className="text-[10px] text-base-content/60 tracking-wider uppercase">Management System</span>
+                            <span className="hidden lg:block text-xl font-bold leading-tight text-base-content">Kacha Admin</span>
+                            <span className="hidden lg:block text-[10px] text-base-content/60 tracking-wider uppercase">Management System</span>
                         </div>
                     </Link>
 
