@@ -15,10 +15,10 @@ const OrderCard: React.FC<OrderCardProps> = ({ order, statusTypeLabels }) => {
   const StatusIcon = statusTypeLabels[order.Status]?.icon;
   const statusInfo = statusTypeLabels[order.Status];
 
-  const { replace } = useRouter();
+  const { push } = useRouter();
 
   const handleClickOpen = () => {
-    replace(`/admin/order-management/${order.Order_ID}`);
+    push(`/admin/order-management/${order.Order_ID}`);
   }
 
   return (

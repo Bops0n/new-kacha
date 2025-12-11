@@ -17,10 +17,10 @@ const OrderRow: React.FC<OrderRowProps> = ({ order, statusConfig, fetchOrders })
   const StatusIcon = statusConfig[order.Status]?.icon;
   const statusInfo = statusConfig[order.Status];
 
-  const { replace } = useRouter();
+  const { push } = useRouter();
 
   const handleClickOpen = () => {
-    replace(`/admin/order-management/${order.Order_ID}`);
+    push(`/admin/order-management/${order.Order_ID}`);
   }
 
   const { btnCancelOrder } = getOrderNextStep(order, 'checkorder');
