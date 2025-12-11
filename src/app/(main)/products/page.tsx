@@ -30,7 +30,7 @@ const CategoryMenuTree = ({ pageData, closeMenu }: { pageData: ProductsPageData,
         <Link 
           href="/products" 
           onClick={closeMenu}
-          className={`font-bold ${!activeCategoryId && !searchParams.get('search') ? 'active text-white' : 'hover:bg-base-200'}`}
+          className={`font-bold ${!activeCategoryId && !searchParams.get('search') ? 'active text-primary' : 'hover:bg-base-200'}`}
         >
           <FiBox className="w-4 h-4" /> สินค้าทั้งหมด
         </Link>

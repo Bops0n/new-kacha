@@ -50,17 +50,17 @@ const UserModal: React.FC<UserModalProps> = ({
   const confirmDeleteUser = (userId: number) => {
     // Implement your custom confirmation modal here instead of window.confirm
     // For now, using a placeholder:
-    if (window.confirm(`คุณแน่ใจหรือไม่ที่จะลบผู้ใช้ User ID: ${userId}?`)) {
+    // if (window.confirm(`คุณแน่ใจหรือไม่ที่จะลบผู้ใช้ User ID: ${userId}?`)) {
         deleteUser(userId);
-    }
+    // }
   };
 
   const confirmDeleteAddress = (addressId: number, userId: number) => {
     // Implement your custom confirmation modal here instead of window.confirm
     // For now, using a placeholder:
-    if (window.confirm('คุณแน่ใจหรือไม่ที่จะลบที่อยู่นี้?')) {
+    // if (window.confirm('คุณแน่ใจหรือไม่ที่จะลบที่อยู่นี้?')) {
       deleteAddress(addressId, userId);
-    }
+    // }
   };
 
 

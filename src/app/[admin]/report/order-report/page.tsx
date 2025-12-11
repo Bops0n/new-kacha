@@ -28,8 +28,9 @@ const allStatuses = Object.keys(statusTypeLabels);
 
 export default function OrdersReportPage() {
     const router = useRouter();
-    const today = new Date().toISOString().split('T')[0];
-
+    const today = new Date().toLocaleDateString('sv').replaceAll('/', '-')
+    // const today = new Date().toISOString().split('T')[0];
+    console.log(today)
     const settings = useWebsiteSettings();
     
     const [startDate, setStartDate] = useState(today);

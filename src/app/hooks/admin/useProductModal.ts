@@ -61,7 +61,7 @@ export function useProductModal({ onSave }: UseProductModalProps) {
 
     if (name === 'Selected_Category_ID') { 
         setFormData(prev => ({...prev, Selected_Sub_Category_ID : null, Child_ID : null }))
-        return
+        // return
     }
     
     setFormData(prev => ({ ...prev, [name]: finalValue }));

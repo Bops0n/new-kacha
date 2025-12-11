@@ -72,11 +72,10 @@ export function useProfilePage() {
   // --- Address Actions ---
   const saveAddress = async (addressData: AddressSchema) => {
     const isEditing = !!addressData.Address_ID;
-    console.log(addressData, isEditing)
     // return
     const url = isEditing ? `/api/main/address/${addressData.Address_ID}` : '/api/main/address';
     const method = isEditing ? 'PUT' : 'POST';
-    console.log(addressData)
+  
     try {
       const response = await fetch(url, {
         method: method,

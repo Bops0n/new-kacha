@@ -10,11 +10,11 @@ import {
 import UserRow from './UserRow'; // Correct path to components
 import UserCard from './UserCard'; // Correct path to components
 import UserModal from './modal/UserModal'; // <-- นำเข้า UserModal
-import AddressModal from './modal/AddressModal'; // <-- นำเข้า AddressModal
+import AddressModal from '@/app/(main)/components/AddressModal'; // <-- นำเข้า AddressModal
 import { useAlert } from '@/app/context/AlertModalContext';
 import Pagination from '@/app/components/Pagination';
 import { Role } from '@/types/';
-import { AddressSchema, NewAddressForm, UserAccount, UserEditForm } from '@/types';
+import { AddressSchema, UserAccount, UserEditForm } from '@/types';
 import LoadingSpinner from '@/app/components/LoadingSpinner';
 import { useSession } from 'next-auth/react';
 import AccessDeniedPage from '@/app/components/AccessDenied';
@@ -60,18 +60,6 @@ export default function UserManagement() {
     Addresses: [],
   });
 
-  const [newAddressForm, setNewAddressForm] = useState<NewAddressForm>({
-    Address_ID: null,
-    User_ID: 0, // Placeholder, will be set when adding to a user
-    Address_1: '',
-    Address_2: '',
-    District: '',
-    Province: '',
-    Zip_Code: '',
-    Is_Default: false,
-    Sub_District: '',
-    Phone: '',
-  });
 
   const [showAddAddressModal, setShowAddAddressModal] = useState<boolean>(false);
   const [addressToEdit, setAddressToEdit] = useState<AddressSchema | null>(null);
@@ -294,53 +282,35 @@ export default function UserManagement() {
   };
 
   const deleteUser = async(userId: number) => {
-    if (!window.confirm(`คุณแน่ใจหรือไม่ที่จะลบผู้ใช้ User ID: ${userId}?`)) return
-    setUsers(prev => prev.filter(u => u.User_ID !== userId));
-    const response = await fetch(`../api/admin/user/deleteUser?id=${userId}`,{
-      method : 'DELETE',
+    // if (!window.confirm(`คุณแน่ใจหรือไม่ที่จะลบผู้ใช้ User ID: ${userId}?`)) return
+
+    showAlert(`คุณแน่ใจหรือไม่ที่จะลบผู้ใช้ User ID: ${userId}?`,'warning','แจ้งเตือน',async()=>{
+      setUsers(prev => prev.filter(u => u.User_ID !== userId));
+      const response = await fetch(`../api/admin/user/deleteUser?id=${userId}`,{
+        method : 'DELETE',
+      })
+      console.log(response)
+      if (response.ok){
+        showAlert('ลบผู้ใช้สำเร็จ','info')
+      }
+      setShowUserModal(false);
     })
-    await response.json()
-    setShowUserModal(false);
   };
 
   // --- Address Actions within User Modal ---
   const handleAddAddressClick = () => {
     if (selectedUser) {
-      setNewAddressForm({
-        Address_ID: null,
-        User_ID: selectedUser.User_ID,
-        Address_1: '',
-        Address_2: '',
-        District: '',
-        Province: '',
-        Zip_Code: '',
-        Is_Default: false,
-        Sub_District: '',
-        Phone: selectedUser.Phone || '',
-      });
       setAddressToEdit(null); // Not editing existing address
       setShowAddAddressModal(true);
     }
   };
 
   const handleEditAddressClick = (address: AddressSchema) => {
-    setNewAddressForm({
-      Address_ID: address.Address_ID,
-      User_ID: address.User_ID,
-      Address_1: address.Address_1,
-      Address_2: address.Address_2 || '',
-      District: address.District,
-      Province: address.Province,
-      Zip_Code: address.Zip_Code,
-      Is_Default: address.Is_Default,
-      Sub_District: address.Sub_District,
-      Phone: address.Phone || '',
-    });
     setAddressToEdit(address); // Set the address being edited
     setShowAddAddressModal(true);
   };
 
-  const saveAddress = async() => {
+  const saveAddress = async(newAddressForm : AddressSchema) => {
     if (!newAddressForm.Address_1 || !newAddressForm.District || !newAddressForm.Province || !newAddressForm.Zip_Code || !newAddressForm.Sub_District || !newAddressForm.Phone) {
       // alert('กรุณากรอกข้อมูลที่อยู่ให้ครบถ้วน');
       // Using a placeholder for custom alert
@@ -363,6 +333,7 @@ export default function UserManagement() {
           method: 'PATCH',
           body : JSON.stringify(newOrUpdatedAddress)
         });
+        console.log(newOrUpdatedAddress)
 
         if (!response.ok) {
           const body = await response.json();
@@ -374,15 +345,18 @@ export default function UserManagement() {
           updatedAddresses[index] = newOrUpdatedAddress;
         }
 
-        const data = await response.json();
-
-        showAlert(data.message, 'success');
+        showAlert('แก้ไขที่อยู่่สำเร็จ', 'success');
       } else {
         const response = await fetch('../api/admin/user/addAddress',{
           method: 'POST',
           body : JSON.stringify(newOrUpdatedAddress)
         })
 
+        if (!response.ok) {
+          const body = await response.json();
+          throw new Error(body.message || `HTTP Error ${response.status}`);
+        }
+        
         const data = await response.json()
 
         newOrUpdatedAddress.Address_ID = data.Address_ID;
@@ -400,14 +374,14 @@ export default function UserManagement() {
         if (updatedAddresses.length > 0 && !updatedAddresses.some(addr => addr.Is_Default)) {
           updatedAddresses[0].Is_Default = true;
         }
+        showAlert('เพิ่มที่อยู่สำเร็จ', 'success')
       }
-
+      
       setEditFormData(prev => ({ ...prev, Addresses: updatedAddresses }));
       setShowAddAddressModal(false);
-      setNewAddressForm({
-        Address_ID: null, User_ID: 0, Address_1: '', Address_2: '', District: '', Province: '', Zip_Code: '', Is_Default: false, Sub_District: '', Phone: '',
-      });
+      ;
       setAddressToEdit(null);
+
     }
     
   };
@@ -415,21 +389,18 @@ export default function UserManagement() {
 
   const deleteAddress = async(addressId: number, userId: number) => {
     // if (window.confirm('คุณแน่ใจหรือไม่ที่จะลบที่อยู่นี้?')) {
+    showAlert(`คุณแน่ใจหรือไม่ท่จะลบที่อยู่นี้ : ${addressId}`,'warning','',async()=>{
       if (selectedUser) {
-
-
         await fetch(`../api/admin/user/deleteAddress?id=${addressId}`,{
           method:'DELETE'
         })
-
         const updatedAddresses = editFormData.Addresses.filter(addr => !(addr.Address_ID == addressId && addr.User_ID == userId));
-
         if (updatedAddresses.length > 0 && !updatedAddresses.some(addr => addr.Is_Default)) {
           updatedAddresses[0].Is_Default = true;
         }
-
         setEditFormData(prev => ({ ...prev, Addresses: updatedAddresses }));
       }
+    })
     // }
   };
 
@@ -450,21 +421,6 @@ export default function UserManagement() {
     }));
   };
 
-  const handleAddressFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const target = e.target;
-    const name = target.name;
-
-    let newValue: string | boolean = target.value;
-
-    if (target instanceof HTMLInputElement && target.type === "checkbox") {
-      newValue = target.checked;
-    }
-
-    setNewAddressForm(prev => ({
-      ...prev,
-      [name]: newValue
-    }));
-  };
 
   if (loading) return <LoadingSpinner />;
   if (!session || !session.user?.User_Mgr) return <AccessDeniedPage url="/admin"/>;
@@ -648,12 +604,17 @@ export default function UserManagement() {
 
         {/* Render AddressModal */}
         <AddressModal
-          showModal={showAddAddressModal}
-          onClose={() => setShowAddAddressModal(false)}
-          addressToEdit={addressToEdit}
-          newAddressForm={newAddressForm}
-          handleAddressFormChange={handleAddressFormChange}
-          saveAddress={saveAddress}
+        isOpen={showAddAddressModal}
+        onClose={() => setShowAddAddressModal(false)}
+        onSave={saveAddress}
+        initialData={addressToEdit}
+          // addressToEdit={addressToEdit
+          // showModal={showAddAddressModal}
+          // onClose={() => setShowAddAddressModal(false)}
+          // addressToEdit={addressToEdit}
+          // newAddressForm={newAddressForm}
+          // handleAddressFormChange={handleAddressFormChange}
+          // saveAddress={saveAddress}
         />
 
       </div>

@@ -8,9 +8,13 @@ const nextConfig = {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: 'placehold.co',
-      }
-    ],
+        hostname: 'placehold.co',      },
+      // สามารถเพิ่มโดเมนอื่นๆ ที่คุณเชื่อถือได้ที่นี่
+      {
+        protocol: 'http',
+        hostname: '103.91.190.65',
+      },
+],
   },
 };
 
