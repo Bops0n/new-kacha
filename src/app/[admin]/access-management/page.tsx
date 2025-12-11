@@ -59,53 +59,119 @@ function AccessLevelModal({ isOpen, onClose, isEditing, onSaved, form, handleAcc
         }
     }
 
+    const accessFields: { key: keyof AccessInfo; label: string }[] = [
+        { key: "Sys_Admin", label: "จัดการระบบ" },
+        { key: "User_Mgr", label: "จัดการสมาชิก" },
+        { key: "Stock_Mgr", label: "จัดการคลังสินค้า" },
+        { key: "Order_Mgr", label: "จัดการคำสั่งซื้อ" },
+        { key: "Report", label: "จัดการรายงาน" },
+        { key: "Dashboard", label: "แดชบอร์ด" },
+    ];
+
     if (!isOpen) return null;
 
     return (
     <dialog className="modal modal-open">
-        <div className="modal-box w-11/12 max-w-2xl">
-            <button onClick={onClose} className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2"><FiX/></button>
-            <h3 className="font-bold text-lg flex items-center gap-2"><FiShield/>{isEditing ? `แก้ไขระดับการเข้าถึง: ${form.Level}` : "เพิ่มระดับการเข้าถึงใหม่"}</h3>
+        <div className="modal-box w-full max-w-full sm:w-11/12 sm:max-w-2xl max-h-[90vh] overflow-y-auto p-4 sm:p-6">
+
+            {/* CLOSE BUTTON */}
+            <button 
+                onClick={onClose} 
+                className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2"
+            >
+                <FiX/>
+            </button>
+
+            {/* TITLE */}
+            <h3 className="font-bold text-lg flex items-center gap-2 break-words">
+                <FiShield />
+                {isEditing ? `แก้ไขระดับการเข้าถึง: ${form.Level}` : "เพิ่มระดับการเข้าถึงใหม่"}
+            </h3>
+
             {error && <div className="alert alert-error mt-3">{error}</div>}
 
+            {/* FORM */}
             <form onSubmit={handleSubmit} className="mt-4 space-y-4">
-                {!isEditing &&
-                    <div>
-                        <label className="label"><span className="label-text">ระดับ</span></label>
-                        <input className="input input-bordered w-full" type="number" name="Level" value={form.Level ?? ""} onChange={handleAccessFormChange} min="0" required/>
-                    </div>
-                }
 
+                {!isEditing && (
+                    <div>
+                        <label className="label">
+                            <span className="label-text">ระดับ</span>
+                        </label>
+                    <input 
+                        type="number"
+                        name="Level"
+                        min="0"
+                        required
+                        value={form.Level ?? ""}
+                        onChange={handleAccessFormChange}
+                        className="input input-bordered w-full"
+                    />
+                    </div>
+                )}
+
+                {/* NAME */}
                 <div>
                     <label className="label"><span className="label-text">ชื่อระดับการเข้าถึง</span></label>
-                    <input className="input input-bordered w-full" name="Name" value={form.Name ?? ""} onChange={handleAccessFormChange} placeholder="เช่น ผู้จัดการระบบ" required/>
+                    <input 
+                        className="input input-bordered w-full"
+                        name="Name"
+                        required
+                        value={form.Name ?? ""}
+                        onChange={handleAccessFormChange}
+                        placeholder="เช่น ผู้จัดการระบบ"
+                    />
                 </div>
 
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                    <label className="label cursor-pointer justify-start gap-2">
-                        <input type="checkbox" name="Sys_Admin" className="checkbox checkbox-primary" checked={!!form.Sys_Admin} onChange={handleAccessFormChange} /> <span className="label-text">จัดการระบบ</span>
-                    </label>
-                    <label className="label cursor-pointer justify-start gap-2">
-                        <input type="checkbox" name="User_Mgr" className="checkbox checkbox-primary" checked={!!form.User_Mgr} onChange={handleAccessFormChange} /> <span className="label-text">จัดการสมาชิก</span>
-                    </label>
-                    <label className="label cursor-pointer justify-start gap-2">
-                        <input type="checkbox" name="Stock_Mgr" className="checkbox checkbox-primary" checked={!!form.Stock_Mgr} onChange={handleAccessFormChange} /> <span className="label-text">จัดการคลังสินค้า</span>
-                    </label>
-                    <label className="label cursor-pointer justify-start gap-2">
-                        <input type="checkbox" name="Order_Mgr" className="checkbox checkbox-primary" checked={!!form.Order_Mgr} onChange={handleAccessFormChange} /> <span className="label-text">จัดการคำสั่งซื้อ</span>
-                    </label>
-                    <label className="label cursor-pointer justify-start gap-2">
-                        <input type="checkbox" name="Report" className="checkbox checkbox-primary" checked={!!form.Report} onChange={handleAccessFormChange} /> <span className="label-text">จัดการรายงาน</span>
-                    </label>
-                    <label className="label cursor-pointer justify-start gap-2">
-                        <input type="checkbox" name="Dashboard" className="checkbox checkbox-primary" checked={!!form.Dashboard} onChange={handleAccessFormChange} /> <span className="label-text">แดชบอร์ด</span>
-                    </label>
+                {/* CHECKBOXES GRID */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                    {accessFields.map(({ key, label }) => (
+                        <label key={key} className="label cursor-pointer justify-start gap-2">
+                            <input
+                            type="checkbox"
+                            name={key}
+                            className="checkbox checkbox-primary"
+                            checked={!!form[key]}
+                            onChange={handleAccessFormChange}
+                            />
+                            <span className="label-text">{label}</span>
+                        </label>
+                    ))}
                 </div>
+                
+                {/* ACTION BUTTONS */}
+                <div className="modal-action flex flex-col sm:flex-row gap-2 sm:gap-3">
+                    <button 
+                        type="button" 
+                        className="btn w-full sm:w-auto"
+                        onClick={onClose}
+                        disabled={saving}
+                    >
+                        <FiX className="w-4 h-4"/> ยกเลิก
+                    </button>
 
-                <div className="modal-action">
-                    <button type="button" className="btn" onClick={onClose} disabled={saving}><FiX className="w-4 h-4"/> ยกเลิก</button>
-                    <button type="submit" className="btn btn-primary" disabled={saving}>{saving ? <span className="loading loading-spinner"/> : <><FiSave className="w-4 h-4"/> บันทึก</>}</button>
-                    <button type="button" className="btn btn-error" onClick={() => removeAccess(form)} disabled={!isEditing}><FiTrash2 className="w-4 h-4"/> ลบระดับการเข้าถึง</button>
+                    <button 
+                        type="submit" 
+                        className="btn btn-primary w-full sm:w-auto"
+                        disabled={saving}
+                    >
+                    {saving ? (
+                        <span className="loading loading-spinner"/>
+                    ) : (
+                        <>
+                            <FiSave className="w-4 h-4"/> บันทึก
+                        </>
+                    )}
+                    </button>
+                    {isEditing && (
+                        <button 
+                            type="button" 
+                            className="btn btn-error w-full sm:w-auto"
+                            onClick={() => removeAccess(form)}
+                        >
+                            <FiTrash2 className="w-4 h-4"/> ลบระดับการเข้าถึง
+                        </button>
+                    )}
                 </div>
             </form>
         </div>
