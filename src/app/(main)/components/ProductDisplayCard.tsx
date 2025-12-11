@@ -55,7 +55,7 @@ const AddToCartQuantityModal: React.FC<{
   return (
     <>
         <div className="modal modal-open flex items-center justify-center bg-black/60 backdrop-blur-sm z-50">
-        <div className="modal-box w-full max-w-3xl p-0 overflow-hidden bg-base-100 rounded-2xl shadow-2xl">
+        <div className="modal-box w-full max-w-3xl p-0 overflow-auto bg-base-100 rounded-2xl shadow-2xl">
             {/* Header Mobile Only */}
             <div className="flex justify-between items-center p-4 md:hidden border-b">
                 <h3 className="font-bold text-lg">เพิ่มลงตะกร้า</h3>

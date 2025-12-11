@@ -394,7 +394,7 @@ export default function UserNavbar() {
                 </Link>
             </li>
             <li>
-                <Link href="/profile" onClick={closeMobileMenu} className="font-semibold hover:bg-primary/10">
+                <Link href="/orders-history" onClick={closeMobileMenu} className="font-semibold hover:bg-primary/10">
                     <FiBox className="w-5 h-5" /> ประวัติคำสั่งซื้อ
                 </Link>
             </li>
