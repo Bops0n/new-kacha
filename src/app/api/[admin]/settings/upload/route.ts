@@ -55,7 +55,6 @@ export async function POST(req: Request) {
 
       if (oldFile) {
         const oldPath = path.join(process.cwd(), "public", oldFile);
-        console.log(process.env.APP_ENV + ' : ' + oldPath)
         try {
           await unlink(oldPath);
         } catch {
