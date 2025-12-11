@@ -84,7 +84,7 @@ export default function AdminMessagesPage() {
 
         {/* FILTER BOX */}
         <div className="bg-base-100 rounded-lg shadow-sm p-6 mb-6">
-          <div className="flex flex-col md:flex-row flex-wrap gap-4 items-center">
+          <div className="flex flex-col md:flex-row gap-4">
             <div className="flex-1">
               <div className="relative">
                 <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-base-content/50 w-4 h-4 z-10" />
@@ -99,7 +99,7 @@ export default function AdminMessagesPage() {
             </div>
 
             {/* FILTER */}
-            <div className="md:col-span-1">
+            <div className="md:w-48">
               <select
                 className="select select-bordered w-full"
                 value={filter}
@@ -115,7 +115,7 @@ export default function AdminMessagesPage() {
             </div>
 
             {/* ITEMS PER PAGE */}
-            <div className="md:col-span-1">
+            <div className="md:w-48">
               <select
                 className="select select-bordered w-full"
                 value={itemsPerPage}
