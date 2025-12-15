@@ -52,7 +52,7 @@ export default function OrdersReportPage() {
     const fetchReport = async (start: string, end: string) => {
         setLoading(true);
         try {
-            const res = await fetch(`/api/admin/report/daily?startDate=${start}&endDate=${end}`);
+            const res = await fetch(`/api/admin/report/summary-sales?startDate=${start}&endDate=${end}`);
             const data = await res.json();
             if (res.ok) {
                 setOrders(data.orders || []);
@@ -122,7 +122,7 @@ export default function OrdersReportPage() {
 
     const renderSlipStatus = (order: ReportOrder) => {
         if (order.Payment_Type === 'cash_on_delivery') return <span className="text-gray-400">-</span>;
-        if (order.Is_Payment_Checked) return <span className="text-success font-semibold flex items-center justify-center gap-1 print:text-green-700"><FiCheck className="print:hidden"/> ยืนยันแล้ว</span>;
+        if (order.Is_Payment_Checked) return <span className="text-green-600 font-semibold flex items-center justify-center gap-1 print:text-green-700"><FiCheck className="print:hidden"/> ยืนยันแล้ว</span>;
         if (order.Transaction_Status === 'rejected') return <span className="text-error font-semibold flex items-center justify-center gap-1 print:text-red-600"><FiAlertCircle className="print:hidden"/> ถูกปฏิเสธ</span>;
         if (order.Status === 'pending' && order.Transaction_Slip) return <span className="text-warning font-semibold flex items-center justify-center gap-1 print:text-orange-500"><FiFileText className="print:hidden"/> แนบสลิป</span>;
         if (!order.Transaction_Slip) return <span className="text-gray-400 flex items-center justify-center gap-1">ยังไม่แนบ</span>;
@@ -290,7 +290,7 @@ export default function OrdersReportPage() {
                         <div className="card bg-base-100 shadow-md border-l-4 border-success">
                             <div className="card-body">
                                 <h2 className="card-title text-base text-base-content/60">ยอดขายรวมสุทธิ</h2>
-                                <div className="flex items-end gap-2"><span className="text-4xl font-bold text-success">{formatPrice(summary.totalRevenue)}</span></div>
+                                <div className="flex items-end gap-2"><span className="text-4xl font-bold text-green-600">{formatPrice(summary.totalRevenue)}</span></div>
                             </div>
                         </div>
                     </div>
