@@ -47,7 +47,7 @@ const OrderItemDetail: React.FC<{ orderProduct: OrderProductDetail; liveProduct:
           </div>
 
           {typeof availableStock !== 'undefined' && (
-            <div className={`flex items-center gap-2 ${isStockInsufficient ? 'text-error' : 'text-success'}`}>
+            <div className={`flex items-center gap-2 ${isStockInsufficient ? 'text-error' : 'text-green-600'}`}>
               <FiArchive className="w-4 h-4 flex-shrink-0" />
               <span>คงเหลือในคลัง: <span className="font-bold">{availableStock}</span> ชิ้น</span>
             </div>

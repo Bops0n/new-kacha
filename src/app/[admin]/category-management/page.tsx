@@ -192,7 +192,7 @@ export default function CategoryManagementPage() {
                 <div className="card bg-base-100 shadow-sm p-4"><div className="flex items-center gap-3"><FiTag className="w-5 h-5 text-neutral"/><div><p className="text-sm">หมวดหมู่ทั้งหมด</p><p className="font-bold text-xl">{stats.total}</p></div></div></div>
                 <div className="card bg-base-100 shadow-sm p-4"><div className="flex items-center gap-3"><FiTag className="w-5 h-5 text-primary"/><div><p className="text-sm">หมวดหมู่หลัก</p><p className="font-bold text-xl">{stats.main}</p></div></div></div>
                 <div className="card bg-base-100 shadow-sm p-4"><div className="flex items-center gap-3"><FiTag className="w-5 h-5 text-info"/><div><p className="text-sm">หมวดหมู่รอง</p><p className="font-bold text-xl">{stats.sub}</p></div></div></div>
-                <div className="card bg-base-100 shadow-sm p-4"><div className="flex items-center gap-3"><FiTag className="w-5 h-5 text-success"/><div><p className="text-sm">หมวดหมู่ย่อย</p><p className="font-bold text-xl">{stats.child}</p></div></div></div>
+                <div className="card bg-base-100 shadow-sm p-4"><div className="flex items-center gap-3"><FiTag className="w-5 h-5 text-green-600"/><div><p className="text-sm">หมวดหมู่ย่อย</p><p className="font-bold text-xl">{stats.child}</p></div></div></div>
             </div>
             
             <div className="bg-base-100 rounded-lg shadow-sm p-6 mb-6">

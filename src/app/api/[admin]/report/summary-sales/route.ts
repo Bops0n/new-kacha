@@ -21,6 +21,7 @@ export async function GET(request: NextRequest) {
 
     try {
         const { rows } = await poolQuery('SELECT * FROM public."SP_ADMIN_REPORT_SUMMARY_SALES_REPORT_GET"($1, $2)', [startDate, endDate]);
+
         return NextResponse.json({ orders: rows });
     } catch (error: unknown) {
         const message = error instanceof Error ? error.message : "เกิดข้อผิดพลาดที่ไม่ทราบสาเหตุ";

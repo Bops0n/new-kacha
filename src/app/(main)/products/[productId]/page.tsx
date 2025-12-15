@@ -122,7 +122,7 @@ export default function ProductDetailPage() {
               <div className="bg-base-200/50 rounded-xl p-4 mb-6 text-sm text-base-content/80 space-y-2 border border-base-200">
                 <p className="flex justify-between">
                     <span>สถานะสต็อก:</span> 
-                    <span className={`font-bold ${calculateAvailableStock(product) > 0 ? 'text-success' : 'text-error'}`}>
+                    <span className={`font-bold ${calculateAvailableStock(product) > 0 ? 'text-green-600' : 'text-error'}`}>
                         {calculateAvailableStock(product) > 0 ? `มีสินค้า (${calculateAvailableStock(product)} ${product.Unit})` : 'สินค้าหมด'}
                     </span>
                 </p>

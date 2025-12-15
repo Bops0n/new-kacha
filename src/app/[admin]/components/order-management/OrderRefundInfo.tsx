@@ -175,7 +175,7 @@ export default function OrderRefundInfo({
 
                                 {/* File Info */}
                                 {selectedFile && (
-                                    <div className="mt-3 text-sm text-center text-success">
+                                    <div className="mt-3 text-sm text-center text-green-600">
                                         ไฟล์ที่เลือก : {selectedFile.name}
                                     </div>
                                 )}

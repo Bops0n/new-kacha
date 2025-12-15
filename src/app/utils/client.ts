@@ -28,9 +28,9 @@ export const statusConfig: StatusConfig = {
   pending: { label: 'รอดำเนินการ', color: 'warning', icon: FiClock, bgColor: 'bg-warning/10', textColor: 'text-warning' },
   preparing: { label: 'กำลังเตรียมสินค้า', color: 'info', icon: FiPackage, bgColor: 'bg-info/10', textColor: 'text-info' },
   shipped: { label: 'อยู่ระหว่างจัดส่ง', color: 'primary', icon: FiTruck, bgColor: 'bg-primary/10', textColor: 'text-primary' },
-  delivered: { label: 'จัดส่งสำเร็จ', color: 'success', icon: FiCheckCircle, bgColor: 'bg-success/10', textColor: 'text-success' },
+  delivered: { label: 'จัดส่งสำเร็จ', color: 'success', icon: FiCheckCircle, bgColor: 'bg-success/10', textColor: 'text-green-600' },
   refunding: { label: 'รอคืนเงิน', color: 'secondary', icon: FiRefreshCw, bgColor: 'bg-secondary/10', textColor: 'text-secondary' },
-  refunded: { label: 'คืนเงินแล้ว', color: 'success', icon: FiCheckCircle, bgColor: 'bg-success/10', textColor: 'text-success' },
+  refunded: { label: 'คืนเงินแล้ว', color: 'success', icon: FiCheckCircle, bgColor: 'bg-success/10', textColor: 'text-green-600' },
   req_cancel: { label: 'ร้องขอยกเลิก', color: 'warning', icon: FiFileText, bgColor: 'bg-warning/10', textColor: 'text-warning' },
   cancelled: { label: 'ยกเลิก', color: 'error', icon: FiXCircle, bgColor: 'bg-error/10', textColor: 'text-error' },
 };

@@ -51,7 +51,7 @@ function AccessLevelModal({ isOpen, onClose, isEditing, onSaved, form, handleAcc
             onSaved(access);
             onClose();
         } catch (error: unknown) {
-            console.log(error)
+            
             const message = error instanceof Error ? error.message : "เกิดข้อผิดพลาดที่ไม่ทราบสาเหตุ";
             setError(message);
         } finally {

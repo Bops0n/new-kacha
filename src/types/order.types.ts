@@ -33,6 +33,7 @@ export type Order = {
   Confirmed_At: string;
   Update_By: string;
   Update_At: string;
+  Current_Vat: string;
 
   // Order Cancellation
   Is_Cancelled: boolean;
@@ -142,6 +143,7 @@ export interface DbOrderRow {
   Confirmed_At: string;
   Update_By: string;
   Update_At: string;
+  Current_Vat: string;
 
   // Order Cancellation
   Is_Cancelled: boolean;
@@ -226,6 +228,9 @@ export const mapDbRowsToOrders = (dbRows: DbOrderRow[]): Order[] => {
                 Confirmed_At: row.Confirmed_At,
                 Update_By: row.Update_By,
                 Update_At: row.Update_At,
+                Current_Vat: row.Current_Vat,
+
+                // Order Cancellation
 
                 Is_Cancelled: row.Is_Cancelled,
                 Cancel_By: row.Cancel_By,

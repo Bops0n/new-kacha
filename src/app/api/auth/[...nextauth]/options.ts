@@ -135,12 +135,7 @@ export const authOptions : AuthOptions = {
     }) {
       const now = Math.floor(Date.now() / 1000);
       if (token.shortExp && now > token.shortExp) {
-        return {
-          ...session,
-          user: null,
-          rememberMe: false,
-          shortExp: undefined,
-        };
+        return null;
       }
 
       session.rememberMe = token.rememberMe ?? false;

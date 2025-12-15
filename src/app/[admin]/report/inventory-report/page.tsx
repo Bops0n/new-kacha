@@ -179,9 +179,9 @@ export default function InventoryReportPage() {
                             <div className="stat-desc text-base-content/60">ต่ำกว่าจุดสั่งซื้อ หรือ หมด</div>
                         </div>
                         {/* <div className="stat bg-base-100 rounded-xl shadow-sm border border-base-200">
-                            <div className="stat-figure text-success"><FiDollarSign className="w-8 h-8" /></div>
+                            <div className="stat-figure text-green-600"><FiDollarSign className="w-8 h-8" /></div>
                             <div className="stat-title">มูลค่าขายรวม</div>
-                            <div className="stat-value text-success text-2xl">{formatPrice(summary.totalValue)}</div>
+                            <div className="stat-value text-green-600 text-2xl">{formatPrice(summary.totalValue)}</div>
                         </div> */}
                     </div>
 
