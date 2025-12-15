@@ -107,7 +107,7 @@ export default function OrderHistoryPage() {
                             <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 py-4">
                                 <div>
                                     <p className="text-xs text-base-content/50 font-bold uppercase tracking-wider mb-1">ยอดรวมสุทธิ</p>
-                                    <p className="text-xl font-bold text-success/90">{formatPrice(order.Total_Amount)}</p>
+                                    <p className="text-xl font-bold text-green-600/90">{formatPrice(order.Total_Amount)}</p>
                                 </div>
                                 <div>
                                     <p className="text-xs text-base-content/50 font-bold uppercase tracking-wider mb-1">ช่องทางชำระเงิน</p>
@@ -141,10 +141,10 @@ export default function OrderHistoryPage() {
                                         )}
                                         {isShipped && (
                                             <>
-                                                <div className="w-8 h-8 rounded-full bg-success/20 text-success flex items-center justify-center flex-shrink-0">
+                                                <div className="w-8 h-8 rounded-full bg-success/20 text-green-600 flex items-center justify-center flex-shrink-0">
                                                     <FiTruck className="w-5 h-5" />
                                                 </div>
-                                                <span className="text-success">สินค้าอยู่ระหว่างการจัดส่ง หากได้รับแล้วกรุณากดยืนยัน</span>
+                                                <span className="text-green-600">สินค้าอยู่ระหว่างการจัดส่ง หากได้รับแล้วกรุณากดยืนยัน</span>
                                             </>
                                         )}
                                     </div>

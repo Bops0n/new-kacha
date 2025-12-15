@@ -226,7 +226,7 @@ const ProductModal = ({
                                         </div>
 
                                         <div>
-                                            <label className="label"><span className="label-text font-semibold">ราคาโปรโมชั่น</span></label>
+                                            <label className="label"><span className="label-text font-semibold">ราคาโปรโมชั่น (กำหนดหากมีการลดราคา)</span></label>
                                             <input name="Discount_Price" type="number" step="0.01" className="input input-bordered w-full" value={formData.Discount_Price ?? ''} onChange={handleFormChange} />
                                         </div>
                                     </div>
@@ -522,7 +522,7 @@ export default function ProductManagementPage() {
 
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
                 <div className="card bg-base-100 shadow-sm p-4 cursor-pointer"onClick={() => handleFilterChange('stockStatusFilter', 'all')}><div className="flex items-center gap-3" ><div className="p-2 bg-neutral/10 rounded-lg"><FiBox className="w-5 h-5 text-neutral"/></div><div><p className="text-sm text-base-content/70">สินค้าทั้งหมด</p><p className="text-2xl font-bold">{stats.total}</p></div></div></div>
-                <div className="card bg-base-100 shadow-sm p-4 cursor-pointer"onClick={() => handleFilterChange('stockStatusFilter', 'in_stock')}><div className="flex items-center gap-3" ><div className="p-2 bg-success/10 rounded-lg"><FiCheckCircle className="w-5 h-5 text-success"/></div><div><p className="text-sm text-base-content/70">ในสต็อก</p><p className="text-2xl font-bold">{stats.inStock}</p></div></div></div>
+                <div className="card bg-base-100 shadow-sm p-4 cursor-pointer"onClick={() => handleFilterChange('stockStatusFilter', 'in_stock')}><div className="flex items-center gap-3" ><div className="p-2 bg-success/10 rounded-lg"><FiCheckCircle className="w-5 h-5 text-green-600"/></div><div><p className="text-sm text-base-content/70">ในสต็อก</p><p className="text-2xl font-bold">{stats.inStock}</p></div></div></div>
                 <div className="card bg-base-100 shadow-sm p-4 cursor-pointer"onClick={() => handleFilterChange('stockStatusFilter', 'low_stock')}><div className="flex items-center gap-3" ><div className="p-2 bg-warning/10 rounded-lg"><FiAlertTriangle className="w-5 h-5 text-warning"/></div><div><p className="text-sm text-base-content/70">สินค้าใกล้หมด</p><p className="text-2xl font-bold">{stats.lowStock}</p></div></div></div>
                 <div className="card bg-base-100 shadow-sm p-4 cursor-pointer"onClick={() => handleFilterChange('stockStatusFilter', 'out_of_stock')}><div className="flex items-center gap-3" ><div className="p-2 bg-error/10 rounded-lg"><FiAlertCircle className="w-5 h-5 text-error"/></div><div><p className="text-sm text-base-content/70">สินค้าหมด</p><p className="text-2xl font-bold">{stats.outOfStock}</p></div></div></div>
                 <div className="card bg-base-100 shadow-sm p-4"><div className="flex items-center gap-3"><div className="p-2 bg-info/10 rounded-lg"><FiEye className="w-5 h-5 text-info"/></div><div><p className="text-sm text-base-content/70">สินค้าที่แสดง</p><p className="text-2xl font-bold">{stats.visible}</p></div></div></div>

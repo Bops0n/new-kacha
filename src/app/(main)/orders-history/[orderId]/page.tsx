@@ -149,7 +149,7 @@ const OrderStepIndicator = ({ order, statusConfig }: { order: Order, statusConfi
 
   const renderIconCircle = (icon: React.ElementType, isCurrent: boolean, isComplete: boolean) => {
       let bgClass = 'bg-base-100 border-base-300 text-base-content/30';
-      if (isComplete) bgClass = 'bg-success text-success-content border-success';
+      if (isComplete) bgClass = 'bg-success text-green-600-content border-success';
       else if (isCurrent) bgClass = `${icon === FiCheckCircle ? 'bg-success border-success' : 'bg-primary text-primary-content border-primary'} shadow-lg scale-110 ring-2 ring-primary/30`;
 
       return (
@@ -405,7 +405,7 @@ export default function OrderDetailsPage() {
                 </div>
                 <p className="text-base-content/60 mt-1 ml-12 text-sm">วันที่สั่งซื้อ: {formatDateTime(order.Order_Date)}</p>
             </div>
-            <div className={`badge border-none px-4 py-3 rounded-lg font-medium flex items-center gap-2 ${statusConfig[order.Status]?.bgColor} ${statusConfig[order.Status]?.textColor}`}>
+            <div className={`badge border-none px-4 py-3 md:py-5 rounded-lg font-medium text-sm md:text-xl flex items-center gap-2 ${statusConfig[order.Status]?.bgColor} ${statusConfig[order.Status]?.textColor}`}>
                 {statusConfig[order.Status]?.icon && React.createElement(statusConfig[order.Status].icon)}
                 {statusConfig[order.Status]?.label}
             </div>
@@ -497,8 +497,8 @@ export default function OrderDetailsPage() {
                                                 {/* If a file is selected, show the file info and change/remove buttons */}
                                                 {selectedFile ? (
                                                     <div className="bg-success/10 border border-success/30 rounded-xl p-3 text-center">
-                                                        <p className="text-xs font-semibold text-success/80 mb-1">ไฟล์ที่เลือก:</p>
-                                                        <p className="text-sm font-medium text-success break-all mb-3">{selectedFile.name}</p>
+                                                        <p className="text-xs font-semibold text-green-600/80 mb-1">ไฟล์ที่เลือก:</p>
+                                                        <p className="text-sm font-medium text-green-600 break-all mb-3">{selectedFile.name}</p>
                                                         <div className="grid grid-cols-2 gap-2">
                                                             <button 
                                                                 className="btn btn-xs btn-outline btn-primary"
@@ -692,9 +692,9 @@ export default function OrderDetailsPage() {
                         <div className="flex justify-between text-sm text-base-content/70"><span>รวมเป็นเงิน</span><span>{formatPrice(subtotalBeforeDiscount - subtotalBeforeDiscount * parseFloat(order.Current_Vat) / 100)}</span></div>
                         <div className="flex justify-between text-sm text-error"><span>ส่วนลด</span><span>- {formatPrice(subtotalBeforeDiscount - order.Total_Amount)}</span></div>
                         <div className="flex justify-between text-sm text-base-content/70"><span>vat {order.Current_Vat}%</span><span>{formatPrice(subtotalBeforeDiscount / 100 * parseFloat(order.Current_Vat))}</span></div>
-                        <div className="flex justify-between text-sm text-success"><span>ค่าจัดส่ง</span><span>ฟรี</span></div>
+                        <div className="flex justify-between text-sm text-green-600"><span>ค่าจัดส่ง</span><span>ฟรี</span></div>
                         <div className="divider my-1"></div>
-                        <div className="flex justify-between items-center"><span className="font-bold text-lg">ยอดสุทธิ</span><span className="font-extrabold text-2xl text-success underline-offset-1 underline">{formatPrice(order.Total_Amount)}</span></div>
+                        <div className="flex justify-between items-center"><span className="font-bold text-lg">ยอดสุทธิ</span><span className="font-extrabold text-2xl text-green-600 underline-offset-1 underline">{formatPrice(order.Total_Amount)}</span></div>
                     </div>
                 </div>
             </div>

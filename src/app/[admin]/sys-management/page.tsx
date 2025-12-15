@@ -238,7 +238,7 @@ export default function AdminSettingsPage() {
                         }
                       />
                       {item.value === "True" || item.value === "true" || item.value === "1" ? (
-                        <span className="label-text text-success">เปิดใช้งาน</span>
+                        <span className="label-text text-green-600">เปิดใช้งาน</span>
                       ) : (
                         <span className="label-text text-warning">ปิดใช้งาน</span>
                       )}

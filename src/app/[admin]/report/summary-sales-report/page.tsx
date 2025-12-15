@@ -198,7 +198,7 @@ export default function SummarySalesReportPage() {
                         </div>
                         <div className="stat bg-base-100 rounded-xl shadow-sm border border-base-200 bg-primary/5">
                             <div className="stat-title font-bold">ยอดรวมสุทธิ</div>
-                            <div className="stat-value text-success">{formatPrice(summary.totalGross)}</div>
+                            <div className="stat-value text-green-600">{formatPrice(summary.totalGross)}</div>
                         </div>
                     </div>
 

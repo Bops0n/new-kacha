@@ -15,7 +15,7 @@ export default function OrderShippedInfo({ isAllValid, order, lbButtonText }: Or
         <div className="flex items-center justify-between py-2 border-b border-base-300">
         <span>{label}</span>
         {valid ? (
-            <BiCheck className="text-success w-5 h-5" />
+            <BiCheck className="text-green-600 w-5 h-5" />
         ) : (
             <BiX className="text-error w-5 h-5" />
         )}
@@ -82,7 +82,7 @@ export default function OrderShippedInfo({ isAllValid, order, lbButtonText }: Or
                     {/* Confirm Card */}
                     <div className="card bg-base-100 shadow-md border border-base-300 p-6 rounded-xl h-fit">
                         <div className="flex items-center gap-3 mb-4">
-                            <FiCheckCircle className="w-7 h-7 text-success" />
+                            <FiCheckCircle className="w-7 h-7 text-green-600" />
                             <div>
                                 <h2 className="font-bold text-lg">ยืนยันการจัดส่งสินค้า</h2>
                                 <p className="text-sm text-base-content/70">

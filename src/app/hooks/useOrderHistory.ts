@@ -47,7 +47,7 @@ export function useOrderHistory() {
         if (!Is_Payment_Checked) {
             return { icon: FiClock, color: 'text-warning', bgColor: 'bg-warning/10', borderColor: 'border-warning/20', title: 'มีการอัปโหลดสลิปแล้ว', message: 'ระบบได้บันทึกหลักฐานการชำระเงินของท่านเรียบร้อยแล้ว กรุณารอเจ้าหน้าที่ตรวจสอบความถูกต้อง' };
         } else {
-            return { icon: FiCheckCircle, color: 'text-success', bgColor: 'bg-success/10', borderColor: 'border-success/20', title: 'สลิปถูกต้อง', message: 'ตรวจสอบการชำระเงินเรียบร้อย ทางร้านกำลังดำเนินการต่อให้คุณ' };
+            return { icon: FiCheckCircle, color: 'text-green-600', bgColor: 'bg-success/10', borderColor: 'border-success/20', title: 'สลิปถูกต้อง', message: 'ตรวจสอบการชำระเงินเรียบร้อย ทางร้านกำลังดำเนินการต่อให้คุณ' };
         }
     }
     if (Status === 'waiting_payment' && Payment_Type === 'bank_transfer') {
@@ -63,7 +63,7 @@ export function useOrderHistory() {
     }
     if (Status === 'refunded') {
         return { 
-            icon: FiCheckCircle, color: 'text-success', bgColor: 'bg-success/10', borderColor: 'border-success/20', title: 'คืนเงินสำเร็จ', 
+            icon: FiCheckCircle, color: 'text-green-600', bgColor: 'bg-success/10', borderColor: 'border-success/20', title: 'คืนเงินสำเร็จ', 
             message: `คืนเงินเรียบร้อยแล้ว${reasonText}` 
         };
     }
