@@ -92,7 +92,7 @@ const UserModal: React.FC<UserModalProps> = ({
                     <input type="password" name="Password" className="input input-bordered w-full" value={editFormData.Password} onChange={handleUserFormChange} />
                   </div>
                   <div className="form-control mb-2">
-                    <label className="label"><span className="label-text">ชื่อเต็ม</span></label>
+                    <label className="label"><span className="label-text">ชื่อ-นามสกุล</span></label>
                     <input type="text" name="Full_Name" className="input input-bordered w-full" value={editFormData.Full_Name} onChange={handleUserFormChange} />
                   </div>
                   <div className="form-control mb-2">

@@ -226,7 +226,7 @@ const ProductModal = ({
                                         </div>
 
                                         <div>
-                                            <label className="label"><span className="label-text font-semibold">ราคาลด (ถ้ามี)</span></label>
+                                            <label className="label"><span className="label-text font-semibold">ราคาโปรโมชั่น</span></label>
                                             <input name="Discount_Price" type="number" step="0.01" className="input input-bordered w-full" value={formData.Discount_Price ?? ''} onChange={handleFormChange} />
                                         </div>
                                     </div>
@@ -405,8 +405,8 @@ const ProductModal = ({
 
                                         <div className="grid grid-cols-2 gap-4">
                                             <StatCard title="สต็อกตั้งต้น" value={product?.Quantity ?? 0} desc="จำนวนรับเข้าทั้งหมด" />
-                                            <StatCard title="ยอดขายสะสม" value={`-${product?.Total_Sales ?? 0}`} className="text-error" />
-                                            <StatCard title="ยอดคืน / ยกเลิก" value={`+${product?.Cancellation_Count ?? 0}`} className="text-success" />
+                                            <StatCard title="ยอดขายสะสม" value={`${product?.Total_Sales ?? 0}`} className="" />
+                                            <StatCard title="ยอดคืน / ยกเลิก" value={`${product?.Cancellation_Count ?? 0}`} className="" />
                                             <StatCard
                                                 title="คงเหลือขายได้"
                                                 value={product ? calculateAvailableStock(product) : 0}

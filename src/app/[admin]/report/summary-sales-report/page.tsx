@@ -14,6 +14,7 @@ interface ReportOrder {
     Total_Amount: number;
     Payment_Type: string;
     Status: string;
+    Current_Vat: string;
 }
 
 const statusLabels: Record<string, string> = {
@@ -48,9 +49,10 @@ export default function SummarySalesReportPage() {
     const fetchReport = async (start: string, end: string) => {
         setLoading(true);
         try {
-            const res = await fetch(`/api/admin/report/daily?startDate=${start}&endDate=${end}`);
+            const res = await fetch(`/api/admin/report/summary-sales?startDate=${start}&endDate=${end}`);
             const data = await res.json();
             if (res.ok) {
+                console.log(data.orders)
                 setOrders(data.orders || []);
             }
         } finally {
@@ -68,8 +70,8 @@ export default function SummarySalesReportPage() {
 
     const summary = useMemo(() => {
         const totalGross = salesOrders.reduce((sum, o) => sum + Number(o.Total_Amount), 0);
-        const totalNet = totalGross / (1 + VAT_RATE); 
-        const totalVat = totalGross - totalNet;
+        const totalVat = salesOrders.reduce((sum, o) => sum + Number(o.Total_Amount) /100 * (parseFloat(o.Current_Vat)), 0); 
+        const totalNet = totalGross - totalVat;
 
         return {
             totalOrders: salesOrders.length,
@@ -150,7 +152,7 @@ export default function SummarySalesReportPage() {
                             <div className="stat-value text-primary text-2xl">{formatPrice(summary.totalNet)}</div>
                         </div>
                         <div className="stat bg-base-100 rounded-xl shadow-sm border border-base-200">
-                            <div className="stat-title">ภาษีมูลค่าเพิ่ม (7%)</div>
+                            <div className="stat-title">ภาษีมูลค่าเพิ่ม</div>
                             <div className="stat-value text-secondary text-2xl">{formatPrice(summary.totalVat)}</div>
                         </div>
                         <div className="stat bg-base-100 rounded-xl shadow-sm border border-base-200 bg-primary/5">
@@ -171,7 +173,7 @@ export default function SummarySalesReportPage() {
                                             <th>ลูกค้า</th>
                                             <th className="text-center">สถานะ</th>
                                             <th className="text-right text-base-content/70">มูลค่าสินค้า</th>
-                                            <th className="text-right text-base-content/70">VAT ({settings.vatRate}%)</th>
+                                            <th className="text-right text-base-content/70">VAT</th>
                                             <th className="text-right font-bold">ยอดรวมสุทธิ</th>
                                         </tr>
                                     </thead>
@@ -194,7 +196,7 @@ export default function SummarySalesReportPage() {
                                                             </span>
                                                         </td>
                                                         <td className="text-right">{formatPrice(net)}</td>
-                                                        <td className="text-right">{formatPrice(vat)}</td>
+                                                        <td className="text-right">{formatPrice(vat)} ({order.Current_Vat}%)</td>
                                                         <td className="text-right font-bold">{formatPrice(gross)}</td>
                                                     </tr>
                                                 );
@@ -265,22 +267,22 @@ export default function SummarySalesReportPage() {
                             <th className="py-1 text-left w-24 font-bold">หมายเลขคำสั่งซื้อ</th>
                             <th className="py-1 text-left font-bold">ลูกค้า</th>
                             <th className="py-1 text-right w-24 font-bold">มูลค่าสินค้า</th>
-                            <th className="py-1 text-right w-24 font-bold">VAT ({settings.vatRate}%)</th>
+                            <th className="py-1 text-right w-24 font-bold">VAT</th>
                             <th className="py-1 text-right w-28 font-bold">ยอดรวมสุทธิ</th>
                         </tr>
                     </thead>
                     <tbody>
                         {salesOrders.map((order) => {
                             const gross = Number(order.Total_Amount);
-                            const net = gross / (1 + VAT_RATE);
-                            const vat = gross - net;
+                            const vat = gross / 100 * ( parseFloat(order.Current_Vat));
+                            const net = gross - vat;
                             return (
                                 <tr key={order.Order_ID} className="border-b border-gray-300">
                                     <td className="py-1 text-left">{formatDateThai(order.Order_Date)}</td>
                                     <td className="py-1 text-left">{order.Order_ID}</td>
                                     <td className="py-1 text-left truncate max-w-[150px]">{order.Customer_Name}</td>
                                     <td className="py-1 text-right">{formatPrice(net)}</td>
-                                    <td className="py-1 text-right">{formatPrice(vat)}</td>
+                                    <td className="py-1 text-right">{formatPrice(vat)}({order.Current_Vat}%)</td>
                                     <td className="py-1 text-right font-bold">{formatPrice(gross)}</td>
                                 </tr>
                             );

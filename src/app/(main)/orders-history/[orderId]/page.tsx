@@ -688,8 +688,9 @@ export default function OrderDetailsPage() {
                 </div>
                 <div className="bg-base-50/50 p-6 border-t border-base-200">
                     <div className="flex flex-col gap-2 max-w-xs ml-auto">
-                        <div className="flex justify-between text-sm text-base-content/70"><span>รวมเป็นเงิน</span><span>{formatPrice(subtotalBeforeDiscount)}</span></div>
+                        <div className="flex justify-between text-sm text-base-content/70"><span>รวมเป็นเงิน</span><span>{formatPrice(subtotalBeforeDiscount - subtotalBeforeDiscount * parseFloat(order.Current_Vat) / 100)}</span></div>
                         <div className="flex justify-between text-sm text-error"><span>ส่วนลด</span><span>- {formatPrice(subtotalBeforeDiscount - order.Total_Amount)}</span></div>
+                        <div className="flex justify-between text-sm text-base-content/70"><span>vat {order.Current_Vat}%</span><span>{formatPrice(subtotalBeforeDiscount / 100 * parseFloat(order.Current_Vat))}</span></div>
                         <div className="flex justify-between text-sm text-success"><span>ค่าจัดส่ง</span><span>ฟรี</span></div>
                         <div className="divider my-1"></div>
                         <div className="flex justify-between items-center"><span className="font-bold text-lg">ยอดสุทธิ</span><span className="font-extrabold text-2xl text-success underline-offset-1 underline">{formatPrice(order.Total_Amount)}</span></div>
