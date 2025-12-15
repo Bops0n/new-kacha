@@ -55,7 +55,7 @@ export default function SummarySalesReportPage() {
             const res = await fetch(`/api/admin/report/summary-sales?startDate=${start}&endDate=${end}`);
             const data = await res.json();
             if (res.ok) {
-                console.log(data.orders)
+     
                 setOrders(data.orders || []);
             }
         } finally {
@@ -224,8 +224,8 @@ export default function SummarySalesReportPage() {
                                         ) : (
                                             salesOrders.map((order) => {
                                                 const gross = Number(order.Total_Amount);
-                                                const net = gross / (1 + VAT_RATE);
-                                                const vat = gross - net;
+                                                const vat = (gross/100)* parseFloat(order.Current_Vat);
+                                                const net = gross-vat;
                                                 return (
                                                     <tr key={order.Order_ID} className="hover:bg-base-50">
                                                         <td className="font-mono text-xs">{formatDateThai(order.Order_Date)}</td>
