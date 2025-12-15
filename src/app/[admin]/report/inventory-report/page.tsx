@@ -125,7 +125,7 @@ export default function InventoryReportPage() {
         <>
             <style jsx global>{`
                 @media print {
-                    @page { size: A4 portrait; margin: 10mm; } 
+                    @page { size: A4 landscape; margin: 10mm; } 
                     
                     body * { visibility: hidden; }
                     #print-view, #print-view * { visibility: visible; }
@@ -320,9 +320,9 @@ export default function InventoryReportPage() {
                 <table className="w-full text-xs border-collapse">
                     <thead>
                         <tr className="border-b border-black">
-                            <th className="py-1 text-left w-12 font-bold">หมายเลขสินค้า</th>
+                            <th className="py-1 text-left font-bold">หมายเลขสินค้า</th>
                             <th className="py-1 text-left font-bold">ชื่อสินค้า</th>
-                            <th className="py-1 text-left w-20 font-bold">หมวดหมู่</th>
+                            <th className="py-1 text-left w-40 font-bold">หมวดหมู่</th>
                             <th className="py-1 text-right w-12 font-bold">จุดสั่งซื้อ</th>
                             <th className="py-1 text-right w-12 font-bold">คงเหลือ</th>
                             <th className="py-1 text-center w-12 font-bold">หน่วย</th>
@@ -342,7 +342,7 @@ export default function InventoryReportPage() {
                             
                             return (
                                 <tr key={p.Product_ID} className={rowClass}>
-                                    <td className="py-1 text-left">{status !== 'in_stock' && '*'}{p.Product_ID}</td>
+                                    <td className="py-1 text-left">{status !== 'in_stock' && '* '}{p.Product_ID}</td>
                                     <td className="py-1 text-left">
                                         {p.Name}
                                         <div className="text-[9px] text-gray-500">{p.Brand}</div>

@@ -447,7 +447,7 @@ export default function UserManagement() {
                 <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-base-content/50 w-4 h-4 z-10" />
                 <input
                   type="text"
-                  placeholder="ค้นหาด้วยชื่อผู้ใช้, ชื่อเต็ม, อีเมล, เบอร์โทร..."
+                  placeholder="ค้นหาด้วยชื่อผู้ใช้, ชื่อ - นามสกุล, อีเมล, เบอร์โทร..."
                   className="input input-bordered w-full pl-10"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
@@ -490,7 +490,7 @@ export default function UserManagement() {
                 <tr>
                   <th>User ID</th>
                   <th>ชื่อผู้ใช้</th>
-                  <th>ชื่อเต็ม</th>
+                  <th>ชื่อ - นามสกุล</th>
                   <th>อีเมล</th>
                   <th>เบอร์โทร</th>
                   <th>ระดับการเข้าถึง</th>

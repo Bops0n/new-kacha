@@ -40,25 +40,25 @@ export function useOrderHistory() {
     if (Status === 'waiting_payment' && Transaction_Status === 'rejected') {
         return {
             icon: FiAlertTriangle, color: 'text-error', bgColor: 'bg-error/10', borderColor: 'border-error/20', title: 'สลิปถูกปฏิเสธ',
-            message: `เจ้าหน้าที่ปฏิเสธสลิป กรุณาตรวจสอบและอัพโหลดใหม่ภายใน ${formattedExpire} `
+            message: `หลักฐานการชำระเงินถูกปฏิเสธ กรุณาตรวจสอบและแนบใหม่ภายใน ${formattedExpire}`
         };
     }
     if (Status === 'pending' && Payment_Type === 'bank_transfer' && Transaction_Slip) {
         if (!Is_Payment_Checked) {
-            return { icon: FiClock, color: 'text-warning', bgColor: 'bg-warning/10', borderColor: 'border-warning/20', title: 'มีการอัปโหลดสลิปแล้ว', message: 'ระบบได้รับสลิปแล้ว รอเจ้าหน้าที่ตรวจสอบความถูกต้อง' };
+            return { icon: FiClock, color: 'text-warning', bgColor: 'bg-warning/10', borderColor: 'border-warning/20', title: 'มีการอัปโหลดสลิปแล้ว', message: 'ระบบได้บันทึกหลักฐานการชำระเงินของท่านเรียบร้อยแล้ว กรุณารอเจ้าหน้าที่ตรวจสอบความถูกต้อง' };
         } else {
-            return { icon: FiCheckCircle, color: 'text-success', bgColor: 'bg-success/10', borderColor: 'border-success/20', title: 'สลิปถูกต้อง', message: 'ข้อมูลการชำระเงินถูกต้อง ทางร้านจะดำเนินการต่อ' };
+            return { icon: FiCheckCircle, color: 'text-success', bgColor: 'bg-success/10', borderColor: 'border-success/20', title: 'สลิปถูกต้อง', message: 'ตรวจสอบการชำระเงินเรียบร้อย ทางร้านกำลังดำเนินการต่อให้คุณ' };
         }
     }
     if (Status === 'waiting_payment' && Payment_Type === 'bank_transfer') {
-        return { icon: FiInfo, color: 'text-info', bgColor: 'bg-info/10', borderColor: 'border-info/20', title: 'รอชำระเงิน', message: `กรุณาชำระเงินและแนบหลักฐานภายใน ${formattedExpire} มิฉะนั้นคำสั่งซื้อจะถูกยกเลิก` };
+        return { icon: FiInfo, color: 'text-info', bgColor: 'bg-info/10', borderColor: 'border-info/20', title: 'รอชำระเงิน', message: `กรุณาดำเนินการชำระเงินและแนบหลักฐานภายใน ${formattedExpire} เพื่อหลีกเลี่ยงการยกเลิกคำสั่งซื้อ` };
     }
 
     // --- สถานะที่ต้องแสดงเหตุผล ---
     if (Status === 'refunding') {
         return { 
-            icon: FiRefreshCw, color: 'text-secondary', bgColor: 'bg-secondary/10', borderColor: 'border-secondary/20', title: 'กำลังคืนเงิน', 
-            message: `เจ้าหน้าที่กำลังดำเนินการคืนเงิน${reasonText}` 
+            icon: FiRefreshCw, color: 'text-secondary', bgColor: 'bg-secondary/10', borderColor: 'border-secondary/20', title: 'รอคืนเงิน', 
+            message: `คำสั่งซื้ออยู่ระหว่างการดำเนินการคืนเงิน${reasonText}` 
         };
     }
     if (Status === 'refunded') {

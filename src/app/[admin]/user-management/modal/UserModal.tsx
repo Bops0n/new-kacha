@@ -92,7 +92,7 @@ const UserModal: React.FC<UserModalProps> = ({
                     <input type="password" name="Password" className="input input-bordered w-full" value={editFormData.Password} onChange={handleUserFormChange} />
                   </div>
                   <div className="form-control mb-2">
-                    <label className="label"><span className="label-text">ชื่อ-นามสกุล</span></label>
+                    <label className="label"><span className="label-text">ชื่อ - นามสกุล</span></label>
                     <input type="text" name="Full_Name" className="input input-bordered w-full" value={editFormData.Full_Name} onChange={handleUserFormChange} />
                   </div>
                   <div className="form-control mb-2">
@@ -117,7 +117,7 @@ const UserModal: React.FC<UserModalProps> = ({
                   <>
                     <p><strong>User ID:</strong> {selectedUser.User_ID}</p><br/>
                     <p><strong>ชื่อผู้ใช้:</strong> {selectedUser.Username}</p><br/>
-                    <p><strong>ชื่อเต็ม:</strong> {selectedUser.Full_Name}</p><br/>
+                    <p><strong>ชื่อ - นามสกุล:</strong> {selectedUser.Full_Name}</p><br/>
                     <p><strong>อีเมล:</strong> {selectedUser.Email || '-'}</p><br/>
                     <p><strong>เบอร์โทร:</strong> {selectedUser.Phone || '-'}</p><br/>
                     <p><strong>ระดับการเข้าถึง:</strong> {getAccessLevelLabel(accesses, selectedUser.Access_Level)}</p>
