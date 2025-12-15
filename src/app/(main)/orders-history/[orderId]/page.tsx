@@ -6,7 +6,8 @@ import {
   FiTruck, FiCheckCircle, 
   FiArrowLeft, FiMapPin, FiShoppingCart, FiUploadCloud, 
   FiRefreshCw, FiTrash2, FiAlertTriangle, FiCreditCard,
-  FiArrowDown, FiZoomIn, FiCopy
+  FiArrowDown, FiZoomIn, FiCopy,
+  FiXCircle
 } from 'react-icons/fi';
 import { Order, OrderStatus, StatusConfig } from '@/types';
 import { useAlert } from '@/app/context/AlertModalContext';
@@ -713,8 +714,22 @@ export default function OrderDetailsPage() {
             )}
 
             {canCancel && (
-                <div className="mt-6 flex justify-center sm:justify-end">
-                    <button onClick={() => { setCancelReason(''); setIsCancelModalOpen(true); }} className="btn btn-ghost text-error hover:bg-error/10 btn-sm"><FiTrash2 className="mr-1"/> ขอยกเลิกคำสั่งซื้อ</button>
+                <div className="mt-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                    
+                    <div className="text-sm text-base-content/70">
+                        * หมายเหตุ : สถานะ {statusConfig['waiting_payment'].label}, {statusConfig['pending'].label} สามารถดำเนินการขอยกเลิกคำสั่งซื้อได้
+                    </div>
+
+                    <button
+                        className="btn btn-ghost text-error hover:bg-error/10 self-end sm:self-auto"
+                        onClick={() => {
+                            setCancelReason('');
+                            setIsCancelModalOpen(true);
+                        }}
+                    >
+                        <FiXCircle className="mr-1" />
+                        ขอยกเลิกคำสั่งซื้อ
+                    </button>
                 </div>
             )}
         </div>

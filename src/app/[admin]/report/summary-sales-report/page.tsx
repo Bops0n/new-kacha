@@ -1,11 +1,12 @@
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { FiPrinter, FiArrowLeft, FiDollarSign, FiCheckCircle } from 'react-icons/fi';
+import { FiPrinter, FiArrowLeft } from 'react-icons/fi';
 import { formatDateThai, formatPrice } from '@/app/utils/formatters';
 import LoadingSpinner from '@/app/components/LoadingSpinner';
 import { useRouter } from 'next/navigation';
 import { useWebsiteSettings } from '@/app/providers/WebsiteSettingProvider';
+import { useAlert } from '@/app/context/AlertModalContext';
 
 interface ReportOrder {
     Order_ID: number;
@@ -24,7 +25,9 @@ const statusLabels: Record<string, string> = {
 export default function SummarySalesReportPage() {
     const router = useRouter();
     const settings = useWebsiteSettings();
-    const today = new Date().toISOString().split('T')[0];
+    const today = new Date().toLocaleDateString('sv').replaceAll('/', '-')
+
+    const { showAlert } = useAlert();
 
     const VAT_RATE = settings.vatRate / 100;
 
@@ -59,6 +62,8 @@ export default function SummarySalesReportPage() {
     };
 
     useEffect(() => {
+        if (!startDate || !endDate) return;
+        if (endDate < startDate) return;
         fetchReport(startDate, endDate);
     }, [startDate, endDate]);
 
@@ -125,13 +130,49 @@ export default function SummarySalesReportPage() {
                         <div className="flex flex-wrap gap-3 items-end bg-base-100 p-3 rounded-xl shadow-sm">
                             <div className="form-control">
                                 <label className="label py-1"><span className="label-text font-semibold">ตั้งแต่วันที่</span></label>
-                                <input type="date" className="input input-bordered input-sm" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
+                                <input 
+                                    type="date" 
+                                    className="input input-bordered" 
+                                    value={startDate} 
+                                    onChange={(e) => {
+                                        const newStart = e.target.value;
+
+                                        if (!newStart) return;
+
+                                        setStartDate(newStart);
+
+                                        if (newStart > endDate) {
+                                            setEndDate(newStart);
+                                        }
+                                    }} 
+                                />
                             </div>
                             <div className="form-control">
                                 <label className="label py-1"><span className="label-text font-semibold">ถึงวันที่</span></label>
-                                <input type="date" className="input input-bordered input-sm" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
+                                <input 
+                                    type="date" 
+                                    className="input input-bordered" 
+                                    value={endDate}
+                                    min={startDate}
+                                    onChange={(e) => {
+                                        const newEnd = e.target.value;
+
+                                        if (!newEnd) return;
+
+                                        if (newEnd < startDate) {
+                                            showAlert("วันที่สิ้นสุดต้องไม่น้อยกว่าวันที่เริ่มต้น", 'warning');
+                                            return;
+                                        }
+
+                                        setEndDate(newEnd);
+                                    }} 
+                                />
                             </div>
-                            <button onClick={handlePrint} className="btn btn-primary btn-sm">
+                            <button 
+                                className="btn btn-primary"
+                                disabled={endDate < startDate}
+                                onClick={handlePrint} 
+                            >
                                 <FiPrinter className="mr-2" /> พิมพ์รายงาน
                             </button>
                         </div>
@@ -140,17 +181,17 @@ export default function SummarySalesReportPage() {
                     {/* Summary Cards */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
                         <div className="stat bg-base-100 rounded-xl shadow-sm border border-base-200">
-                            <div className="stat-figure text-base-content/40"><FiCheckCircle className="w-8 h-8" /></div>
+                            <div className="stat-figure text-base-content/40"></div>
                             <div className="stat-title">จำนวนรายการ</div>
                             <div className="stat-value text-base-content">{summary.totalOrders}</div>
                         </div>
                         <div className="stat bg-base-100 rounded-xl shadow-sm border border-base-200">
-                            <div className="stat-figure text-primary"><FiDollarSign className="w-8 h-8" /></div>
+                            <div className="stat-figure text-primary"></div>
                             <div className="stat-title">มูลค่าสินค้า (ก่อนภาษี)</div>
                             <div className="stat-value text-primary text-2xl">{formatPrice(summary.totalNet)}</div>
                         </div>
                         <div className="stat bg-base-100 rounded-xl shadow-sm border border-base-200">
-                            <div className="stat-title">ภาษีมูลค่าเพิ่ม (7%)</div>
+                            <div className="stat-title">ภาษีมูลค่าเพิ่ม ({settings.vatRate}%)</div>
                             <div className="stat-value text-secondary text-2xl">{formatPrice(summary.totalVat)}</div>
                         </div>
                         <div className="stat bg-base-100 rounded-xl shadow-sm border border-base-200 bg-primary/5">

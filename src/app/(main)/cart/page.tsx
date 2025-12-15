@@ -17,6 +17,7 @@ import AddressSelectionModal from '../components/AddressSelectionModal';
 import AddressModal from '../components/AddressModal';
 import { useProfilePage } from '@/app/hooks/useProfilePage';
 import { AddressSchema } from '@/types';
+import { useWebsiteSettings } from '@/app/providers/WebsiteSettingProvider';
 
 // Payment Methods Config
 const PAYMENT_METHODS = [
@@ -27,6 +28,7 @@ const PAYMENT_METHODS = [
 export default function CheckoutPage() {
     const router = useRouter();
     const { data: session } = useSession();
+    const settings = useWebsiteSettings();
 
     const { saveAddress, userAddresses, deleteAddress } = useProfilePage()
 
@@ -95,6 +97,12 @@ if (cartItems.length === 0) {
         }
         return acc;
     }, 0);
+      
+    const VAT_RATE = settings.vatRate / 100;
+    
+    const gross = Number(totalPrice);
+    const net = gross / (1 + VAT_RATE);
+    const vat = gross - net;
 
     return (
         <div className="min-h-screen bg-base-200/50 p-4 lg:p-8 font-sarabun">
@@ -296,7 +304,11 @@ if (cartItems.length === 0) {
                                     <div className="space-y-3 text-sm">
                                         <div className="flex justify-between text-base-content/70">
                                             <span>ยอดรวมสินค้า</span>
-                                            <span>{formatPrice(totalPrice + totalDiscount)}</span>
+                                            <span>{formatPrice(net)}</span>
+                                        </div>
+                                        <div className="flex justify-between text-base-content/70">
+                                            <span>ภาษี</span>
+                                            <span>{formatPrice(vat)}</span>
                                         </div>
                                         {totalDiscount > 0 && (
                                             <div className="flex justify-between text-error">

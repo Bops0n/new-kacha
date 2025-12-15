@@ -9,6 +9,7 @@ import { useRouter } from 'next/navigation';
 import { statusTypeLabels } from '@/app/utils/client';
 import { OrderStatus } from '@/types';
 import { useWebsiteSettings } from '@/app/providers/WebsiteSettingProvider';
+import { useAlert } from '@/app/context/AlertModalContext';
 
 interface ReportOrder {
     Order_ID: number;
@@ -31,6 +32,7 @@ export default function OrdersReportPage() {
     const today = new Date().toLocaleDateString('sv').replaceAll('/', '-')
     // const today = new Date().toISOString().split('T')[0];
     const settings = useWebsiteSettings();
+    const { showAlert } = useAlert();
     
     const [startDate, setStartDate] = useState(today);
     const [endDate, setEndDate] = useState(today);
@@ -61,6 +63,8 @@ export default function OrdersReportPage() {
     };
 
     useEffect(() => {
+        if (!startDate || !endDate) return;
+        if (endDate < startDate) return;
         fetchReport(startDate, endDate);
     }, [startDate, endDate]);
 
@@ -221,14 +225,50 @@ export default function OrdersReportPage() {
                         <div className="flex flex-wrap gap-3 items-end bg-base-100 p-3 rounded-xl shadow-sm">
                             <div className="form-control">
                                 <label className="label py-1"><span className="label-text font-semibold">ตั้งแต่วันที่</span></label>
-                                <input type="date" className="input input-bordered shadow-sm" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
+                                <input 
+                                    type="date" 
+                                    className="input input-bordered shadow-sm" 
+                                    value={startDate} 
+                                    onChange={(e) => {
+                                        const newStart = e.target.value;
+
+                                        if (!newStart) return;
+
+                                        setStartDate(newStart);
+
+                                        if (newStart > endDate) {
+                                            setEndDate(newStart);
+                                        }
+                                    }} 
+                                />
                             </div>
                             <div className="form-control">
                                 <label className="label py-1"><span className="label-text font-semibold">ถึงวันที่</span></label>
-                                <input type="date" className="input input-bordered shadow-sm" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
+                                <input 
+                                    type="date" 
+                                    className="input input-bordered shadow-sm" 
+                                    value={endDate} 
+                                    min={startDate}
+                                    onChange={(e) => {
+                                        const newEnd = e.target.value;
+
+                                        if (!newEnd) return;
+
+                                        if (newEnd < startDate) {
+                                            showAlert("วันที่สิ้นสุดต้องไม่น้อยกว่าวันที่เริ่มต้น", 'warning');
+                                            return;
+                                        }
+
+                                        setEndDate(newEnd);
+                                    }}
+                                />
                             </div>
-                            <button onClick={handlePrint} className="btn btn-primary shadow-md">
-                                <FiPrinter className="mr-2" /> พิมพ์รายงาน PDF
+                            <button 
+                                className="btn btn-primary shadow-md" 
+                                disabled={endDate < startDate}
+                                onClick={handlePrint} 
+                            >
+                                <FiPrinter className="mr-2" /> พิมพ์รายงาน
                             </button>
                         </div>
                     </div>

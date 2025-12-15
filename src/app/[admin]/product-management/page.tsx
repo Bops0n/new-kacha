@@ -405,8 +405,8 @@ const ProductModal = ({
 
                                         <div className="grid grid-cols-2 gap-4">
                                             <StatCard title="สต็อกตั้งต้น" value={product?.Quantity ?? 0} desc="จำนวนรับเข้าทั้งหมด" />
-                                            <StatCard title="ยอดขายสะสม" value={`-${product?.Total_Sales ?? 0}`} className="text-error" />
-                                            <StatCard title="ยอดคืน / ยกเลิก" value={`+${product?.Cancellation_Count ?? 0}`} className="text-success" />
+                                            <StatCard title="ยอดขายสะสม" value={`${product?.Total_Sales ?? 0}`} className="text-error" desc={product?.Unit} />
+                                            <StatCard title="ยอดคืน / ยกเลิก" value={`${product?.Cancellation_Count ?? 0}`} className="text-success" desc={product?.Unit} />
                                             <StatCard
                                                 title="คงเหลือขายได้"
                                                 value={product ? calculateAvailableStock(product) : 0}
