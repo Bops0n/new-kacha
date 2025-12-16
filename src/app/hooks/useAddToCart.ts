@@ -23,7 +23,7 @@ export function useAddToCart() {
     const availableStock = calculateAvailableStock(product);
 
     if (quantity > availableStock) {
-      showAlert(`สินค้ามีในสต็อกเพียง ${availableStock} ชิ้น`, 'error');
+      showAlert(`สินค้ามีในสต็อกเพียง ${availableStock} ${product.Unit}`, 'error');
       return;
     }
 
@@ -39,7 +39,7 @@ export function useAddToCart() {
         if (!response.ok) throw new Error(result.message || 'เกิดข้อผิดพลาด');
 
         increment();
-        showAlert(`เพิ่ม "${product.Name}" (${quantity} ชิ้น) ลงตะกร้าแล้ว!`, 'success');
+        showAlert(`เพิ่ม "${product.Name}" (${quantity} ${product.Unit}) ลงตะกร้าแล้ว!`, 'success');
       } catch (error: unknown) {
         const message = error instanceof Error ? error.message : "เกิดข้อผิดพลาดที่ไม่ทราบสาเหตุ";
         showAlert(message, 'error');

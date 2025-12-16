@@ -1,6 +1,7 @@
 export interface TopProduct {
   Product_ID: number;
   Product_Name: string;
+  Product_Unit: string;
   Total_Sales: number;
   Quantity: number;
   Revenue: number;

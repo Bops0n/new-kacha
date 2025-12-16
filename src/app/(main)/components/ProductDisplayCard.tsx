@@ -183,7 +183,7 @@ export default function ProductDisplayCard({ product }: ProductDisplayCardProps)
         throw new Error(result.message || 'เกิดข้อผิดพลาดในการเพิ่มสินค้า');
       }
 
-      showAlert(`เพิ่ม ${productToAdd.Name} (${quantityToAdd} ชิ้น) ลงในรถเข็นแล้ว!`, 'success');
+      showAlert(`เพิ่ม ${productToAdd.Name} (${quantityToAdd} ${productToAdd.Unit}) ลงในรถเข็นแล้ว!`, 'success');
       increment(); // เพิ่มจำนวนสินค้าใน Navbar
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : "เกิดข้อผิดพลาดที่ไม่ทราบสาเหตุ";

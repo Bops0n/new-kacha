@@ -75,7 +75,7 @@ export function TopProducts() {
                     {p.Product_Name}
                   </p>
                   <p className="text-xs text-gray-500">
-                    ขายแล้ว {p.Total_Sales.toLocaleString()} ชิ้น •{" "}
+                    ขายแล้ว {p.Total_Sales} {p.Product_Unit} •{" "}
                     <span className="text-green-600 font-medium">
                       {formatPrice(p.Revenue)}
                     </span>

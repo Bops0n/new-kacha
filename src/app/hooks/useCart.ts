@@ -102,7 +102,7 @@ export function useCart() {
         return;
     }
     if (newQuantity > availableStock) {
-        showAlert(`สินค้ามีในสต็อกเพียง ${availableStock} ชิ้น`, 'warning');
+        showAlert(`สินค้ามีในสต็อกเพียง ${availableStock} ${item.Unit}`, 'warning');
         try {
           const response = await fetch('/api/main/cart', {
               method: 'PATCH',
