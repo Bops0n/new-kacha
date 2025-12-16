@@ -99,7 +99,7 @@ const guards: Guard[] = [
     }),
 ];
 
-export async function middleware(req: NextRequest) {
+export async function proxy(req: NextRequest) {
     for (const guard of guards) {
         const res = await guard(req);
         if (res) return res;
