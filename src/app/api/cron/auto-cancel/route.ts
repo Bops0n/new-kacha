@@ -41,7 +41,7 @@ export async function GET(request: NextRequest) {
 
     } catch (error: unknown) {
         const message = error instanceof Error ? error.message : "เกิดข้อผิดพลาดที่ไม่ทราบสาเหตุ";
-        logger.error('[Auto-Cancel] Error:', { error });
+        logger.error('[Auto-Cancel] Error:', { error: error });
         return NextResponse.json(
             { success: false, message: 'Failed to execute auto-cancel task', error: message },
             { status: 500 }

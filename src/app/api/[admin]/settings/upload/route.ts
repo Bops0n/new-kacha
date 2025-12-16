@@ -20,17 +20,17 @@ export async function POST(req: Request) {
     const file = form.get("file") as File;
     const oldFile = form.get("oldFile") as string | null;
 
-    if (!file) return NextResponse.json({ error: "No file provided" }, { status: 400 });
+    if (!file) return NextResponse.json({ message: "No file provided" }, { status: 400 });
 
     if (file.size > MAX_FILE_SIZE) {
       return NextResponse.json({
-        error: `ไฟล์ใหญ่เกินไป (สูงสุด ${MAX_FILE_SIZE / (1024 * 1024)} MB)`
+        message: `ไฟล์ใหญ่เกินไป (สูงสุด ${MAX_FILE_SIZE / (1024 * 1024)} MB)`
       }, { status: 400 });
     }
 
     if (!ALLOWED_TYPES.includes(file.type)) {
       return NextResponse.json({
-        error: "อนุญาตเฉพาะไฟล์ JPEG, PNG, WEBP เท่านั้น"
+        message: "อนุญาตเฉพาะไฟล์ JPEG, PNG, WEBP เท่านั้น"
       }, { status: 400 });
     }
 
@@ -39,7 +39,7 @@ export async function POST(req: Request) {
 
     if (!isSafeImageSignature(buffer)) {
       return NextResponse.json({
-        error: "ไฟล์รูปไม่ถูกต้อง หรืออาจเป็นไฟล์อันตราย"
+        message: "ไฟล์รูปไม่ถูกต้อง หรืออาจเป็นไฟล์อันตราย"
       }, { status: 400 });
     }
 
@@ -87,6 +87,6 @@ export async function POST(req: Request) {
 
   } catch (err) {
     logger.error("UPLOAD ERROR:", { error: err });
-    return NextResponse.json({ error: "Upload failed" }, { status: 500 });
+    return NextResponse.json({ message: "Upload failed" }, { status: 500 });
   }
 }

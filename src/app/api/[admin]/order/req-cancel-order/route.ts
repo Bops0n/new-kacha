@@ -27,7 +27,7 @@ export async function PATCH(req: NextRequest) {
         const message = error instanceof Error ? error.message : "เกิดข้อผิดพลาดที่ไม่ทราบสาเหตุ";
         logger.error("Cancel Order Error:", { error: error });
         return NextResponse.json(
-            { error: message || "Server Error" },
+            { message: message || "Server Error" },
             { status: 500 }
         );
     }

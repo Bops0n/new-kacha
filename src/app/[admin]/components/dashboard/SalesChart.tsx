@@ -14,6 +14,7 @@ import { CardBoard, CardHeader, CardContent } from "./CardBoard";
 import { PEROID_TYPE, SalesData } from "@/types/dashboard";
 import { FiBarChart2 } from "react-icons/fi";
 import { motion, AnimatePresence } from "framer-motion";
+import { formatPrice } from "@/app/utils/formatters";
 
 export function SalesChart() {
   const [data, setData] = useState<SalesData[]>([]);
@@ -122,7 +123,7 @@ export function SalesChart() {
                     const sign = value >= 0 ? "+" : "";
                     return [`${sign}${value}%`, "เบี่ยงเบนจากเฉลี่ย"];
                   }
-                  return [`฿${value.toLocaleString()}`, name];
+                  return [`${formatPrice(value)}`, name];
                 }}
               />
               <Legend wrapperStyle={{ paddingTop: "10px", fontSize: "13px" }} />

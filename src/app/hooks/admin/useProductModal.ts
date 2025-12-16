@@ -3,13 +3,15 @@
 import { useState, useEffect, useCallback } from 'react';
 import { ModalMode, ProductFormData } from '@/types';
 import { useCategoryData } from '../useCategoryData';
+import { useAlert } from '@/app/context/AlertModalContext';
 
 interface UseProductModalProps {
   onSave: (productData: ProductFormData) => Promise<boolean>;
 }
 
 export function useProductModal({ onSave }: UseProductModalProps) {
-  const { childSubCategories } = useCategoryData()
+  const { showAlert } = useAlert();
+  const { childSubCategories } = useCategoryData();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState<ModalMode>('view');
   const [selectedProduct, setSelectedProduct] = useState<ProductFormData | null>(null);
@@ -88,7 +90,7 @@ export function useProductModal({ onSave }: UseProductModalProps) {
         if (!response.ok) throw new Error(result.message || 'Image upload failed');
         finalFormData.Image_URL = result.imageUrl;
       } catch {
-        alert('เกิดข้อผิดพลาดในการอัปโหลดรูปภาพ');
+        showAlert('เกิดข้อผิดพลาดในการอัปโหลดรูปภาพ', 'error');
         setIsUploading(false);
         return;
       }

@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { FiMapPin, FiCheckCircle, FiPlus, FiEdit, FiTrash2 } from 'react-icons/fi'; // [NEW] เพิ่มไอคอน
 import { AddressSchema } from '../../../types/user.types'; // ตรวจสอบ path ให้ถูกต้อง
+import { useAlert } from '@/app/context/AlertModalContext';
 
 interface AddressSelectionModalProps {
   isOpen: boolean;
@@ -26,6 +27,8 @@ export default function AddressSelectionModal({
 }: AddressSelectionModalProps) {
   const [selectedAddressInternal, setSelectedAddressInternal] = useState<AddressSchema | undefined>(currentSelectedAddress);
 
+  const { showAlert } = useAlert();
+
   useEffect(() => {
     setSelectedAddressInternal(currentSelectedAddress);
   }, [currentSelectedAddress]);
@@ -39,7 +42,7 @@ export default function AddressSelectionModal({
       onSelectAddress(selectedAddressInternal);
       onClose();
     } else {
-      alert('กรุณาเลือกที่อยู่จัดส่ง');
+      showAlert('กรุณาเลือกที่อยู่จัดส่ง', 'warning');
     }
   };
 

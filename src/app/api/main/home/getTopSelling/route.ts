@@ -8,6 +8,6 @@ export async function GET() {
     return NextResponse.json(rows[0]);
   } catch (err) {
     logger.error("Error fetching top selling:", { error: err });
-    return NextResponse.json({ error: "Database error" }, { status: 500 });
+    return NextResponse.json({ message: "Database error" }, { status: 500 });
   }
 }

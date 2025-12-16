@@ -15,7 +15,7 @@ export async function GET() {
     try {
         const products = await productService.getAllAdminProducts();
         return NextResponse.json({ products });
-    } catch (error) {
+    } catch (error: unknown) {
         return NextResponse.json({ message: "Server Error", error: (error as Error).message }, { status: 500 });
     }
 }

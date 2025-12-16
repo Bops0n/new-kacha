@@ -6,6 +6,7 @@ import { RecentOrder } from "@/types/dashboard";
 import { FiTruck } from "react-icons/fi";
 import { motion } from "framer-motion";
 import { ORDER_STATUS_CONFIG } from "@/app/utils/client";
+import { formatPrice } from "@/app/utils/formatters";
 
 export function RecentOrders() {
   const [orders, setOrders] = useState<RecentOrder[]>([]);
@@ -85,9 +86,7 @@ export function RecentOrders() {
 
                   <div className="text-right">
                     <p className="text-lg font-semibold text-gray-900">
-                      ฿{o.Total_Amount.toLocaleString(undefined, {
-                        minimumFractionDigits: 2,
-                      })}
+                      {formatPrice(o.Total_Amount)}
                     </p>
                     <p className="text-xs text-gray-500">ยอดรวม</p>
                   </div>

@@ -308,9 +308,7 @@ export default function UserManagement() {
 
   const saveAddress = async(newAddressForm : AddressSchema) => {
     if (!newAddressForm.Address_1 || !newAddressForm.District || !newAddressForm.Province || !newAddressForm.Zip_Code || !newAddressForm.Sub_District || !newAddressForm.Phone) {
-      // alert('กรุณากรอกข้อมูลที่อยู่ให้ครบถ้วน');
-      // Using a placeholder for custom alert
-      showAlert('กรุณากรอกข้อมูลที่อยู่ให้ครบถ้วน');
+      showAlert('กรุณากรอกข้อมูลที่อยู่ให้ครบถ้วน', 'warning');
       return;
     }
 

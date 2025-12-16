@@ -14,14 +14,14 @@ export async function POST(req: NextRequest) {
 
         if (!orderId || !action) {
             return NextResponse.json(
-                { error: "Missing required fields" },
+                { message: "Missing required fields" },
                 { status: 400 }
             );
         }
 
         if (!["confirmed", "rejected"].includes(action)) {
             return NextResponse.json(
-                { error: "Invalid action input" },
+                { message: "Invalid action input" },
                 { status: 400 }
             );
         }
@@ -39,7 +39,7 @@ export async function POST(req: NextRequest) {
         const message = error instanceof Error ? error.message : "เกิดข้อผิดพลาดที่ไม่ทราบสาเหตุ";
         logger.error("Payment Verify Error:", { error: error });
         return NextResponse.json(
-            { error: message || "Server Error" },
+            { message: message || "Server Error" },
             { status: 500 }
         );
     }

@@ -27,7 +27,7 @@ export async function POST(req: NextRequest) {
         const productDetails: SimpleProductDetail[] = result;
         return NextResponse.json(productDetails);
 
-    } catch (error) {
+    } catch (error: unknown) {
         logger.error('Error fetching bulk product details:', { error: error });
         return NextResponse.json({ message: "Server Error", error: (error as Error).message }, { status: 500 });
     }

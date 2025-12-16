@@ -1,6 +1,7 @@
 "use client";
 
 import { ImagePreviewModal } from "@/app/components/ImagePreviewModal";
+import { useAlert } from "@/app/context/AlertModalContext";
 import { WEBSITE_SETTING_GROUP, WEBSITE_SETTING_TYPE } from "@/app/utils/setting";
 import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
@@ -31,6 +32,9 @@ const groupLabels: Record<string, string> = {
 };
 
 export default function AdminSettingsPage() {
+
+  const { showAlert } = useAlert();
+
   const [settings, setSettings] = useState<AdminSettingItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [savingKey, setSavingKey] = useState<string | null>(null);
@@ -213,7 +217,7 @@ export default function AdminSettingsPage() {
                           if (data.url) {
                             updateValue(item.key, data.url);
                           } else {
-                            alert(data.error);
+                            showAlert(data.message, 'error');
                           }
                         }}
                       />

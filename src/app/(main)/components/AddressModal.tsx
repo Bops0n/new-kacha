@@ -11,6 +11,7 @@ import {
   District,
   SubDistrict
 } from '@/app/utils/AddressList'; // ตรวจสอบ path ให้ถูกต้อง
+import { useAlert } from '@/app/context/AlertModalContext';
 
 interface AddressModalProps {
   isOpen: boolean;
@@ -33,6 +34,9 @@ const defaultFormData: AddressSchema = {
 };
 
 export default function AddressModal({ isOpen, onClose, onSave, initialData }: AddressModalProps) {
+
+  const { showAlert } = useAlert();
+
   const [formData, setFormData] = useState<AddressSchema>(defaultFormData);
   const [loading, setLoading] = useState(false);
 
@@ -147,7 +151,7 @@ export default function AddressModal({ isOpen, onClose, onSave, initialData }: A
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if(!formData.Province || !formData.District || !formData.Sub_District) {
-        alert("กรุณาเลือกข้อมูลที่อยู่ให้ครบถ้วน");
+        showAlert("กรุณาเลือกข้อมูลที่อยู่ให้ครบถ้วน", 'warning');
         return;
     }
 
@@ -156,7 +160,7 @@ export default function AddressModal({ isOpen, onClose, onSave, initialData }: A
       await onSave(formData);
       onClose();
     } catch (error) {
-      console.error("Save Error:", error);
+      showAlert("บันทึกข้อมูลล้มเหลว!");
     } finally {
       setLoading(false);
     }

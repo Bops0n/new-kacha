@@ -9,12 +9,13 @@ import { SalesChart } from "../components/dashboard/SalesChart";
 import { LowStockProducts } from "../components/dashboard/LowStockProducts";
 import { useEffect, useState } from "react";
 import { FiBarChart2, FiShoppingCart, FiUsers } from "react-icons/fi";
+import { formatPrice } from "@/app/utils/formatters";
 
 export default function DashboardPage() {
   const { data: session } = useSession();
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState([
-    { title: "ยอดขายวันนี้", value: "฿0", icon: <FiBarChart2 />, color: "bg-blue-500" },
+    { title: "ยอดขายวันนี้", value: "0", icon: <FiBarChart2 />, color: "bg-blue-500" },
     { title: "ยอดขายเดือนนี้", value: "0", icon: <FiBarChart2 />, color: "bg-orange-500" },
     { title: "คำสั่งซื้อใหม่ (วันนี้)", value: "0", icon: <FiShoppingCart />, color: "bg-purple-500" },
     { title: "ลูกค้าทั้งหมด", value: "0", icon: <FiUsers />, color: "bg-emerald-500" },
@@ -27,12 +28,11 @@ export default function DashboardPage() {
         const result = await fetch("/api/admin/dashboard", { cache: "no-store" });
         const { Sales_Today, Sales_Monthly, New_Orders, Total_Customers } = await result.json();
         setStats([
-          { title: "ยอดขายวันนี้", value: `฿${Sales_Today.toLocaleString()}`, icon: <FiBarChart2 />, color: "bg-blue-500" },
-          { title: "ยอดขายเดือนนี้", value: `฿${Sales_Monthly.toLocaleString()}`, icon: <FiBarChart2 />, color: "bg-orange-500" },
+          { title: "ยอดขายวันนี้", value: `${formatPrice(Sales_Today)}`, icon: <FiBarChart2 />, color: "bg-blue-500" },
+          { title: "ยอดขายเดือนนี้", value: `${formatPrice(Sales_Monthly)}`, icon: <FiBarChart2 />, color: "bg-orange-500" },
           { title: "คำสั่งซื้อใหม่ (วันนี้)", value: New_Orders.toString(), icon: <FiShoppingCart />, color: "bg-purple-500" },
           { title: "ลูกค้าทั้งหมด", value: Total_Customers.toString(), icon: <FiUsers />, color: "bg-emerald-500" },
         ]);
-      } catch {
       } finally {
         setLoading(false);
       }
