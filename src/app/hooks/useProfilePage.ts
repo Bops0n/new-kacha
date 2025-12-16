@@ -15,10 +15,6 @@ export function useProfilePage() {
 
   // --- Data Fetching ---
   const fetchData = useCallback(async () => {
-    // if (sessionStatus !== 'authenticated') {
-    //   if (sessionStatus === 'unauthenticated') router.push('/login');
-    //   return;
-    // }
     setLoading(true);
     try {
       const [profileRes, addressesRes] = await Promise.all([

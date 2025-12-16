@@ -5,7 +5,7 @@ import LoadingSpinner from "@/app/components/LoadingSpinner";
 import { RecentOrder } from "@/types/dashboard";
 import { FiTruck } from "react-icons/fi";
 import { motion } from "framer-motion";
-import { statusTypeLabels } from "@/app/utils/client";
+import { ORDER_STATUS_CONFIG } from "@/app/utils/client";
 
 export function RecentOrders() {
   const [orders, setOrders] = useState<RecentOrder[]>([]);
@@ -52,7 +52,7 @@ export function RecentOrders() {
       <CardContent className="space-y-3 sm:space-y-4">
         {orders.length > 0 ? (
           orders.map((o, index) => {
-            const status = statusTypeLabels[o.Status] ?? statusTypeLabels.pending;
+            const status = ORDER_STATUS_CONFIG[o.Status] ?? ORDER_STATUS_CONFIG.pending;
             const Icon = status.icon;
 
             return (
@@ -92,7 +92,7 @@ export function RecentOrders() {
                 {/* Status + Extra Info */}
                 <div className="flex items-center justify-between text-xs sm:text-sm mt-1">
                   <div
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full font-medium ${status.bgColor} ${status.color}`}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full font-medium ${status.bgColor} ${status.textColor}`}
                   >
                     <Icon className="text-sm" />
                     <span>{status.label}</span>

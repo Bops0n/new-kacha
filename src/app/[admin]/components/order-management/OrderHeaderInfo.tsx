@@ -1,10 +1,10 @@
-import { paymentTypeLabels, statusTypeLabels } from "@/app/utils/client";
+import { PAYMENT_METHOD_CONFIG, ORDER_STATUS_CONFIG } from "@/app/utils/client";
 import { Order } from "@/types";
 import { FiFileText, FiMapPin, FiUser } from "react-icons/fi";
 
 export default function OrderHeaderInfo({ order }: { order: Order }) {
-    const paymentLabel = paymentTypeLabels[order.Payment_Type];
-    const statusInfo = statusTypeLabels[order.Status];
+    const paymentMethod = PAYMENT_METHOD_CONFIG[order.Payment_Type];
+    const statusInfo = ORDER_STATUS_CONFIG[order.Status];
     return (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Customer Info */}
@@ -38,14 +38,14 @@ export default function OrderHeaderInfo({ order }: { order: Order }) {
                 <div className="text-sm space-y-1">
                     <p><strong>หมายเลขคำสั่งซื้อ :</strong> {order.Order_ID}</p>
                     <p><strong>วันที่สั่ง :</strong> {order.Order_Date || '-'}</p>
-                    <p><strong>ประเภทการชำระเงิน :</strong>
-                        <span className={`badge ${paymentLabel?.color || 'badge-primary'}`}>
-                            <paymentLabel.icon className="inline-block w-4 h-4 mr-1" />
-                            {paymentLabel?.label || order.Payment_Type}
+                    <p><strong>ประเภทการชำระเงิน : </strong>
+                        <span className={`badge ${paymentMethod.textColor} ${paymentMethod.bgColor}`}>
+                            <paymentMethod.icon className="inline-block w-4 h-4 mr-1" />
+                            {paymentMethod?.label || order.Payment_Type}
                         </span>
                     </p>
-                    <p><strong>สถานะคำสั่งซื้อ :</strong>
-                        <span className={`badge ${statusInfo.color}`}>
+                    <p><strong>สถานะคำสั่งซื้อ : </strong>
+                        <span className={`badge ${statusInfo.bgColor} ${statusInfo.textColor}`}>
                             {statusInfo.icon && <statusInfo.icon className="w-3 h-3 mr-1" />} 
                             {statusInfo.label}
                         </span>

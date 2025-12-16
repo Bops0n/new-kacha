@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useMemo, useState } from 'react';
-import { FiPackage, FiTruck, FiCheckCircle, FiXCircle, FiClock, FiRefreshCw, FiSearch } from 'react-icons/fi';
+import { FiPackage, FiSearch } from 'react-icons/fi';
 
 import { useOrderManagement } from '@/app/hooks/admin/useOrderManagement';
 import { OrderStatus, TransferSlipStatusFilter } from '@/types';
@@ -11,9 +11,7 @@ import OrderRow from './OrderRow';
 import OrderCard from './OrderCard';
 import { useSession } from 'next-auth/react';
 import AccessDeniedPage from '@/app/components/AccessDenied';
-import { statusTypeLabels } from '@/app/utils/client';
-import { MdOutlinePendingActions } from 'react-icons/md';
-// --- END: อัปเดต statusConfig ---
+import { ORDER_STATUS_CONFIG } from '@/app/utils/client';
 
 export default function OrderManagementPage() {
   const { data: session } = useSession();
@@ -68,6 +66,18 @@ export default function OrderManagementPage() {
     setCurrentPage(1);
   };
 
+  const STATUS_ORDER: OrderStatus[] = [
+    'waiting_payment',
+    'pending',
+    'preparing',
+    'shipped',
+    'delivered',
+    'refunding',
+    'refunded',
+    'req_cancel',
+    'cancelled',
+  ];
+
   if (loading) return <LoadingSpinner />;
   if (error) return <div className="text-center p-8 text-error"><h3>เกิดข้อผิดพลาด:</h3><p>{error}</p></div>;
 
@@ -84,15 +94,29 @@ export default function OrderManagementPage() {
         {/* --- START: เพิ่ม Card สถิติใหม่ และปรับ Grid --- */}
         <div className="grid grid-cols-2 md:grid-cols-5 lg:grid-cols-5 gap-5 mb-6">
             <div className="card bg-base-100 shadow-sm p-4 cursor-pointer hover:bg-base-200 transition-colors" onClick={() => handleStatCardClick('all')}><div className="flex items-center gap-3"><div className="p-2 bg-neutral/10 rounded-lg"><FiPackage className="w-5 h-5 text-neutral"/></div><div><p className="text-sm">ทั้งหมด</p><p className="font-bold text-xl">{stats.total}</p></div></div></div>
-            <div className="card bg-base-100 shadow-sm p-4 cursor-pointer hover:bg-base-200 transition-colors" onClick={() => handleStatCardClick('waiting_payment')}><div className="flex items-center gap-3"><div className="p-2 bg-primary/10 rounded-lg"><FiClock className="w-5 h-5 text-purple-700"/></div><div><p className="text-sm">{statusTypeLabels['waiting_payment'].label}</p><p className="font-bold text-xl">{stats.waiting_payment}</p></div></div></div>
-            <div className="card bg-base-100 shadow-sm p-4 cursor-pointer hover:bg-base-200 transition-colors" onClick={() => handleStatCardClick('pending')}><div className="flex items-center gap-3"><div className="p-2 bg-warning/10 rounded-lg"><FiClock className="w-5 h-5 text-warning"/></div><div><p className="text-sm">{statusTypeLabels['pending'].label}</p><p className="font-bold text-xl">{stats.pending}</p></div></div></div>
-            <div className="card bg-base-100 shadow-sm p-4 cursor-pointer hover:bg-base-200 transition-colors" onClick={() => handleStatCardClick('preparing')}><div className="flex items-center gap-3"><div className="p-2 bg-info/10 rounded-lg"><FiPackage className="w-5 h-5 text-info"/></div><div><p className="text-sm">{statusTypeLabels['preparing'].label}</p><p className="font-bold text-xl">{stats.preparing}</p></div></div></div>
-            <div className="card bg-base-100 shadow-sm p-4 cursor-pointer hover:bg-base-200 transition-colors" onClick={() => handleStatCardClick('shipped')}><div className="flex items-center gap-3"><div className="p-2 bg-primary/10 rounded-lg"><FiTruck className="w-5 h-5 text-primary"/></div><div><p className="text-sm">{statusTypeLabels['shipped'].label}</p><p className="font-bold text-xl">{stats.shipped}</p></div></div></div>
-            <div className="card bg-base-100 shadow-sm p-4 cursor-pointer hover:bg-base-200 transition-colors" onClick={() => handleStatCardClick('delivered')}><div className="flex items-center gap-3"><div className="p-2 bg-success/10 rounded-lg"><FiCheckCircle className="w-5 h-5 text-green-600"/></div><div><p className="text-sm">{statusTypeLabels['delivered'].label}</p><p className="font-bold text-xl">{stats.delivered}</p></div></div></div>
-            <div className="card bg-base-100 shadow-sm p-4 cursor-pointer hover:bg-base-200 transition-colors" onClick={() => handleStatCardClick('refunding')}><div className="flex items-center gap-3"><div className="p-2 bg-accent/10 rounded-lg"><FiRefreshCw className="w-5 h-5 text-accent"/></div><div><p className="text-sm">{statusTypeLabels['refunding'].label}</p><p className="font-bold text-xl">{stats.refunding}</p></div></div></div>
-            <div className="card bg-base-100 shadow-sm p-4 cursor-pointer hover:bg-base-200 transition-colors" onClick={() => handleStatCardClick('refunded')}><div className="flex items-center gap-3"><div className="p-2 bg-neutral/10 rounded-lg"><FiCheckCircle className="w-5 h-5 text-neutral"/></div><div><p className="text-sm">{statusTypeLabels['refunded'].label}</p><p className="font-bold text-xl">{stats.refunded}</p></div></div></div>
-            <div className="card bg-base-100 shadow-sm p-4 cursor-pointer hover:bg-base-200 transition-colors" onClick={() => handleStatCardClick('req_cancel')}><div className="flex items-center gap-3"><div className="p-2 bg-error/10 rounded-lg"><MdOutlinePendingActions className="w-5 h-5 text-error"/></div><div><p className="text-sm">{statusTypeLabels['req_cancel'].label}</p><p className="font-bold text-xl">{stats.req_cancel}</p></div></div></div>
-            <div className="card bg-base-100 shadow-sm p-4 cursor-pointer hover:bg-base-200 transition-colors" onClick={() => handleStatCardClick('cancelled')}><div className="flex items-center gap-3"><div className="p-2 bg-error/10 rounded-lg"><FiXCircle className="w-5 h-5 text-error"/></div><div><p className="text-sm">{statusTypeLabels['cancelled'].label}</p><p className="font-bold text-xl">{stats.cancelled}</p></div></div></div>
+            
+            {STATUS_ORDER.map((status) => {
+              const config = ORDER_STATUS_CONFIG[status];
+              const Icon = config.icon;
+
+              return (
+                <div
+                  key={status}
+                  className="card bg-base-100 shadow-sm p-4 cursor-pointer hover:bg-base-200 transition-colors" 
+                  onClick={() => handleStatCardClick(status)}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className={`p-2 rounded-lg ${config.bgColor}`}>
+                      <Icon className={`w-5 h-5 ${config.textColor}`}/>
+                    </div>
+                    <div>
+                      <p className="text-sm">{config.label}</p>
+                      <p className="font-bold text-xl">{stats[status as keyof typeof stats] ?? 0}</p>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
         </div>
         {/* --- END: เพิ่ม Card สถิติใหม่ และปรับ Grid --- */}
         
@@ -106,7 +130,12 @@ export default function OrderManagementPage() {
                 </div>
                 <select value={filters.statusFilter} onChange={e => { setFilters(f => ({...f, statusFilter: e.target.value as OrderStatus | 'all'})); setCurrentPage(1); }} className="select select-bordered w-full md:w-auto">
                     <option value="all">สถานะทั้งหมด</option>
-                    {Object.keys(statusTypeLabels).map(key => <option key={key} value={key}>{statusTypeLabels[key as OrderStatus].label}</option>)}
+                    {STATUS_ORDER.map((status) => {
+                      const config = ORDER_STATUS_CONFIG[status];
+                      return (
+                        <option key={status} value={status}>{config.label}</option>
+                      )
+                    })}
                 </select>
                 <select value={filters.transferSlipFilter} onChange={e => { setFilters(f => ({...f, transferSlipFilter: e.target.value as TransferSlipStatusFilter})); setCurrentPage(1); }} className="select select-bordered w-full md:w-auto">
                     <option value="all">สถานะสลิปทั้งหมด</option>
@@ -121,14 +150,14 @@ export default function OrderManagementPage() {
                 <table className="table table-zebra w-full">
                     <thead><tr><th>หมายเลขคำสั่งซื้อ</th><th>ลูกค้า</th><th>สินค้า</th><th>ยอดรวม</th><th>สถานะ</th><th>วันที่สั่ง</th><th>จัดการ</th></tr></thead>
                     <tbody>
-                        {paginatedOrders.map(order => <OrderRow key={order.Order_ID} order={order} statusConfig={statusTypeLabels} fetchOrders={fetchOrders} />)}
+                        {paginatedOrders.map(order => <OrderRow key={order.Order_ID} order={order} statusConfig={ORDER_STATUS_CONFIG} fetchOrders={fetchOrders} />)}
                     </tbody>
                 </table>
             </div>
         </div>
         
         <div className="block md:hidden space-y-4">
-            {paginatedOrders.map(order => <OrderCard key={order.Order_ID} order={order} statusTypeLabels={statusTypeLabels} />)}
+            {paginatedOrders.map(order => <OrderCard key={order.Order_ID} order={order} statusConfig={ORDER_STATUS_CONFIG} />)}
         </div>
         
         {totalPages > 0 && (

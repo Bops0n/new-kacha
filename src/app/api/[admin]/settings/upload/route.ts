@@ -46,7 +46,7 @@ export async function POST(req: Request) {
     const ext = path.extname(file.name);
     const filename = `${Date.now()}-${Math.random().toString(36).substring(2)}${ext}`;
 
-    if (process.env.APP_ENV === 'local') {
+    if (process.env.NODE_ENV === 'development') {
       const uploadDir = path.join(process.cwd(), 'public', `${process.env.UPLOAD_PATH}`, 'settings');
       await mkdir(uploadDir, { recursive: true });
 
@@ -69,7 +69,6 @@ export async function POST(req: Request) {
 
           if (oldFile) {
             const oldPath = path.join(uploadPath, oldFile);
-            logger.debug(process.env.APP_ENV + ' : ' + oldPath)
             try {
               await unlink(oldPath);
             } catch {
@@ -82,7 +81,7 @@ export async function POST(req: Request) {
       
     }
 
-    const imageUrl = `${process.env.APP_ENV !== 'local' ? process.env.CDN_URL : process.env.UPLOAD_PATH}/settings/${filename}`;
+    const imageUrl = `${process.env.NODE_ENV !== 'development' ? process.env.CDN_URL : process.env.UPLOAD_PATH}/settings/${filename}`;
 
     return NextResponse.json({ message: 'File uploaded successfully.', url: imageUrl }, { status: 201 });
 

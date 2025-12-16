@@ -6,7 +6,7 @@ import { useSession } from 'next-auth/react';
 import { Order, OrderStatus } from '../../types'; // Adjust path if your types are in a different location
 import { useAlert } from '../context/AlertModalContext';
 import { FiAlertTriangle, FiCheckCircle, FiClock, FiInfo, FiRefreshCw, FiTruck } from 'react-icons/fi';
-import { statusConfig, statusTypeLabels } from '../utils/client';
+import { ORDER_STATUS_CONFIG } from '../utils/client';
 import { useWebsiteSettings } from '../providers/WebsiteSettingProvider';
 
 
@@ -69,7 +69,7 @@ export function useOrderHistory() {
     }
     if (Status === 'cancelled' || Status === 'req_cancel') {
         return { 
-            icon: statusConfig[Status].icon, color: statusConfig[Status].textColor, bgColor: statusConfig[Status].bgColor, borderColor: 'border-error/20', title: statusConfig[Status].label, 
+            icon: ORDER_STATUS_CONFIG[Status].icon, color: ORDER_STATUS_CONFIG[Status].textColor, bgColor: ORDER_STATUS_CONFIG[Status].bgColor, borderColor: 'border-error/20', title: ORDER_STATUS_CONFIG[Status].label, 
             message: Cancel_Reason ? `เหตุผล: ${Cancel_Reason}` : 'ไม่ระบุเหตุผล' 
         };       
     }
@@ -79,7 +79,7 @@ export function useOrderHistory() {
         return { icon: FiTruck, color: 'text-primary', bgColor: 'bg-primary/10', borderColor: 'border-primary/20', title: 'สินค้าอยู่ระหว่างจัดส่ง', message: 'เมื่อได้รับสินค้าแล้ว กรุณากดปุ่ม "ยืนยันรับสินค้า" ด้านล่าง' };
     }
 
-    const config = statusConfig[Status] || statusConfig.pending;
+    const config = ORDER_STATUS_CONFIG[Status] || ORDER_STATUS_CONFIG.pending;
     return { icon: config.icon, color: config.textColor, bgColor: config.bgColor, borderColor: 'border-base-200', title: config.label, message: `สถานะปัจจุบัน: ${config.label}` };
   }, [settings.paymentTimeoutHours]);
   
@@ -109,16 +109,6 @@ export function useOrderHistory() {
     );
   };
   const fetchOrders = useCallback(async () => {
-    // Wait until session is loaded
-    // if (status === 'loading') {
-    //   return;
-    // }
-    // // Redirect if unauthenticated
-    // if (status === 'unauthenticated') {
-    //   router.push('/login');
-    //   return;
-    // }
-
     setLoading(true);
     setError(null);
     try {
@@ -146,9 +136,9 @@ export function useOrderHistory() {
     const hasSlip = !!order.Transaction_Slip;
     const isChecked = order.Is_Payment_Checked;
 
-    const refunding = statusTypeLabels['refunding']
-    const req_cancel = statusTypeLabels['req_cancel']
-    const cancelled = statusTypeLabels['cancelled']
+    const refunding = ORDER_STATUS_CONFIG['refunding']
+    const req_cancel = ORDER_STATUS_CONFIG['req_cancel']
+    const cancelled = ORDER_STATUS_CONFIG['cancelled']
 
     if (hasSlip && isChecked) {
         return { targetStatus: 'refunding' as OrderStatus, description: `เนื่องจากมีการยืนยันชำระเงินแล้ว ระบบจะเปลี่ยนสถานะเป็น "${refunding.label}" เพื่อให้เจ้าหน้าที่ตรวจสอบและดำเนินการคืนเงิน` };

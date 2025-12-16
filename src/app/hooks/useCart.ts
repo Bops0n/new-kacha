@@ -29,10 +29,6 @@ export function useCart() {
   const [error, setError] = useState<string | null>(null);
 
   const fetchCartAndAddresses = useCallback(async () => {
-    // if (status !== 'authenticated') {
-    //   if (status === 'unauthenticated') router.push('/login');
-    //   return;
-    // }
     setLoading(true);
     setError(null);
     try {

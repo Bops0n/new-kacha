@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useAlert } from "@/app/context/AlertModalContext";
 import { FiInfo, FiXCircle } from "react-icons/fi";
-import { paymentTypeLabels, statusTypeLabels } from "@/app/utils/client";
+import { ORDER_STATUS_CONFIG, PAYMENT_METHOD_CONFIG } from "@/app/utils/client";
 import { Order } from "@/types";
 import { useRouter } from "next/navigation";
 
@@ -141,11 +141,11 @@ export default function OrderCancelButton({ order, onlyIcon, onSuccess }: {
     );
   }
 
-  const currentStatus = statusTypeLabels[order.Status];
-  const refunding = statusTypeLabels['refunding'];
-  const cancelled = statusTypeLabels['cancelled'];
+  const currentStatus = ORDER_STATUS_CONFIG[order.Status];
+  const refunding = ORDER_STATUS_CONFIG['refunding'];
+  const cancelled = ORDER_STATUS_CONFIG['cancelled'];
   
-  const lbCOD = paymentTypeLabels['cash_on_delivery'];
+  const lbCOD = PAYMENT_METHOD_CONFIG['cash_on_delivery'];
 
   const modalId = `cancelOrderModal_${order.Order_ID}`;
 
@@ -230,7 +230,7 @@ export default function OrderCancelButton({ order, onlyIcon, onSuccess }: {
                   <div className="space-y-3">
                       <div className="badge badge-lg badge-outline">
                           สถานะปัจจุบัน : 
-                          <span className={`badge ${currentStatus.color}`}>
+                          <span className={`badge ${currentStatus.bgColor} ${currentStatus.textColor}`}>
                               <currentStatus.icon className="inline-block w-4 h-4 mr-1" />
                               {currentStatus.label}
                           </span>
@@ -243,7 +243,7 @@ export default function OrderCancelButton({ order, onlyIcon, onSuccess }: {
                                 {isRefunding &&
                                   <>
                                     หากคำสั่งซื้อได้รับการชำระเงินและตรวจสอบแล้ว ระบบจะเปลี่ยนสถานะคำสั่งซื้อเป็น{" "}
-                                    <span className={`badge ${refunding.color }`}>
+                                    <span className={`badge ${refunding.bgColor} ${refunding.textColor}`}>
                                         <refunding.icon className="inline-block w-4 h-4 mr-1" />
                                         {refunding.label}
                                     </span>{" "}เพื่อดำเนินการขั้นตอนการคืนเงินต่อไป
@@ -254,12 +254,12 @@ export default function OrderCancelButton({ order, onlyIcon, onSuccess }: {
                                     <br/>
                                     1. หากคำสั่งซื้อ ยังไม่ได้ชำระเงิน<br/>
                                     2. หรือคำสั่งซื้อเป็นแบบ{" "}
-                                    <span className={`badge ${lbCOD?.color || 'badge-primary'}`}>
+                                    <span className={`badge ${lbCOD.bgColor} ${lbCOD.textColor}`}>
                                       <lbCOD.icon className="inline-block w-4 h-4 mr-1" />
                                       {lbCOD?.label || order.Payment_Type}
                                     </span><br/>
                                     ระบบจะเปลี่ยนสถานะคำสั่งซื้อเป็น{" "}
-                                    <span className={`badge ${cancelled.color }`}>
+                                    <span className={`badge ${cancelled.bgColor} ${cancelled.textColor}`}>
                                         <cancelled.icon className="inline-block w-4 h-4 mr-1" />
                                         {cancelled.label}
                                     </span>{" "}<br/>
@@ -298,7 +298,7 @@ export default function OrderCancelButton({ order, onlyIcon, onSuccess }: {
                   <div className="space-y-3">
                       <div className="badge badge-lg badge-outline">
                           สถานะปัจจุบัน : 
-                          <span className={`badge ${currentStatus.color}`}>
+                          <span className={`badge ${currentStatus.bgColor} ${currentStatus.textColor}`}>
                               <currentStatus.icon className="inline-block w-4 h-4 mr-1" />
                               {currentStatus.label}
                           </span>

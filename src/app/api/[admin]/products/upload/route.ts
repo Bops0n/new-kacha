@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
         const buffer = Buffer.from(await file.arrayBuffer());
         const filename = `${uuidv4()}${path.extname(file.name)}`;
 
-        if (process.env.APP_ENV === 'local') {
+        if (process.env.NODE_ENV === 'development') {
             const uploadDir = path.join(process.cwd(), 'public', `${process.env.UPLOAD_PATH}`, 'products');
             await mkdir(uploadDir, { recursive: true });
 
@@ -38,7 +38,7 @@ export async function POST(req: NextRequest) {
             }
         }
 
-        const imageUrl = `${process.env.APP_ENV !== 'local' ? process.env.CDN_URL : process.env.UPLOAD_PATH}/products/${filename}`;
+        const imageUrl = `${process.env.NODE_ENV !== 'development' ? process.env.CDN_URL : process.env.UPLOAD_PATH}/products/${filename}`;
 
         return NextResponse.json({ 
             message: 'File uploaded successfully.', 

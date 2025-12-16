@@ -19,18 +19,14 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const session = await getServerSession(authOptions);
 
-  if (!session || !session.user) redirect("/login");
+  if (!session?.user) redirect("/login");
   
-  if (session.user.accessLevel != 0) {
-    return (
-      <>
-        <div className="w-full min-h-screen bg-base-200" data-theme="dark">
-          <AdminNavbar/>
-          {children}
-        </div>
-      </>
-    )
-  }
+  if (session.user.accessLevel === 0) redirect("/");
 
-  redirect("/login");
+  return (
+    <div className="w-full min-h-screen bg-base-200" data-theme="dark">
+      <AdminNavbar />
+      {children}
+    </div>
+  );
 }

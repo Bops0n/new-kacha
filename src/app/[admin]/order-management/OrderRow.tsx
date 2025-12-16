@@ -43,7 +43,7 @@ const OrderRow: React.FC<OrderRowProps> = ({ order, statusConfig, fetchOrders })
       <td><div className="font-bold">{formatPrice(order.Total_Amount)}</div></td>
       <td>
         {statusInfo && (
-          <span className={`badge ${statusInfo.color}`}>
+          <span className={`badge ${statusInfo.bgColor} ${statusInfo.textColor}`}>
             {StatusIcon && <StatusIcon className="w-3 h-3 mr-1" />} 
             {statusInfo.label}
           </span>

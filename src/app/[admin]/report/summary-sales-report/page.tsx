@@ -15,7 +15,7 @@ interface ReportOrder {
     Total_Amount: number;
     Payment_Type: string;
     Status: string;
-    Current_Vat: string;
+    Current_Vat: number;
 }
 
 const statusLabels: Record<string, string> = {
@@ -29,8 +29,6 @@ export default function SummarySalesReportPage() {
     const today = new Date().toLocaleDateString('sv').replaceAll('/', '-')
 
     const { showAlert } = useAlert();
-
-    const VAT_RATE = settings.vatRate / 100;
 
     const getCurDate = ()=>{
         const date = new Date().toLocaleString('th-TH',{dateStyle: 'long', timeStyle: 'medium'})
@@ -75,7 +73,7 @@ export default function SummarySalesReportPage() {
 
     const summary = useMemo(() => {
         const totalGross = salesOrders.reduce((sum, o) => sum + Number(o.Total_Amount), 0);
-        const totalVat = salesOrders.reduce((sum, o) => sum + Number(o.Total_Amount) /100 * (parseFloat(o.Current_Vat)), 0); 
+        const totalVat = salesOrders.reduce((sum, o) => sum + Number(o.Total_Amount) /100 * (o.Current_Vat), 0); 
         const totalNet = totalGross - totalVat;
 
         return {
@@ -84,7 +82,7 @@ export default function SummarySalesReportPage() {
             totalNet,
             totalVat
         };
-    }, [salesOrders, VAT_RATE]);
+    }, [salesOrders]);
 
     const handlePrint = () => {
         setPrintDate(getCurDate)
@@ -224,7 +222,7 @@ export default function SummarySalesReportPage() {
                                         ) : (
                                             salesOrders.map((order) => {
                                                 const gross = Number(order.Total_Amount);
-                                                const vat = (gross/100)* parseFloat(order.Current_Vat);
+                                                const vat = (gross/100)* order.Current_Vat;
                                                 const net = gross-vat;
                                                 return (
                                                     <tr key={order.Order_ID} className="hover:bg-base-50">
@@ -315,7 +313,7 @@ export default function SummarySalesReportPage() {
                     <tbody>
                         {salesOrders.map((order) => {
                             const gross = Number(order.Total_Amount);
-                            const vat = gross / 100 * ( parseFloat(order.Current_Vat));
+                            const vat = gross / 100 * (order.Current_Vat);
                             const net = gross - vat;
                             return (
                                 <tr key={order.Order_ID} className="border-b border-gray-300">

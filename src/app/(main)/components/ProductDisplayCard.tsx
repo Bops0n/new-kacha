@@ -102,7 +102,7 @@ const AddToCartQuantityModal: React.FC<{
                         {/* Stock Info */}
                         <div className="flex items-center gap-2 mb-6">
                             {availableStock > 0 ? (
-                                <div className="badge badge-success badge-outline gap-1 p-3">
+                                <div className="badge badge-success badge-outline gap-1 p-3 text-green-600">
                                     <FiCheckCircle /> มีสินค้า {availableStock} {product.Unit}
                                 </div>
                             ) : (
@@ -158,13 +158,13 @@ const AddToCartQuantityModal: React.FC<{
 
 export default function ProductDisplayCard({ product }: ProductDisplayCardProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const session = useSession();
+  const { data: session } = useSession();
   const { showAlert } = useAlert();
   const { increment } = useCounter();
  
   const handleConfirmAddToCart = async (productToAdd: ProductInventory, quantityToAdd: number) => {
-    if (session?.status !== 'authenticated') {
-        showAlert('กรุณาเข้าสู่ระบบเพื่อเพิ่มสินค้าลงในตะกร้า', 'warning');
+    if (!session?.user) {
+        showAlert('กรุณาเข้าสู่ระบบก่อนทำการเพิ่มสินค้าในตะกร้า', 'warning');
         return;
     }
 

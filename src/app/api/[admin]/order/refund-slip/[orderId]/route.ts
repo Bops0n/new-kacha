@@ -35,7 +35,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
         const buffer = Buffer.from(await transferSlipFile.arrayBuffer());
         const filename = `refund-${orderId}-${uuidv4()}${path.extname(transferSlipFile.name)}`;
 
-        if (process.env.APP_ENV === 'local') {
+        if (process.env.NODE_ENV === 'development') {
             const uploadDir = path.join(process.cwd(), 'public', `${process.env.UPLOAD_PATH}`, 'refunds');
             await mkdir(uploadDir, { recursive: true });
 
@@ -51,7 +51,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
             }
         }
 
-        const imageUrl = `${process.env.APP_ENV !== 'local' ? process.env.CDN_URL : process.env.UPLOAD_PATH}/refunds/${filename}`;
+        const imageUrl = `${process.env.NODE_ENV !== 'development' ? process.env.CDN_URL : process.env.UPLOAD_PATH}/refunds/${filename}`;
 
         const result = await uploadRefundSlip(imageUrl, orderId, Number(auth.userId));
 

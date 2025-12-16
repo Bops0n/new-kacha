@@ -73,13 +73,21 @@ export const authOptions : AuthOptions = {
       token: JWT;
       user?: User | AdapterUser  | null;
       trigger?: "update" | "signIn" | "signUp";
-      session?: Session 
+      session?: Session
     }) {
+
+      const now = Math.floor(Date.now() / 1000);
+
+      if (token.shortExp && now > token.shortExp) {
+        return {
+          exp: 0,
+          iat: 0,
+        } as JWT;
+      }
+
       if (user) {
         const IsRemember = user.rememberMe === true;
         token.rememberMe = IsRemember;
-
-        const now = Math.floor(Date.now() / 1000);
         token.shortExp = now + (IsRemember ? LONG : SHORT);
 
         token.id = user.id;
@@ -100,14 +108,10 @@ export const authOptions : AuthOptions = {
           }
         }
       }
-      if (trigger === "update" && session) {
-        if (!session.user) return token;
-        
-        if (typeof session.rememberMe === "boolean") {
-          token.rememberMe = session.rememberMe;
-          const now = Math.floor(Date.now() / 1000);
-          token.shortExp = now + ((token.rememberMe as boolean) ? LONG : SHORT);
-        }
+      if (trigger === "update" && session?.user) {
+
+        token.rememberMe = session.rememberMe;
+        token.shortExp = now + (token.rememberMe ? LONG : SHORT);
 
         token.accessLevel = session.user.accessLevel;
 
@@ -126,22 +130,20 @@ export const authOptions : AuthOptions = {
       }
       return token;
     },
-    async session({
-      session,
-      token,
-    }: {
-      session: Session;
-      token: JWT;
-    }) {
-      const now = Math.floor(Date.now() / 1000);
-      if (token.shortExp && now > token.shortExp) {
-        return null;
-      }
+    async session({session, token }: { session: Session, token: JWT }) {
 
+      const now = Math.floor(Date.now() / 1000);
+      
       session.rememberMe = token.rememberMe ?? false;
       session.shortExp = token.shortExp;
+
+      if (!token.id || (token.shortExp && now > token.shortExp)) {
+        session.user = null;
+        return session;
+      }
+
       session.user = {
-        id: token.id!,
+        id: token.id,
         name: token.name!,
         email: token.email!,
         accessLevel: token.accessLevel!,
@@ -153,8 +155,9 @@ export const authOptions : AuthOptions = {
         Report: token.Report ?? false,
         Dashboard: token.Dashboard ?? false
       };
+
       return session;
-    },
+    }
   },
   secret: process.env.NEXTAUTH_SECRET,
 };

@@ -8,12 +8,12 @@ import { useRouter } from 'next/navigation';
 
 interface OrderCardProps {
   order: Order;
-  statusTypeLabels: StatusConfig;
+  statusConfig: StatusConfig;
 }
 
-const OrderCard: React.FC<OrderCardProps> = ({ order, statusTypeLabels }) => {
-  const StatusIcon = statusTypeLabels[order.Status]?.icon;
-  const statusInfo = statusTypeLabels[order.Status];
+const OrderCard: React.FC<OrderCardProps> = ({ order, statusConfig }) => {
+  const StatusIcon = statusConfig[order.Status]?.icon;
+  const statusInfo = statusConfig[order.Status];
 
   const { push } = useRouter();
 
@@ -30,7 +30,7 @@ const OrderCard: React.FC<OrderCardProps> = ({ order, statusTypeLabels }) => {
                 <p className="text-sm text-base-content/70">หมายเลขคำสั่งซื้อ: {order.Order_ID}</p>
             </div>
             {statusInfo && (
-                <span className={`badge ${statusInfo.color}`}>
+                <span className={`badge ${statusInfo.bgColor} ${statusInfo.textColor}`}>
                     {StatusIcon && <StatusIcon className="w-3 h-3 mr-1" />}
                     {statusInfo.label}
                 </span>

@@ -5,8 +5,7 @@ import { FiPrinter, FiArrowLeft, FiFilter, FiCheck, FiFileText, FiAlertCircle } 
 import { formatPrice } from '@/app/utils/formatters';
 import LoadingSpinner from '@/app/components/LoadingSpinner';
 import { useRouter } from 'next/navigation';
-// 1. นำเข้า statusTypeLabels จากไฟล์กลาง
-import { statusTypeLabels } from '@/app/utils/client';
+import { ORDER_STATUS_CONFIG } from '@/app/utils/client';
 import { OrderStatus } from '@/types';
 import { useWebsiteSettings } from '@/app/providers/WebsiteSettingProvider';
 import { useAlert } from '@/app/context/AlertModalContext';
@@ -25,7 +24,7 @@ interface ReportOrder {
 }
 
 // 2. ใช้ Keys จาก Config กลาง แทนการ Hardcode
-const allStatuses = Object.keys(statusTypeLabels);
+const allStatuses = Object.keys(ORDER_STATUS_CONFIG);
 
 export default function OrdersReportPage() {
     const router = useRouter();
@@ -311,7 +310,7 @@ export default function OrdersReportPage() {
                                             <label key={status} className="label cursor-pointer justify-start gap-3 hover:bg-base-200 rounded-lg p-2 -mx-2 transition-colors">
                                                 <input type="checkbox" className="checkbox checkbox-sm checkbox-primary" checked={selectedStatuses.includes(status)} onChange={() => toggleStatus(status)} />
                                                 {/* 3. ใช้ชื่อสถานะจาก Config กลาง */}
-                                                <span className="label-text">{statusTypeLabels[status as OrderStatus]?.label || status}</span>
+                                                <span className="label-text">{ORDER_STATUS_CONFIG[status as OrderStatus]?.label || status}</span>
                                             </label>
                                         ))}
                                     </div>
@@ -329,7 +328,7 @@ export default function OrdersReportPage() {
                                             <h3 className="font-bold text-lg flex items-center gap-2">
                                                 <span className={`badge badge-sm ${['cancelled', 'refunded'].includes(status) ? 'badge-error' : 'badge-primary'}`}></span>
                                                 {/* 3. ใช้ชื่อสถานะจาก Config กลาง */}
-                                                {statusTypeLabels[status as OrderStatus]?.label || status}
+                                                {ORDER_STATUS_CONFIG[status as OrderStatus]?.label || status}
                                             </h3>
                                             <span className="badge badge-ghost">{groupedOrders[status].length} รายการ</span>
                                         </div>
@@ -408,7 +407,7 @@ export default function OrdersReportPage() {
                             <div key={status} className="status-section">
                                 <h3 className="font-bold text-lg mb-2 border-l-4 border-black pl-3 text-black">
                                     {/* 3. ใช้ชื่อสถานะจาก Config กลาง */}
-                                    {statusTypeLabels[status as OrderStatus]?.label || status} ({groupItems.length})
+                                    {ORDER_STATUS_CONFIG[status as OrderStatus]?.label || status} ({groupItems.length})
                                 </h3>
                                 <table className="w-full text-xs border-collapse">
                                     <thead>
@@ -427,7 +426,7 @@ export default function OrdersReportPage() {
                                     </tbody>
                                     <tfoot>
                                         <tr className="bg-gray-100 font-bold border-t border-black">
-                                            <td colSpan={6} className="py-2 px-2 text-right">รวมกลุ่มนี้ ({statusTypeLabels[status as OrderStatus]?.label || status}):</td>
+                                            <td colSpan={6} className="py-2 px-2 text-right">รวมกลุ่มนี้ ({ORDER_STATUS_CONFIG[status as OrderStatus]?.label || status}):</td>
                                             <td className="py-2 px-2 text-right">{formatPrice(groupTotal)}</td>
                                         </tr>
                                     </tfoot>

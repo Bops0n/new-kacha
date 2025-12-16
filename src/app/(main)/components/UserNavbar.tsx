@@ -138,7 +138,7 @@ const DesktopMegaMenu = ({ categories, subCategories, childSubCategories, closeM
 };
 
 export default function UserNavbar() {
-    const { data: session, status } = useSession();
+    const { data: session } = useSession();
     const router = useRouter();
     const { count: cartItemCount, setCounter } = useCounter();
     const { categories, subCategories, childSubCategories, loading: navLoading } = useCategoryData();
@@ -161,7 +161,7 @@ export default function UserNavbar() {
 
     useEffect(() => {
         const fetchCartCount = async () => {
-            if (status === 'authenticated') {
+            if (session?.user) {
                 const res = await fetch('/api/main/cart');
                 if (!res.ok) {
                   setCounter(0);
@@ -174,7 +174,7 @@ export default function UserNavbar() {
             }
         };
         fetchCartCount();
-    }, [status, setCounter]);
+    }, [session, setCounter]);
 
     const handleLogout = () => {
       signOut({ callbackUrl: "/" });
@@ -233,7 +233,7 @@ export default function UserNavbar() {
 
                         <div className="flex items-center gap-2">
                             {/* Cart Icon */}
-                            {status === 'authenticated' && (
+                            {session?.user && (
                                 <Link href="/cart" className="btn btn-ghost btn-circle relative hover:bg-base-200">
                                     <div className="indicator">
                                         <FiShoppingCart className="w-6 h-6" />
@@ -243,7 +243,7 @@ export default function UserNavbar() {
                             )}
 
                             {/* User Menu */}
-                            {status === 'authenticated' ? (
+                            {session?.user ? (
                                 <div className="dropdown dropdown-end">
                                     <label tabIndex={0} className="btn btn-ghost gap-2 pl-2 pr-1 rounded-full hover:bg-base-200 border border-transparent hover:border-base-300">
                                         <div className="avatar placeholder">
@@ -324,106 +324,106 @@ export default function UserNavbar() {
                 </nav>
 
                 {/* Mobile Navigation Menu (Drawer style) */}
-<div className={`lg:hidden bg-base-100 border-t border-base-200 overflow-hidden transition-all duration-300 ease-in-out shadow-lg ${isMenuOpen ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0'}`}>
-    
-    {/* Container หลัก */}
-    <div className="flex flex-col h-full">
-        
-        {/* ส่วนข้อมูลผู้ใช้ (Optional: ถ้ามี session แสดงชื่อหน่อยก็ดีครับ) */}
-        {session?.user && (
-            <div className="p-4 bg-base-200/50 flex items-center gap-3 border-b border-base-200">
-                <div className="avatar placeholder">
-                    <div className="bg-neutral text-neutral-content rounded-full w-8">
-                        <span>{session.user.name?.charAt(0) || <FiUser />}</span>
+                <div className={`lg:hidden bg-base-100 border-t border-base-200 overflow-hidden transition-all duration-300 ease-in-out shadow-lg ${isMenuOpen ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0'}`}>
+                    
+                    {/* Container หลัก */}
+                    <div className="flex flex-col h-full">
+                        
+                        {/* ส่วนข้อมูลผู้ใช้ (Optional: ถ้ามี session แสดงชื่อหน่อยก็ดีครับ) */}
+                        {session?.user && (
+                            <div className="p-4 bg-base-200/50 flex items-center gap-3 border-b border-base-200">
+                                <div className="avatar placeholder">
+                                    <div className="bg-neutral text-neutral-content rounded-full w-8">
+                                        <span>{session.user.name?.charAt(0) || <FiUser />}</span>
+                                    </div>
+                                </div>
+                                <div>
+                                    <p className="font-bold text-sm">สวัสดี, {session.user.name}</p>
+                                    <p className="text-xs text-base-content/60">ยินดีต้อนรับกลับ</p>
+                                </div>
+                            </div>
+                        )}
+
+                        <ul className="menu p-3 text-base-content w-full gap-1">
+                            
+                            {/* เมนูหลัก */}
+                            <li>
+                                <Link href="/" onClick={closeMobileMenu} className="font-semibold active:bg-primary active:text-white">
+                                    <FiHome className="w-5 h-5" /> หน้าแรก
+                                </Link>
+                            </li>
+                            <li>
+                                <Link href="/products" onClick={closeMobileMenu} className="font-semibold active:bg-primary active:text-white">
+                                    <FiHome className="w-5 h-5" /> สินค้าทั้งหมด
+                                </Link>
+                            </li>
+
+                            {/* หมวดหมู่สินค้า (ใช้ details เพื่อทำ Dropdown ยืดหดได้) */}
+                            <li>
+                                <details>
+                                    <summary className="font-semibold group">
+                                        <FiGrid className="w-5 h-5" /> หมวดหมู่สินค้า
+                                    </summary>
+                                    <ul className="before:!hidden pl-4 mt-1 border-l-2 border-base-200 ml-2"> 
+                                        {navLoading ? (
+                                            <li><span className="loading loading-spinner loading-xs"></span> กำลังโหลด...</li>
+                                        ) : (
+                                            // ส่ง props ไปให้ MobileCategoryMenu (ตรวจสอบว่า Component นี้รองรับการแสดงผลแบบ list item หรือไม่)
+                                            // แนะนำให้ MobileCategoryMenu return เป็น <li>...</li> หลายๆ ตัว
+                                            <MobileCategoryMenu 
+                                                categories={categories} 
+                                                subCategories={subCategories} 
+                                                childSubCategories={childSubCategories} 
+                                                closeMobileMenu={closeMobileMenu} 
+                                            />
+                                        )}
+                                    </ul>
+                                </details>
+                            </li>
+
+                            {/* โปรโมชั่น */}
+                            <li>
+                                <Link href="/products?discount=true" onClick={closeMobileMenu} className="font-semibold text-primary hover:bg-primary/10">
+                                    <FiTag className="w-5 h-5" /> สินค้าลดราคา
+                                </Link>
+                            </li>
+                            <div className="divider my-1"></div>
+                            <li>
+                                <Link href="/profile" onClick={closeMobileMenu} className="font-semibold hover:bg-primary/10">
+                                    <FiUser className="w-5 h-5" /> โปรไฟล์ของฉัน
+                                </Link>
+                            </li>
+                            <li>
+                                <Link href="/orders-history" onClick={closeMobileMenu} className="font-semibold hover:bg-primary/10">
+                                    <FiBox className="w-5 h-5" /> ประวัติคำสั่งซื้อ
+                                </Link>
+                            </li>
+
+                            {/* เส้นคั่นบางๆ */}
+                            <div className="divider my-1"></div>
+
+                            {/* เมนู Admin (แสดงเฉพาะคนมีสิทธิ์) */}
+                            {(session?.user?.accessLevel != 0 && session?.user?.accessLevel !== undefined) && (
+                                <li>
+                                    <Link 
+                                        href="/admin" 
+                                        onClick={closeMobileMenu} 
+                                        className="bg-primary/10 text-primary hover:bg-primary hover:text-white font-bold mt-1"
+                                    >
+                                        <FiSettings className="w-5 h-5" /> จัดการระบบ (Admin)
+                                    </Link>
+                                </li>
+                            )}
+                                <li className="bg-error/10 text-error hover:bg-primary hover:text-white font-bold mt-1"
+                                onClick={()=>signOut({ callbackUrl: "/" }) }>
+                                    <p>
+
+                                        <FiLogOut className="w-5 h-5" /> ออกจากระบบ
+                                    </p>
+                                </li>
+                        </ul>
                     </div>
                 </div>
-                <div>
-                    <p className="font-bold text-sm">สวัสดี, {session.user.name}</p>
-                    <p className="text-xs text-base-content/60">ยินดีต้อนรับกลับ</p>
-                </div>
-            </div>
-        )}
-
-        <ul className="menu p-3 text-base-content w-full gap-1">
-            
-            {/* เมนูหลัก */}
-            <li>
-                <Link href="/" onClick={closeMobileMenu} className="font-semibold active:bg-primary active:text-white">
-                    <FiHome className="w-5 h-5" /> หน้าแรก
-                </Link>
-            </li>
-            <li>
-                <Link href="/products" onClick={closeMobileMenu} className="font-semibold active:bg-primary active:text-white">
-                    <FiHome className="w-5 h-5" /> สินค้าทั้งหมด
-                </Link>
-            </li>
-
-            {/* หมวดหมู่สินค้า (ใช้ details เพื่อทำ Dropdown ยืดหดได้) */}
-            <li>
-                <details>
-                    <summary className="font-semibold group">
-                        <FiGrid className="w-5 h-5" /> หมวดหมู่สินค้า
-                    </summary>
-                    <ul className="before:!hidden pl-4 mt-1 border-l-2 border-base-200 ml-2"> 
-                        {navLoading ? (
-                            <li><span className="loading loading-spinner loading-xs"></span> กำลังโหลด...</li>
-                        ) : (
-                            // ส่ง props ไปให้ MobileCategoryMenu (ตรวจสอบว่า Component นี้รองรับการแสดงผลแบบ list item หรือไม่)
-                            // แนะนำให้ MobileCategoryMenu return เป็น <li>...</li> หลายๆ ตัว
-                            <MobileCategoryMenu 
-                                categories={categories} 
-                                subCategories={subCategories} 
-                                childSubCategories={childSubCategories} 
-                                closeMobileMenu={closeMobileMenu} 
-                            />
-                        )}
-                    </ul>
-                </details>
-            </li>
-
-            {/* โปรโมชั่น */}
-            <li>
-                <Link href="/products?discount=true" onClick={closeMobileMenu} className="font-semibold text-primary hover:bg-primary/10">
-                    <FiTag className="w-5 h-5" /> สินค้าลดราคา
-                </Link>
-            </li>
-            <div className="divider my-1"></div>
-            <li>
-                <Link href="/profile" onClick={closeMobileMenu} className="font-semibold hover:bg-primary/10">
-                    <FiUser className="w-5 h-5" /> โปรไฟล์ของฉัน
-                </Link>
-            </li>
-            <li>
-                <Link href="/orders-history" onClick={closeMobileMenu} className="font-semibold hover:bg-primary/10">
-                    <FiBox className="w-5 h-5" /> ประวัติคำสั่งซื้อ
-                </Link>
-            </li>
-
-            {/* เส้นคั่นบางๆ */}
-            <div className="divider my-1"></div>
-
-            {/* เมนู Admin (แสดงเฉพาะคนมีสิทธิ์) */}
-            {(session?.user?.accessLevel != 0 && session?.user?.accessLevel !== undefined) && (
-                <li>
-                    <Link 
-                        href="/admin" 
-                        onClick={closeMobileMenu} 
-                        className="bg-primary/10 text-primary hover:bg-primary hover:text-white font-bold mt-1"
-                    >
-                        <FiSettings className="w-5 h-5" /> จัดการระบบ (Admin)
-                    </Link>
-                </li>
-            )}
-                <li className="bg-error/10 text-error hover:bg-primary hover:text-white font-bold mt-1"
-                 onClick={()=>signOut({ callbackUrl: "/" }) }>
-                    <p>
-
-                        <FiLogOut className="w-5 h-5" /> ออกจากระบบ
-                    </p>
-                </li>
-        </ul>
-    </div>
-</div>
             </header>
 
             <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} />

@@ -33,7 +33,7 @@ export type Order = {
   Confirmed_At: string;
   Update_By: string;
   Update_At: string;
-  Current_Vat: string;
+  Current_Vat: number;
 
   // Order Cancellation
   Is_Cancelled: boolean;
@@ -143,7 +143,7 @@ export interface DbOrderRow {
   Confirmed_At: string;
   Update_By: string;
   Update_At: string;
-  Current_Vat: string;
+  Current_Vat: number;
 
   // Order Cancellation
   Is_Cancelled: boolean;

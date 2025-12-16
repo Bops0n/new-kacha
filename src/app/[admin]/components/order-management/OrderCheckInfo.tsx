@@ -3,7 +3,7 @@ import { Order, OrderProductDetail, SimpleProductDetail } from "@/types";
 import { FiArchive, FiCreditCard, FiImage, FiShoppingBag, FiZoomIn } from "react-icons/fi";
 import { useAlert } from "@/app/context/AlertModalContext";
 import { calculateAvailableStock } from "@/app/utils/calculations";
-import { statusTypeLabels } from "@/app/utils/client";
+import { ORDER_STATUS_CONFIG } from "@/app/utils/client";
 import Image from "next/image";
 
 const OrderItemDetail: React.FC<{ orderProduct: OrderProductDetail; liveProduct: SimpleProductDetail; }> = ({ orderProduct, liveProduct }) => {
@@ -118,8 +118,8 @@ export default function OrderCheckInfo({
         });
     }
 
-    const cancelled = statusTypeLabels['cancelled'];
-    const refunding = statusTypeLabels['refunding'];
+    const cancelled = ORDER_STATUS_CONFIG['cancelled'];
+    const refunding = ORDER_STATUS_CONFIG['refunding'];
 
     return (
         <>
@@ -219,12 +219,12 @@ export default function OrderCheckInfo({
                               <p className="text-sm text-base-content/80">
                                 <br/>
                                 1. หากกดปุ่ม {"'"}ปฏิเสธ{"'"} สถานะคำสั่งซื้อจะถูกเปลี่ยนเป็น
-                                <span className={`badge ${cancelled.color }`}>
+                                <span className={`badge ${cancelled.bgColor} ${cancelled.textColor}`}>
                                   <cancelled.icon className="inline-block w-4 h-4 mr-1" />
                                   {cancelled.label}
                                 </span><br/><br/>
                                 2. หากกดปุ่ม {"'"}ยืนยัน{"'"} ระบบจะเปลี่ยนสถานะเป็น{" "}
-                                <span className={`badge ${refunding.color }`}>
+                                <span className={`badge ${refunding.bgColor}  ${refunding.textColor}`}>
                                     <refunding.icon className="inline-block w-4 h-4 mr-1" />
                                     {refunding.label}
                                 </span>{" "}

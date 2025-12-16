@@ -17,10 +17,6 @@ export default function AuthPage() {
   const router = useRouter();
   const callbackUrl = searchParams.get("callbackUrl") ?? "";
   
-  // useEffect(()=>{
-  //   if (session.status === 'authenticated')
-  //     redirect('/')
-  // },[session.status])
   const [activeTab, setActiveTab] = useState<'login' | 'register'>('login'); // State to control active tab
 
   const [loginFormData, setLoginFormData] = useState({

@@ -1,4 +1,4 @@
-import { paymentTypeLabels, statusTypeLabels } from "@/app/utils/client";
+import { PAYMENT_METHOD_CONFIG, ORDER_STATUS_CONFIG } from "@/app/utils/client";
 import { Order } from "@/types";
 import { BiCheck, BiX } from "react-icons/bi";
 import { FiCheckCircle, FiCreditCard, FiInfo } from "react-icons/fi";
@@ -37,9 +37,9 @@ export default function OrderShippedInfo({ isAllValid, order, lbButtonText }: Or
         Driver_Phone: !!order.Driver_Phone,
     };
 
-    const currentStatus = statusTypeLabels[order.Status];
-    const shipped = statusTypeLabels['shipped'];
-    const paymentLabel = paymentTypeLabels[order.Payment_Type];
+    const currentStatus = ORDER_STATUS_CONFIG[order.Status];
+    const shipped = ORDER_STATUS_CONFIG['shipped'];
+    const paymentMethod = PAYMENT_METHOD_CONFIG[order.Payment_Type];
     
     return (
         <>
@@ -48,9 +48,9 @@ export default function OrderShippedInfo({ isAllValid, order, lbButtonText }: Or
                 <div className="flex items-center gap-2 mb-3">
                     <FiCreditCard className="text-primary w-5 h-5" />
                     <h2 className="font-bold text-lg">การชำระเงิน (
-                        <span className={`badge ${paymentLabel.color}`}>
-                            <paymentLabel.icon className="inline-block w-4 h-4 mr-1" />
-                            {paymentLabel.label || order.Payment_Type}
+                        <span className={`badge ${paymentMethod.bgColor} ${paymentMethod.textColor}`}>
+                            <paymentMethod.icon className="inline-block w-4 h-4 mr-1" />
+                            {paymentMethod.label || order.Payment_Type}
                         </span>)
                     </h2>
                 </div>
@@ -94,7 +94,7 @@ export default function OrderShippedInfo({ isAllValid, order, lbButtonText }: Or
                         <div className="space-y-3">
                             <div className="badge badge-lg badge-outline">
                                 สถานะปัจจุบัน : 
-                                <span className={`badge ${currentStatus.color}`}>
+                                <span className={`badge ${currentStatus.bgColor} ${currentStatus.textColor}`}>
                                     <currentStatus.icon className="inline-block w-4 h-4 mr-1" />
                                     {currentStatus.label}
                                 </span>
@@ -105,7 +105,7 @@ export default function OrderShippedInfo({ isAllValid, order, lbButtonText }: Or
                                 <p>
                                     หลังจากกด <span className="font-semibold">{'"'}{lbButtonText}{'"'}</span>{" "}
                                     ระบบจะเปลี่ยนสถานะคำสั่งซื้อเป็น{" "}
-                                    <span className={`badge ${shipped.color }`}>
+                                    <span className={`badge ${shipped.bgColor} ${currentStatus.textColor}`}>
                                         <shipped.icon className="inline-block w-4 h-4 mr-1" />
                                         {shipped.label}
                                     </span>{" "} และจะไม่สามารถยกเลิกคำสั่งซื้อนี้ได้แล้ว

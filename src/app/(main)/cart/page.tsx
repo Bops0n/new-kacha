@@ -316,7 +316,7 @@ if (cartItems.length === 0) {
                                                 <span>- {formatPrice(totalDiscount)}</span>
                                             </div>
                                         )}
-                                        <div className="flex justify-between text-success">
+                                        <div className="flex justify-between text-green-600">
                                             <span>ค่าจัดส่ง</span>
                                             <span>ฟรี</span>
                                         </div>

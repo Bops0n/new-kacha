@@ -18,7 +18,7 @@ import AccessDeniedPage from '@/app/components/AccessDenied';
 import { useOrderHistory } from '@/app/hooks/useOrderHistory';
 import { ImagePreviewModal } from '@/app/components/ImagePreviewModal';
 import { useWebsiteSettings } from '@/app/providers/WebsiteSettingProvider';
-import { statusConfig } from '@/app/utils/client';
+import { ORDER_STATUS_CONFIG } from '@/app/utils/client';
 import Image from 'next/image';
 
 // --- Component: Payment Info Modal ---
@@ -221,10 +221,10 @@ const OrderStepIndicator = ({ order, statusConfig }: { order: Order, statusConfi
             <div className="flex flex-col items-center relative">
                 {renderArrow()}
                 <div className={`w-10 h-10 rounded-full border-2 flex items-center justify-center relative z-10 ${isReq ? 'bg-warning text-warning-content border-warning shadow-lg' : 'bg-error text-error-content border-error shadow-lg'}`}>
-                    {React.createElement(statusConfig[currentStatus].icon, { className: 'w-5 h-5' })}
+                    {React.createElement(ORDER_STATUS_CONFIG[currentStatus].icon, { className: 'w-5 h-5' })}
                 </div>
                 <span className={`text-xs sm:text-sm mt-3 font-bold ${isReq ? 'text-warning' : 'text-error'}`}>
-                    {statusConfig[currentStatus].label}
+                    {ORDER_STATUS_CONFIG[currentStatus].label}
                 </span>
             </div>
         </li>
@@ -373,7 +373,7 @@ export default function OrderDetailsPage() {
     const result = getCancelTarget(order);
     if (!result) return null;
     return {
-        config: statusConfig[result.targetStatus], 
+        config: ORDER_STATUS_CONFIG[result.targetStatus], 
         description: result.description
     };
   }, [order, getCancelTarget]);
@@ -405,14 +405,14 @@ export default function OrderDetailsPage() {
                 </div>
                 <p className="text-base-content/60 mt-1 ml-12 text-sm">วันที่สั่งซื้อ: {formatDateTime(order.Order_Date)}</p>
             </div>
-            <div className={`badge border-none px-4 py-3 md:py-5 rounded-lg font-medium text-sm md:text-xl flex items-center gap-2 ${statusConfig[order.Status]?.bgColor} ${statusConfig[order.Status]?.textColor}`}>
-                {statusConfig[order.Status]?.icon && React.createElement(statusConfig[order.Status].icon)}
-                {statusConfig[order.Status]?.label}
+            <div className={`badge border-none px-4 py-3 md:py-5 rounded-lg font-medium text-sm md:text-xl flex items-center gap-2 ${ORDER_STATUS_CONFIG[order.Status]?.bgColor} ${ORDER_STATUS_CONFIG[order.Status]?.textColor}`}>
+                {ORDER_STATUS_CONFIG[order.Status]?.icon && React.createElement(ORDER_STATUS_CONFIG[order.Status].icon)}
+                {ORDER_STATUS_CONFIG[order.Status]?.label}
             </div>
         </div>
 
         {/* Step Indicator */}
-        <OrderStepIndicator order={order} statusConfig={statusConfig} />
+        <OrderStepIndicator order={order} statusConfig={ORDER_STATUS_CONFIG} />
 
         <div className="divider my-8"></div>
 
@@ -689,9 +689,9 @@ export default function OrderDetailsPage() {
                 </div>
                 <div className="bg-base-50/50 p-6 border-t border-base-200">
                     <div className="flex flex-col gap-2 max-w-xs ml-auto">
-                        <div className="flex justify-between text-sm text-base-content/70"><span>รวมเป็นเงิน</span><span>{formatPrice(subtotalBeforeDiscount - subtotalBeforeDiscount * parseFloat(order.Current_Vat) / 100)}</span></div>
+                        <div className="flex justify-between text-sm text-base-content/70"><span>รวมเป็นเงิน</span><span>{formatPrice(subtotalBeforeDiscount - subtotalBeforeDiscount * order.Current_Vat / 100)}</span></div>
                         <div className="flex justify-between text-sm text-error"><span>ส่วนลด</span><span>- {formatPrice(subtotalBeforeDiscount - order.Total_Amount)}</span></div>
-                        <div className="flex justify-between text-sm text-base-content/70"><span>vat {order.Current_Vat}%</span><span>{formatPrice(subtotalBeforeDiscount / 100 * parseFloat(order.Current_Vat))}</span></div>
+                        <div className="flex justify-between text-sm text-base-content/70"><span>ภาษีมูลค่าเพิ่ม</span><span>{formatPrice(subtotalBeforeDiscount / 100 * order.Current_Vat)}</span></div>
                         <div className="flex justify-between text-sm text-green-600"><span>ค่าจัดส่ง</span><span>ฟรี</span></div>
                         <div className="divider my-1"></div>
                         <div className="flex justify-between items-center"><span className="font-bold text-lg">ยอดสุทธิ</span><span className="font-extrabold text-2xl text-green-600 underline-offset-1 underline">{formatPrice(order.Total_Amount)}</span></div>
@@ -718,7 +718,7 @@ export default function OrderDetailsPage() {
                 <div className="mt-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                     
                     <div className="text-sm text-base-content/70">
-                        * หมายเหตุ : สถานะ {statusConfig['waiting_payment'].label}, {statusConfig['pending'].label} สามารถดำเนินการขอยกเลิกคำสั่งซื้อได้
+                        * หมายเหตุ : สถานะ {ORDER_STATUS_CONFIG['waiting_payment'].label}, {ORDER_STATUS_CONFIG['pending'].label} สามารถดำเนินการขอยกเลิกคำสั่งซื้อได้
                     </div>
 
                     <button
@@ -748,12 +748,12 @@ export default function OrderDetailsPage() {
                         <textarea className="textarea textarea-bordered textarea-error h-24 w-full bg-base-50 focus:outline-none focus:ring-2 focus:ring-error/50" placeholder="เช่น เปลี่ยนใจ, สั่งผิด, ต้องการเปลี่ยนที่อยู่..." value={cancelReason} onChange={(e) => setCancelReason(e.target.value)} disabled={isCancelling}></textarea>
                     </div>
                     {targetStatusInfo && (
-                        <div className={`alert ${targetStatusInfo.config.bgColor} border ${targetStatusInfo.config.color.replace('text-', 'border-')} mt-4 flex flex-col sm:flex-row items-start gap-3 p-3 rounded-lg`}>
-                            <div className={`p-2 rounded-full bg-white/50 ${targetStatusInfo.config.color}`}>{React.createElement(targetStatusInfo.config.icon, { className: "w-5 h-5" })}</div>
+                        <div className={`alert ${targetStatusInfo.config.bgColor} border ${targetStatusInfo.config.textColor.replace('text-', 'border-')} mt-4 flex flex-col sm:flex-row items-start gap-3 p-3 rounded-lg`}>
+                            <div className={`p-2 rounded-full bg-white/50 ${targetStatusInfo.config.textColor}`}>{React.createElement(targetStatusInfo.config.icon, { className: "w-5 h-5" })}</div>
                             <div className="flex-1">
-                                <h3 className={`font-bold text-sm ${targetStatusInfo.config.color}`}>ผลการดำเนินการ</h3>
+                                <h3 className={`font-bold text-sm ${targetStatusInfo.config.textColor}`}>ผลการดำเนินการ</h3>
                                 <p className="text-xs opacity-80 mt-1">{targetStatusInfo.description}</p>
-                                <div className={`badge ${targetStatusInfo.config.color.replace('text-', 'badge-')} gap-1 mt-2 border-none ${targetStatusInfo.config.textColor}`}>สถานะใหม่ : {targetStatusInfo.config.label}</div>
+                                <div className={`badge ${targetStatusInfo.config.textColor.replace('text-', 'badge-')} gap-1 mt-2 border-none ${targetStatusInfo.config.textColor}`}>สถานะใหม่ : {targetStatusInfo.config.label}</div>
                             </div>
                         </div>
                     )}

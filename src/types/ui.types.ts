@@ -29,18 +29,17 @@ export type ModalMode = 'view' | 'edit' | 'add';
 export interface StatusConfig {
   [key: string]: {
     label: string;
-    color: string; // Tailwind/DaisyUI color class
     icon: React.ElementType;
     bgColor: string;
-    textColor?: string;
+    textColor: string;
   };
 }
 
 export interface PaymentConfig {
   [key: string]: {
     label: string;
-    color: string; // Tailwind/DaisyUI color class
     icon: React.ElementType;
     bgColor: string;
+    textColor: string;
   };
 }

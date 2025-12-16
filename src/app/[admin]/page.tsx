@@ -1,37 +1,33 @@
 'use client'
 import { useSession } from "next-auth/react";
-import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
 import LoadingSpinner from "../components/LoadingSpinner";
+import { useEffect } from "react";
 
 export default function AdminPage() {
     const { data: session, status } = useSession();
-
-    if (status == "loading") {
-        return <LoadingSpinner />;
-    }
-
+    const { replace } = useRouter();
     
-    if (!session || !session.user) {
-        redirect("/");
-    }
+    useEffect(() => {
+        
+        if (status !== "authenticated") return;
 
-    let URL = "/";
+        if (!session?.user) {
+            replace("/");
+            return;
+        }
 
-    if (session.user.Dashboard) {
-        URL = "/admin/dashboard";
-    }
-    else if (session.user.User_Mgr) {
-        URL = "/admin/user-management";
-    } 
-    else if (session.user.Stock_Mgr) {
-        URL = "/admin/product-management";
-    }
-    else if (session.user.Order_Mgr) {
-        URL = "/admin/order-management";
-    }
-    else if (session.user.Report) {
-        URL = "/admin/report";
-    }
+        let url = "/";
 
-    redirect(URL);
+        if (session.user.Dashboard)         url = "/admin/dashboard";
+        else if (session.user.User_Mgr)     url = "/admin/user-management";
+        else if (session.user.Stock_Mgr)    url = "/admin/product-management";
+        else if (session.user.Order_Mgr)    url = "/admin/order-management";
+        else if (session.user.Report)       url = "/admin/report";
+
+        replace(url);
+
+    }, [status, session, replace]);
+
+    return <LoadingSpinner />;
 }

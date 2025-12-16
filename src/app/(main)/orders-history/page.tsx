@@ -15,7 +15,7 @@ import { useOrderHistory } from '../../hooks/useOrderHistory';
 import { OrderStatus } from '../../../types';
 import { formatPrice } from '../../utils/formatters';
 import LoadingSpinner from '../../components/LoadingSpinner';
-import { statusConfig } from '@/app/utils/client';
+import { ORDER_STATUS_CONFIG } from '@/app/utils/client';
 // import { useAlert } from '@/app/context/AlertModalContext'; // ไม่ได้ใช้ในหน้านี้โดยตรง แต่ใช้ผ่าน hook
 
 // Status Config พร้อมสีและไอคอนที่สวยงาม
@@ -74,7 +74,7 @@ export default function OrderHistoryPage() {
           // Orders List
           <div className="space-y-6">
             {orders.map((order) => {
-              const statusInfo = statusConfig[order.Status as OrderStatus] || statusConfig.pending;
+              const statusInfo = ORDER_STATUS_CONFIG[order.Status as OrderStatus] || ORDER_STATUS_CONFIG.pending;
               const isRejected = order.Transaction_Status === 'rejected';
               const isShipped = order.Status === 'shipped';
 

@@ -141,7 +141,7 @@ export default function AdminSettingsPage() {
                   <div className="flex justify-between items-start mb-3">
                     <div>
                       <h3 className="font-semibold text-lg">{item.label}</h3>
-                      <div className="text-xs text-base-content/60 mt-1">{item.key}</div>
+                      {/* <div className="text-xs text-base-content/60 mt-1">{item.key}</div> */}
                     </div>
                     <button
                       className="btn btn-xs btn-ghost"

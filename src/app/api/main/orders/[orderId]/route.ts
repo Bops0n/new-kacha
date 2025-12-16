@@ -74,7 +74,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
         const buffer = Buffer.from(await transferSlipFile.arrayBuffer());
         const filename = `slip-${orderId}-${uuidv4()}${path.extname(transferSlipFile.name)}`;
 
-        if (process.env.APP_ENV === 'local') {
+        if (process.env.NODE_ENV === 'development') {
             const uploadDir = path.join(process.cwd(), 'public', `${process.env.UPLOAD_PATH}`, 'slips');
             await mkdir(uploadDir, { recursive: true });
 
@@ -89,7 +89,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
                 return NextResponse.json({ message: 'ไม่สามารถอัปโหลดไฟล์ได้!' }, { status: 500 });
             }
         }
-        const imageUrl = `${process.env.APP_ENV !== 'local' ? process.env.CDN_URL : process.env.UPLOAD_PATH}/slips/${filename}`;
+        const imageUrl = `${process.env.NODE_ENV !== 'development' ? process.env.CDN_URL : process.env.UPLOAD_PATH}/slips/${filename}`;
 
         const result = await uploadTransactionSlip(imageUrl, orderId);
 
