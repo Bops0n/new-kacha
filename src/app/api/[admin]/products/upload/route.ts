@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import path from 'path';
-import { writeFile, mkdir } from 'fs/promises';
 import { v4 as uuidv4 } from 'uuid';
 import { checkRequire } from '@/app/utils/client';
 import { checkStockMgrRequire } from '../../../auth/utils';
 import { logger } from '@/server/logger';
+import { uploadImage } from '@/app/api/services/upload/uploadService';
+import path from 'path';
 
 export async function POST(req: NextRequest) {
     const auth = await checkStockMgrRequire();
@@ -22,29 +22,20 @@ export async function POST(req: NextRequest) {
         const buffer = Buffer.from(await file.arrayBuffer());
         const filename = `${uuidv4()}${path.extname(file.name)}`;
 
-        if (process.env.NODE_ENV === 'development') {
-            const uploadDir = path.join(process.cwd(), 'public', `${process.env.UPLOAD_PATH}`, 'products');
-            await mkdir(uploadDir, { recursive: true });
+        const folder = 'products';
 
-            const filePath = path.join(uploadDir, filename);
-            await writeFile(filePath, buffer);
+        const isSuccess = await uploadImage(folder, filename, buffer);
+        if (isSuccess) {
+            const imageUrl = `${process.env.NODE_ENV !== 'development' ? process.env.CDN_URL : process.env.UPLOAD_PATH}/${folder}/${filename}`;
+
+            return NextResponse.json({ 
+                message: 'File uploaded successfully.', 
+                imageUrl: imageUrl 
+            }, { status: 201 });
+
         } else {
-            const uploadPath = process.env.UPLOAD_PATH;
-            if (uploadPath) {
-                const filePath = path.join(uploadPath, 'products', filename);
-                await writeFile(filePath, buffer);
-            } else {
-                return NextResponse.json({ message: 'ไม่สามารถอัปโหลดไฟล์ได้!' }, { status: 500 });
-            }
+            return NextResponse.json({ message: 'ไม่สามารถอัปโหลดไฟล์ได้!' }, { status: 500 });
         }
-
-        const imageUrl = `${process.env.NODE_ENV !== 'development' ? process.env.CDN_URL : process.env.UPLOAD_PATH}/products/${filename}`;
-
-        return NextResponse.json({ 
-            message: 'File uploaded successfully.', 
-            imageUrl: imageUrl 
-        }, { status: 201 });
-
     } catch (error) {
         logger.error('File upload error:', { error: error });
         return NextResponse.json({ message: "Server Error during file upload." }, { status: 500 });

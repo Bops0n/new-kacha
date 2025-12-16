@@ -3,29 +3,30 @@ import { authenticateRequest } from '@/app/api/auth/utils';
 import { cancelOrder, getOrderById } from '@/app/api/services/user/orderService';
 import { v4 as uuidv4 } from 'uuid';
 import path from 'path';
-import { writeFile, mkdir } from 'fs/promises';
 import { checkRequire } from '@/app/utils/client';
 import { uploadTransactionSlip } from '@/app/api/services/user/userServices';
 import { logger } from '@/server/logger';
+import { uploadImage } from '@/app/api/services/upload/uploadService';
 
 /**
  * GET /api/main/orders/[orderId]
  * Retrieves detailed information for a specific order for the authenticated user.
  */
-export async function GET(request: NextRequest, { params }: { params: Promise<{ orderId: number }> }) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ orderId: string }> }) {
     const auth = await authenticateRequest();
     const isCheck = checkRequire(auth);
     if (isCheck) return isCheck;
 
     const { orderId } = await params;
-    
-    if (isNaN(orderId)) {
+    const parseId = Number(orderId);
+
+    if (isNaN(parseId)) {
         return NextResponse.json({ message: 'Invalid Order ID' }, { status: 400 });
     }
 
     try {
         // เรียกใช้ Service ที่อัปเดตแล้ว
-        const order = await getOrderById(orderId);
+        const order = await getOrderById(parseId);
         if (!order) {
             return NextResponse.json({ message: 'ไม่พบคำสั่งซื้อ' }, { status: 404 });
         }
@@ -45,14 +46,15 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
  * PATCH /api/main/orders/[orderId]
  * Updates the transfer slip image URL for a specific order.
  */
-export async function PATCH(request: NextRequest, { params }: { params: Promise<{ orderId: number }> }) {
+export async function PATCH(request: NextRequest, { params }: { params: Promise<{ orderId: string }> }) {
     const auth = await authenticateRequest();
     const isCheck = checkRequire(auth);
     if (isCheck) return isCheck;
 
     const { orderId } = await params;
+    const parseId = Number(orderId);
 
-    if (isNaN(orderId)) {
+    if (isNaN(parseId)) {
         return NextResponse.json({ message: 'รหัสคำสั่งซื้อไม่ถูกต้อง' }, { status: 400 });
     }
 
@@ -72,32 +74,30 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
         }
         
         const buffer = Buffer.from(await transferSlipFile.arrayBuffer());
-        const filename = `slip-${orderId}-${uuidv4()}${path.extname(transferSlipFile.name)}`;
+        const filename = `slip-${parseId}-${uuidv4()}${path.extname(transferSlipFile.name)}`;
 
-        if (process.env.NODE_ENV === 'development') {
-            const uploadDir = path.join(process.cwd(), 'public', `${process.env.UPLOAD_PATH}`, 'slips');
-            await mkdir(uploadDir, { recursive: true });
+        const folder = 'slips';
+                
+        const isSuccess = await uploadImage(folder, filename, buffer);
+        if (isSuccess) {
 
-            const filePath = path.join(uploadDir, filename);
-            await writeFile(filePath, buffer);
-        } else {
-            const uploadPath = process.env.UPLOAD_PATH;
-            if (uploadPath) {
-                const filePath = path.join(uploadPath, 'slips', filename);
-                await writeFile(filePath, buffer);
+            const imageUrl = `${process.env.NODE_ENV !== 'development' ? process.env.CDN_URL : process.env.UPLOAD_PATH}/${folder}/${filename}`;
+
+            const result = await uploadTransactionSlip(imageUrl, parseId);
+
+            if (result) {
+
+                return NextResponse.json({ 
+                    message: 'File uploaded successfully.', 
+                }, { status: 201 });
+
             } else {
-                return NextResponse.json({ message: 'ไม่สามารถอัปโหลดไฟล์ได้!' }, { status: 500 });
+                return NextResponse.json({ message: 'บันทึกลงฐานข้อมูลไม่สำเร็จ!' }, { status: 500 });
             }
+
+        } else {
+            return NextResponse.json({ message: 'ไม่สามารถอัปโหลดไฟล์ได้!' }, { status: 500 });
         }
-        const imageUrl = `${process.env.NODE_ENV !== 'development' ? process.env.CDN_URL : process.env.UPLOAD_PATH}/slips/${filename}`;
-
-        const result = await uploadTransactionSlip(imageUrl, orderId);
-
-        if (!result) {
-            return NextResponse.json({ message: 'อัปโหลดสลิปล้มเหลว!' }, { status: 500 });
-        }
-
-        return NextResponse.json({ message: 'อัปโหลดสลิปสำเร็จ', imageUrl });
 
     } catch (error) {
         logger.error('Error uploading transfer slip:', { error: error });
@@ -105,12 +105,13 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     }
 }
 
-export async function DELETE(request: NextRequest, { params }: { params: Promise<{ orderId: number }> }) {
+export async function DELETE(request: NextRequest, { params }: { params: Promise<{ orderId: string }> }) {
     const auth = await authenticateRequest();
     const isCheck = checkRequire(auth);
     if (isCheck) return isCheck;
 
     const { orderId } = await params;
+    const parseId = Number(orderId);
 
     try {
         const { reason } = await request.json();
@@ -119,7 +120,7 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
             return NextResponse.json({ message: 'กรุณาระบุเหตุผลการยกเลิก' }, { status: 400 });
         }
 
-        const result = await cancelOrder(orderId, Number(auth.userId), reason);
+        const result = await cancelOrder(parseId, Number(auth.userId), reason);
 
         if (result.Status_Code !== 200) {
              return NextResponse.json({ message: result.Message }, { status: result.Status_Code });

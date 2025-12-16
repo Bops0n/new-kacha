@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { writeFile, unlink, mkdir } from "fs/promises";
 import path from "path";
 import { logger } from "@/server/logger";
+import { uploadImage } from "@/app/api/services/upload/uploadService";
 
 const MAX_FILE_SIZE = 1024 * 1024 * 3; // 3MB
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"];
@@ -46,44 +47,20 @@ export async function POST(req: Request) {
     const ext = path.extname(file.name);
     const filename = `${Date.now()}-${Math.random().toString(36).substring(2)}${ext}`;
 
-    if (process.env.NODE_ENV === 'development') {
-      const uploadDir = path.join(process.cwd(), 'public', `${process.env.UPLOAD_PATH}`, 'settings');
-      await mkdir(uploadDir, { recursive: true });
+    const folder = 'settings';
+    
+    const isSuccess = await uploadImage(folder, filename, buffer, oldFile);
+    if (isSuccess) {
+        const imageUrl = `${process.env.NODE_ENV !== 'development' ? process.env.CDN_URL : process.env.UPLOAD_PATH}/${folder}/${filename}`;
 
-      const filePath = path.join(uploadDir, filename);
-      await writeFile(filePath, buffer);
+        return NextResponse.json({ 
+            message: 'File uploaded successfully.', 
+            url: imageUrl
+        }, { status: 201 });
 
-      if (oldFile) {
-        const oldPath = path.join(process.cwd(), "public", oldFile);
-        try {
-          await unlink(oldPath);
-        } catch {
-          logger.warn("ลบไฟล์เก่าไม่สำเร็จ (อาจไม่มีอยู่แล้ว)");
-        }
-      }
     } else {
-      const uploadPath = process.env.UPLOAD_PATH;
-      if (uploadPath) {
-          const filePath = path.join(uploadPath, 'settings', filename);
-          await writeFile(filePath, buffer);
-
-          if (oldFile) {
-            const oldPath = path.join(uploadPath, oldFile);
-            try {
-              await unlink(oldPath);
-            } catch {
-              logger.warn("ลบไฟล์เก่าไม่สำเร็จ (อาจไม่มีอยู่แล้ว)");
-            }
-          }
-      } else {
-          return NextResponse.json({ message: 'ไม่สามารถอัปโหลดไฟล์ได้!' }, { status: 500 });
-      }
-      
+        return NextResponse.json({ message: 'ไม่สามารถอัปโหลดไฟล์ได้!' }, { status: 500 });
     }
-
-    const imageUrl = `${process.env.NODE_ENV !== 'development' ? process.env.CDN_URL : process.env.UPLOAD_PATH}/settings/${filename}`;
-
-    return NextResponse.json({ message: 'File uploaded successfully.', url: imageUrl }, { status: 201 });
 
   } catch (err) {
     logger.error("UPLOAD ERROR:", { error: err });

@@ -1,4 +1,3 @@
-// import { AlertModalProvider } from "..//AlertModalContext";
 import { Metadata } from "next";
 import { getWebsiteSettings } from "../api/services/website/settingService";
 import { CartCountProvider } from "../context/CartCount";

@@ -1,13 +1,13 @@
 import { getSettingFromDB } from "../api/services/website/settingService";
 
-const settingsCache = new Map<WEBSITE_SETTING_KEYS, string>();
+const settingsCache = new Map<string, string>();
 let settingsInitialized = false;
 
-export function getCachedSetting(key: WEBSITE_SETTING_KEYS): string | null {
+export function getCachedSetting(key: string): string | null {
     return settingsCache.get(key) ?? null;
 }
 
-export function updateCachedSetting(key: WEBSITE_SETTING_KEYS, value: string): void {
+export function updateCachedSetting(key: string, value: string): void {
     settingsCache.set(key, value);
 }
 
@@ -371,7 +371,7 @@ export interface WEBSITE_SETTING_DEFINITION {
 }
 
 
-export function getSettingDefinition(key: WEBSITE_SETTING_KEYS): WEBSITE_SETTING_INFO {
+export function getSettingDefinition(key: string): WEBSITE_SETTING_INFO {
   const def = WEBSITE_SETTINGS_DEF.find(d => d.key === key);
   if (!def) throw new Error(`Unknown website setting key: ${key}`);
   return def;

@@ -3,11 +3,11 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { getOrderNextStep, Order, OrderShipping, SimpleProductDetail } from '@/types';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
-import { STEP_TYPE, StepFlowBar } from '@/app/[admin]/components/order-management/StepFlowComponent';
+import { STEP_TYPE, StepFlowBar } from '../../components/order-management/StepFlowComponent';
 import { useAlert } from '@/app/context/AlertModalContext';
-import { OrderNavigation } from '@/app/[admin]/components/order-management/OrderNavigation';
-import OrderHeaderInfo from '@/app/[admin]/components/order-management/OrderHeaderInfo';
-import OrderCheckInfo from '@/app/[admin]/components/order-management/OrderCheckInfo';
+import { OrderNavigation } from '../../components/order-management/OrderNavigation';
+import OrderHeaderInfo from '../../components/order-management/OrderHeaderInfo';
+import OrderCheckInfo from '../../components/order-management/OrderCheckInfo';
 import OrderShippingInfo from '../../components/order-management/OrderShippingInfo';
 import OrderShippedInfo from '../../components/order-management/OrderShippedInfo';
 import OrderRefundInfo from '../../components/order-management/OrderRefundInfo';

@@ -1,12 +1,12 @@
 import { poolQuery } from "../../lib/db";
 import { getCachedSetting, getSettingDefinition, isSettingsInitialized, setAllSettingsCache, updateCachedSetting, WEBSITE_SETTING_DEFINITION, WEBSITE_SETTING_GROUP, WEBSITE_SETTING_KEYS, WEBSITE_SETTING_TYPE, WEBSITE_SETTINGS_DEF } from "@/app/utils/setting";
 
-export async function getSettingFromDB(key: WEBSITE_SETTING_KEYS): Promise<string | null> {
+export async function getSettingFromDB(key: string): Promise<string | null> {
     const { rows } = await poolQuery(`SELECT * FROM master."SP_MASTER_WEBSITE_SETTING_GET"($1)`, [key]);
     return rows[0]?.VALUE ?? null;
 }
 
-export async function setSettingToDB(key: WEBSITE_SETTING_KEYS, value: string, type: WEBSITE_SETTING_TYPE, group: WEBSITE_SETTING_GROUP, userId: number): Promise<boolean> {
+export async function setSettingToDB(key: string, value: string, type: WEBSITE_SETTING_TYPE, group: WEBSITE_SETTING_GROUP, userId: number): Promise<boolean> {
     const { rowCount } = await poolQuery(`SELECT * FROM master."SP_MASTER_WEBSITE_SETTING_UPD"($1, $2, $3, $4, $5)`, 
       [key, value, type, group, userId]);
     return rowCount !== null && rowCount > 0;
@@ -17,7 +17,7 @@ export async function loadAllSettingsFromDB() {
     return rows.map(({ KEY, VALUE }: { KEY: WEBSITE_SETTING_KEYS, VALUE: string }) => ({ key: KEY, value: VALUE }));
 }
 
-export async function getSettingHistory(key: WEBSITE_SETTING_KEYS, limit: number = 20) {
+export async function getSettingHistory(key: string, limit: number = 20) {
   const { rows } = await poolQuery(`SELECT * FROM master."SP_MASTER_WEBSITE_SETTING_HISTORY_GET"($1, $2)`, [key, limit]);
   return rows;
 }
@@ -28,7 +28,7 @@ async function ensureSettingsLoaded() {
   setAllSettingsCache(all);
 }
 
-export async function getSettingRaw(key: WEBSITE_SETTING_KEYS): Promise<string> {
+export async function getSettingRaw(key: string): Promise<string> {
   await ensureSettingsLoaded();
 
   const def = getSettingDefinition(key);
@@ -66,7 +66,7 @@ function parseByType(raw: string, type: WEBSITE_SETTING_TYPE): number | boolean 
   }
 }
 
-export async function getSettingTyped<T = unknown>(key: WEBSITE_SETTING_KEYS): Promise<T> {
+export async function getSettingTyped<T = unknown>(key: string): Promise<T> {
   const def = getSettingDefinition(key);
   const raw = await getSettingRaw(key);
   return parseByType(raw, def.type) as T;
@@ -133,7 +133,7 @@ export async function getWebsiteSettings(): Promise<WEBSITE_SETTING_DEFINITION> 
 }
 
 /** Save + History + Cache */
-export async function updateSetting(key: WEBSITE_SETTING_KEYS, value: string, type: WEBSITE_SETTING_TYPE, group: WEBSITE_SETTING_GROUP, userId: number) {
+export async function updateSetting(key: string, value: string, type: WEBSITE_SETTING_TYPE, group: WEBSITE_SETTING_GROUP, userId: number) {
   await ensureSettingsLoaded();
 
   const def = getSettingDefinition(key);

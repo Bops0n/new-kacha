@@ -2,15 +2,16 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getProductDetail } from '@/app/api/services/user/userServices';
 import { logger } from '@/server/logger';
 
-export async function GET(request: NextRequest, { params }: { params: Promise<{ productId: number }> }) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ productId: string }> }) {
   const { productId } = await params;
+  const parseId = Number(productId);
 
-  if (!productId || isNaN(Number(productId))) {
+  if (!parseId || isNaN(parseId)) {
     return NextResponse.json({ message: 'Product ID ไม่ถูกต้อง' }, { status: 400 });
   }
 
   try {
-    const { Status_Code, Message, Product, Related_Products, Category_Path } = await getProductDetail(productId);
+    const { Status_Code, Message, Product, Related_Products, Category_Path } = await getProductDetail(parseId);
 
     if (Status_Code != 200) {
       return NextResponse.json({ message: Message }, { status: Status_Code });  
