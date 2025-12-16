@@ -1,3 +1,5 @@
+import { OrderStatus } from "./order.types";
+
 export interface TopProduct {
   Product_ID: number;
   Product_Name: string;
@@ -12,7 +14,7 @@ export interface RecentOrder {
   Customer_Name: string;
   Order_Date: string;
   Total_Amount: number;
-  Status: string;
+  Status: OrderStatus;
   Update_At: string;
 }
 

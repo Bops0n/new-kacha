@@ -1,22 +1,25 @@
 import React from 'react';
-import { FiEdit, FiTrash2 } from 'react-icons/fi'; // Removed FiEye
+import { FiEdit, FiTrash2 } from 'react-icons/fi';
 import { AccessInfo, UserAccount } from '@/types';
+import { ACCESS_LEVEL_CONFIG } from '@/app/utils/client';
 
 interface UserRowProps {
   user: UserAccount;
   access: AccessInfo | undefined;
-  openUserModal: (user: UserAccount) => void; // Changed from viewUserDetails
+  openUserModal: (user: UserAccount) => void;
   deleteUser: (userId: number) => void;
 }
 
 const UserRow: React.FC<UserRowProps> = ({
   user,
   access,
-  openUserModal, // Renamed prop
+  openUserModal,
   deleteUser,
 }) => {
+  
+  const AccessInfo = ACCESS_LEVEL_CONFIG[access?.Level ?? 0];
+
   return (
-    // Make the entire row clickable to open the modal in view mode
     <tr className="hover cursor-pointer" onClick={() => openUserModal(user)}>
       <td><div className="font-bold text-primary">{user.User_ID}</div></td>
       <td>{user.Username}</td>
@@ -24,24 +27,10 @@ const UserRow: React.FC<UserRowProps> = ({
       <td>{user.Email || '-'}</td>
       <td>{user.Phone || '-'}</td>
       <td>
-        <span className={`badge ${(
-          !access ? 'badge-error' : 
-          access.Sys_Admin ? 'badge-primary' : 
-          access.User_Mgr ? 'badge-secondary' : 
-          access.Stock_Mgr ? 'badge-accent' : 
-          access.Order_Mgr ? 'badge-info' : 
-          access.Report ? 'badge-success' : 
-          access.Dashboard ? 'badge-warning' : 
-          'badge-neutral'
-          )}`}>
-          {(
-            !access ? 'ไม่ระบุ' : access.Name
-            )}
-        </span>
+        <span className={`badge ${AccessInfo.bgColor} ${AccessInfo.textColor}`}>{(!access ? 'ไม่ระบุ' : access.Name)}</span>
       </td>
       <td>
         <div className="flex gap-1">
-          {/* Button to open modal in edit mode directly (optional, but good for direct access) */}
           <button
             className="btn btn-sm btn-ghost btn-square"
             onClick={(e) => {

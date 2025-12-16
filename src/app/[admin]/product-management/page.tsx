@@ -577,7 +577,7 @@ export default function ProductManagementPage() {
                 totalItemsCount={filteredProducts.length}
                 onPageChange={page => setCurrentPage(page)}
                 totalPages={totalPages}
-                />
+            />
 
             <ProductModal 
                 {...modalProps}

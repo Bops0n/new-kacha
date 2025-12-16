@@ -1,4 +1,4 @@
-import { PaymentConfig, StatusConfig } from "@/types";
+import { AccessLeveLConfig, PaymentConfig, StatusConfig } from "@/types";
 import { AUTH_CHECK } from "@/types/auth.types";
 import { NextResponse } from "next/server";
 import { BsBank, BsCash } from "react-icons/bs";
@@ -9,6 +9,33 @@ export const checkRequire = (auth: AUTH_CHECK) => {
     if (!auth.authenticated) return auth.response;
     if (auth.accessLevel < 0) return NextResponse.json({ message: 'Forbidden' }, { status: 403 });
     return null;
+};
+
+export const ACCESS_LEVEL_CONFIG: AccessLeveLConfig = {
+    0: { 
+        bgColor: 'bg-gray-200',
+        textColor: 'text-gray-800',
+    },
+    1: { 
+        bgColor: 'bg-rose-100',
+        textColor: 'text-rose-800',
+    },
+    2: { 
+        bgColor: 'bg-amber-100',
+        textColor: 'text-amber-800',
+    },
+    3: { 
+        bgColor: 'bg-green-100',
+        textColor: 'text-green-800',
+    },
+    4: { 
+        bgColor: 'bg-blue-100',
+        textColor: 'text-blue-800',
+    },
+    999: { 
+        bgColor: 'bg-purple-100',
+        textColor: 'text-purple-800',
+    }
 };
 
 export const ORDER_STATUS_CONFIG: StatusConfig = {

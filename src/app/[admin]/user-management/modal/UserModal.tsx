@@ -1,4 +1,4 @@
-'use client'; // Client Component
+'use client';
 
 import React from 'react';
 import {
@@ -9,8 +9,8 @@ import {
   FiPlus
 } from 'react-icons/fi';
 import { AddressSchema, AccessInfo, UserEditForm, UserSchema } from '@/types';
+import { ACCESS_LEVEL_CONFIG } from '@/app/utils/client';
 
-// กำหนด Props สำหรับ UserModal
 interface UserModalProps {
   showModal: boolean;
   onClose: () => void;
@@ -21,11 +21,11 @@ interface UserModalProps {
   handleUserFormChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
   saveUserDetails: () => void;
   deleteUser: (userId: number) => void;
-  getAccessLevelLabel: (accesses: AccessInfo[], level: number) => string;
+  access:  AccessInfo | undefined;
+  accesses: AccessInfo[];
   handleAddAddressClick: () => void;
   handleEditAddressClick: (address: AddressSchema) => void;
   deleteAddress: (addressId: number, userId: number) => void;
-  accesses: AccessInfo[];
 }
 
 const UserModal: React.FC<UserModalProps> = ({
@@ -38,31 +38,23 @@ const UserModal: React.FC<UserModalProps> = ({
   handleUserFormChange,
   saveUserDetails,
   deleteUser,
-  getAccessLevelLabel,
+  access,
+  accesses,
   handleAddAddressClick,
   handleEditAddressClick,
-  deleteAddress,
-  accesses
+  deleteAddress
 }) => {
   if (!showModal) return null;
 
-  // แทนที่ window.confirm ด้วย Alert Component ของคุณเองใน Production
   const confirmDeleteUser = (userId: number) => {
-    // Implement your custom confirmation modal here instead of window.confirm
-    // For now, using a placeholder:
-    // if (window.confirm(`คุณแน่ใจหรือไม่ที่จะลบผู้ใช้ User ID: ${userId}?`)) {
-        deleteUser(userId);
-    // }
+    deleteUser(userId);
   };
 
   const confirmDeleteAddress = (addressId: number, userId: number) => {
-    // Implement your custom confirmation modal here instead of window.confirm
-    // For now, using a placeholder:
-    // if (window.confirm('คุณแน่ใจหรือไม่ที่จะลบที่อยู่นี้?')) {
-      deleteAddress(addressId, userId);
-    // }
+    deleteAddress(addressId, userId);
   };
 
+  const AccessInfo = ACCESS_LEVEL_CONFIG[selectedUser?.Access_Level ?? 0];
 
   return (
     <div className="modal modal-open">
@@ -120,7 +112,11 @@ const UserModal: React.FC<UserModalProps> = ({
                     <p><strong>ชื่อ - นามสกุล:</strong> {selectedUser.Full_Name}</p><br/>
                     <p><strong>อีเมล:</strong> {selectedUser.Email || '-'}</p><br/>
                     <p><strong>เบอร์โทร:</strong> {selectedUser.Phone || '-'}</p><br/>
-                    <p><strong>ระดับการเข้าถึง:</strong> {getAccessLevelLabel(accesses, selectedUser.Access_Level)}</p>
+                    <p><strong>ระดับการเข้าถึง:</strong> 
+                      <span className={`badge ${AccessInfo.bgColor} ${AccessInfo.textColor}`}>
+                        {(!access ? 'ไม่ระบุ' : access.Name)}
+                      </span>
+                    </p>
                   </>
                 )
               )}

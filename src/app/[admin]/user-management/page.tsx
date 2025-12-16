@@ -7,10 +7,10 @@ import {
   FiUser,
 } from 'react-icons/fi';
 
-import UserRow from './UserRow'; // Correct path to components
-import UserCard from './UserCard'; // Correct path to components
-import UserModal from './modal/UserModal'; // <-- นำเข้า UserModal
-import AddressModal from '@/app/(main)/components/AddressModal'; // <-- นำเข้า AddressModal
+import UserRow from './UserRow';
+import UserCard from './UserCard';
+import UserModal from './modal/UserModal';
+import AddressModal from '@/app/(main)/components/AddressModal';
 import { useAlert } from '@/app/context/AlertModalContext';
 import Pagination from '@/app/components/Pagination';
 import { AccessInfo } from '@/types/';
@@ -18,18 +18,6 @@ import { AddressSchema, UserAccount, UserEditForm } from '@/types';
 import LoadingSpinner from '@/app/components/LoadingSpinner';
 import { useSession } from 'next-auth/react';
 import AccessDeniedPage from '@/app/components/AccessDenied';
-
-// Helper function to map access level char to readable string
-
-const getAccessLevel = (accesses: AccessInfo[], level: number): AccessInfo | undefined => {
-  return accesses.find(x => x.Level == level);
-};
-
-const getAccessLevelLabel = (accesses: AccessInfo[], level: number): string => {
-  const access = getAccessLevel(accesses, level);
-  if (!access) return "ไม่ระบุ";
-  return access.Name;
-};
 
 export default function UserManagement() {
   const { showAlert } = useAlert();
@@ -44,7 +32,7 @@ export default function UserManagement() {
 
   const [selectedUser, setSelectedUser] = useState<UserAccount | null>(null);
   const [showUserModal, setShowUserModal] = useState<boolean>(false);
-  const [isEditing, setIsEditing] = useState<boolean>(false); // True for edit mode, false for add new
+  const [isEditing, setIsEditing] = useState<boolean>(false);
 
   const [editFormData, setEditFormData] = useState<UserEditForm>({
     User_ID: null,
@@ -57,19 +45,14 @@ export default function UserManagement() {
     Addresses: [],
   });
 
-
   const [showAddAddressModal, setShowAddAddressModal] = useState<boolean>(false);
   const [addressToEdit, setAddressToEdit] = useState<AddressSchema | null>(null);
 
-  // Pagination states
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [itemsPerPage, setItemsPerPage] = useState<number>(10);
   const [paginatedUsers, setPaginatedUsers] = useState<UserAccount[]>([]);
   const [totalPages, setTotalPages] = useState<number>(1);
 
-
-
-  // --- call data from api ---
   useEffect(() => {
     async function apiGetUsers() {
       try {
@@ -136,15 +119,12 @@ export default function UserManagement() {
     setCurrentPage(1);
   };
 
-  // --- User Actions ---
-  // Opens modal in VIEW mode
   const openUserModal = async(user: UserAccount) => {
     setSelectedUser(user);
 
     const response = await fetch(`../api/admin/user/getAddress?UserId=${user.User_ID}`)
     const data = await response.json()
 
-    // Populate form data with current user's data for potential edit later
     setEditFormData({
       User_ID: user.User_ID,
       Username: user.Username,
@@ -155,16 +135,14 @@ export default function UserManagement() {
       Access_Level: user.Access_Level,
       Addresses: data.addresses || [],
     });
-    setIsEditing(false); // Set to view mode
+    setIsEditing(false);
     setShowUserModal(true);
   };
 
-  // Toggles between VIEW and EDIT mode within the modal
   const toggleEditMode = () => {
     setIsEditing(prev => !prev);
   };
 
-  // Handles adding a new user, opens modal in ADD mode
   const handleAddUserClick = () => {
     setEditFormData({
       User_ID: null,
@@ -176,24 +154,20 @@ export default function UserManagement() {
       Access_Level: 0,
       Addresses: [],
     });
-    setSelectedUser(null); // No user selected for new user
-    setIsEditing(true); // Set to edit/add mode for new user
+    setSelectedUser(null);
+    setIsEditing(true);
     setShowUserModal(true);
   };
 
   const saveUserDetails = async() => {
 
     if (!editFormData.Username) {
-      showAlert('กรุณากรอก Username และ Full Name'); // Replace with custom modal
-      // Using a placeholder for custom alert
-      // showAlert('กรุณากรอก Username และ Full Name');
+      showAlert('กรุณากรอกชื่อผู้ใช้งาน และชื่อ - นามสกุล');
       return;
     }
-    // Password validation only for new users or if password field is explicitly changed in edit mode
+
     if (!isEditing && !editFormData.Password) {
       showAlert('กรุณากำหนดรหัสผ่านสำหรับผู้ใช้ใหม่');
-      // Using a placeholder for custom alert
-      // showAlert('กรุณากำหนดรหัสผ่านสำหรับผู้ใช้ใหม่');
       return;
     }
     
@@ -274,13 +248,12 @@ export default function UserManagement() {
     }
 
     setSelectedUser(newOrUpdatedUser);
-    setIsEditing(false); // Switch back to view mode after saving
-    //setShowUserModal(false); // Keep modal open in view mode after save
-  };
+    setIsEditing(false);
+  };const getAccessLevel = (accesses: AccessInfo[], level: number): AccessInfo | undefined => {
+  return accesses.find(x => x.Level == level);
+};
 
   const deleteUser = async(userId: number) => {
-    // if (!window.confirm(`คุณแน่ใจหรือไม่ที่จะลบผู้ใช้ User ID: ${userId}?`)) return
-
     showAlert(`คุณแน่ใจหรือไม่ที่จะลบผู้ใช้ User ID: ${userId}?`,'warning','แจ้งเตือน',async()=>{
       setUsers(prev => prev.filter(u => u.User_ID !== userId));
       const response = await fetch(`../api/admin/user/deleteUser?id=${userId}`,{
@@ -293,16 +266,15 @@ export default function UserManagement() {
     })
   };
 
-  // --- Address Actions within User Modal ---
   const handleAddAddressClick = () => {
     if (selectedUser) {
-      setAddressToEdit(null); // Not editing existing address
+      setAddressToEdit(null);
       setShowAddAddressModal(true);
     }
   };
 
   const handleEditAddressClick = (address: AddressSchema) => {
-    setAddressToEdit(address); // Set the address being edited
+    setAddressToEdit(address);
     setShowAddAddressModal(true);
   };
 
@@ -381,7 +353,6 @@ export default function UserManagement() {
 
 
   const deleteAddress = async(addressId: number, userId: number) => {
-    // if (window.confirm('คุณแน่ใจหรือไม่ที่จะลบที่อยู่นี้?')) {
     showAlert(`คุณแน่ใจหรือไม่ท่จะลบที่อยู่นี้ : ${addressId}`,'warning','',async()=>{
       if (selectedUser) {
         await fetch(`../api/admin/user/deleteAddress?id=${addressId}`,{
@@ -394,10 +365,8 @@ export default function UserManagement() {
         setEditFormData(prev => ({ ...prev, Addresses: updatedAddresses }));
       }
     })
-    // }
   };
 
-  // --- Form Change Handlers ---
   const handleUserFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const target = e.target;
     const name = target.name;
@@ -539,42 +508,15 @@ export default function UserManagement() {
           </div>
         )}
 
-
         {/* Pagination Section */}
         {filteredUsers.length > 0 && (
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 border-t bg-base-100 rounded-b-lg shadow-sm mt-4">
-            <div className="text-sm text-base-content/70">
-              แสดงรายการ {((currentPage - 1) * itemsPerPage) + 1} ถึง {Math.min(currentPage * itemsPerPage, filteredUsers.length)} จากทั้งหมด {filteredUsers.length} รายการ
-            </div>
-
-            <div className="flex flex-wrap justify-center sm:justify-start gap-1">
-              <button
-                className={`btn btn-sm ${currentPage == 1 ? 'btn-disabled' : ''}`}
-                onClick={() => handlePageChange(currentPage - 1)}
-                disabled={currentPage == 1}
-              >
-                ก่อนหน้า
-              </button>
-
-              <div className="flex flex-wrap justify-center gap-1">
-                <Pagination
-                  currentPage={currentPage}
-                  itemsPerPage={itemsPerPage}
-                  totalItemsCount={filteredUsers.length}
-                  totalPages={totalPages}
-                  onPageChange={handlePageChange}
-                />
-              </div>
-
-              <button
-                className={`btn btn-sm ${currentPage == totalPages ? 'btn-disabled' : ''}`}
-                onClick={() => handlePageChange(currentPage + 1)}
-                disabled={currentPage == totalPages}
-              >
-                ถัดไป
-              </button>
-            </div>
-          </div>
+          <Pagination
+            currentPage={currentPage}
+            itemsPerPage={itemsPerPage}
+            totalItemsCount={filteredUsers.length}
+            totalPages={totalPages}
+            onPageChange={handlePageChange}
+          />
         )}
 
         {/* Render UserModal */}
@@ -588,28 +530,20 @@ export default function UserManagement() {
           handleUserFormChange={handleUserFormChange}
           saveUserDetails={saveUserDetails}
           deleteUser={deleteUser}
-          getAccessLevelLabel={getAccessLevelLabel}
+          access={getAccessLevel(accesses, selectedUser?.Access_Level ?? 0)}
+          accesses={accesses}
           handleAddAddressClick={handleAddAddressClick}
           handleEditAddressClick={handleEditAddressClick}
           deleteAddress={deleteAddress}
-          accesses={accesses}
         />
 
         {/* Render AddressModal */}
         <AddressModal
-        isOpen={showAddAddressModal}
-        onClose={() => setShowAddAddressModal(false)}
-        onSave={saveAddress}
-        initialData={addressToEdit}
-          // addressToEdit={addressToEdit
-          // showModal={showAddAddressModal}
-          // onClose={() => setShowAddAddressModal(false)}
-          // addressToEdit={addressToEdit}
-          // newAddressForm={newAddressForm}
-          // handleAddressFormChange={handleAddressFormChange}
-          // saveAddress={saveAddress}
+          isOpen={showAddAddressModal}
+          onClose={() => setShowAddAddressModal(false)}
+          onSave={saveAddress}
+          initialData={addressToEdit}
         />
-
       </div>
     </div>
   );

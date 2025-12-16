@@ -1,10 +1,8 @@
-// types/ui.types.ts
 import React from 'react';
+import { OrderStatus, Payment_Type } from './order.types';
 
-// --- UI Component Props ---
-
-// Props สำหรับ AlertModal
 export type AlertModalType = 'info' | 'success' | 'warning' | 'error';
+export type ModalMode = 'view' | 'edit' | 'add';
 
 export interface AlertModalProps {
   isOpen: boolean;
@@ -15,31 +13,28 @@ export interface AlertModalProps {
   onConfirm?: () => void;
 }
 
-// +++ START: เพิ่ม Type ใหม่สำหรับ Modal Mode +++
-/**
- * กำหนดสถานะที่เป็นไปได้สำหรับ Modal ที่มีการดู, แก้ไข, หรือเพิ่มข้อมูล
- */
-export type ModalMode = 'view' | 'edit' | 'add';
-// +++ END: เพิ่ม Type ใหม่สำหรับ Modal Mode +++
 
-
-// --- UI Configuration Objects ---
-
-// Config สำหรับการแสดงผลสถานะ Order
-export interface StatusConfig {
-  [key: string]: {
-    label: string;
-    icon: React.ElementType;
-    bgColor: string;
-    textColor: string;
-  };
+export interface AccessLeveLConfigItem {
+  bgColor: string;
+  textColor: string;
 }
 
-export interface PaymentConfig {
-  [key: string]: {
-    label: string;
-    icon: React.ElementType;
-    bgColor: string;
-    textColor: string;
-  };
+export type AccessLeveLConfig = Record<number, AccessLeveLConfigItem>;
+
+export interface StatusConfigItem {
+  label: string;
+  icon: React.ElementType;
+  bgColor: string;
+  textColor: string;
 }
+
+export type StatusConfig = Record<OrderStatus, StatusConfigItem>;
+
+export interface PaymentConfigItem {
+  label: string;
+  icon: React.ElementType;
+  bgColor: string;
+  textColor: string;
+}
+
+export type PaymentConfig = Record<Payment_Type, PaymentConfigItem>;
