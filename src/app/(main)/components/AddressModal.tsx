@@ -195,7 +195,7 @@ export default function AddressModal({ isOpen, onClose, onSave, initialData }: A
                         <input 
                         type="tel" 
                         name="Phone" 
-                        value={formData.Phone? formData.Phone : '-'} 
+                        value={formData.Phone} 
                         onChange={handleChange} 
                         placeholder="08X-XXX-XXXX" 
                         className="input input-bordered w-full focus:input-primary bg-base-50" 

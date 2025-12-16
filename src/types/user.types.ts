@@ -34,7 +34,7 @@ export interface AddressSchema {
   Province: string;
   Zip_Code: string;
   Is_Default: boolean;
-  Phone: string | null;
+  Phone: string;
 }
 
 // Form data for adding/editing a new address

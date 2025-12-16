@@ -116,7 +116,7 @@ export default function OrderHistoryPage() {
                                     </p>
                                 </div>
                                 <div>
-                                    <p className="text-xs text-base-content/50 font-bold uppercase tracking-wider mb-1">วันที่ถูกจัดส่ง</p>
+                                    <p className="text-xs text-base-content/50 font-bold uppercase tracking-wider mb-1">วันที่จัดส่ง</p>
                                     <p className={`text-base font-medium ${order.Shipping_Date ? 'text-base-content/80' : 'text-base-content/40 italic'}`}>
                                         {order.Shipping_Date 
                                             ? new Date(order.Shipping_Date).toLocaleDateString('th-TH') 

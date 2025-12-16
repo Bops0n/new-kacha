@@ -30,6 +30,10 @@ export function RecentOrders() {
     window.open(`/admin/order-management`, "_blank");
   };
 
+  const handleOpenOrderDetail = (orderId: number) => {
+    window.open(`/admin/order-management/${orderId}`, "_blank");
+  };
+
   if (loading) return <LoadingSpinner />;
 
   return (
@@ -61,7 +65,7 @@ export function RecentOrders() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.05, duration: 0.4 }}
-                onClick={handleOpenOrderManagement}
+                onClick={() => handleOpenOrderDetail(o.Order_ID)}
                 className="flex flex-col bg-gradient-to-br from-white to-gray-50 border border-gray-100 rounded-2xl p-4 hover:shadow-md hover:-translate-y-0.5 transition-all cursor-pointer group"
                 title="คลิกเพื่อดูรายละเอียดคำสั่งซื้อ"
               >

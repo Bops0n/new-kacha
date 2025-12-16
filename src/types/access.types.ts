@@ -8,3 +8,11 @@ export type AccessInfo = {
     Report: boolean;
     Dashboard: boolean;
 };
+
+export type ACCESS_FLAG =
+  | "Sys_Admin"
+  | "User_Mgr"
+  | "Stock_Mgr"
+  | "Order_Mgr"
+  | "Report"
+  | "Dashboard";
