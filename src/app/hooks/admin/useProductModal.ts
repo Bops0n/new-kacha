@@ -101,7 +101,7 @@ export function useProductModal({ onSave }: UseProductModalProps) {
     if (success) {
       closeModal();
     }
-  }, [formData, imageFile, onSave, closeModal]);
+  }, [formData, imageFile, onSave, closeModal, showAlert]);
 
   const imagePreviewUrl = imageFile 
     ? URL.createObjectURL(imageFile) 

@@ -159,7 +159,7 @@ export default function AddressModal({ isOpen, onClose, onSave, initialData }: A
     try {
       await onSave(formData);
       onClose();
-    } catch (error) {
+    } catch {
       showAlert("บันทึกข้อมูลล้มเหลว!");
     } finally {
       setLoading(false);
