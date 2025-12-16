@@ -142,12 +142,12 @@ export default function AdminNavbar() {
                                 <ul tabIndex={0} className="dropdown-content z-[1] menu p-2 shadow-lg bg-base-100 rounded-box w-52 border border-base-200">
                                     <li>
                                         <Link href="/admin/product-management" className={isActive('/admin/product-management') ? 'active' : ''}>
-                                            <MdInventory className="w-4 h-4" /> สินค้าคงคลัง
+                                            <MdInventory className="w-4 h-4" /> จัดการสินค้า
                                         </Link>
                                     </li>
                                     <li>
                                         <Link href="/admin/category-management" className={isActive('/admin/category-management') ? 'active' : ''}>
-                                            <MdCategory className="w-4 h-4" /> หมวดหมู่สินค้า
+                                            <MdCategory className="w-4 h-4" /> จัดการหมวดหมู่
                                         </Link>
                                     </li>
                                 </ul>
@@ -158,7 +158,7 @@ export default function AdminNavbar() {
                         {session.user.Order_Mgr && (
                             <li>
                                 <Link href="/admin/order-management" className={isActive('/admin/order-management') ? 'active font-bold' : ''}>
-                                    <FaBox className="w-4 h-4" /> คำสั่งซื้อ
+                                    <FaBox className="w-4 h-4" /> จัดการคำสั่งซื้อ
                                 </Link>
                             </li>
                         )}
@@ -213,7 +213,7 @@ export default function AdminNavbar() {
             </nav>
 
             {/* Mobile Navigation Menu (Drawer style) */}
-{/* --- Mobile Menu (Dropdown / Accordion) --- */}
+            {/* --- Mobile Menu (Dropdown / Accordion) --- */}
             <div 
                 className={`
                     lg:hidden bg-base-100 border-t border-base-200 absolute w-full left-0 z-50 shadow-xl overflow-hidden transition-all duration-300 ease-in-out
@@ -263,6 +263,16 @@ export default function AdminNavbar() {
                         </li>
                     )}
 
+                    <li>
+                            <Link 
+                                href="/admin/contact-messages" 
+                                onClick={closeMobileMenu} 
+                                className={isActive('/admin/contact-messages') ? 'active' : ''}
+                            >
+                                <BiMessage className="w-5 h-5"/> ข้อความจากลูกค้า
+                            </Link>
+                        </li>
+
                     {session.user.Stock_Mgr && (
                         <li>
                             <details open={isActive('/admin/product-management') || isActive('/admin/category-management')}>
@@ -272,12 +282,12 @@ export default function AdminNavbar() {
                                 <ul className="before:!hidden pl-4 mt-1 border-l-2 border-base-200 ml-2">
                                     <li>
                                         <Link href="/admin/product-management" onClick={closeMobileMenu} className={isActive('/admin/product-management') ? 'active' : ''}>
-                                            จัดการสินค้า
+                                            <MdInventory className="w-5 h-5" /> จัดการสินค้า
                                         </Link>
                                     </li>
                                     <li>
                                         <Link href="/admin/category-management" onClick={closeMobileMenu} className={isActive('/admin/category-management') ? 'active' : ''}>
-                                            จัดการหมวดหมู่
+                                            <MdCategory className="w-4 h-4" /> จัดการหมวดหมู่
                                         </Link>
                                     </li>
                                 </ul>
@@ -305,9 +315,21 @@ export default function AdminNavbar() {
                                     <TbReportAnalytics className="w-5 h-5"/> รายงาน
                                 </summary>
                                 <ul className="before:!hidden pl-4 mt-1 border-l-2 border-base-200 ml-2">
-                                    <li><Link href="/admin/report/order-report" onClick={closeMobileMenu}>สรุปคำสั่งซื้อ</Link></li>
-                                    <li><Link href="/admin/report/summary-sales-report" onClick={closeMobileMenu}>สรุปยอดขาย</Link></li>
-                                    <li><Link href="/admin/report/inventory-report" onClick={closeMobileMenu}>สินค้าคงคลัง</Link></li>
+                                    <li>
+                                        <Link href="/admin/report/order-report" onClick={closeMobileMenu}>
+                                            <FaChartLine className="w-5 h-5" /> สรุปคำสั่งซื้อ
+                                        </Link>
+                                    </li>
+                                    <li>
+                                        <Link href="/admin/report/summary-sales-report" onClick={closeMobileMenu}>
+                                            <TbReportAnalytics className="w-5 h-5" /> สรุปยอดขาย
+                                        </Link>
+                                    </li>
+                                    <li>
+                                        <Link href="/admin/report/inventory-report" onClick={closeMobileMenu}>
+                                            <FaWarehouse className="w-5 h-5" /> สินค้าคงคลัง
+                                        </Link>
+                                    </li>
                                 </ul>
                             </details>
                         </li>
@@ -317,6 +339,15 @@ export default function AdminNavbar() {
                     {session.user.Sys_Admin && (
                         <>
                             <li className="menu-title mt-2 text-xs uppercase opacity-50">ระบบ</li>
+                            <li>
+                                <Link 
+                                    href="/admin/sys-management" 
+                                    onClick={closeMobileMenu} 
+                                    className="text-warning hover:bg-warning/10"
+                                >
+                                    <FaGears className="w-5 h-5"/> ตั้งค่าระบบ
+                                </Link>
+                            </li>
                             <li>
                                 <Link 
                                     href="/admin/access-management" 
