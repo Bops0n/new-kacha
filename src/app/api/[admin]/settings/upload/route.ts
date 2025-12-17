@@ -19,7 +19,6 @@ export async function POST(req: Request) {
   try {
     const form = await req.formData();
     const file = form.get("file") as File;
-    const oldFile = form.get("oldFile") as string | null;
 
     if (!file) return NextResponse.json({ message: "No file provided" }, { status: 400 });
 
@@ -49,7 +48,7 @@ export async function POST(req: Request) {
 
     const folder = 'settings';
     
-    const isSuccess = await uploadImage(folder, filename, buffer, oldFile);
+    const isSuccess = await uploadImage(folder, filename, buffer);
     if (isSuccess) {
         const imageUrl = `${process.env.NODE_ENV !== 'development' ? process.env.CDN_URL : process.env.UPLOAD_PATH}/${folder}/${filename}`;
 
