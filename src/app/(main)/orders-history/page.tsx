@@ -120,7 +120,7 @@ export default function OrderHistoryPage() {
                                     <p className={`text-base font-medium ${order.Shipping_Date ? 'text-base-content/80' : 'text-base-content/40 italic'}`}>
                                         {order.Shipping_Date 
                                             ? new Date(order.Shipping_Date).toLocaleDateString('th-TH') 
-                                            : 'รออัปเดต'
+                                            : 'รอปรับปรุง'
                                         }
                                     </p>
                                 </div>

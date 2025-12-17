@@ -17,17 +17,16 @@ export const formatPrice = (price: number | undefined | null): string => {
 };
 
 export  const formatDateTimeThai = (dateObj: Date) => {
-        return dateObj.toLocaleString('th-TH', { dateStyle: 'long', timeStyle: 'medium' });
-    };
+  return dateObj.toLocaleString('th-TH', { dateStyle: 'long', timeStyle: 'medium' });
+};
 
 export  const formatDateThai = (dateStr: string, monthStyle: monthStyle = 'numeric') => {
-        return new Date(dateStr).toLocaleDateString('th-TH', { year: 'numeric', month : monthStyle, day: 'numeric' });
-    };
+  return new Date(dateStr).toLocaleDateString('th-TH', { day: 'numeric', month : monthStyle, year: 'numeric' });
+};
 export const setCurrentTime = (setState : ( text:string )=>void ) => {
-        setState(new Date().toLocaleString('th-TH', { dateStyle: 'long', timeStyle: 'medium' }));
+  setState(new Date().toLocaleString('th-TH', { dateStyle: 'long', timeStyle: 'medium' }));
 }
 export  const getCurDate = ()=>{
-        const date = new Date().toLocaleString('th-TH',{dateStyle: 'long', timeStyle: 'medium'})
-        return date
-    };
-  
+  const date = new Date().toLocaleString('th-TH',{dateStyle: 'long', timeStyle: 'medium'})
+  return date
+};

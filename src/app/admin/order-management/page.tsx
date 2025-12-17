@@ -148,7 +148,7 @@ export default function OrderManagementPage() {
         <div className="hidden md:block bg-base-100 rounded-lg shadow-sm overflow-hidden">
             <div className="overflow-x-auto">
                 <table className="table table-zebra w-full">
-                    <thead><tr><th>หมายเลขคำสั่งซื้อ</th><th>ลูกค้า</th><th>สินค้า</th><th>ยอดรวม</th><th>สถานะ</th><th>วันที่สั่ง</th><th>จัดการ</th></tr></thead>
+                    <thead><tr><th>หมายเลขคำสั่งซื้อ</th><th>ลูกค้า</th><th>สินค้า</th><th>ยอดรวม</th><th>สถานะ</th><th>วันที่สั่งซื้อ​ล่าสุด</th><th>จัดการ</th></tr></thead>
                     <tbody>
                         {paginatedOrders.map(order => <OrderRow key={order.Order_ID} order={order} statusConfig={ORDER_STATUS_CONFIG} fetchOrders={fetchOrders} />)}
                     </tbody>

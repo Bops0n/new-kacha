@@ -56,10 +56,19 @@ export default function InventoryReportPage() {
         return cat ? cat.Name : '-';
     };
 
-    const getStockStatus = (product: ProductInventory, available: number) => {
+    const getStockStatus = (product: ProductInventory, available: number): STOCK_FILTER_TYPE => {
         if (available <= 0) return 'out_of_stock';
         if (available <= product.Reorder_Point) return 'low_stock';
         return 'in_stock';
+    };
+
+    const getStockStatusLabel = (status: STOCK_FILTER_TYPE): string => {
+        switch (status) {
+            case 'all': return 'ทุกสถานะ';
+            case 'in_stock': return 'ปกติ';
+            case 'low_stock': return 'ใกล้หมด';
+            case 'out_of_stock': return 'หมด';
+        }
     };
 
     const filteredProducts = useMemo(() => {
@@ -297,7 +306,7 @@ export default function InventoryReportPage() {
                         <h1 className="text-3xl font-extrabold text-black mb-1">รายงานสินค้าคงคลัง</h1>
                         <p className="text-sm text-black font-medium">
                             {/* แสดงเงื่อนไข และ หมวดหมู่ที่เลือกตรงนี้ */}
-                            สถานะ: <b>{stockFilter === 'all' ? 'ทุกสถานะ' : stockFilter}</b> | 
+                            สถานะ: <b>{getStockStatusLabel(stockFilter)}</b> | 
                             หมวดหมู่: <b>{getCategoryNameById(categoryFilter)}</b>
                         </p>
                     </div>
@@ -354,7 +363,7 @@ export default function InventoryReportPage() {
                                     <td className="py-1 text-right">{formatPrice(p.Sale_Cost)}</td>
                                     <td className="py-1 text-right">{formatPrice(p.Sale_Price)}</td>
                                     <td className="py-1 text-center text-xs">
-                                        {status === 'out_of_stock' ? 'หมด' : status === 'low_stock' ? 'ใกล้หมด' : 'ปกติ'}
+                                        {getStockStatusLabel(status)}
                                     </td>
                                 </tr>
                             );

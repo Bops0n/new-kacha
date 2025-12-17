@@ -28,7 +28,7 @@ const PAYMENT_METHODS = [
 export default function CheckoutPage() {
     const router = useRouter();
     const { data: session } = useSession();
-    const settings = useWebsiteSettings();
+    const { vatRate } = useWebsiteSettings();
 
     const { saveAddress, userAddresses, deleteAddress } = useProfilePage()
 
@@ -98,7 +98,7 @@ if (cartItems.length === 0) {
         return acc;
     }, 0);
       
-    const VAT_RATE = settings.vatRate / 100;
+    const VAT_RATE = vatRate / 100;
     
     const gross = Number(totalPrice);
     const net = gross / (1 + VAT_RATE);
@@ -303,19 +303,17 @@ if (cartItems.length === 0) {
                                 <div className="p-6 space-y-4">
                                     <div className="space-y-3 text-sm">
                                         <div className="flex justify-between text-base-content/70">
-                                            <span>ยอดรวมสินค้า</span>
+                                            <span>ราคาสินค้า</span>
                                             <span>{formatPrice(net)}</span>
                                         </div>
+                                        <div className="flex justify-between text-error">
+                                            <span>ส่วนลด</span>
+                                            <span>- {formatPrice(totalDiscount)}</span>
+                                        </div>
                                         <div className="flex justify-between text-base-content/70">
-                                            <span>ภาษี</span>
+                                            <span>ภาษีมูลค่าเพิ่ม ({vatRate}%)</span>
                                             <span>{formatPrice(vat)}</span>
                                         </div>
-                                        {totalDiscount > 0 && (
-                                            <div className="flex justify-between text-error">
-                                                <span>ส่วนลด</span>
-                                                <span>- {formatPrice(totalDiscount)}</span>
-                                            </div>
-                                        )}
                                         <div className="flex justify-between text-green-600">
                                             <span>ค่าจัดส่ง</span>
                                             <span>ฟรี</span>
@@ -325,7 +323,7 @@ if (cartItems.length === 0) {
                                     <div className="divider my-2 before:bg-base-300 after:bg-base-300"></div>
 
                                     <div className="flex justify-between items-end">
-                                        <span className="font-bold text-lg text-base-content">ยอดสุทธิ</span>
+                                        <span className="font-bold text-lg text-base-content">ยอดรวมสุทธิ</span>
                                         <div className="text-right">
                                             <span className="font-extrabold text-3xl text-primary block leading-none">{formatPrice(totalPrice)}</span>
                                             <span className="text-xs text-base-content/50 mt-1 block">รวมภาษีมูลค่าเพิ่มแล้ว</span>

@@ -381,7 +381,7 @@ export default function UserNavbar() {
                                 </details>
                             </li>
 
-                            {/* โปรโมชั่น */}
+                            {/* โปรโมชัน */}
                             <li>
                                 <Link href="/products?discount=true" onClick={closeMobileMenu} className="font-semibold text-primary hover:bg-primary/10">
                                     <FiTag className="w-5 h-5" /> สินค้าลดราคา

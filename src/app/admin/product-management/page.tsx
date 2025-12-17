@@ -216,18 +216,23 @@ const ProductModal = ({
 
                                     <div className="space-y-4">
                                         <div>
-                                            <label className="label"><span className="label-text font-semibold">ราคาทุน</span></label>
+                                            <label className="label"><span className="label-text font-semibold">ราคาทุน (บาท)</span></label>
                                             <input name="Sale_Cost" type="number" step="0.01" className="input input-bordered w-full" value={formData.Sale_Cost ?? ''} onChange={handleFormChange} required />
                                         </div>
 
                                         <div>
-                                            <label className="label"><span className="label-text font-semibold">ราคาขาย</span></label>
+                                            <label className="label"><span className="label-text font-semibold">ราคาขาย (บาท)</span></label>
                                             <input name="Sale_Price" type="number" step="0.01" className="input input-bordered w-full" value={formData.Sale_Price ?? ''} onChange={handleFormChange} required />
                                         </div>
 
                                         <div>
-                                            <label className="label"><span className="label-text font-semibold">ราคาโปรโมชั่น (กำหนดหากมีการลดราคา)</span></label>
+                                            <label className="label">
+                                                <span className="label-text font-semibold">ราคาโปรโมชัน (บาท)</span>
+                                            </label>
                                             <input name="Discount_Price" type="number" step="0.01" className="input input-bordered w-full" value={formData.Discount_Price ?? ''} onChange={handleFormChange} />
+                                            <label className="label">
+                                                <span className="label-text font-semibold text-xs text-green-700">* กำหนดค่าเมื่อมีการจัดรายการส่งเสริมการขาย</span>
+                                            </label>
                                         </div>
                                     </div>
                                 </div>
@@ -408,7 +413,7 @@ const ProductModal = ({
                                             <StatCard title="ยอดขายสะสม" value={`${product?.Total_Sales ?? 0}`} className="" />
                                             <StatCard title="ยอดคืน / ยกเลิก" value={`${product?.Cancellation_Count ?? 0}`} className="" />
                                             <StatCard
-                                                title="คงเหลือขายได้"
+                                                title="ยอดคงเหลือในคลังสินค้า"
                                                 value={product ? calculateAvailableStock(product) : 0}
                                                 className="text-primary"
                                                 desc={

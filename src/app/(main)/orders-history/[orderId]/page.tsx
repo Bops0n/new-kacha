@@ -239,6 +239,7 @@ export default function OrderDetailsPage() {
   const router = useRouter();
   const params = useParams();
   const { showAlert } = useAlert();
+  const { vatRate } = useWebsiteSettings();
   
   const { handleConfirmReceive: confirmReceiveHook, getCancelTarget, getOrderStatusNote } = useOrderHistory();
   
@@ -689,12 +690,12 @@ export default function OrderDetailsPage() {
                 </div>
                 <div className="bg-base-50/50 p-6 border-t border-base-200">
                     <div className="flex flex-col gap-2 max-w-xs ml-auto">
-                        <div className="flex justify-between text-sm text-base-content/70"><span>รวมเป็นเงิน</span><span>{formatPrice(subtotalBeforeDiscount - subtotalBeforeDiscount * order.Current_Vat / 100)}</span></div>
+                        <div className="flex justify-between text-sm text-base-content/70"><span>ราคาสินค้า</span><span>{formatPrice(subtotalBeforeDiscount - subtotalBeforeDiscount * order.Current_Vat / 100)}</span></div>
                         <div className="flex justify-between text-sm text-error"><span>ส่วนลด</span><span>- {formatPrice(subtotalBeforeDiscount - order.Total_Amount)}</span></div>
-                        <div className="flex justify-between text-sm text-base-content/70"><span>ภาษีมูลค่าเพิ่ม</span><span>{formatPrice(subtotalBeforeDiscount / 100 * order.Current_Vat)}</span></div>
+                        <div className="flex justify-between text-sm text-base-content/70"><span>ภาษีมูลค่าเพิ่ม ({vatRate}%)</span><span>{formatPrice(subtotalBeforeDiscount / 100 * order.Current_Vat)}</span></div>
                         <div className="flex justify-between text-sm text-green-600"><span>ค่าจัดส่ง</span><span>ฟรี</span></div>
                         <div className="divider my-1"></div>
-                        <div className="flex justify-between items-center"><span className="font-bold text-lg">ยอดสุทธิ</span><span className="font-extrabold text-2xl text-green-600 underline-offset-1 underline">{formatPrice(order.Total_Amount)}</span></div>
+                        <div className="flex justify-between items-center"><span className="font-bold text-lg">ยอดรวมสุทธิ</span><span className="font-extrabold text-2xl text-green-600 underline-offset-1 underline">{formatPrice(order.Total_Amount)}</span></div>
                     </div>
                 </div>
             </div>
