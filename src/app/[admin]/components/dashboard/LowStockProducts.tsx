@@ -109,7 +109,7 @@ export function LowStockProducts() {
                 </div>
 
                 <div className="flex justify-between text-xs text-gray-500 mt-1">
-                  <span>จุดสั่งซื้อซ้ำ: {item.Reorder_Point}</span>
+                  <span>จุดสั่งซื้อ: {item.Reorder_Point}</span>
                   <span>{percent}%</span>
                 </div>
               </motion.div>

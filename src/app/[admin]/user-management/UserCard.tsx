@@ -30,7 +30,7 @@ const UserCard: React.FC<UserCardProps> = ({
           <FiMail className="w-3 h-3" /> <strong>อีเมล:</strong> {user.Email || '-'}
         </p>
         <p className="text-sm flex items-center gap-1">
-          <FiPhone className="w-3 h-3" /> <strong>เบอร์โทร:</strong> {user.Phone || '-'}
+          <FiPhone className="w-3 h-3" /> <strong>เบอร์โทรศัพท์:</strong> {user.Phone || '-'}
         </p>
         <p className="text-sm flex items-center gap-1">
           <FiKey className="w-3 h-3" /> <strong>ระดับการเข้าถึง:</strong>{' '}

@@ -249,7 +249,7 @@ const ProductModal = ({
                                     </div>
 
                                     <div className="space-y-4">
-                                        <label className="label"><span className="label-text font-semibold">จุดสั่งซื้อซ้ำ</span></label>
+                                        <label className="label"><span className="label-text font-semibold">จุดสั่งซื้อ</span></label>
                                         <input name="Reorder_Point" type="number" className="input input-bordered w-full" value={formData.Reorder_Point ?? ''} onChange={handleFormChange} required />
                                     </div>
                                 </div>

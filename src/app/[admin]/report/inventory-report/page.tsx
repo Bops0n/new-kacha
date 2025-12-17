@@ -156,7 +156,7 @@ export default function InventoryReportPage() {
                             </button>
                             <div>
                                 <h1 className="text-3xl font-bold text-base-content">รายงานสินค้าคงคลัง</h1>
-                                <p className="text-base-content/70">ตรวจสอบสถานะสต็อกและจุดสั่งซื้อซ้ำ</p>
+                                <p className="text-base-content/70">ตรวจสอบสถานะสต็อกและจุดสั่งซื้อ</p>
                             </div>
                         </div>
                         <button onClick={handlePrint} className="btn btn-primary shadow-md">

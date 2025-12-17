@@ -92,7 +92,7 @@ const UserModal: React.FC<UserModalProps> = ({
                     <input type="email" name="Email" className="input input-bordered w-full" value={editFormData.Email || ''} onChange={handleUserFormChange} />
                   </div>
                   <div className="form-control mb-2">
-                    <label className="label"><span className="label-text">เบอร์โทร</span></label>
+                    <label className="label"><span className="label-text">เบอร์โทรศัพท์</span></label>
                     <input type="tel" name="Phone" className="input input-bordered w-full" value={editFormData.Phone || ''} onChange={handleUserFormChange} />
                   </div>
                   <div className="form-control mb-2">

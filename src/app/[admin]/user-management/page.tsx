@@ -459,7 +459,7 @@ export default function UserManagement() {
                   <th>ชื่อผู้ใช้</th>
                   <th>ชื่อ - นามสกุล</th>
                   <th>อีเมล</th>
-                  <th>เบอร์โทร</th>
+                  <th>เบอร์โทรศัพท์</th>
                   <th>ระดับการเข้าถึง</th>
                   <th>จัดการ</th>
                 </tr>

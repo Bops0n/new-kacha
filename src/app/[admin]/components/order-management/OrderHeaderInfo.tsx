@@ -16,7 +16,7 @@ export default function OrderHeaderInfo({ order }: { order: Order }) {
 
                 <div className="text-sm space-y-1">
                     <p><strong>ชื่อ :</strong> {order.Customer_Name}</p>
-                    <p><strong>เบอร์โทร :</strong> {order.Phone || '-'}</p>
+                    <p><strong>เบอร์โทรติดต่อ :</strong> {order.Phone || '-'}</p>
                     <p><strong>อีเมล :</strong> {order.Customer_Email || '-'}</p>
                     <br />
                     <p className="flex gap-1">
