@@ -411,6 +411,13 @@ export default function OrderDetailsPage() {
 
         <div className="divider my-8"></div>
 
+        {order.Received_At && (
+            <div className={`badge border-none px-4 py-3 md:py-5 rounded-lg font-medium text-sm md:text-xm flex items-center gap-2 bg-green-100 text-green-800`}>
+                <FiCheckCircle/>
+                รับสินค้าแล้วเมื่อ {formatDateTimeShort(order.Received_At)}
+            </div>
+        )}
+        
         {/* Info Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
             
