@@ -51,6 +51,9 @@ export default function OrderHeaderInfo({ order }: { order: Order }) {
                             {statusInfo.label}
                         </span>
                     </p>
+                    {order.Received_At && (
+                        <p><strong>รับสินค้าแล้วเมื่อ :</strong> {formatDateTimeShort(order.Received_At)}</p>
+                    )}
                     {order.Is_Cancelled && (
                         <>
                             <div className="divider my-5"></div>
