@@ -1,5 +1,5 @@
 import React from 'react';
-import { OrderStatus, Payment_Type } from './order.types';
+import { OrderStatus, Payment_Type, ShippingMethodType } from './order.types';
 
 export type AlertModalType = 'info' | 'success' | 'warning' | 'error';
 export type ModalMode = 'view' | 'edit' | 'add';
@@ -38,3 +38,12 @@ export interface PaymentConfigItem {
 }
 
 export type PaymentConfig = Record<Payment_Type, PaymentConfigItem>;
+
+export interface ShippingMethodItem {
+  label: string;
+  icon: React.ElementType;
+  bgColor: string;
+  textColor: string;
+}
+
+export type ShippingMethodConfig = Record<ShippingMethodType, ShippingMethodItem>;

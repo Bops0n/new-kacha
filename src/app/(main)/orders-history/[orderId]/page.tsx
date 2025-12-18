@@ -18,7 +18,7 @@ import AccessDeniedPage from '@/app/components/AccessDenied';
 import { useOrderHistory } from '@/app/hooks/useOrderHistory';
 import { ImagePreviewModal } from '@/app/components/ImagePreviewModal';
 import { useWebsiteSettings } from '@/app/providers/WebsiteSettingProvider';
-import { ORDER_STATUS_CONFIG } from '@/app/utils/client';
+import { ORDER_STATUS_CONFIG, PAYMENT_METHOD_CONFIG, SHIPPING_METHOD_CONFIG } from '@/app/utils/client';
 import Image from 'next/image';
 
 // --- Component: Payment Info Modal ---
@@ -384,6 +384,8 @@ export default function OrderDetailsPage() {
 
   // Check if we should show the switch buttons
   const showRefundContext = order.Status === 'refunding' || !!order.Refund_Slip || order.Status === 'refunded';
+  const paymentConfig = PAYMENT_METHOD_CONFIG[order.Payment_Type];
+  const shippingConfig = SHIPPING_METHOD_CONFIG[order.Shipping_Method];
 
   return (
     <div className="min-h-screen bg-base-200 p-4 sm:p-6 lg:p-8">
@@ -430,8 +432,29 @@ export default function OrderDetailsPage() {
                     <div className="card-body p-6">
                         <h3 className="card-title text-lg flex items-center gap-2 mb-2"><FiTruck className="text-primary" /> ข้อมูลการจัดส่ง</h3>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pl-7 text-sm text-base-content/80">
-                            <div><p className="font-semibold text-base-content/60 mb-1">ประเภทการชำระเงิน</p><p className="font-medium">{order.Payment_Type === 'bank_transfer' ? 'โอนผ่านธนาคาร' : 'ชำระเงินปลายทาง (COD)'}</p></div>
-                            <div><p className="font-semibold text-base-content/60 mb-1">บริษัทขนส่ง</p><p className="font-medium">{order.Shipping_Method || '-'}</p></div>
+                            <div>
+                                <p className="font-semibold text-base-content/60 mb-1">ประเภทการชำระเงิน</p>
+                                <p className="font-medium">
+                                    <span className={`badge ${paymentConfig.textColor} ${paymentConfig.bgColor}`}>
+                                        <paymentConfig.icon className="inline-block w-4 h-4 mr-1" />
+                                        {paymentConfig.label}
+                                    </span>
+                                </p>
+                            </div>
+                            <div>
+                                <p className="font-semibold text-base-content/60 mb-1">วิธีการจัดส่ง</p>
+                                <p className="font-medium">
+                                    {shippingConfig ? (
+                                        <span className={`badge ${shippingConfig.textColor} ${shippingConfig.bgColor}`}>
+                                            <shippingConfig.icon className="inline-block w-4 h-4 mr-1" />
+                                            {shippingConfig.label}
+                                        </span>
+                                    ) : (
+                                        '-'
+                                    )}
+                                </p>
+                            </div>
+                            <div><p className="font-semibold text-base-content/60 mb-1">บริษัทขนส่ง</p><p className="font-medium">{order.Shipping_Provider || '-'}</p></div>
                             <div><p className="font-semibold text-base-content/60 mb-1">หมายเลขพัสดุ</p><p className="font-medium tracking-wide select-all bg-base-200 px-2 py-1 rounded w-fit">{order.Tracking_Number || '-'}</p></div>
                             <div><p className="font-semibold text-base-content/60 mb-1">วันที่จัดส่ง</p><p className="font-medium">{formatDateTimeShort(order.Shipping_Date)}</p></div>
                         </div>

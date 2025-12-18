@@ -4,6 +4,7 @@ export type OrderStatus = 'waiting_payment' | 'pending' | 'preparing' | 'shipped
 export type TransferSlipStatusFilter = 'all' | 'has_slip' | 'no_slip';
 export type Payment_Type = 'bank_transfer' | 'cash_on_delivery'
 export type TransactionStatus = 'pending' | 'confirmed' | 'rejected';
+export type ShippingMethodType = 'shop_delivery' | 'third_party' | 'pickup';
 
 // Type for product items within an order (detailed snapshot)
 export interface OrderProductDetail {
@@ -56,7 +57,7 @@ export type Order = {
   Refund_At: string;
 
   // Order Shipping
-  Shipping_Method: string;
+  Shipping_Method: ShippingMethodType;
   Shipping_Provider: string;
   Shipping_Date: string;
   Shipping_Cost: number;
@@ -117,7 +118,7 @@ export interface PlaceOrderRequestBody {
 }
 
 export interface OrderShipping {
-  Shipping_Method: string,
+  Shipping_Method: ShippingMethodType,
   Shipping_Provider: string,
   Shipping_Date: string,
   Shipping_Cost: number,
@@ -166,7 +167,7 @@ export interface DbOrderRow {
   Refund_At: string;
 
   // Order Shipping
-  Shipping_Method: string;
+  Shipping_Method: ShippingMethodType;
   Shipping_Provider: string;
   Shipping_Date: string;
   Shipping_Cost: number;

@@ -1,8 +1,8 @@
-import { AccessLeveLConfig, PaymentConfig, StatusConfig } from "@/types";
+import { AccessLeveLConfig, PaymentConfig, ShippingMethodConfig, StatusConfig } from "@/types";
 import { AUTH_CHECK } from "@/types/auth.types";
 import { NextResponse } from "next/server";
 import { BsBank, BsCash } from "react-icons/bs";
-import { FiCheckCircle, FiClock, FiPackage, FiRefreshCw, FiTruck, FiXCircle } from "react-icons/fi";
+import { FiCheckCircle, FiClock, FiPackage, FiRefreshCw, FiSend, FiTruck, FiUser, FiXCircle } from "react-icons/fi";
 import { MdOutlinePendingActions } from "react-icons/md";
 
 export const checkRequire = (auth: AUTH_CHECK) => {
@@ -109,3 +109,24 @@ export const PAYMENT_METHOD_CONFIG: PaymentConfig = {
         textColor: "text-green-800"
     },
 };
+
+export const SHIPPING_METHOD_CONFIG: ShippingMethodConfig = {
+    shop_delivery: {
+        label: 'จัดส่งโดยร้าน', 
+        icon: FiTruck, 
+        bgColor: 'bg-purple-100',
+        textColor: 'text-purple-800',
+    },
+    third_party: {
+        label: "ขนส่งเอกชน", 
+        icon: FiSend, 
+        bgColor: 'bg-green-100',
+        textColor: 'text-green-800',
+    },
+    pickup: {
+        label: "ลูกค้ามารับเอง", 
+        icon: FiUser, 
+        bgColor: 'bg-sky-100',
+        textColor: 'text-sky-600',
+    },
+}

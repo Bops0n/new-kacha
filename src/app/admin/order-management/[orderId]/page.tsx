@@ -53,7 +53,7 @@ export default function OrderStepPage() {
     const [btnCancelOrder, setBtnCancelOrder] = useState(false);
 
     const [form, setForm] = useState<OrderShipping>({
-        Shipping_Method: "",
+        Shipping_Method: 'shop_delivery',
         Shipping_Provider: "",
         Shipping_Date: "",
         Shipping_Cost: 0,
