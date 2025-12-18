@@ -1,3 +1,4 @@
+import { formatDateTimeShort } from "@/app/utils/formatters";
 import { Order, OrderShipping } from "@/types";
 import { MdOutlineLocalShipping } from "react-icons/md";
 
@@ -171,7 +172,7 @@ export default function OrderShippingInfo({
                     <div className="space-y-4">
                         <div>
                             <p className="text-sm opacity-60">วันที่ – เวลาที่บันทึกข้อมูล</p>
-                            <p className="text-xl font-bold mt-1">{order.Shipping_Updated_At || "-"}</p>
+                            <p className="text-xl font-bold mt-1">{formatDateTimeShort(order.Shipping_Updated_At)}</p>
                         </div>
 
                         <div>

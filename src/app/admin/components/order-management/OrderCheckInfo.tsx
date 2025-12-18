@@ -1,4 +1,4 @@
-import { formatPrice } from "@/app/utils/formatters";
+import { formatDateTimeShort, formatPrice } from "@/app/utils/formatters";
 import { Order, OrderProductDetail, SimpleProductDetail } from "@/types";
 import { FiArchive, FiCreditCard, FiImage, FiShoppingBag, FiZoomIn } from "react-icons/fi";
 import { useAlert } from "@/app/context/AlertModalContext";
@@ -198,12 +198,12 @@ export default function OrderCheckInfo({
 
                         <div>
                             <p className="text-sm opacity-60">วันที่ – เวลาที่แนบหลักฐาน</p>
-                            <p className="text-xl font-bold mt-1">{order.Transaction_Date || "-"}</p>
+                            <p className="text-xl font-bold mt-1">{formatDateTimeShort(order.Transaction_Date)}</p>
                         </div>
 
                         <div>
                             <p className="text-sm opacity-60">วันที่ – เวลาที่ตรวจสอบ</p>
-                            <p className="text-xl font-bold mt-1">{order.Checked_At || "-"}</p>
+                            <p className="text-xl font-bold mt-1">{formatDateTimeShort(order.Checked_At)}</p>
                         </div>
 
                         <div>
@@ -274,7 +274,7 @@ export default function OrderCheckInfo({
                   <div className="space-y-4">
                       <div>
                           <p className="text-sm opacity-60">วันที่ – เวลาที่ยืนยันคำสั่งซื้อ</p>
-                          <p className="text-xl font-bold mt-1">{order.Confirmed_At || "-"}</p>
+                          <p className="text-xl font-bold mt-1">{formatDateTimeShort(order.Confirmed_At)}</p>
                       </div>
 
                       <div>
@@ -327,7 +327,7 @@ export default function OrderCheckInfo({
                   <div className="space-y-4">
                       <div>
                           <p className="text-sm opacity-60">วันที่ – เวลาที่แนบหลักฐานการคืนเงิน</p>
-                          <p className="text-xl font-bold mt-1">{order.Refund_At || "-"}</p>
+                          <p className="text-xl font-bold mt-1">{formatDateTimeShort(order.Refund_At)}</p>
                       </div>
 
                       <div>

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { FiPrinter, FiArrowLeft, FiBox, FiAlertTriangle, FiSearch } from 'react-icons/fi';
-import { formatDateTimeThai, formatPrice } from '@/app/utils/formatters';
+import { formatDateTimeLong, formatPrice } from '@/app/utils/formatters';
 import LoadingSpinner from '@/app/components/LoadingSpinner';
 import { useRouter } from 'next/navigation';
 import { ProductInventory } from '@/types';
@@ -297,7 +297,7 @@ export default function InventoryReportPage() {
                 
                 {/* 1. วันที่พิมพ์ (ขวาบนสุด) */}
                 <div className="text-right text-[10px] text-gray-500 mb-2">
-                     พิมพ์เมื่อ: {formatDateTimeThai(new Date())}
+                     พิมพ์เมื่อ: {formatDateTimeLong(new Date())}
                 </div>
 
                 {/* 2. ส่วนหัวกระดาษ (Header) */}

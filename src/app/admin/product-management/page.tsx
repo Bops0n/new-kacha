@@ -92,7 +92,7 @@ const ProductModal = ({
         desc?: string;
         className?: string;
     }) => (
-        <div className="bg-base-200 border border-base-300 rounded-xl p-4 text-center shadow-sm">
+        <div className="bg-base-200 border border-base-300 rounded-xl p-2 text-center shadow-sm">
             <p className="stat-title text-sm opacity-70">{title}</p>
             <p className={`stat-value text-2xl font-bold ${className}`}>{value}</p>
             {desc && <p className="stat-desc text-xs mt-1 opacity-70">{desc}</p>}

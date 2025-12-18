@@ -13,7 +13,7 @@ import {
 } from 'react-icons/fi';
 import { useOrderHistory } from '../../hooks/useOrderHistory';
 import { OrderStatus } from '../../../types';
-import { formatPrice } from '../../utils/formatters';
+import { formatDate, formatDateTimeShort, formatPrice } from '../../utils/formatters';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import { ORDER_STATUS_CONFIG } from '@/app/utils/client';
 // import { useAlert } from '@/app/context/AlertModalContext'; // ไม่ได้ใช้ในหน้านี้โดยตรง แต่ใช้ผ่าน hook
@@ -92,7 +92,7 @@ export default function OrderHistoryPage() {
                                             <span className='text-lg font-bold text-primary group-hover:underline decoration-2 underline-offset-2'> {order.Order_ID}</span></h2>
                                     </div>
                                     <p className="text-sm text-base-content/60 mt-1 flex items-center gap-1">
-                                        <FiClock className="w-3 h-3" /> สั่งเมื่อ: {new Date(order.Order_Date).toLocaleDateString('th-TH', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                                        <FiClock className="w-3 h-3" /> สั่งเมื่อ: {formatDateTimeShort(order.Order_Date)}
                                     </p>
                                 </div>
                                 <div className={`badge border-none px-3 py-4 rounded-lg font-medium flex items-center gap-2 ${statusInfo.bgColor} ${statusInfo.textColor}`}>
@@ -119,7 +119,7 @@ export default function OrderHistoryPage() {
                                     <p className="text-xs text-base-content/50 font-bold uppercase tracking-wider mb-1">วันที่จัดส่ง</p>
                                     <p className={`text-base font-medium ${order.Shipping_Date ? 'text-base-content/80' : 'text-base-content/40 italic'}`}>
                                         {order.Shipping_Date 
-                                            ? new Date(order.Shipping_Date).toLocaleDateString('th-TH') 
+                                            ? formatDate(order.Shipping_Date) 
                                             : 'รอปรับปรุง'
                                         }
                                     </p>

@@ -1,6 +1,7 @@
 "use client";
 
 import Pagination from "@/app/components/Pagination";
+import { formatDateTimeShort } from "@/app/utils/formatters";
 import { CONTACT_TYPE, ContactInfo } from "@/types/contact.types";
 import { useCallback, useEffect, useState } from "react";
 import { FiEye, FiSearch } from "react-icons/fi";
@@ -149,7 +150,7 @@ export default function AdminMessagesPage() {
             <tbody>
               {filteredMessages.map((m: ContactInfo) => (
                 <tr key={m.Message_ID} className={!m.Is_Read ? "bg-yellow-50" : ""}>
-                  <td>{m.Created_At}</td>
+                  <td>{formatDateTimeShort(m.Created_At)}</td>
                   <td>{m.Name}</td>
                   <td>{m.Email}</td>
                   <td>{m.Phone ?? "-"}</td>

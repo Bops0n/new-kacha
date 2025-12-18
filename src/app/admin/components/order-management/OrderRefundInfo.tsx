@@ -1,3 +1,4 @@
+import { formatDateTimeShort } from "@/app/utils/formatters";
 import { Order } from "@/types";
 import Image from "next/image";
 import { FiCreditCard, FiUploadCloud, FiZoomIn } from "react-icons/fi";
@@ -73,10 +74,10 @@ export default function OrderRefundInfo({
                         {/* Payment Info */}
                         <div className="bg-base-200 p-4 rounded-xl border border-base-300 shadow-inner">
                             <p className="text-sm opacity-60">วันที่ – เวลาที่แนบหลักฐาน</p>
-                            <p className="font-bold">{order.Transaction_Date || "-"}</p>
+                            <p className="font-bold">{formatDateTimeShort(order.Transaction_Date)}</p>
 
                             <p className="text-sm opacity-60 mt-3">วันที่ – เวลาที่ตรวจสอบ</p>
-                            <p className="font-bold">{order.Checked_At || "-"}</p>
+                            <p className="font-bold">{formatDateTimeShort(order.Checked_At)}</p>
 
                             <p className="text-sm opacity-60 mt-3">ผู้ตรวจสอบ</p>
                             <p className="font-bold">{order.Checked_By || "-"}</p>
@@ -115,7 +116,7 @@ export default function OrderRefundInfo({
                         {/* Refund Info */}
                         <div className="bg-base-200 p-4 rounded-xl border border-base-300 shadow-inner">
                             <p className="text-sm opacity-60">วันที่ – เวลาการคืนเงิน</p>
-                            <p className="font-bold">{order.Refund_At || "-"}</p>
+                            <p className="font-bold">{formatDateTimeShort(order.Refund_At)}</p>
 
                             <p className="text-sm opacity-60 mt-3">ผู้บันทึกหลักฐานการคืนเงิน</p>
                             <p className="font-bold">{order.Refund_By || "-"}</p>

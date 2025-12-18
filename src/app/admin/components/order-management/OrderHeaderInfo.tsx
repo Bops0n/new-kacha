@@ -1,4 +1,5 @@
 import { PAYMENT_METHOD_CONFIG, ORDER_STATUS_CONFIG } from "@/app/utils/client";
+import { formatDateTimeShort } from "@/app/utils/formatters";
 import { Order } from "@/types";
 import { FiFileText, FiMapPin, FiUser } from "react-icons/fi";
 
@@ -37,7 +38,7 @@ export default function OrderHeaderInfo({ order }: { order: Order }) {
 
                 <div className="text-sm space-y-1">
                     <p><strong>หมายเลขคำสั่งซื้อ :</strong> {order.Order_ID}</p>
-                    <p><strong>วันที่สั่ง :</strong> {order.Order_Date || '-'}</p>
+                    <p><strong>วันที่สั่ง :</strong> {formatDateTimeShort(order.Order_Date)}</p>
                     <p><strong>ประเภทการชำระเงิน : </strong>
                         <span className={`badge ${paymentMethod.textColor} ${paymentMethod.bgColor}`}>
                             <paymentMethod.icon className="inline-block w-4 h-4 mr-1" />
@@ -53,7 +54,7 @@ export default function OrderHeaderInfo({ order }: { order: Order }) {
                     {order.Is_Cancelled && (
                         <>
                             <div className="divider my-5"></div>
-                            <p><strong>วันที่ยกเลิก :</strong> {order.Cancel_Date || '-'}</p>
+                            <p><strong>วันที่ยกเลิก :</strong> {formatDateTimeShort(order.Cancel_Date)}</p>
                             <p><strong>ยกเลิกโดย :</strong> {order.Cancel_By || '-'}</p>
                             <p><strong>เหตุผลที่ยกเลิก :</strong> {order.Cancel_Reason || '-'}</p>
                         </>

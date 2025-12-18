@@ -2,13 +2,14 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { FiPrinter, FiArrowLeft, FiFilter, FiCheck, FiFileText, FiAlertCircle } from 'react-icons/fi';
-import { formatPrice } from '@/app/utils/formatters';
+import { formatDate, formatDateTimeLong, formatDateTimeShort, formatPrice } from '@/app/utils/formatters';
 import LoadingSpinner from '@/app/components/LoadingSpinner';
 import { useRouter } from 'next/navigation';
 import { ORDER_STATUS_CONFIG } from '@/app/utils/client';
 import { OrderStatus } from '@/types';
 import { useWebsiteSettings } from '@/app/providers/WebsiteSettingProvider';
 import { useAlert } from '@/app/context/AlertModalContext';
+import { DatePicker } from '@/app/components/DatePicker';
 
 interface ReportOrder {
     Order_ID: number;
@@ -88,7 +89,6 @@ export default function OrdersReportPage() {
 
     const groupedOrders = useMemo(() => {
         const groups: Record<string, ReportOrder[]> = {};
-        // เรียงลำดับตาม Config กลาง
         allStatuses.forEach(status => {
             if (selectedStatuses.includes(status)) {
                 const items = orders.filter(o => o.Status === status);
@@ -101,22 +101,6 @@ export default function OrdersReportPage() {
     const handlePrint = () => {
         setPrintDate(new Date());
         setTimeout(() => window.print(), 100);
-    };
-
-    const formatDateThai = (dateStr: string) => {
-        return new Date(dateStr).toLocaleDateString('th-TH', { year: 'numeric', month: 'short', day: 'numeric' });
-    };
-    
-    const formatDateTimeShort = (dateStr: string) => {
-        return new Date(dateStr).toLocaleDateString('th-TH', { 
-            year: '2-digit', month: 'short', day: 'numeric', 
-            hour: '2-digit', minute: '2-digit' 
-        });
-    };
-
-    const formatPrintTime = (dateObj: Date | null) => {
-        if (!dateObj) return '';
-        return dateObj.toLocaleString('th-TH', { dateStyle: 'long', timeStyle: 'medium' });
     };
 
     const renderSlipStatus = (order: ReportOrder) => {
@@ -224,41 +208,35 @@ export default function OrdersReportPage() {
                         <div className="flex flex-wrap gap-3 items-end bg-base-100 p-3 rounded-xl shadow-sm">
                             <div className="form-control">
                                 <label className="label py-1"><span className="label-text font-semibold">ตั้งแต่วันที่</span></label>
-                                <input 
-                                    type="date" 
+                                <DatePicker 
                                     className="input input-bordered shadow-sm" 
                                     value={startDate} 
-                                    onChange={(e) => {
-                                        const newStart = e.target.value;
+                                    formatDisplay={formatDate}
+                                    onChange={(date) => {
+                                        if (!date) return;
+                                        
+                                        setStartDate(date);
 
-                                        if (!newStart) return;
-
-                                        setStartDate(newStart);
-
-                                        if (newStart > endDate) {
-                                            setEndDate(newStart);
-                                        }
+                                        if (endDate && date > endDate) setEndDate(date);
                                     }} 
                                 />
                             </div>
                             <div className="form-control">
                                 <label className="label py-1"><span className="label-text font-semibold">ถึงวันที่</span></label>
-                                <input 
-                                    type="date" 
+                                <DatePicker 
                                     className="input input-bordered shadow-sm" 
                                     value={endDate} 
                                     min={startDate}
-                                    onChange={(e) => {
-                                        const newEnd = e.target.value;
+                                    formatDisplay={formatDate}
+                                    onChange={(date) => {
+                                        if (!date) return;
 
-                                        if (!newEnd) return;
-
-                                        if (newEnd < startDate) {
+                                        if (startDate && date < startDate) {
                                             showAlert("วันที่สิ้นสุดต้องไม่น้อยกว่าวันที่เริ่มต้น", 'warning');
                                             return;
                                         }
 
-                                        setEndDate(newEnd);
+                                        setEndDate(date);
                                     }}
                                 />
                             </div>
@@ -361,14 +339,14 @@ export default function OrdersReportPage() {
             {/* ==================== PRINT VIEW ==================== */}
             <div id="print-view" className="hidden">
                 <div className="text-right text-[10px] text-gray-500 mb-2">
-                     พิมพ์เมื่อ: {formatPrintTime(printDate)}
+                     พิมพ์เมื่อ: {formatDateTimeLong(printDate)}
                 </div>
 
                 <div className="border-b-2 border-black pb-4 mb-6">
                     <div className="text-center mb-4">
                         <h1 className="text-3xl font-extrabold text-black mb-1">รายงานสรุปยอดคำสั่งซื้อ</h1>
                         <p className="text-sm text-black font-medium">
-                            ข้อมูลระหว่างวันที่: <b>{formatDateThai(startDate)}</b> ถึง <b>{formatDateThai(endDate)}</b>
+                            ข้อมูลระหว่างวันที่: <b>{formatDate(startDate)}</b> ถึง <b>{formatDate(endDate)}</b>
                         </p>
                     </div>
                     

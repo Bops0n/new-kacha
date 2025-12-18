@@ -6,7 +6,7 @@ import { RecentOrder } from "@/types/dashboard";
 import { FiTruck } from "react-icons/fi";
 import { motion } from "framer-motion";
 import { ORDER_STATUS_CONFIG } from "@/app/utils/client";
-import { formatPrice } from "@/app/utils/formatters";
+import { formatDateTimeLong, formatDateTimeShort, formatPrice } from "@/app/utils/formatters";
 
 export function RecentOrders() {
   const [orders, setOrders] = useState<RecentOrder[]>([]);
@@ -80,7 +80,7 @@ export function RecentOrders() {
                       <p className="font-semibold text-gray-800 group-hover:text-blue-700 transition-colors">
                         {o.Customer_Name}
                       </p>
-                      <p className="text-xs text-gray-500">{o.Order_Date}</p>
+                      <p className="text-xs text-gray-500">{formatDateTimeShort(o.Order_Date)}</p>
                     </div>
                   </div>
 
@@ -102,7 +102,7 @@ export function RecentOrders() {
                   </div>
 
                   <p className="text-gray-400 italic">
-                    อัปเดตล่าสุด : {o.Update_At || '-'}
+                    อัปเดตล่าสุด : {formatDateTimeShort(o.Update_At)}
                   </p>
                 </div>
               </motion.div>

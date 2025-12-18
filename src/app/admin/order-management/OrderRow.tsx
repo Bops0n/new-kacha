@@ -3,7 +3,7 @@
 import React from 'react';
 import { FiEye, FiXCircle } from 'react-icons/fi';
 import { getOrderNextStep, Order, StatusConfig } from '@/types';
-import { formatPrice } from '@/app/utils/formatters';
+import { formatDateTimeShort, formatPrice } from '@/app/utils/formatters';
 import OrderCancelButton from '../components/order-management/OrderCancelButton';
 import { useRouter } from 'next/navigation';
 
@@ -49,7 +49,7 @@ const OrderRow: React.FC<OrderRowProps> = ({ order, statusConfig, fetchOrders })
           </span>
         )}
       </td>
-      <td>{order.Order_Date}</td>
+      <td>{formatDateTimeShort(order.Order_Date)}</td>
       <td>
         <div className="flex gap-1">
           <button

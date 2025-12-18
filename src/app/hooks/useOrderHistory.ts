@@ -8,6 +8,7 @@ import { useAlert } from '../context/AlertModalContext';
 import { FiAlertTriangle, FiCheckCircle, FiClock, FiInfo, FiRefreshCw, FiTruck } from 'react-icons/fi';
 import { ORDER_STATUS_CONFIG } from '../utils/client';
 import { useWebsiteSettings } from '../providers/WebsiteSettingProvider';
+import { formatDateTimeShort } from '../utils/formatters';
 
 
 export function useOrderHistory() {
@@ -25,14 +26,9 @@ export function useOrderHistory() {
     
     const { Status, Payment_Type, Is_Payment_Checked, Transaction_Slip, Transaction_Status, Transaction_Date, Order_Date, Cancel_Reason } = order;
 
-    const formatDateTime = (dateStr: string | Date) => {
-        if (!dateStr) return '-';
-        return new Date(dateStr).toLocaleString('th-TH', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
-    };
-
     const baseDate = Transaction_Date ? new Date(Transaction_Date) : new Date(Order_Date);
     const expireDate = new Date(baseDate.getTime() + (settings.paymentTimeoutHours * 60 * 60 * 1000));
-    const formattedExpire = formatDateTime(expireDate);
+    const formattedExpire = formatDateTimeShort(expireDate);
     
     // Helper: ข้อความเหตุผล (ใช้ร่วมกันทุกสถานะที่มีการยกเลิก/คืนเงิน)
     const reasonText = Cancel_Reason ? `\nเหตุผล: ${Cancel_Reason}` : '';

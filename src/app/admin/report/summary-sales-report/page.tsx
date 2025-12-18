@@ -2,11 +2,12 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { FiPrinter, FiArrowLeft } from 'react-icons/fi';
-import { formatDateThai, formatPrice } from '@/app/utils/formatters';
+import { formatDate, formatPrice } from '@/app/utils/formatters';
 import LoadingSpinner from '@/app/components/LoadingSpinner';
 import { useRouter } from 'next/navigation';
 import { useWebsiteSettings } from '@/app/providers/WebsiteSettingProvider';
 import { useAlert } from '@/app/context/AlertModalContext';
+import { DatePicker } from '@/app/components/DatePicker';
 
 interface ReportOrder {
     Order_ID: number;
@@ -130,41 +131,35 @@ export default function SummarySalesReportPage() {
                         <div className="flex flex-wrap gap-3 items-end bg-base-100 p-3 rounded-xl shadow-sm">
                             <div className="form-control">
                                 <label className="label py-1"><span className="label-text font-semibold">ตั้งแต่วันที่</span></label>
-                                <input 
-                                    type="date" 
+                                <DatePicker 
                                     className="input input-bordered" 
                                     value={startDate} 
-                                    onChange={(e) => {
-                                        const newStart = e.target.value;
+                                    formatDisplay={formatDate}
+                                    onChange={(date) => {
+                                        if (!date) return;
 
-                                        if (!newStart) return;
+                                        setStartDate(date);
 
-                                        setStartDate(newStart);
-
-                                        if (newStart > endDate) {
-                                            setEndDate(newStart);
-                                        }
+                                        if (endDate && date > endDate) setEndDate(date);
                                     }} 
                                 />
                             </div>
                             <div className="form-control">
                                 <label className="label py-1"><span className="label-text font-semibold">ถึงวันที่</span></label>
-                                <input 
-                                    type="date" 
+                                <DatePicker 
                                     className="input input-bordered" 
                                     value={endDate}
                                     min={startDate}
-                                    onChange={(e) => {
-                                        const newEnd = e.target.value;
+                                    formatDisplay={formatDate}
+                                    onChange={(date) => {
+                                        if (!date) return;
 
-                                        if (!newEnd) return;
-
-                                        if (newEnd < startDate) {
+                                        if (startDate && date < startDate) {
                                             showAlert("วันที่สิ้นสุดต้องไม่น้อยกว่าวันที่เริ่มต้น", 'warning');
                                             return;
                                         }
 
-                                        setEndDate(newEnd);
+                                        setEndDate(date);
                                     }} 
                                 />
                             </div>
@@ -226,7 +221,7 @@ export default function SummarySalesReportPage() {
                                                 const net = gross-vat;
                                                 return (
                                                     <tr key={order.Order_ID} className="hover:bg-base-50">
-                                                        <td className="font-mono text-xs">{formatDateThai(order.Order_Date)}</td>
+                                                        <td className="font-mono text-xs">{formatDate(order.Order_Date)}</td>
                                                         <td className="font-bold text-primary">{order.Order_ID}</td>
                                                         <td>{order.Customer_Name}</td>
                                                         <td className="text-center">
@@ -262,7 +257,7 @@ export default function SummarySalesReportPage() {
                     <div className="text-center mb-4">
                         <h1 className="text-3xl font-extrabold text-black mb-1">รายงานสรุปยอดขาย</h1>
                         <p className="text-sm text-black font-medium">
-                            ข้อมูลระหว่างวันที่: <b>{formatDateThai(startDate,'long')}</b> ถึง <b>{formatDateThai(endDate, 'long')}</b>
+                            ข้อมูลระหว่างวันที่: <b>{formatDate(startDate,'long')}</b> ถึง <b>{formatDate(endDate, 'long')}</b>
                         </p>
                     </div>
                     
@@ -317,7 +312,7 @@ export default function SummarySalesReportPage() {
                             const net = gross - vat;
                             return (
                                 <tr key={order.Order_ID} className="border-b border-gray-300">
-                                    <td className="py-1 text-left">{formatDateThai(order.Order_Date)}</td>
+                                    <td className="py-1 text-left">{formatDate(order.Order_Date)}</td>
                                     <td className="py-1 text-left">{order.Order_ID}</td>
                                     <td className="py-1 text-left truncate max-w-[150px]">{order.Customer_Name}</td>
                                     <td className="py-1 text-right">{formatPrice(net)}</td>

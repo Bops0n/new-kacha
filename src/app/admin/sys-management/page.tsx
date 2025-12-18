@@ -2,6 +2,7 @@
 
 import { ImagePreviewModal } from "@/app/components/ImagePreviewModal";
 import { useAlert } from "@/app/context/AlertModalContext";
+import { formatDateTimeShort } from "@/app/utils/formatters";
 import { WEBSITE_SETTING_GROUP, WEBSITE_SETTING_TYPE } from "@/app/utils/setting";
 import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
@@ -315,7 +316,7 @@ export default function AdminSettingsPage() {
                     <tbody>
                       {history.map((h, idx) => (
                         <tr key={idx}>
-                          <td>{h.CHANGED_AT}</td>
+                          <td>{formatDateTimeShort(h.CHANGED_AT)}</td>
                           <td>{h.OLD_VALUE ?? "-"}</td>
                           <td>{h.NEW_VALUE}</td>
                           <td>{h.CHANGED_BY ?? "-"}</td>

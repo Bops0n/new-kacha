@@ -11,7 +11,7 @@ import {
 } from 'react-icons/fi';
 import { Order, OrderStatus, StatusConfig } from '@/types';
 import { useAlert } from '@/app/context/AlertModalContext';
-import { formatPrice } from '@/app/utils/formatters';
+import { formatDateTimeShort, formatPrice } from '@/app/utils/formatters';
 import LoadingSpinner from '@/app/components/LoadingSpinner';
 import { useSession } from 'next-auth/react';
 import AccessDeniedPage from '@/app/components/AccessDenied';
@@ -361,14 +361,6 @@ export default function OrderDetailsPage() {
     }
   };
 
-  const formatDateTime = (dateStr: string | Date) => {
-    if (!dateStr) return '-';
-    return new Date(dateStr).toLocaleString('th-TH', {
-      year: 'numeric', month: 'short', day: 'numeric', 
-      hour: '2-digit', minute: '2-digit'
-    });
-  };
-
   const targetStatusInfo = useMemo(() => {
     if (!order) return null;
     const result = getCancelTarget(order);
@@ -404,7 +396,7 @@ export default function OrderDetailsPage() {
                     <button onClick={() => router.back()} className="btn btn-circle btn-ghost btn-sm text-base-content/70 hover:bg-base-200"><FiArrowLeft className="w-5 h-5" /></button>
                     <h1 className="text-2xl sm:text-3xl font-extrabold text-base-content tracking-tight">หมายเลขคำสั่งซื้อ: {order.Order_ID}</h1>
                 </div>
-                <p className="text-base-content/60 mt-1 ml-12 text-sm">วันที่สั่งซื้อ: {formatDateTime(order.Order_Date)}</p>
+                <p className="text-base-content/60 mt-1 ml-12 text-sm">วันที่สั่งซื้อ: {formatDateTimeShort(order.Order_Date)}</p>
             </div>
             <div className={`badge border-none px-4 py-3 md:py-5 rounded-lg font-medium text-sm md:text-xl flex items-center gap-2 ${ORDER_STATUS_CONFIG[order.Status]?.bgColor} ${ORDER_STATUS_CONFIG[order.Status]?.textColor}`}>
                 {ORDER_STATUS_CONFIG[order.Status]?.icon && React.createElement(ORDER_STATUS_CONFIG[order.Status].icon)}
@@ -441,7 +433,7 @@ export default function OrderDetailsPage() {
                             <div><p className="font-semibold text-base-content/60 mb-1">ประเภทการชำระเงิน</p><p className="font-medium">{order.Payment_Type === 'bank_transfer' ? 'โอนผ่านธนาคาร' : 'ชำระเงินปลายทาง (COD)'}</p></div>
                             <div><p className="font-semibold text-base-content/60 mb-1">บริษัทขนส่ง</p><p className="font-medium">{order.Shipping_Method || '-'}</p></div>
                             <div><p className="font-semibold text-base-content/60 mb-1">หมายเลขพัสดุ</p><p className="font-medium tracking-wide select-all bg-base-200 px-2 py-1 rounded w-fit">{order.Tracking_Number || '-'}</p></div>
-                            <div><p className="font-semibold text-base-content/60 mb-1">วันที่จัดส่ง</p><p className="font-medium">{order.Shipping_Date ? formatDateTime(order.Shipping_Date) : '-'}</p></div>
+                            <div><p className="font-semibold text-base-content/60 mb-1">วันที่จัดส่ง</p><p className="font-medium">{formatDateTimeShort(order.Shipping_Date)}</p></div>
                         </div>
                     </div>
                 </div>
