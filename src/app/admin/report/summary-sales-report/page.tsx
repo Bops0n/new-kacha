@@ -207,7 +207,7 @@ export default function SummarySalesReportPage() {
                                             <th>ลูกค้า</th>
                                             <th className="text-center">สถานะ</th>
                                             <th className="text-right text-base-content/70">มูลค่าสินค้า</th>
-                                            <th className="text-right text-base-content/70">VAT</th>
+                                            <th className="text-center text-base-content/70">VAT</th>
                                             <th className="text-right font-bold">ยอดรวมสุทธิ</th>
                                         </tr>
                                     </thead>
@@ -301,7 +301,7 @@ export default function SummarySalesReportPage() {
                             <th className="py-1 text-left w-24 font-bold">หมายเลขคำสั่งซื้อ</th>
                             <th className="py-1 text-left font-bold">ลูกค้า</th>
                             <th className="py-1 text-right w-24 font-bold">มูลค่าสินค้า</th>
-                            <th className="py-1 text-right w-24 font-bold">VAT</th>
+                            <th className="py-1 text-center w-24 font-bold">VAT</th>
                             <th className="py-1 text-right w-28 font-bold">ยอดรวมสุทธิ</th>
                         </tr>
                     </thead>
@@ -316,7 +316,7 @@ export default function SummarySalesReportPage() {
                                     <td className="py-1 text-left">{order.Order_ID}</td>
                                     <td className="py-1 text-left truncate max-w-[150px]">{order.Customer_Name}</td>
                                     <td className="py-1 text-right">{formatPrice(net)}</td>
-                                    <td className="py-1 text-right">{formatPrice(vat)}({order.Current_Vat}%)</td>
+                                    <td className="py-1 text-right">{formatPrice(vat)} ({order.Current_Vat} %)</td>
                                     <td className="py-1 text-right font-bold">{formatPrice(gross)}</td>
                                 </tr>
                             );

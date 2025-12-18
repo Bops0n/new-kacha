@@ -7,7 +7,7 @@ export const formatPrice = (price: number | undefined | null): string => {
   }).format(price);
 };
 
-export  const formatDate = (dateStr: string, monthStyle: monthStyle = 'numeric') => {
+export  const formatDate = (dateStr: string, monthStyle: monthStyle = 'short') => {
   return new Date(dateStr).toLocaleDateString('th-TH', { day: 'numeric', month : monthStyle, year: 'numeric' });
 };
 

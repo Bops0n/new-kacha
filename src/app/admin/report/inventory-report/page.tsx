@@ -249,8 +249,8 @@ export default function InventoryReportPage() {
                                         const status = getStockStatus(p, available);
                                         
                                         let rowClass = "";
-                                        if (status === 'out_of_stock') rowClass = "bg-error/10 hover:bg-error/20 text-error-content";
-                                        else if (status === 'low_stock') rowClass = "bg-warning/10 hover:bg-warning/20 text-warning-content";
+                                        if (status === 'out_of_stock') rowClass = "!bg-error/10 hover:bg-error/20 text-error-content";
+                                        else if (status === 'low_stock') rowClass = "!bg-warning/10 hover:bg-warning/20 text-warning-content";
 
                                         return (
                                             <tr key={p.Product_ID} className={rowClass}>
@@ -340,6 +340,9 @@ export default function InventoryReportPage() {
                             <th className="py-1 text-center w-16 font-bold">สถานะ</th>
                         </tr>
                     </thead>
+                    <tfoot>
+                            <tr><td colSpan={2}>หมายเหตุ : * หมายถึง สินค้าที่มียอดคงเหลือน้อยกว่าหรือเท่ากับจุดสั่งซื้อ</td></tr>
+                    </tfoot>    
                     <tbody>
                         {filteredProducts.map((p) => {
                             const available = calculateAvailableStock(p);
@@ -366,10 +369,14 @@ export default function InventoryReportPage() {
                                         {getStockStatusLabel(status)}
                                     </td>
                                 </tr>
+                                
                             );
                         })}
                     </tbody>
                 </table>
+                {/* <tfoot> */}
+
+                {/* </tfoot> */}
 
                 <div className="mt-6 flex justify-between items-end break-inside-avoid pt-2 border-t border-dashed border-gray-300">
                     <div className="text-center w-1/3">
