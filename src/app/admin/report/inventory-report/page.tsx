@@ -339,10 +339,7 @@ export default function InventoryReportPage() {
                             <th className="py-1 text-right w-16 font-bold">ราคาขาย</th>
                             <th className="py-1 text-center w-16 font-bold">สถานะ</th>
                         </tr>
-                    </thead>
-                    <tfoot>
-                            <tr><td colSpan={2}>หมายเหตุ : * หมายถึง สินค้าที่มียอดคงเหลือน้อยกว่าหรือเท่ากับจุดสั่งซื้อ</td></tr>
-                    </tfoot>    
+                    </thead>  
                     <tbody>
                         {filteredProducts.map((p) => {
                             const available = calculateAvailableStock(p);
@@ -373,11 +370,10 @@ export default function InventoryReportPage() {
                             );
                         })}
                     </tbody>
+                    <tfoot>
+                        <tr><td colSpan={2}><br/><br/>{"หมายเหตุ : * หมายถึง สินค้าที่มียอดคงเหลือ ≤ จุดสั่งซื้อ"}</td></tr>
+                    </tfoot>  
                 </table>
-                {/* <tfoot> */}
-
-                {/* </tfoot> */}
-
                 <div className="mt-6 flex justify-between items-end break-inside-avoid pt-2 border-t border-dashed border-gray-300">
                     <div className="text-center w-1/3">
                         <div className="border-b border-black w-full h-4 mb-1"></div>

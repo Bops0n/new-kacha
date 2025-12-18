@@ -3,7 +3,7 @@ import './globals.css';
 import { Sarabun } from 'next/font/google'; // นำเข้าฟอนต์ Kanit
 import AlertProvider from './providers/AlertProviders';
 import { WebsiteSettingsProvider } from './providers/WebsiteSettingProvider';
-import NextAuthSessionProvider from './providers/authProviders';
+import NextAuthSessionProvider from './providers/AuthProviders';
 
 // กำหนด subset สำหรับภาษาไทยและน้ำหนักฟอนต์ที่คุณต้องการ
 // preload: true จะช่วยให้โหลดฟอนต์ได้เร็วขึ้นสำหรับภาษาไทย

@@ -93,7 +93,7 @@ export default function HomePage() {
                   <Link href={category.Category_Path} key={index} className="card bg-base-100 shadow-xl image-full group transition-transform transform hover:scale-105 duration-300">
                     <figure>
                       <Image
-                        src={encodeURIComponent(category.Image)}
+                        src={category.Image}
                         alt={category.Name}
                         width={512}
                         height={512}
