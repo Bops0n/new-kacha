@@ -125,7 +125,7 @@ export default function OrderManagementPage() {
                 <div className="flex-1">
                     <div className="relative">
                         <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-base-content/50 w-4 h-4 z-10" />
-                        <input type="text" placeholder="ค้นหาด้วยรหัส, ชื่อลูกค้า, Tracking Number..." value={filters.searchTerm} onChange={e => setFilters(f => ({...f, searchTerm: e.target.value}))} className="input input-bordered w-full flex-1 pl-10" />
+                        <input type="text" placeholder="ค้นหาด้วยหมายเลขคำสั่งซื้อ, ชื่อลูกค้า, Tracking Number..." value={filters.searchTerm} onChange={e => setFilters(f => ({...f, searchTerm: e.target.value}))} className="input input-bordered w-full flex-1 pl-10" />
                     </div>
                 </div>
                 <select value={filters.statusFilter} onChange={e => { setFilters(f => ({...f, statusFilter: e.target.value as OrderStatus | 'all'})); setCurrentPage(1); }} className="select select-bordered w-full md:w-auto">
