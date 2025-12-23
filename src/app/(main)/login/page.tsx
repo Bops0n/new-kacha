@@ -231,14 +231,14 @@ export default function AuthPage() {
               {/* Name */}
               <div className="form-control">
                 <label className="label">
-                  <span className="label-text text-base-content">ชื่อ-นามสกุล</span>
+                  <span className="label-text text-base-content">ชื่อผู้ใช้</span>
                 </label>
                 <div className="relative">
                   <FiUser className="absolute left-3 top-1/2 transform -translate-y-1/2 text-base-content/60 z-10" />
                   <input
                     type="text"
                     name="username"
-                    placeholder="ชื่อของคุณ"
+                    placeholder="example"
                     className="input input-bordered w-full pl-10 pr-4"
                     value={registerFormData.username}
                     onChange={handleRegisterChange}

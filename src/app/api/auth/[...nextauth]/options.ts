@@ -39,6 +39,7 @@ export const authOptions : AuthOptions = {
 
               return {
                 id: result.User_ID,
+                username: result.Username,
                 name: result.Full_Name,
                 email: result.Email,
                 accessLevel: result.Access_Level as number,
@@ -91,8 +92,9 @@ export const authOptions : AuthOptions = {
         token.shortExp = now + (IsRemember ? LONG : SHORT);
 
         token.id = user.id;
-        token.name = user.name;
+        token.username = user.username;
         token.email = user.email;
+        token.name = user.name;
         if (user.accessLevel !== undefined) {
           token.accessLevel = user.accessLevel as number;
 
@@ -144,8 +146,9 @@ export const authOptions : AuthOptions = {
 
       session.user = {
         id: token.id,
-        name: token.name!,
+        username: token.username!,
         email: token.email!,
+        name: token.name!,
         accessLevel: token.accessLevel!,
 
         Sys_Admin: token.Sys_Admin ?? false,

@@ -6,8 +6,9 @@ declare module "next-auth" {
     shortExp?: number;
     user: (DefaultSession["user"] & {
       id: number | string;
-      name: string;
+      username: string;
       email: string;
+      name: string;
       accessLevel: number;
 
       Sys_Admin: boolean;
@@ -21,8 +22,9 @@ declare module "next-auth" {
 
   interface User {
     id: number | string;
-    name: string;
+    username: string;
     email: string;
+    name: string;
     rememberMe?: boolean;
     accessLevel?: number;
   }
@@ -31,8 +33,9 @@ declare module "next-auth" {
 declare module "next-auth/jwt" {
   interface JWT extends DefaultJWT {
     id?: number | string;
-    name?: string;
+    username?: string;
     email?: string;
+    name?: string;
 
     rememberMe?: boolean;
     shortExp?: number;

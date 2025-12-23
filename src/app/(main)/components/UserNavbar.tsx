@@ -251,7 +251,7 @@ export default function UserNavbar() {
                                                 <span className="text-xs font-bold">{session.user?.name?.charAt(0)}</span>
                                             </div>
                                         </div>
-                                        <span className="hidden sm:inline-block text-sm font-medium max-w-[100px] truncate">{session.user?.name}</span>
+                                        <span className="hidden sm:inline-block text-sm font-medium max-w-[100px] truncate">{session.user.username}</span>
                                         <GoTriangleDown className="w-4 h-4 text-base-content/50" />
                                     </label>
                                     <ul tabIndex={0} className="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow-lg bg-base-100 rounded-xl w-56 border border-base-200">
