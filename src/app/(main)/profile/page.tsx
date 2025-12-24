@@ -10,6 +10,7 @@ import { useProfilePage } from '@/app/hooks/useProfilePage';
 import { UserSchema, AddressSchema, NewAddressForm } from '@/types';
 import LoadingSpinner from '@/app/components/LoadingSpinner';
 import AddressModal from '@/app/(main)/components/AddressModal';
+import { useAlert } from '@/app/context/AlertModalContext';
 
 export default function ProfilePage() {
   const { 
@@ -23,6 +24,7 @@ export default function ProfilePage() {
   } = useProfilePage();
 
   const { data: session, update } = useSession();
+  const { showAlert } = useAlert();
 
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [profileFormData, setProfileFormData] = useState<Partial<UserSchema>>({});
@@ -41,6 +43,11 @@ export default function ProfilePage() {
   }, [userProfile]);
   
   const handleProfileSave = async () => {
+    if (!profileFormData.Full_Name || !profileFormData.Email || !profileFormData.Phone) {
+      showAlert("กรุณากรอกข้อมูลให้ครบถ้วน!", 'warning');
+      return;
+    }
+
     const success = await updateUserProfile(profileFormData);
     if (success && session) {
       await update({ user: { ...session.user, name: profileFormData.Full_Name } });
@@ -100,27 +107,26 @@ export default function ProfilePage() {
             <div className="lg:col-span-4 space-y-6">
                 <div className="card bg-base-100 shadow-xl border border-base-200 overflow-hidden">
                     <div className="card-body p-6">
-                        <div className="flex justify-between items-center mb-6 pb-4 border-b border-base-200">
-                            <h2 className="text-lg font-bold flex items-center gap-2">
-                                <FiUser className="text-primary" /> ข้อมูลส่วนตัว
-                            </h2>
-                            {!isEditingProfile ? (
-                                <button onClick={() => setIsEditingProfile(true)} className="btn btn-ghost btn-sm btn-circle text-primary tooltip tooltip-left" data-tip="แก้ไข">
-                                    <FiEdit3 className="w-5 h-5" />
-                                </button>
-                            ) : (
-                                <div className="flex gap-2">
-                                    <button onClick={() => setIsEditingProfile(false)} className="btn btn-ghost btn-xs">ยกเลิก</button>
-                                    <button onClick={handleProfileSave} className="btn btn-primary btn-xs">บันทึก</button>
-                                </div>
-                            )}
-                        </div>
-
                         <form onSubmit={(e) => { e.preventDefault(); handleProfileSave(); }} className="space-y-5">
+                            <div className="flex justify-between items-center mb-6 pb-4 border-b border-base-200">
+                                <h2 className="text-lg font-bold flex items-center gap-2">
+                                    <FiUser className="text-primary" /> ข้อมูลส่วนตัว
+                                </h2>
+                                {!isEditingProfile ? (
+                                    <button onClick={() => setIsEditingProfile(true)} className="btn btn-ghost btn-sm btn-circle text-primary tooltip tooltip-left" data-tip="แก้ไข">
+                                        <FiEdit3 className="w-5 h-5" />
+                                    </button>
+                                ) : (
+                                    <div className="flex gap-2">
+                                        <button onClick={() => setIsEditingProfile(false)} className="btn btn-ghost btn-xs">ยกเลิก</button>
+                                        <button type="submit" className="btn btn-primary btn-xs">บันทึก</button>
+                                    </div>
+                                )}
+                            </div>
                             <div className="form-control">
                                 <label className="label py-1"><span className="label-text text-xs font-bold uppercase text-base-content/50">ชื่อ-นามสกุล</span></label>
                                 {isEditingProfile ? (
-                                    <input type="text" value={profileFormData.Full_Name || ''} onChange={(e) => setProfileFormData(p => ({...p, Full_Name: e.target.value}))} className="input input-bordered input-sm w-full focus:input-primary" />
+                                    <input type="text" value={profileFormData.Full_Name || ''} onChange={(e) => setProfileFormData(p => ({...p, Full_Name: e.target.value}))} className="input input-bordered input-sm w-full focus:input-primary" required/>
                                 ) : (
                                     <p className="font-medium text-base-content">{userProfile.Full_Name}</p>
                                 )}
@@ -129,7 +135,7 @@ export default function ProfilePage() {
                             <div className="form-control">
                                 <label className="label py-1"><span className="label-text text-xs font-bold uppercase text-base-content/50">อีเมล</span></label>
                                 {isEditingProfile ? (
-                                    <input type="email" value={profileFormData.Email || ''} onChange={(e) => setProfileFormData(p => ({...p, Email: e.target.value}))} className="input input-bordered input-sm w-full focus:input-primary" />
+                                    <input type="email" value={profileFormData.Email || ''} onChange={(e) => setProfileFormData(p => ({...p, Email: e.target.value}))} className="input input-bordered input-sm w-full focus:input-primary" required/>
                                 ) : (
                                     <p className="font-medium text-base-content flex items-center gap-2"><FiMail className="opacity-50"/> {userProfile.Email}</p>
                                 )}
@@ -138,7 +144,7 @@ export default function ProfilePage() {
                             <div className="form-control">
                                 <label className="label py-1"><span className="label-text text-xs font-bold uppercase text-base-content/50">เบอร์โทรศัพท์</span></label>
                                 {isEditingProfile ? (
-                                    <input type="tel" value={profileFormData.Phone || ''} onChange={(e) => setProfileFormData(p => ({...p, Phone: e.target.value}))} className="input input-bordered input-sm w-full focus:input-primary" />
+                                    <input type="tel" value={profileFormData.Phone || ''} onChange={(e) => setProfileFormData(p => ({...p, Phone: e.target.value}))} className="input input-bordered input-sm w-full focus:input-primary" required/>
                                 ) : (
                                     <p className="font-medium text-base-content flex items-center gap-2"><FiPhone className="opacity-50"/> {userProfile.Phone || '-'}</p>
                                 )}
