@@ -77,23 +77,23 @@ const UserModal: React.FC<UserModalProps> = ({
                 <>
                   <div className="form-control mb-2">
                     <label className="label"><span className="label-text">ชื่อผู้ใช้</span></label>
-                    <input type="text" name="Username" className="input input-bordered w-full" value={editFormData.Username} onChange={handleUserFormChange} />
+                    <input type="text" name="Username" placeholder='example' className="input input-bordered w-full" value={editFormData.Username} onChange={handleUserFormChange} />
                   </div>
                   <div className="form-control mb-2">
                     <label className="label"><span className="label-text">รหัสผ่าน (จะถูกเปลี่ยนหากแก้ไข)</span></label>
-                    <input type="password" name="Password" className="input input-bordered w-full" value={editFormData.Password} onChange={handleUserFormChange} />
+                    <input type="password" name="Password" placeholder='ตั้งรหัสผ่าน' className="input input-bordered w-full" value={editFormData.Password} onChange={handleUserFormChange} />
                   </div>
                   <div className="form-control mb-2">
                     <label className="label"><span className="label-text">ชื่อ - นามสกุล</span></label>
-                    <input type="text" name="Full_Name" className="input input-bordered w-full" value={editFormData.Full_Name} onChange={handleUserFormChange} />
+                    <input type="text" name="Full_Name" placeholder='ตั้งชื่อ - นามสกุล' className="input input-bordered w-full" value={editFormData.Full_Name} onChange={handleUserFormChange} />
                   </div>
                   <div className="form-control mb-2">
                     <label className="label"><span className="label-text">อีเมล</span></label>
-                    <input type="email" name="Email" className="input input-bordered w-full" value={editFormData.Email || ''} onChange={handleUserFormChange} />
+                    <input type="email" name="Email" placeholder='your.email@example.com' className="input input-bordered w-full" value={editFormData.Email || ''} onChange={handleUserFormChange} />
                   </div>
                   <div className="form-control mb-2">
                     <label className="label"><span className="label-text">เบอร์โทรศัพท์</span></label>
-                    <input type="tel" name="Phone" className="input input-bordered w-full" value={editFormData.Phone || ''} onChange={handleUserFormChange} />
+                    <input type="tel" name="Phone" placeholder='ตั้งเบอร์โทรศัพท์' className="input input-bordered w-full" value={editFormData.Phone || ''} onChange={handleUserFormChange} />
                   </div>
                   <div className="form-control mb-2">
                     <label className="label"><span className="label-text">ระดับการเข้าถึง</span></label>

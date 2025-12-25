@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { RegisterSchema } from "../utils";
 import { signUp } from "../../services/auth/authService";
 import { REGISTER_PARSE_DATA } from "@/types/auth.types";
+import { RegisterSchema } from "@/app/utils/validate";
 
 export async function POST(req: NextRequest) {
     const json = await req.json().catch(() => null);
@@ -20,8 +20,8 @@ export async function POST(req: NextRequest) {
         let message = "ข้อผิดพลาดที่ไม่ระบุ";
         switch (issue.code) {
             case "invalid_format": message = "รูปแบบไม่ถูกต้อง กรุณากรอกให้ถูกต้องตามที่ระบบกำหนด"; break;
-            case "too_big": message = `ต้องมีอักขระน้อยกว่า ${(Number(issue.maximum) + 1)} ตัว`; break;
-            case "too_small": message = `ต้องมีอักขระมากกว่า ${issue.minimum} ตัว`; break;
+            case "too_big": message = `จำนวนอักขระมีมากกว่า ${issue.maximum} ตัว`; break;
+            case "too_small": message = `จำนวนอักขระมีน้อยกว่า ${issue.minimum} ตัว`; break;
         }
         
         return NextResponse.json(

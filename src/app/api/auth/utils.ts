@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
-import { z } from "zod";
 import { logger } from '@/server/logger';
 import { AUTH_CHECK } from '@/types/auth.types';
 import { authOptions } from './[...nextauth]/options';
@@ -116,9 +115,3 @@ export const checkStockMgrRequire = () => checkAccessRequire("Stock_Mgr");
 export const checkOrderMgrRequire = () => checkAccessRequire("Order_Mgr");
 export const checkReportRequire = () => checkAccessRequire("Report");
 export const checkDashboardRequire = () => checkAccessRequire("Dashboard");
-
-export const RegisterSchema = z.object({
-    username: z.string().min(3).max(32).regex(/^[a-zA-Z0-9_\.]+$/),
-    email: z.string().email(),
-    password: z.string().min(6).max(128)
-});

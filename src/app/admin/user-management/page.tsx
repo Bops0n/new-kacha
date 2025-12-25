@@ -18,6 +18,7 @@ import { AddressSchema, UserAccount, UserEditForm } from '@/types';
 import LoadingSpinner from '@/app/components/LoadingSpinner';
 import { useSession } from 'next-auth/react';
 import AccessDeniedPage from '@/app/components/AccessDenied';
+import { UserMgrSchema } from '@/app/utils/validate';
 
 export default function UserManagement() {
   const { showAlert } = useAlert();
@@ -162,13 +163,52 @@ export default function UserManagement() {
   const saveUserDetails = async() => {
 
     if (!editFormData.Username) {
-      showAlert('กรุณากรอกชื่อผู้ใช้งาน และชื่อ - นามสกุล');
+      showAlert('กรุณากรอกชื่อผู้ใช้งาน', 'warning');
+      return;
+    }
+
+    if (!editFormData.Full_Name) {
+      showAlert('กรุณากรอกชื่อ - นามสกุล', 'warning');
+      return;
+    }
+
+    if (!editFormData.Email) {
+      showAlert('กรุณากรอกอีเมล', 'warning');
       return;
     }
 
     if (!isEditing && !editFormData.Password) {
       showAlert('กรุณากำหนดรหัสผ่านสำหรับผู้ใช้ใหม่');
       return;
+    }
+
+    if (!editFormData.Phone) {
+      showAlert('กรุณากรอกเบอร์โทรศัพท์', 'warning');
+      return;
+    }
+
+    const parsed = UserMgrSchema.safeParse(editFormData);
+    
+    if (!parsed.success) {
+        let path = "ไม่ระบุ";
+
+        const issue = parsed.error.issues[0];
+        switch (`${issue.path}`) {
+            case 'Email': path = "อีเมล"; break;
+            case 'Username': path = "ชื่อผู้ใช้"; break;
+            case 'Password': path = "รหัสผ่าน"; break;
+            case 'Phone': path = "เบอร์โทรศัพท์"; break;
+        }
+
+        let message = "ข้อผิดพลาดที่ไม่ระบุ";
+        switch (issue.code) {
+            case "invalid_format": message = "รูปแบบไม่ถูกต้อง กรุณากรอกให้ถูกต้องตามที่ระบบกำหนด"; break;
+            case "too_big": message = `จำนวนอักขระมีมากกว่า ${issue.maximum} ตัว`; break;
+            case "too_small": message = `จำนวนอักขระมีน้อยกว่า ${issue.minimum} ตัว`; break;
+        }
+
+        showAlert(`${path} : ${message}`, 'warning');
+        return;
     }
     
     let newID : number = 0;
