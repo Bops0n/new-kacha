@@ -113,7 +113,7 @@ export function useOrderHistory() {
       
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || 'ไม่สามารถดึงข้อมูลประวัติคำสั่งซื้อได้');
+        throw new Error(errorData.message || 'ไม่สามารถดึงข้อมูลประวัติการสั่งซื้อได้');
       }
 
       const data = await response.json();

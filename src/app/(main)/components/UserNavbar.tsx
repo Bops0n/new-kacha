@@ -260,7 +260,7 @@ export default function UserNavbar() {
                                             <span className="text-base-content font-bold text-sm -mt-1 truncate block">{session.user?.email}</span>
                                         </li>
                                         <li><Link href="/profile" className="py-2"><FiUser className="w-4 h-4"/> โปรไฟล์ของฉัน</Link></li>
-                                        <li><Link href="/orders-history" className="py-2"><FiBox className="w-4 h-4"/> ประวัติคำสั่งซื้อ</Link></li>
+                                        <li><Link href="/orders-history" className="py-2"><FiBox className="w-4 h-4"/> ประวัติการสั่งซื้อ</Link></li>
                                         <div className="divider my-1"></div>
                                         <li><a onClick={handleLogout} className="py-2 text-error hover:bg-error/10 hover:text-error"><span className="flex items-center gap-2">ออกจากระบบ</span></a></li>
                                     </ul>
@@ -395,7 +395,7 @@ export default function UserNavbar() {
                             </li>
                             <li>
                                 <Link href="/orders-history" onClick={closeMobileMenu} className="font-semibold hover:bg-primary/10">
-                                    <FiBox className="w-5 h-5" /> ประวัติคำสั่งซื้อ
+                                    <FiBox className="w-5 h-5" /> ประวัติการสั่งซื้อ
                                 </Link>
                             </li>
 

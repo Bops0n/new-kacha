@@ -52,7 +52,7 @@ export default function OrderHistoryPage() {
         {/* Header Section */}
         <div className="mb-8 text-center sm:text-left flex flex-col sm:flex-row justify-between items-end border-b border-base-300 pb-4">
             <div>
-                <h1 className="text-3xl font-extrabold text-base-content tracking-tight">ประวัติคำสั่งซื้อ</h1>
+                <h1 className="text-3xl font-extrabold text-base-content tracking-tight">ประวัติการสั่งซื้อ</h1>
                 <p className="text-base-content/60 mt-1">รายการสั่งซื้อและสถานะพัสดุของคุณ</p>
             </div>
             {/* อาจเพิ่มปุ่มติดต่อเจ้าหน้าที่ตรงนี้ในอนาคต */}
