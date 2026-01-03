@@ -95,6 +95,7 @@ export default function ContactPage() {
                 className="input input-bordered w-full"
                 value={formData.phone}
                 onChange={handleChange}
+                required
               />
 
               <input

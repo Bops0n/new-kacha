@@ -1,3 +1,4 @@
+import { DateTimePicker } from "@/app/components/DateTimePicker";
 import { formatDateTimeShort } from "@/app/utils/formatters";
 import { Order, OrderShipping } from "@/types";
 import { MdOutlineLocalShipping } from "react-icons/md";
@@ -59,12 +60,15 @@ export default function OrderShippingInfo({
                         <label className="label-text font-semibold">
                             วันที่จัดส่ง <span className="text-error">*</span>
                         </label>
-                        <input type="datetime-local" className={`input input-bordered w-full`}
-                            name={"Shipping_Date"}
-                            value={form.Shipping_Date}
-                            onChange={handleFormChange}
+                        <DateTimePicker 
+                            className="input input-bordered w-full" 
+                            value={form.Shipping_Date} 
+                            formatDisplay={formatDateTimeShort}
                             readOnly={IsReadOnly}
                             disabled={IsReadOnly}
+                            onChange={(value) => {
+                                handleFormChange({ target: { name: "Shipping_Date", value } } as React.ChangeEvent<HTMLInputElement>)
+                            }}
                         />
                     </div>
 
