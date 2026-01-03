@@ -21,11 +21,11 @@ export const DateTimePicker = ({ value, min, onChange, className = "", readOnly,
         className={`relative flex items-center justify-between gap-3 px-4 py-2 bg-white border border-gray-300 rounded-lg shadow-sm cursor-pointer hover:bg-gray-50 transition-colors w-fit select-none group min-w-[140px] ${className}`}
         onClick={openDatePicker}
     >
-        <span className="text-base font-medium text-gray-700">
+        <span className={readOnly || disabled ? "text-base font-medium text-gray-400" : "text-base font-medium text-gray-700"}>
             {formatDisplay(value)}
         </span>
 
-        <BiCalendar size={18} className="text-gray-400 group-hover:text-indigo-500 transition-colors" />
+        <BiCalendar size={18} className={readOnly || disabled ? "text-gray-400" : "text-gray-400 group-hover:text-indigo-500 transition-colors"} />
 
         <input
             ref={inputRef}
