@@ -13,6 +13,7 @@ const sarabun = Sarabun({
   variable: '--font-kanit', // กำหนด CSS variable เพื่อใช้อ้างอิงใน Tailwind CSS
   display: 'swap', // แนะนำให้ใช้ 'swap' เพื่อการแสดงผลที่ดีขึ้น
 });
+export const dynamic = 'force-dynamic';
 
 export default function RootLayout({
   children,

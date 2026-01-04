@@ -1,0 +1,49 @@
+services:
+  app:
+    container_name: kacha-app
+    build:
+      context: .
+      dockerfile: dockerfile
+      args:
+          # ต้องส่งค่าตรงนี้ เพื่อให้มันเอาไปฝังตอน Build
+          NEXT_PUBLIC_API_URL: ${API_URL}
+    restart: always
+    ports:
+      - "${APP_PORT}:3000"
+    env_file:
+      - .env
+      - .env.production
+    depends_on:
+      - db
+    volumes:
+      - /cdn-data/uploads:/app/uploads
+
+  db:
+    container_name: postgres-db
+    image: postgres:18.1-alpine3.23
+    volumes:
+      - ./postgres_data:/var/lib/postgresql/data
+      #
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+    restart: always
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASS}
+      POSTGRES_DB: ${DB_NAME}
+    ports:
+      - "5433:5432" # เปิดพอร์ตถ้าต้องการต่อ DB จากข้างนอก (เช่นใช้ DBeaver)
+  
+  nginx-cdn:
+    container_name: image-cdn
+    image: nginx:1.29.4-alpine
+    restart: always
+    ports:
+      - "${CDN_PORT}:80" # Map Port 8080 (จาก .env) -> 80 ของ Nginx
+    volumes:
+      # Map ไฟล์ Config เข้าไป
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      # Map โฟลเดอร์รูปภาพเข้าไป (Host -> Container)
+      - ./cdn-data:/usr/share/nginx/html:ro
+  
+volumes:
+  postgres_data:

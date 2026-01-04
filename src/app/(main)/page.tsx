@@ -8,6 +8,8 @@ import { CategoryTopSelling, ProductInventory } from '@/types';
 import LoadingSpinner from '../components/LoadingSpinner';
 import Image from 'next/image';
 
+export const dynamic = 'force-dynamic';
+
 export default function HomePage() {
   const [loading, setLoading] = useState(true);
 
