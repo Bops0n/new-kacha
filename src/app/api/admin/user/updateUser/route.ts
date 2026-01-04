@@ -36,9 +36,10 @@ export async function PATCH(req: NextRequest) {
     }
 
     try {
+        delete updatedUserData.User_ID;
         delete updatedUserData.Addresses;
 
-        const result = await updateUser(updatedUserData.User_ID, updatedUserData, Number(auth.userId));
+        const result = await updateUser(userIdToUpdate, updatedUserData, Number(auth.userId));
 
         if (!result)
         {

@@ -353,7 +353,7 @@ export default function UserManagement() {
           updatedAddresses[index] = newOrUpdatedAddress;
         }
 
-        showAlert('แก้ไขที่อยู่่สำเร็จ', 'success');
+        showAlert('แก้ไขที่อยู่สำเร็จ', 'success');
       } else {
         const response = await fetch('../api/admin/user/addAddress',{
           method: 'POST',
