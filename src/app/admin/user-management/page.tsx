@@ -18,7 +18,7 @@ import { AddressSchema, UserAccount, UserEditForm } from '@/types';
 import LoadingSpinner from '@/app/components/LoadingSpinner';
 import { useSession } from 'next-auth/react';
 import AccessDeniedPage from '@/app/components/AccessDenied';
-import { UserMgrSchema } from '@/app/utils/validate';
+import { UserMgrCreateSchema, UserMgrEditSchema } from '@/app/utils/validate';
 
 export default function UserManagement() {
   const { showAlert } = useAlert();
@@ -166,28 +166,30 @@ export default function UserManagement() {
       showAlert('กรุณากรอกชื่อผู้ใช้งาน', 'warning');
       return;
     }
-
+    
+    if (!editFormData.User_ID && !editFormData.Password) {
+      showAlert('กรุณากำหนดรหัสผ่านสำหรับผู้ใช้ใหม่', 'warning');
+      return;
+    }
+    
     if (!editFormData.Full_Name) {
       showAlert('กรุณากรอกชื่อ - นามสกุล', 'warning');
       return;
     }
-
+    
     if (!editFormData.Email) {
       showAlert('กรุณากรอกอีเมล', 'warning');
       return;
     }
-
-    if (!isEditing && !editFormData.Password) {
-      showAlert('กรุณากำหนดรหัสผ่านสำหรับผู้ใช้ใหม่');
-      return;
-    }
-
+    
     if (!editFormData.Phone) {
       showAlert('กรุณากรอกเบอร์โทรศัพท์', 'warning');
       return;
     }
 
-    const parsed = UserMgrSchema.safeParse(editFormData);
+    const schema = editFormData.User_ID ? UserMgrEditSchema : UserMgrCreateSchema;
+
+    const parsed = schema.safeParse(editFormData);
     
     if (!parsed.success) {
         let path = "ไม่ระบุ";
@@ -237,6 +239,7 @@ export default function UserManagement() {
         }
 
         showAlert(data.message, 'success');
+        setEditFormData(prevFormData => ({ ...prevFormData, Password: '' }));
       }
       catch (error : unknown) {
         const message = error instanceof Error ? error.message : "เกิดข้อผิดพลาดที่ไม่ทราบสาเหตุ";

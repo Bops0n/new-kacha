@@ -81,7 +81,7 @@ const UserModal: React.FC<UserModalProps> = ({
                   </div>
                   <div className="form-control mb-2">
                     <label className="label"><span className="label-text">รหัสผ่าน (จะถูกเปลี่ยนหากแก้ไข)</span></label>
-                    <input type="password" name="Password" placeholder='ตั้งรหัสผ่าน' className="input input-bordered w-full" value={editFormData.Password} onChange={handleUserFormChange} />
+                    <input type="password" name="Password" placeholder='ตั้งรหัสผ่าน' className="input input-bordered w-full" value={editFormData.Password || ''} onChange={handleUserFormChange} />
                   </div>
                   <div className="form-control mb-2">
                     <label className="label"><span className="label-text">ชื่อ - นามสกุล</span></label>
