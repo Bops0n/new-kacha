@@ -17,6 +17,7 @@ services:
       - db
     volumes:
       - ./cdn-data:/app/cdn-data/
+      - ./logs:/app/logs
 
   db:
     container_name: postgres-db
