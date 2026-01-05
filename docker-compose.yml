@@ -16,7 +16,7 @@ services:
     depends_on:
       - db
     volumes:
-      - /cdn-data/uploads:/app/uploads
+      - ./cdn-data:/app/cdn-data/
 
   db:
     container_name: postgres-db
